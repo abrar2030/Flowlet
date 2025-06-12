@@ -1,0 +1,239 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: flowlet-monitoring
+data:
+  grafana.ini: |
+    [analytics]
+    check_for_updates = true
+    
+    [grafana_net]
+    url = https://grafana.net
+    
+    [log]
+    mode = console
+    
+    [paths]
+    data = /var/lib/grafana/data
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+    
+    [server]
+    root_url = http://localhost:3000/
+    
+    [security]
+    admin_user = admin
+    admin_password = admin123
+    
+    [users]
+    allow_sign_up = false
+
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus.flowlet-monitoring.svc.cluster.local:9090
+      isDefault: true
+    - name: InfluxDB
+      type: influxdb
+      access: proxy
+      url: http://influxdb.flowlet-data.svc.cluster.local:8086
+      database: flowlet-metrics
+      user: admin
+      secureJsonData:
+        password: password123
+
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards
+
+  flowlet-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Flowlet Platform Overview",
+        "tags": ["flowlet"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Service Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{job=\"flowlet-services\"}",
+                "legendFormat": "{{kubernetes_name}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total[5m])",
+                "legendFormat": "{{kubernetes_name}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Response Time",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+                "legendFormat": "95th percentile"
+              },
+              {
+                "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+                "legendFormat": "50th percentile"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
+                "legendFormat": "{{kubernetes_name}} errors"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 5,
+            "title": "Database Connections",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "database_connections_active",
+                "legendFormat": "Active connections"
+              },
+              {
+                "expr": "database_connections_idle",
+                "legendFormat": "Idle connections"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: flowlet-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:10.1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "admin123"
+        volumeMounts:
+        - name: grafana-config
+          mountPath: /etc/grafana/grafana.ini
+          subPath: grafana.ini
+        - name: grafana-config
+          mountPath: /etc/grafana/provisioning/datasources/datasources.yml
+          subPath: datasources.yml
+        - name: grafana-config
+          mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
+          subPath: dashboards.yml
+        - name: grafana-config
+          mountPath: /var/lib/grafana/dashboards/flowlet-overview.json
+          subPath: flowlet-overview.json
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: grafana-config
+        configMap:
+          name: grafana-config
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-storage-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: flowlet-monitoring
+spec:
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage-pvc
+  namespace: flowlet-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+

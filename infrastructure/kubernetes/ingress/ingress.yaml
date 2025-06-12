@@ -1,0 +1,116 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flowlet-ingress
+  namespace: flowlet-core
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - api.flowlet.com
+    - portal.flowlet.com
+    secretName: flowlet-tls
+  rules:
+  - host: api.flowlet.com
+    http:
+      paths:
+      - path: /(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 80
+  - host: portal.flowlet.com
+    http:
+      paths:
+      - path: /(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: developer-portal
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flowlet-core-network-policy
+  namespace: flowlet-core
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-core
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-data
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-messaging
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-data
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-messaging
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flowlet-data-network-policy
+  namespace: flowlet-data
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-core
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-monitoring
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flowlet-messaging-network-policy
+  namespace: flowlet-messaging
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-core
+    - namespaceSelector:
+        matchLabels:
+          name: flowlet-monitoring
+

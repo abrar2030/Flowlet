@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flowlet-core
+  labels:
+    name: flowlet-core
+    tier: application
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flowlet-data
+  labels:
+    name: flowlet-data
+    tier: data
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flowlet-messaging
+  labels:
+    name: flowlet-messaging
+    tier: messaging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flowlet-monitoring
+  labels:
+    name: flowlet-monitoring
+    tier: monitoring
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flowlet-security
+  labels:
+    name: flowlet-security
+    tier: security
+

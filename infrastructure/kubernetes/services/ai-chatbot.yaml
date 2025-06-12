@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-chatbot-config
+  namespace: flowlet-core
+data:
+  application.yml: |
+    server:
+      port: 3009
+    database:
+      host: postgresql.flowlet-data.svc.cluster.local
+      port: 5432
+      name: flowlet
+      username: flowlet
+    mongodb:
+      host: mongodb.flowlet-data.svc.cluster.local
+      port: 27017
+      database: flowlet
+      username: flowlet
+    redis:
+      host: redis.flowlet-data.svc.cluster.local
+      port: 6379
+    openai:
+      apiKey: "your-openai-api-key"
+      model: "gpt-4"
+    websocket:
+      enabled: true
+      port: 3010
+    logging:
+      level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-chatbot
+  namespace: flowlet-core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-chatbot
+  template:
+    metadata:
+      labels:
+        app: ai-chatbot
+    spec:
+      containers:
+      - name: ai-chatbot
+        image: flowlet/ai-chatbot:latest
+        ports:
+        - containerPort: 3009
+        - containerPort: 3010
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3009
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3009
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: ai-chatbot-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-chatbot
+  namespace: flowlet-core
+spec:
+  selector:
+    app: ai-chatbot
+  ports:
+  - port: 80
+    targetPort: 3009
+    name: http
+  - port: 3010
+    targetPort: 3010
+    name: websocket
+  type: ClusterIP
+

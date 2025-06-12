@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-fraud-detection-config
+  namespace: flowlet-core
+data:
+  application.yml: |
+    server:
+      port: 3008
+    database:
+      host: postgresql.flowlet-data.svc.cluster.local
+      port: 5432
+      name: flowlet
+      username: flowlet
+    mongodb:
+      host: mongodb.flowlet-data.svc.cluster.local
+      port: 27017
+      database: flowlet
+      username: flowlet
+    redis:
+      host: redis.flowlet-data.svc.cluster.local
+      port: 6379
+    kafka:
+      brokers: kafka-0.kafka.flowlet-messaging.svc.cluster.local:9092,kafka-1.kafka.flowlet-messaging.svc.cluster.local:9092,kafka-2.kafka.flowlet-messaging.svc.cluster.local:9092
+    influxdb:
+      host: influxdb.flowlet-data.svc.cluster.local
+      port: 8086
+      org: flowlet
+      bucket: flowlet-metrics
+    ml:
+      modelPath: "/app/models"
+      updateInterval: "24h"
+    logging:
+      level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-fraud-detection
+  namespace: flowlet-core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-fraud-detection
+  template:
+    metadata:
+      labels:
+        app: ai-fraud-detection
+    spec:
+      containers:
+      - name: ai-fraud-detection
+        image: flowlet/ai-fraud-detection:latest
+        ports:
+        - containerPort: 3008
+        env:
+        - name: PYTHON_ENV
+          value: "production"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: influxdb-credentials
+              key: token
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        - name: models
+          mountPath: /app/models
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3008
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: config
+        configMap:
+          name: ai-fraud-detection-config
+      - name: models
+        persistentVolumeClaim:
+          claimName: ai-models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-fraud-detection
+  namespace: flowlet-core
+spec:
+  selector:
+    app: ai-fraud-detection
+  ports:
+  - port: 80
+    targetPort: 3008
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-models-pvc
+  namespace: flowlet-core
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+

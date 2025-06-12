@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flowlet-tls-secrets
+  namespace: flowlet-security
+type: Opaque
+data:
+  # Base64 encoded TLS certificates - replace with actual certificates
+  tls.crt: LS0tLS1CRUdJTi... # Your TLS certificate
+  tls.key: LS0tLS1CRUdJTi... # Your TLS private key
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flowlet-api-keys
+  namespace: flowlet-security
+type: Opaque
+data:
+  # Base64 encoded API keys - replace with actual keys
+  stripe-api-key: c2tfbGl2ZV8... # Stripe API key
+  plaid-api-key: cGxhaWRfa2V5... # Plaid API key
+  marqeta-api-key: bWFycWV0YV9rZXk... # Marqeta API key
+  sendgrid-api-key: U0cuLi4... # SendGrid API key
+  twilio-api-key: QUMuLi4... # Twilio API key
+  openai-api-key: c2stLi4u... # OpenAI API key
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flowlet-oauth-secrets
+  namespace: flowlet-security
+type: Opaque
+data:
+  # Base64 encoded OAuth secrets - replace with actual secrets
+  google-client-secret: R09DT0NfY2xpZW50X3NlY3JldA== # Google OAuth client secret
+  github-client-secret: Z2l0aHViX2NsaWVudF9zZWNyZXQ= # GitHub OAuth client secret
+  microsoft-client-secret: bWljcm9zb2Z0X2NsaWVudF9zZWNyZXQ= # Microsoft OAuth client secret
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-policies
+  namespace: flowlet-security
+data:
+  password-policy.json: |
+    {
+      "minLength": 12,
+      "requireUppercase": true,
+      "requireLowercase": true,
+      "requireNumbers": true,
+      "requireSpecialChars": true,
+      "maxAge": 90,
+      "historyCount": 12,
+      "lockoutThreshold": 5,
+      "lockoutDuration": 900
+    }
+  
+  rate-limiting.json: |
+    {
+      "global": {
+        "requests": 10000,
+        "window": 3600
+      },
+      "perUser": {
+        "requests": 1000,
+        "window": 3600
+      },
+      "perIP": {
+        "requests": 100,
+        "window": 60
+      },
+      "endpoints": {
+        "/auth/login": {
+          "requests": 5,
+          "window": 300
+        },
+        "/auth/register": {
+          "requests": 3,
+          "window": 3600
+        },
+        "/payments/transfer": {
+          "requests": 10,
+          "window": 60
+        }
+      }
+    }
+  
+  encryption-config.json: |
+    {
+      "algorithms": {
+        "symmetric": "AES-256-GCM",
+        "asymmetric": "RSA-4096",
+        "hashing": "SHA-256",
+        "signing": "ECDSA-P256"
+      },
+      "keyRotation": {
+        "interval": "30d",
+        "gracePeriod": "7d"
+      },
+      "dataClassification": {
+        "pii": {
+          "encryption": "required",
+          "tokenization": "required"
+        },
+        "financial": {
+          "encryption": "required",
+          "tokenization": "required",
+          "hsm": "preferred"
+        },
+        "internal": {
+          "encryption": "optional"
+        }
+      }
+    }
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: flowlet-mtls
+  namespace: flowlet-core
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: flowlet-authz
+  namespace: flowlet-core
+spec:
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/flowlet-core/sa/api-gateway"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+  - from:
+    - source:
+        namespaces: ["flowlet-monitoring"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/metrics", "/health"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-auth
+  namespace: flowlet-security
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-auth
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: vault-auth
+  namespace: flowlet-security
+

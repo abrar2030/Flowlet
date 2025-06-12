@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: developer-portal-config
+  namespace: flowlet-core
+data:
+  application.yml: |
+    server:
+      port: 3005
+    apiGateway:
+      url: http://api-gateway.flowlet-core.svc.cluster.local
+    database:
+      host: postgresql.flowlet-data.svc.cluster.local
+      port: 5432
+      name: flowlet
+      username: flowlet
+    redis:
+      host: redis.flowlet-data.svc.cluster.local
+      port: 6379
+    logging:
+      level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: developer-portal
+  namespace: flowlet-core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: developer-portal
+  template:
+    metadata:
+      labels:
+        app: developer-portal
+    spec:
+      containers:
+      - name: developer-portal
+        image: flowlet/developer-portal:latest
+        ports:
+        - containerPort: 3005
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3005
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3005
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: developer-portal-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: developer-portal
+  namespace: flowlet-core
+spec:
+  selector:
+    app: developer-portal
+  ports:
+  - port: 80
+    targetPort: 3005
+  type: LoadBalancer
+

@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-service-config
+  namespace: flowlet-core
+data:
+  application.yml: |
+    server:
+      port: 3007
+    database:
+      host: postgresql.flowlet-data.svc.cluster.local
+      port: 5432
+      name: flowlet
+      username: flowlet
+    redis:
+      host: redis.flowlet-data.svc.cluster.local
+      port: 6379
+    kafka:
+      brokers: kafka-0.kafka.flowlet-messaging.svc.cluster.local:9092,kafka-1.kafka.flowlet-messaging.svc.cluster.local:9092,kafka-2.kafka.flowlet-messaging.svc.cluster.local:9092
+    rabbitmq:
+      host: rabbitmq.flowlet-messaging.svc.cluster.local
+      port: 5672
+      username: flowlet
+    email:
+      provider: "sendgrid"
+      apiKey: "your-sendgrid-api-key"
+    sms:
+      provider: "twilio"
+      accountSid: "your-twilio-account-sid"
+      authToken: "your-twilio-auth-token"
+    push:
+      provider: "firebase"
+      serverKey: "your-firebase-server-key"
+    logging:
+      level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: flowlet-core
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: flowlet/notification-service:latest
+        ports:
+        - containerPort: 3007
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-credentials
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3007
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3007
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: notification-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: flowlet-core
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - port: 80
+    targetPort: 3007
+  type: ClusterIP
+

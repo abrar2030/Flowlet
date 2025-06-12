@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: flowlet-core
+data:
+  application.yml: |
+    server:
+      port: 3006
+    database:
+      host: postgresql.flowlet-data.svc.cluster.local
+      port: 5432
+      name: flowlet
+      username: flowlet
+    redis:
+      host: redis.flowlet-data.svc.cluster.local
+      port: 6379
+    jwt:
+      secret: "flowlet-jwt-secret-key-change-in-production"
+      expiresIn: "24h"
+    oauth:
+      google:
+        clientId: "your-google-client-id"
+        clientSecret: "your-google-client-secret"
+      github:
+        clientId: "your-github-client-id"
+        clientSecret: "your-github-client-secret"
+    logging:
+      level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: flowlet-core
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: flowlet/auth-service:latest
+        ports:
+        - containerPort: 3006
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3006
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: auth-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: flowlet-core
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - port: 80
+    targetPort: 3006
+  type: ClusterIP
+
