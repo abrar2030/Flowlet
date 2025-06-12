@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flowlet-frontend
+  labels:
+    app: flowlet
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flowlet
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: flowlet
+        tier: frontend
+    spec:
+      containers:
+      - name: flowlet-frontend
+        image: flowlet/frontend:latest  # Replace with your actual image
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limit:
+            memory: "128Mi"
+            cpu: "200m"
+
+

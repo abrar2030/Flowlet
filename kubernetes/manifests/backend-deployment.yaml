@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flowlet-backend
+  labels:
+    app: flowlet
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flowlet
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: flowlet
+        tier: backend
+    spec:
+      containers:
+      - name: flowlet-backend
+        image: flowlet/backend:latest  # Replace with your actual image
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: flowlet-secrets
+              key: database_url
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flowlet-secrets
+              key: api_key
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limit:
+            memory: "256Mi"
+            cpu: "500m"
+
+
