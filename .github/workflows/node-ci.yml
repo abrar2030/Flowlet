@@ -1,0 +1,25 @@
+
+name: Node.js CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+    - name: Install dependencies
+      run: npm install
+      working-directory: Flowlet/frontend/web-frontend
+    - name: Run tests
+      run: npm test
+      working-directory: Flowlet/frontend/web-frontend
+    - name: Build
+      run: npm run build
+      working-directory: Flowlet/frontend/web-frontend
+
+

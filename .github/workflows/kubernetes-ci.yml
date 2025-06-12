@@ -1,0 +1,44 @@
+
+name: Kubernetes and Helm CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - kubernetes/**
+      - infrastructure/helm/**
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - kubernetes/**
+      - infrastructure/helm/**
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Kubeval
+      uses: instrumenta/kubeval-action@master
+      with:
+        version: 0.16.1
+        files: kubernetes/**/*.yaml
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.8.1
+
+    - name: Lint Helm Charts
+      run: helm lint infrastructure/helm/flowlet
+
+    - name: Validate Helm Charts
+      run: helm template infrastructure/helm/flowlet | kubeval --strict
+
+

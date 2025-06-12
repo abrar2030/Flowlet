@@ -1,0 +1,77 @@
+
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - infrastructure/terraform/**
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - infrastructure/terraform/**
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.0.0 # Specify a suitable version
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      working-directory: infrastructure/terraform
+
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+      working-directory: infrastructure/terraform
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate
+      working-directory: infrastructure/terraform
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      working-directory: infrastructure/terraform
+      continue-on-error: true
+
+    - name: Update Pull Request
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const output = `#### Terraform Format and Validate ⚙️
+          ${{ steps.fmt.outcome == 'success' ? '✅' : '❌' }} Format
+          ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }} Validate
+
+          #### Terraform Plan 📖
+          <details><summary>Show Plan</summary>
+
+          ```terraform
+          ${{ steps.plan.outputs.stdout }}
+          ```
+
+          </details>
+
+          *Pushed by: @${{ github.actor }}, Action: 
+          `
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+
+

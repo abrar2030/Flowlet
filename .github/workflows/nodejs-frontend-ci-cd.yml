@@ -1,0 +1,84 @@
+
+name: Node.js Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - frontend/**
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - frontend/**
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    - name: Install dependencies (web-frontend)
+      run: npm install
+      working-directory: frontend/web-frontend
+
+    - name: Run tests (web-frontend)
+      run: npm test
+      working-directory: frontend/web-frontend
+
+    - name: Build (web-frontend)
+      run: npm run build
+      working-directory: frontend/web-frontend
+
+    # Add steps for mobile-frontend if it's a separate Node.js project
+    # - name: Install dependencies (mobile-frontend)
+    #   run: npm install
+    #   working-directory: frontend/mobile-frontend
+
+    # - name: Run tests (mobile-frontend)
+    #   run: npm test
+    #   working-directory: frontend/mobile-frontend
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    - name: Install dependencies (web-frontend) for security scan
+      run: npm install
+      working-directory: frontend/web-frontend
+
+    - name: Run npm audit
+      run: npm audit --json > npm-audit-report.json || true
+      working-directory: frontend/web-frontend
+
+    - name: Upload npm audit report
+      uses: actions/upload-artifact@v3
+      with:
+        name: npm-audit-report
+        path: frontend/web-frontend/npm-audit-report.json
+
+  # Add a deployment job placeholder for future implementation
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-test
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #   - name: Deploy frontend
+  #     run: echo "Deploying frontend..."
+
+
