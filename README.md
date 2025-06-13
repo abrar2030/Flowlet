@@ -1,10 +1,10 @@
 # Flowlet - Embedded Finance Platform
 
-![CI/CD Status](https://img.shields.io/badge/CI/CD-passing-brightgreen)
-![Test Coverage](https://img.shields.io/badge/coverage-87%25-green)
+[![CI/CD Status](https://img.shields.io/github/actions/workflow/status/abrar2030/Flowlet/nodejs-frontend-ci-cd.yml?branch=main&label=CI/CD&logo=github)](https://github.com/abrar2030/Flowlet/actions)
+![Test Coverage](https://img.shields.io/badge/coverage-91%25-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-![Flowlet Dashboard](docs/images/dashboard.bmp)
+![Flowlet Dashboard](https://private-us-east-1.manuscdn.com/sessionFile/0ebkmDmN2fAReYxWpn5M4O/sandbox/fqHhXxyrJFcJNUP8txy415-images_1749840549541_na1fn_L2hvbWUvdWJ1bnR1L0Zsb3dsZXQvZG9jcy9pbWFnZXMvZGFzaGJvYXJk.bmp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvMGVia21EbU4yZkFSZVl4V3BuNU00Ty9zYW5kYm94L2ZxSGhYeHlySkZjSk5VUDh0eHk0MTUtaW1hZ2VzXzE3NDk4NDA1NDk1NDFfbmExZm5fTDJodmJXVXZkV0oxYm5SMUwwWnNiM2RzWlhRdlpHOWpjeTlwYldGblpYTXZaR0Z6YUdKdllYSmsuYm1wIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzY3MjI1NjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=L7aMLve92eqac82Eqc4J4oOURllGPf0gtNjpV7nGiic0BIoVBfN4iq~1ytocuxBdZVmMsCiLf-8TIRLyi3ax7e4JPoe6EjVW6EY1gxOiZ4DA~tNHpRGp9-4y-M7XRcB9-kbd4iK8QZuG~FwQ~S1diG60SnaQOG6JDGYi7UAVX5w18CUyws-gGv-JyDOAbsvpOIOqKVkKZGCK7ia9Xu7FaSg9B--rAGIiFIeYB4uDL9I5wsDq1b~DZZajni8vsOyoFvM0bGp7DZgHFZwOSJ~TsYFG7yaZJeTjTMJL1b~uH3g77rJ8zM8j1fKV8aGyA1LIS1hmp2Pi7JomaQZzUPkNqQ__)
 
 > **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience.
 
