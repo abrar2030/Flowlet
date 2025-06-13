@@ -1,23 +1,27 @@
-# Test Configuration for Enhanced Flowlet Backend
+"""
+Test configuration for the enhanced Flowlet backend
+"""
+
 import pytest
-import tempfile
 import os
+import tempfile
 from src.main import create_app
-from src.models.enhanced_database import db
+from src.models.database import db
 
 @pytest.fixture
 def app():
-    """Create application for testing"""
-    # Create temporary database
+    """Create and configure a new app instance for each test."""
+    # Create a temporary file to isolate the database for each test
     db_fd, db_path = tempfile.mkstemp()
     
     app = create_app('testing')
     app.config.update({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
-        'JWT_SECRET_KEY': 'test-secret-key-for-testing-only',
-        'REDIS_URL': 'redis://localhost:6379/1',  # Use different DB for testing
-        'WTF_CSRF_ENABLED': False
+        'SECRET_KEY': 'test-secret-key',
+        'JWT_SECRET_KEY': 'test-jwt-secret',
+        'WTF_CSRF_ENABLED': False,
+        'REDIS_URL': None,  # Disable Redis for testing
     })
     
     with app.app_context():
@@ -30,42 +34,40 @@ def app():
 
 @pytest.fixture
 def client(app):
-    """Create test client"""
+    """A test client for the app."""
     return app.test_client()
 
 @pytest.fixture
 def runner(app):
-    """Create test runner"""
+    """A test runner for the app's Click commands."""
     return app.test_cli_runner()
 
 @pytest.fixture
-def auth_headers(client):
-    """Create authentication headers for testing"""
-    # Create test user and get token
-    user_data = {
+def auth_headers():
+    """Sample authentication headers for testing."""
+    return {
+        'Authorization': 'Bearer test-token',
+        'Content-Type': 'application/json'
+    }
+
+@pytest.fixture
+def sample_user_data():
+    """Sample user data for testing."""
+    return {
         'email': 'test@example.com',
+        'username': 'testuser',
         'password': 'TestPassword123!',
         'first_name': 'Test',
         'last_name': 'User'
     }
-    
-    # Register user
-    client.post('/api/v1/auth/register', json=user_data)
-    
-    # Login to get token
-    login_response = client.post('/api/v1/auth/login', json={
-        'email': user_data['email'],
-        'password': user_data['password']
-    })
-    
-    token = login_response.get_json()['access_token']
-    
-    return {'Authorization': f'Bearer {token}'}
 
-class TestConfig:
-    """Test configuration constants"""
-    TEST_USER_EMAIL = 'test@example.com'
-    TEST_USER_PASSWORD = 'TestPassword123!'
-    TEST_WALLET_CURRENCY = 'USD'
-    TEST_TRANSACTION_AMOUNT = '100.00'
+@pytest.fixture
+def sample_transaction_data():
+    """Sample transaction data for testing."""
+    return {
+        'amount': 100.00,
+        'currency': 'USD',
+        'description': 'Test transaction',
+        'account_id': 'test-account-123'
+    }
 

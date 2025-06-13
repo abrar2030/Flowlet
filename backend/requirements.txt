@@ -1,50 +1,173 @@
-# Requirements file for the enhanced Flowlet backend
-# Core Flask dependencies
+"""
+Enhanced requirements for the refactored Flowlet backend
+Includes all original dependencies plus new financial industry standard packages
+"""
+
+# Original Flask dependencies (preserved)
 Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
 Flask-CORS==4.0.0
 Flask-Migrate==4.0.5
 
-# Database
+# Enhanced database support
 psycopg2-binary==2.9.7
 SQLAlchemy==2.0.21
 
-# Security and Authentication
+# Enhanced security and authentication
 PyJWT==2.8.0
 bcrypt==4.0.1
 cryptography==41.0.4
+passlib==1.7.4
 
-# Redis for caching and rate limiting
+# Redis for enhanced caching and rate limiting
 redis==4.6.0
+Flask-Limiter==3.5.0
 
-# Input validation and sanitization
+# Enhanced input validation and sanitization
 email-validator==2.0.0
 phonenumbers==8.13.19
 bleach==6.0.0
+marshmallow==3.20.1
 
 # HTTP requests for external APIs
 requests==2.31.0
 
-# Decimal handling for financial calculations
-# (Built into Python, no additional package needed)
-
-# Testing
+# Enhanced testing framework
 pytest==7.4.2
 pytest-flask==1.2.0
 pytest-cov==4.1.0
+pytest-mock==3.11.1
 
-# Development tools
+# Development and environment tools
 python-dotenv==1.0.0
+python-decouple==3.8
 
-# Monitoring and logging
+# Enhanced monitoring and logging
 prometheus-client==0.17.1
+structlog==23.1.0
 
-# Data validation
+# Data validation and serialization
 marshmallow==3.20.1
+cerberus==1.3.5
 
 # Date and time handling
 python-dateutil==2.8.2
 
-# Environment configuration
-python-decouple==3.8
+# Financial calculations and decimal handling
+# (Built into Python, no additional package needed for Decimal)
+
+# Enhanced data analysis for fraud detection
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+
+# Enhanced API documentation
+flask-restx==1.1.0
+flasgger==0.9.7.1
+
+# Enhanced file handling
+openpyxl==3.1.2
+xlsxwriter==3.1.2
+
+# Enhanced networking and security
+urllib3==2.0.4
+certifi==2023.7.22
+
+# Enhanced JSON handling
+orjson==3.9.4
+
+# Enhanced configuration management
+pydantic==2.1.1
+pydantic-settings==2.0.2
+
+# Enhanced async support
+asyncio==3.4.3
+aiohttp==3.8.5
+
+# Enhanced database migrations
+alembic==1.11.1
+
+# Enhanced caching
+Flask-Caching==2.1.0
+
+# Enhanced session management
+Flask-Session==0.5.0
+
+# Enhanced WSGI server for production
+gunicorn==21.2.0
+gevent==23.7.0
+
+# Enhanced monitoring and health checks
+psutil==5.9.5
+
+# Enhanced timezone handling
+pytz==2023.3
+
+# Enhanced UUID handling
+uuid==1.30
+
+# Enhanced regular expressions
+regex==2023.6.3
+
+# Enhanced string processing
+Unidecode==1.3.6
+
+# Enhanced HTTP status codes
+http-status==0.2.1
+
+# Enhanced error tracking (optional)
+sentry-sdk[flask]==1.29.2
+
+# Enhanced rate limiting and throttling
+slowapi==0.1.9
+
+# Enhanced API versioning
+flask-api-versioning==1.0.0
+
+# Enhanced CORS handling
+flask-cors==4.0.0
+
+# Enhanced request ID tracking
+flask-request-id==0.1.1
+
+# Enhanced health checks
+flask-healthz==0.0.3
+
+# Enhanced metrics collection
+flask-prometheus-metrics==1.0.0
+
+# Enhanced background tasks
+celery==5.3.1
+redis==4.6.0
+
+# Enhanced file uploads
+Flask-Uploads==0.2.1
+
+# Enhanced form handling
+WTForms==3.0.1
+Flask-WTF==1.1.1
+
+# Enhanced internationalization
+Flask-Babel==3.1.0
+
+# Enhanced admin interface (optional)
+Flask-Admin==1.6.1
+
+# Enhanced user management
+Flask-User==1.0.2.2
+
+# Enhanced mail support
+Flask-Mail==0.9.1
+
+# Enhanced CLI support
+Click==8.1.6
+
+# Enhanced development tools
+flask-shell-ipython==1.4.0
+
+# Enhanced debugging (development only)
+flask-debugtoolbar==0.13.1
+
+# Enhanced profiling (development only)
+flask-profiler==1.8.1
 
