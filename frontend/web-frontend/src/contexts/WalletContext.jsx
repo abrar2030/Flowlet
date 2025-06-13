@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import apiService from '../services/api';
 
 const WalletContext = createContext();
 
@@ -17,115 +18,79 @@ export const WalletProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Mock wallet data
-  const mockWallet = {
-    id: 'wallet_123',
-    userId: user?.id,
-    balances: {
-      USD: 2500.75,
-      EUR: 1200.50,
-      GBP: 850.25
-    },
-    status: 'active',
-    type: 'personal',
-    createdAt: '2024-01-15T10:00:00Z',
-    lastActivity: new Date().toISOString()
-  };
-
-  // Mock transaction data
-  const mockTransactions = [
-    {
-      id: 'tx_001',
-      type: 'credit',
-      amount: 500.00,
-      currency: 'USD',
-      description: 'Salary deposit',
-      status: 'completed',
-      timestamp: '2024-06-10T09:30:00Z',
-      reference: 'SAL_2024_06'
-    },
-    {
-      id: 'tx_002',
-      type: 'debit',
-      amount: 125.50,
-      currency: 'USD',
-      description: 'Online purchase - Amazon',
-      status: 'completed',
-      timestamp: '2024-06-09T14:22:00Z',
-      reference: 'AMZ_ORDER_123'
-    },
-    {
-      id: 'tx_003',
-      type: 'credit',
-      amount: 75.25,
-      currency: 'USD',
-      description: 'Refund - Store return',
-      status: 'completed',
-      timestamp: '2024-06-08T11:15:00Z',
-      reference: 'REF_STORE_456'
-    },
-    {
-      id: 'tx_004',
-      type: 'debit',
-      amount: 200.00,
-      currency: 'USD',
-      description: 'Transfer to savings',
-      status: 'pending',
-      timestamp: '2024-06-10T16:45:00Z',
-      reference: 'SAVE_TRANSFER_789'
-    }
-  ];
-
   useEffect(() => {
     if (isAuthenticated && user) {
-      setWallet(mockWallet);
-      setTransactions(mockTransactions);
+      loadWalletData();
     } else {
       setWallet(null);
       setTransactions([]);
     }
   }, [isAuthenticated, user]);
 
+  const loadWalletData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get user's wallets
+      const walletsResponse = await apiService.getUserWallets(user.id);
+      if (walletsResponse.wallets && walletsResponse.wallets.length > 0) {
+        const primaryWallet = walletsResponse.wallets[0]; // Use first wallet as primary
+        setWallet(primaryWallet);
+        
+        // Load transactions for the primary wallet
+        const transactionsResponse = await apiService.getWalletTransactions(primaryWallet.wallet_id);
+        setTransactions(transactionsResponse.transactions || []);
+      }
+    } catch (error) {
+      console.error('Failed to load wallet data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshWalletData = async () => {
+    if (wallet) {
+      try {
+        // Refresh wallet balance
+        const balanceResponse = await apiService.getWalletBalance(wallet.wallet_id);
+        setWallet(prev => ({
+          ...prev,
+          balance: balanceResponse.balance,
+          available_balance: balanceResponse.available_balance
+        }));
+        
+        // Refresh transactions
+        const transactionsResponse = await apiService.getWalletTransactions(wallet.wallet_id);
+        setTransactions(transactionsResponse.transactions || []);
+      } catch (error) {
+        console.error('Failed to refresh wallet data:', error);
+      }
+    }
+  };
+
   const sendPayment = async (paymentData) => {
+    if (!wallet) {
+      return { success: false, error: 'No wallet available' };
+    }
+
     setLoading(true);
     try {
-      // Simulate API call
-      const newTransaction = {
-        id: 'tx_' + Date.now(),
-        type: 'debit',
+      // Use wallet transfer for internal transfers
+      const transferResponse = await apiService.transferFunds(wallet.wallet_id, {
+        to_wallet_id: paymentData.toWalletId,
         amount: paymentData.amount,
-        currency: paymentData.currency,
-        description: `Payment to ${paymentData.recipient}`,
-        status: 'pending',
-        timestamp: new Date().toISOString(),
-        reference: 'PAY_' + Date.now()
-      };
+        description: paymentData.description || `Payment to ${paymentData.recipient}`
+      });
 
-      // Update wallet balance
-      const updatedWallet = {
-        ...wallet,
-        balances: {
-          ...wallet.balances,
-          [paymentData.currency]: wallet.balances[paymentData.currency] - paymentData.amount
-        }
-      };
-
-      setWallet(updatedWallet);
-      setTransactions(prev => [newTransaction, ...prev]);
-      
-      // Simulate processing delay
-      setTimeout(() => {
-        setTransactions(prev => 
-          prev.map(tx => 
-            tx.id === newTransaction.id 
-              ? { ...tx, status: 'completed' }
-              : tx
-          )
-        );
-      }, 3000);
-
-      return { success: true, transaction: newTransaction };
+      if (transferResponse.transfer_id) {
+        // Refresh wallet data after successful transfer
+        await refreshWalletData();
+        return { success: true, transaction: transferResponse };
+      } else {
+        return { success: false, error: 'Transfer failed' };
+      }
     } catch (error) {
+      console.error('Payment failed:', error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -135,11 +100,12 @@ export const WalletProvider = ({ children }) => {
   const requestPayment = async (requestData) => {
     setLoading(true);
     try {
-      // Simulate API call
+      // For now, create a mock payment request
+      // In a real implementation, this would create a payment request in the backend
       const paymentRequest = {
         id: 'req_' + Date.now(),
         amount: requestData.amount,
-        currency: requestData.currency,
+        currency: requestData.currency || 'USD',
         description: requestData.description,
         from: requestData.from,
         status: 'pending',
@@ -149,6 +115,7 @@ export const WalletProvider = ({ children }) => {
 
       return { success: true, request: paymentRequest };
     } catch (error) {
+      console.error('Payment request failed:', error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -173,6 +140,72 @@ export const WalletProvider = ({ children }) => {
     return filteredTransactions;
   };
 
+  const createWallet = async (walletData) => {
+    try {
+      setLoading(true);
+      const response = await apiService.createWallet({
+        user_id: user.id,
+        wallet_type: walletData.type || 'user',
+        currency: walletData.currency || 'USD'
+      });
+
+      if (response.wallet_id) {
+        // Reload wallet data
+        await loadWalletData();
+        return { success: true, wallet: response };
+      } else {
+        return { success: false, error: 'Wallet creation failed' };
+      }
+    } catch (error) {
+      console.error('Wallet creation failed:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const freezeWallet = async () => {
+    if (!wallet) return { success: false, error: 'No wallet available' };
+
+    try {
+      setLoading(true);
+      const response = await apiService.freezeWallet(wallet.wallet_id);
+      
+      if (response.status === 'suspended') {
+        setWallet(prev => ({ ...prev, status: 'suspended' }));
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, error: 'Failed to freeze wallet' };
+      }
+    } catch (error) {
+      console.error('Wallet freeze failed:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const unfreezeWallet = async () => {
+    if (!wallet) return { success: false, error: 'No wallet available' };
+
+    try {
+      setLoading(true);
+      const response = await apiService.unfreezeWallet(wallet.wallet_id);
+      
+      if (response.status === 'active') {
+        setWallet(prev => ({ ...prev, status: 'active' }));
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, error: 'Failed to unfreeze wallet' };
+      }
+    } catch (error) {
+      console.error('Wallet unfreeze failed:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <WalletContext.Provider value={{
       wallet,
@@ -180,7 +213,12 @@ export const WalletProvider = ({ children }) => {
       loading,
       sendPayment,
       requestPayment,
-      getTransactionHistory
+      getTransactionHistory,
+      createWallet,
+      freezeWallet,
+      unfreezeWallet,
+      refreshWalletData,
+      loadWalletData
     }}>
       {children}
     </WalletContext.Provider>

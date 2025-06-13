@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import apiService from '../services/api';
 
 const AuthContext = createContext();
 
@@ -18,79 +19,108 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check for stored authentication token
     const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('userData');
     
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      setIsAuthenticated(true);
+    if (token) {
+      apiService.setToken(token);
+      // Verify token with backend
+      verifyStoredToken();
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
+
+  const verifyStoredToken = async () => {
+    try {
+      const response = await apiService.verifyToken();
+      if (response.valid) {
+        setUser(response.user);
+        setIsAuthenticated(true);
+      } else {
+        // Token is invalid, clear it
+        localStorage.removeItem('authToken');
+        apiService.setToken(null);
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      localStorage.removeItem('authToken');
+      apiService.setToken(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email, password) => {
     try {
-      // Simulate API call
-      const mockUser = {
-        id: '1',
-        email,
-        name: 'John Doe',
-        role: 'user',
-        avatar: '/api/placeholder/40/40',
-        kycStatus: 'verified',
-        walletId: 'wallet_123'
-      };
+      setLoading(true);
+      const response = await apiService.login(email, password);
       
-      const mockToken = 'mock_jwt_token_' + Date.now();
-      
-      localStorage.setItem('authToken', mockToken);
-      localStorage.setItem('userData', JSON.stringify(mockUser));
-      
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      
-      return { success: true, user: mockUser };
+      if (response.token) {
+        apiService.setToken(response.token);
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return { success: true, user: response.user };
+      } else {
+        return { success: false, error: 'Login failed' };
+      }
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signup = async (userData) => {
     try {
-      // Simulate API call
-      const newUser = {
-        id: Date.now().toString(),
-        ...userData,
-        role: 'user',
-        avatar: '/api/placeholder/40/40',
-        kycStatus: 'pending',
-        walletId: 'wallet_' + Date.now()
-      };
+      setLoading(true);
+      const response = await apiService.register(userData);
       
-      const mockToken = 'mock_jwt_token_' + Date.now();
-      
-      localStorage.setItem('authToken', mockToken);
-      localStorage.setItem('userData', JSON.stringify(newUser));
-      
-      setUser(newUser);
-      setIsAuthenticated(true);
-      
-      return { success: true, user: newUser };
+      if (response.token) {
+        apiService.setToken(response.token);
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return { success: true, user: response.user };
+      } else {
+        return { success: false, error: 'Registration failed' };
+      }
     } catch (error) {
+      console.error('Registration error:', error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = () => {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
+    apiService.setToken(null);
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  const updateUser = (userData) => {
-    const updatedUser = { ...user, ...userData };
-    setUser(updatedUser);
-    localStorage.setItem('userData', JSON.stringify(updatedUser));
+  const updateUser = async (userData) => {
+    try {
+      const response = await apiService.updateProfile(userData);
+      if (response.user) {
+        setUser(response.user);
+        return { success: true, user: response.user };
+      }
+      return { success: false, error: 'Update failed' };
+    } catch (error) {
+      console.error('Profile update error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const refreshProfile = async () => {
+    try {
+      const response = await apiService.getProfile();
+      if (response.user) {
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Profile refresh error:', error);
+    }
   };
 
   return (
@@ -101,7 +131,8 @@ export const AuthProvider = ({ children }) => {
       login,
       signup,
       logout,
-      updateUser
+      updateUser,
+      refreshProfile
     }}>
       {children}
     </AuthContext.Provider>

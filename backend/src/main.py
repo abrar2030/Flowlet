@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from src.models.database import db
+from src.routes.auth import auth_bp
 from src.routes.wallet import wallet_bp
 from src.routes.payment import payment_bp
 from src.routes.card import card_bp
@@ -13,7 +14,7 @@ from src.routes.kyc_aml import kyc_aml_bp
 from src.routes.ledger import ledger_bp
 from src.routes.ai_service import ai_bp
 from src.routes.security import security_bp
-from src.routes.api_gateway import api_gateway_bp
+from src.routes.analytics import analytics_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'flowlet_secure_key_2024_embedded_finance'
@@ -22,6 +23,7 @@ app.config['SECRET_KEY'] = 'flowlet_secure_key_2024_embedded_finance'
 CORS(app, origins="*")
 
 # Register all service blueprints
+app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
 app.register_blueprint(wallet_bp, url_prefix='/api/v1/wallet')
 app.register_blueprint(payment_bp, url_prefix='/api/v1/payment')
 app.register_blueprint(card_bp, url_prefix='/api/v1/card')
@@ -29,10 +31,12 @@ app.register_blueprint(kyc_aml_bp, url_prefix='/api/v1/kyc')
 app.register_blueprint(ledger_bp, url_prefix='/api/v1/ledger')
 app.register_blueprint(ai_bp, url_prefix='/api/v1/ai')
 app.register_blueprint(security_bp, url_prefix='/api/v1/security')
-app.register_blueprint(api_gateway_bp, url_prefix='/api/v1/gateway')
+app.register_blueprint(analytics_bp, url_prefix='/api/v1/analytics')
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'flowlet.db')}"
+database_dir = os.path.join(os.path.dirname(__file__), 'database')
+os.makedirs(database_dir, exist_ok=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(database_dir, 'flowlet.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -60,5 +64,5 @@ def health_check():
     return {"status": "healthy", "service": "Flowlet Backend", "version": "1.0.0"}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
 
