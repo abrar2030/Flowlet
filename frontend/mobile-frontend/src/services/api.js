@@ -267,6 +267,15 @@ export const gatewayAPI = {
   getRateLimits: () => apiService.get(API_ENDPOINTS.GATEWAY.RATE_LIMITS),
 };
 
+// Analytics API
+export const analyticsAPI = {
+  getTransactionAnalytics: (params) => apiService.get('/analytics/transactions', params),
+  getSpendingAnalytics: (params) => apiService.get('/analytics/spending', params),
+  getBudgetAnalytics: (params) => apiService.get('/analytics/budgets', params),
+  getGoalAnalytics: (params) => apiService.get('/analytics/goals', params),
+  getInsights: (params) => apiService.get('/analytics/insights', params),
+};
+
 export default apiService;
 
 

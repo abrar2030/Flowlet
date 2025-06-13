@@ -31,10 +31,15 @@ import AnalyticsScreen from './components/analytics/AnalyticsScreen.jsx';
 // AI Components
 import ChatbotScreen from './components/ai/ChatbotScreen.jsx';
 import FraudAlerts from './components/ai/FraudAlerts.jsx';
+import AIFraudDetectionScreen from './components/ai/AIFraudDetectionScreen.jsx';
 
 // Security Components
 import SecurityScreen from './components/security/SecurityScreen.jsx';
 import SettingsScreen from './components/security/SettingsScreen.jsx';
+import EnhancedSecurityScreen from './components/security/EnhancedSecurityScreen.jsx';
+
+// Financial Components
+import AdvancedBudgetingScreen from './components/financial/AdvancedBudgetingScreen.jsx';
 
 import './App.css';
 
@@ -136,12 +141,18 @@ function App() {
             {/* Analytics */}
             <Route path="analytics" element={<AnalyticsScreen />} />
             
+            {/* Financial Planning */}
+            <Route path="financial-planning" element={<AdvancedBudgetingScreen />} />
+            <Route path="budgeting" element={<AdvancedBudgetingScreen />} />
+            
             {/* AI Features */}
             <Route path="chat" element={<ChatbotScreen />} />
             <Route path="alerts" element={<FraudAlerts />} />
+            <Route path="fraud-detection" element={<AIFraudDetectionScreen />} />
             
             {/* Security & Settings */}
             <Route path="security" element={<SecurityScreen />} />
+            <Route path="security/advanced" element={<EnhancedSecurityScreen />} />
             <Route path="settings" element={<SettingsScreen />} />
           </Route>
 
