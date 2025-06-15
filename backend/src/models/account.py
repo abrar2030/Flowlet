@@ -2,7 +2,7 @@
 Account model for financial account management
 """
 
-from src.models.database import db, TimestampMixin, UUIDMixin
+from src.models.database import db, TimestampMixin, UUIDMixin, UUID
 from decimal import Decimal
 from datetime import datetime, timezone
 from enum import Enum
@@ -27,7 +27,7 @@ class AccountStatus(Enum):
 class Account(db.Model, TimestampMixin, UUIDMixin):
     """Financial account model with enhanced security and compliance features"""
     
-    __tablename__ = 'accounts'
+    __tablename__ = 'enhanced_accounts'
     
     # Account identification
     account_number = db.Column(db.String(20), unique=True, nullable=False, index=True)
@@ -61,7 +61,7 @@ class Account(db.Model, TimestampMixin, UUIDMixin):
     
     # Relationships
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    transactions = db.relationship('Transaction', backref='account', lazy='dynamic')
+    transactions = db.relationship('Transaction', backref='account', lazy='dynamic', foreign_keys='Transaction.account_id')
     
     def __init__(self, **kwargs):
         super(Account, self).__init__(**kwargs)

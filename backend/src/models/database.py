@@ -4,6 +4,21 @@ import uuid
 
 db = SQLAlchemy()
 
+# Add missing mixins for enhanced models
+class TimestampMixin:
+    """Mixin to add timestamp fields to models"""
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+class UUIDMixin:
+    """Mixin to add UUID primary key to models"""
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+
+# Define UUID type for compatibility
+def UUID(as_uuid=True):
+    """UUID type for SQLAlchemy compatibility"""
+    return db.String(36)
+
 class User(db.Model):
     __tablename__ = 'users'
     

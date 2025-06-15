@@ -2,7 +2,7 @@
 Transaction model for financial transaction management
 """
 
-from src.models.database import db, TimestampMixin, UUIDMixin
+from src.models.database import db, TimestampMixin, UUIDMixin, UUID
 from decimal import Decimal
 from datetime import datetime, timezone
 from enum import Enum
@@ -43,7 +43,7 @@ class TransactionCategory(Enum):
 class Transaction(db.Model, TimestampMixin, UUIDMixin):
     """Financial transaction model with comprehensive tracking and compliance features"""
     
-    __tablename__ = 'transactions'
+    __tablename__ = 'enhanced_transactions'
     
     # Transaction identification
     transaction_id = db.Column(db.String(50), unique=True, nullable=False, index=True)
@@ -105,11 +105,11 @@ class Transaction(db.Model, TimestampMixin, UUIDMixin):
     
     # Relationships
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('accounts.id'), nullable=False)
+    account_id = db.Column(UUID(as_uuid=True), db.ForeignKey('enhanced_accounts.id'), nullable=False)
     card_id = db.Column(UUID(as_uuid=True), db.ForeignKey('cards.id'), nullable=True)  # If card transaction
     
     # Related transactions (for transfers, reversals, etc.)
-    parent_transaction_id = db.Column(UUID(as_uuid=True), db.ForeignKey('transactions.id'))
+    parent_transaction_id = db.Column(UUID(as_uuid=True), db.ForeignKey('enhanced_transactions.id'))
     related_transactions = db.relationship('Transaction', backref=db.backref('parent_transaction', remote_side=[id]))
     
     def __init__(self, **kwargs):

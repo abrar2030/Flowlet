@@ -239,13 +239,15 @@ def create_app(config_name='production'):
     def api_info():
         """Enhanced API information and documentation endpoint"""
         return jsonify({
-            'api_name': 'Flowlet Financial Backend - Enhanced',
+            'api_name': 'Flowlet Financial Backend - Enhanced MVP',
             'version': '2.0.0',
             'description': 'Secure financial services backend compliant with industry standards',
             'documentation_url': '/api/v1/docs',
             'endpoints': {
                 'authentication': '/api/v1/auth',
                 'user_management': '/api/v1/users',
+                'wallet_mvp': '/api/v1/wallet',
+                'payment_mvp': '/api/v1/payment',
                 'payments': '/api/v1/payment',
                 'cards': '/api/v1/card',
                 'enhanced_cards': '/api/v1/cards/enhanced',
@@ -259,6 +261,14 @@ def create_app(config_name='production'):
                 'monitoring': '/api/v1/monitoring',
                 'multicurrency': '/api/v1/multicurrency'
             },
+            'mvp_features': [
+                'Wallet Creation and Management',
+                'Balance Inquiry',
+                'Fund Deposits and Withdrawals',
+                'Transaction History',
+                'Peer-to-Peer Payments',
+                'Transfer Between Wallets'
+            ],
             'security_features': [
                 'JWT Authentication with Refresh Tokens',
                 'Advanced Rate Limiting (1000/hour, 100/minute)',
@@ -297,6 +307,13 @@ def create_app(config_name='production'):
                 'BRL', 'INR', 'KRW', 'PLN'
             ]
         }), 200
+    
+    # Register MVP blueprints
+    from src.routes.wallet_mvp import wallet_mvp_bp
+    from src.routes.payment_mvp import payment_mvp_bp
+    
+    app.register_blueprint(wallet_mvp_bp)
+    app.register_blueprint(payment_mvp_bp)
     
     # Create database tables
     with app.app_context():
