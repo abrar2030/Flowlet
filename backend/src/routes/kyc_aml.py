@@ -1,538 +1,1051 @@
-from flask import Blueprint, request, jsonify
-from src.models.database import db, User, KYCRecord
-from datetime import datetime, timedelta
+"""
+Enhanced KYC/AML Compliance System with Financial-Grade Features
+"""
+
+from flask import Blueprint, request, jsonify, g
+from src.models.database import db, User
+from src.models.account import Account
+from src.models.kyc import KYCRecord, KYCStatus, VerificationLevel, DocumentType, RiskLevel
+from src.models.aml import AMLRecord, SanctionsCheck, TransactionMonitoring, SuspiciousActivity
+from src.security.audit_logger import AuditLogger
+from src.security.input_validator import InputValidator
+from src.security.document_verifier import DocumentVerifier
+from src.security.sanctions_screener import SanctionsScreener
+from src.routes.auth import token_required, admin_required
+from datetime import datetime, timezone, timedelta
 import uuid
-import random
-import re
+import logging
+import json
+from decimal import Decimal
+from functools import wraps
 
-kyc_aml_bp = Blueprint('kyc_aml', __name__)
+# Create blueprint
+kyc_aml_bp = Blueprint('kyc_aml', __name__, url_prefix='/api/v1/kyc')
 
-def validate_email(email):
-    """Validate email format"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
+# Configure logging
+logger = logging.getLogger(__name__)
 
-def validate_phone(phone):
-    """Validate phone number format"""
-    pattern = r'^\+?[1-9]\d{1,14}$'
-    return re.match(pattern, phone) is not None
+# Initialize security components
+audit_logger = AuditLogger()
+input_validator = InputValidator()
+document_verifier = DocumentVerifier()
+sanctions_screener = SanctionsScreener()
 
-def calculate_risk_score(user_data, verification_data):
-    """Calculate risk score based on user data and verification results"""
-    risk_score = 0
-    
-    # Age factor
-    if 'date_of_birth' in user_data:
-        try:
-            birth_date = datetime.strptime(user_data['date_of_birth'], '%Y-%m-%d').date()
-            age = (datetime.now().date() - birth_date).days // 365
-            if age < 18:
-                risk_score += 50  # Underage
-            elif age < 25:
-                risk_score += 20  # Young adult
-            elif age > 80:
-                risk_score += 15  # Elderly
-        except:
-            risk_score += 30  # Invalid date
-    
-    # Email verification
-    if not validate_email(user_data.get('email', '')):
-        risk_score += 25
-    
-    # Phone verification
-    if not validate_phone(user_data.get('phone', '')):
-        risk_score += 15
-    
-    # Address completeness
-    if not user_data.get('address'):
-        risk_score += 20
-    
-    # Document verification results
-    if verification_data.get('document_verified', False):
-        risk_score -= 30
-    else:
-        risk_score += 40
-    
-    # Biometric verification
-    if verification_data.get('biometric_verified', False):
-        risk_score -= 20
-    
-    # Database screening results
-    if verification_data.get('watchlist_match', False):
-        risk_score += 100
-    
-    # Ensure score is between 0 and 100
-    return max(0, min(100, risk_score))
-
-@kyc_aml_bp.route('/user/create', methods=['POST'])
-def create_user():
-    """Create a new user with basic information"""
-    try:
-        data = request.get_json()
+def compliance_access_required(f):
+    """Decorator to ensure user has access to compliance data"""
+    @wraps(f)
+    @token_required
+    def decorated(user_id, *args, **kwargs):
+        current_user = g.current_user
         
-        # Validate required fields
-        required_fields = ['email', 'first_name', 'last_name']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        # Check if user is accessing their own data or is admin/compliance officer
+        if str(current_user.id) != user_id and not current_user.is_admin and not current_user.is_compliance_officer:
+            audit_logger.log_security_event(
+                event_type='unauthorized_compliance_access',
+                details={
+                    'user_id': current_user.id,
+                    'target_user_id': user_id,
+                    'ip': request.remote_addr
+                }
+            )
+            return jsonify({
+                'error': 'Access denied',
+                'code': 'ACCESS_DENIED'
+            }), 403
         
-        # Validate email format
-        if not validate_email(data['email']):
-            return jsonify({'error': 'Invalid email format'}), 400
-        
-        # Check if user already exists
-        existing_user = User.query.filter_by(email=data['email']).first()
-        if existing_user:
-            return jsonify({'error': 'User with this email already exists'}), 409
-        
-        # Validate date of birth if provided
-        date_of_birth = None
-        if 'date_of_birth' in data:
-            try:
-                date_of_birth = datetime.strptime(data['date_of_birth'], '%Y-%m-%d').date()
-            except ValueError:
-                return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
-        
-        # Create new user
-        user = User(
-            email=data['email'],
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            phone=data.get('phone'),
-            date_of_birth=date_of_birth,
-            address=data.get('address'),
-            kyc_status='pending'
-        )
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        return jsonify({
-            'user_id': user.id,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'kyc_status': user.kyc_status,
-            'created_at': user.created_at.isoformat()
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-@kyc_aml_bp.route('/user/<user_id>', methods=['GET'])
-def get_user(user_id):
-    """Get user information"""
-    try:
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        return jsonify({
-            'user_id': user.id,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'phone': user.phone,
-            'date_of_birth': user.date_of_birth.isoformat() if user.date_of_birth else None,
-            'address': user.address,
-            'kyc_status': user.kyc_status,
-            'created_at': user.created_at.isoformat(),
-            'updated_at': user.updated_at.isoformat()
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@kyc_aml_bp.route('/user/<user_id>', methods=['PUT'])
-def update_user(user_id):
-    """Update user information"""
-    try:
-        data = request.get_json()
-        
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        # Update fields if provided
-        if 'first_name' in data:
-            user.first_name = data['first_name']
-        
-        if 'last_name' in data:
-            user.last_name = data['last_name']
-        
-        if 'phone' in data:
-            if data['phone'] and not validate_phone(data['phone']):
-                return jsonify({'error': 'Invalid phone format'}), 400
-            user.phone = data['phone']
-        
-        if 'date_of_birth' in data:
-            try:
-                user.date_of_birth = datetime.strptime(data['date_of_birth'], '%Y-%m-%d').date()
-            except ValueError:
-                return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
-        
-        if 'address' in data:
-            user.address = data['address']
-        
-        user.updated_at = datetime.utcnow()
-        db.session.commit()
-        
-        return jsonify({
-            'user_id': user.id,
-            'message': 'User updated successfully',
-            'updated_at': user.updated_at.isoformat()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return f(user_id, *args, **kwargs)
+    return decorated
 
 @kyc_aml_bp.route('/verification/start', methods=['POST'])
-def start_verification():
-    """Start KYC verification process"""
+@token_required
+def start_kyc_verification():
+    """
+    Start KYC verification process
+    
+    Expected JSON payload:
+    {
+        "user_id": "string" (optional, defaults to current user),
+        "verification_level": "basic|enhanced|premium",
+        "purpose": "account_opening|transaction_limit_increase|compliance_review"
+    }
+    """
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'Request body must contain valid JSON',
+                'code': 'INVALID_JSON'
+            }), 400
         
-        # Validate required fields
-        required_fields = ['user_id', 'verification_level']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        # Determine target user
+        user_id = data.get('user_id', str(g.current_user.id))
         
-        user = User.query.get(data['user_id'])
+        # Check access permissions
+        if str(g.current_user.id) != user_id and not g.current_user.is_admin:
+            return jsonify({
+                'error': 'Access denied',
+                'code': 'ACCESS_DENIED'
+            }), 403
+        
+        user = User.query.get(user_id)
         if not user:
-            return jsonify({'error': 'User not found'}), 404
+            return jsonify({
+                'error': 'User not found',
+                'code': 'USER_NOT_FOUND'
+            }), 404
         
-        verification_level = data['verification_level']
-        if verification_level not in ['basic', 'enhanced', 'premium']:
-            return jsonify({'error': 'Invalid verification level'}), 400
+        # Validate verification level
+        if 'verification_level' not in data:
+            return jsonify({
+                'error': 'Verification level is required',
+                'code': 'VERIFICATION_LEVEL_REQUIRED'
+            }), 400
+        
+        try:
+            verification_level = VerificationLevel(data['verification_level'].lower())
+        except ValueError:
+            return jsonify({
+                'error': f'Invalid verification level. Must be one of: {[v.value for v in VerificationLevel]}',
+                'code': 'INVALID_VERIFICATION_LEVEL'
+            }), 400
         
         # Check if there's already a pending verification
         existing_verification = KYCRecord.query.filter_by(
-            user_id=data['user_id'],
-            verification_status='pending'
+            user_id=user_id,
+            status=KYCStatus.PENDING
         ).first()
         
         if existing_verification:
-            return jsonify({'error': 'User already has a pending verification'}), 409
+            return jsonify({
+                'error': 'User already has a pending verification',
+                'code': 'VERIFICATION_PENDING',
+                'existing_verification_id': str(existing_verification.id)
+            }), 409
+        
+        # Check if user already has sufficient verification level
+        current_kyc = KYCRecord.query.filter_by(
+            user_id=user_id,
+            status=KYCStatus.APPROVED
+        ).order_by(KYCRecord.created_at.desc()).first()
+        
+        if current_kyc and current_kyc.verification_level.value >= verification_level.value:
+            return jsonify({
+                'error': 'User already has sufficient verification level',
+                'code': 'SUFFICIENT_VERIFICATION',
+                'current_level': current_kyc.verification_level.value
+            }), 400
         
         # Create new KYC record
         kyc_record = KYCRecord(
-            user_id=data['user_id'],
+            user_id=user_id,
             verification_level=verification_level,
-            verification_status='pending',
-            verification_provider=data.get('provider', 'Flowlet_Internal')
+            status=KYCStatus.PENDING,
+            purpose=data.get('purpose', 'account_opening'),
+            initiated_by=g.current_user.id,
+            verification_provider='Flowlet_Enhanced_KYC',
+            required_documents=json.dumps(get_required_documents(verification_level)),
+            verification_steps=json.dumps(get_verification_steps(verification_level))
         )
         
         db.session.add(kyc_record)
+        db.session.flush()  # Get the record ID
+        
+        # Perform initial sanctions screening
+        sanctions_result = sanctions_screener.screen_individual(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            date_of_birth=user.date_of_birth,
+            country=user.address_country
+        )
+        
+        # Create sanctions check record
+        sanctions_check = SanctionsCheck(
+            kyc_record_id=kyc_record.id,
+            user_id=user_id,
+            screening_provider='Flowlet_Sanctions_DB',
+            screening_result=sanctions_result['status'],
+            match_details=json.dumps(sanctions_result.get('matches', [])),
+            risk_score=sanctions_result.get('risk_score', 0)
+        )
+        
+        db.session.add(sanctions_check)
+        
+        # If sanctions match found, flag for manual review
+        if sanctions_result['status'] == 'match_found':
+            kyc_record.status = KYCStatus.MANUAL_REVIEW
+            kyc_record.review_reason = 'Sanctions screening match detected'
+        
         db.session.commit()
         
+        # Log KYC initiation
+        audit_logger.log_compliance_event(
+            user_id=user_id,
+            event_type='kyc_verification_started',
+            details={
+                'kyc_record_id': str(kyc_record.id),
+                'verification_level': verification_level.value,
+                'purpose': kyc_record.purpose,
+                'initiated_by': g.current_user.id,
+                'sanctions_result': sanctions_result['status']
+            }
+        )
+        
         return jsonify({
-            'verification_id': kyc_record.id,
-            'user_id': user.id,
-            'verification_level': verification_level,
-            'status': 'pending',
-            'next_steps': get_verification_steps(verification_level),
+            'success': True,
+            'kyc_record_id': str(kyc_record.id),
+            'user_id': user_id,
+            'verification_level': verification_level.value,
+            'status': kyc_record.status.value,
+            'required_documents': json.loads(kyc_record.required_documents),
+            'verification_steps': json.loads(kyc_record.verification_steps),
+            'sanctions_screening': {
+                'status': sanctions_result['status'],
+                'risk_score': sanctions_result.get('risk_score', 0)
+            },
+            'estimated_completion_time': get_estimated_completion_time(verification_level),
             'created_at': kyc_record.created_at.isoformat()
         }), 201
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"KYC verification start error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to start KYC verification',
+            'code': 'KYC_START_ERROR'
+        }), 500
 
-def get_verification_steps(level):
-    """Get required verification steps based on level"""
-    steps = {
-        'basic': [
-            'email_verification',
-            'phone_verification'
+def get_required_documents(verification_level):
+    """Get required documents based on verification level"""
+    documents = {
+        VerificationLevel.BASIC: [
+            'government_id'
         ],
-        'enhanced': [
-            'email_verification',
-            'phone_verification',
-            'document_upload',
-            'address_verification'
+        VerificationLevel.ENHANCED: [
+            'government_id',
+            'proof_of_address'
         ],
-        'premium': [
-            'email_verification',
-            'phone_verification',
-            'document_upload',
-            'biometric_verification',
-            'address_verification',
-            'database_screening'
+        VerificationLevel.PREMIUM: [
+            'government_id',
+            'proof_of_address',
+            'proof_of_income',
+            'bank_statement'
         ]
     }
-    return steps.get(level, [])
+    return documents.get(verification_level, [])
 
-@kyc_aml_bp.route('/verification/<verification_id>/document', methods=['POST'])
-def submit_document(verification_id):
-    """Submit identity document for verification"""
+def get_verification_steps(verification_level):
+    """Get required verification steps based on level"""
+    steps = {
+        VerificationLevel.BASIC: [
+            'email_verification',
+            'phone_verification',
+            'document_upload',
+            'basic_sanctions_screening'
+        ],
+        VerificationLevel.ENHANCED: [
+            'email_verification',
+            'phone_verification',
+            'document_upload',
+            'document_verification',
+            'address_verification',
+            'enhanced_sanctions_screening',
+            'pep_screening'
+        ],
+        VerificationLevel.PREMIUM: [
+            'email_verification',
+            'phone_verification',
+            'document_upload',
+            'document_verification',
+            'biometric_verification',
+            'address_verification',
+            'income_verification',
+            'enhanced_sanctions_screening',
+            'pep_screening',
+            'adverse_media_screening',
+            'source_of_funds_verification'
+        ]
+    }
+    return steps.get(verification_level, [])
+
+def get_estimated_completion_time(verification_level):
+    """Get estimated completion time based on verification level"""
+    times = {
+        VerificationLevel.BASIC: '1-2 business days',
+        VerificationLevel.ENHANCED: '3-5 business days',
+        VerificationLevel.PREMIUM: '5-10 business days'
+    }
+    return times.get(verification_level, '1-2 business days')
+
+@kyc_aml_bp.route('/verification/<kyc_record_id>/document', methods=['POST'])
+@token_required
+def submit_kyc_document(kyc_record_id):
+    """
+    Submit document for KYC verification
+    
+    Expected JSON payload:
+    {
+        "document_type": "government_id|proof_of_address|proof_of_income|bank_statement",
+        "document_subtype": "passport|drivers_license|national_id|utility_bill|etc",
+        "document_number": "string",
+        "issuing_country": "string",
+        "expiry_date": "YYYY-MM-DD" (optional),
+        "document_data": "base64_encoded_image_or_pdf"
+    }
+    """
     try:
+        kyc_record = KYCRecord.query.get(kyc_record_id)
+        if not kyc_record:
+            return jsonify({
+                'error': 'KYC record not found',
+                'code': 'KYC_RECORD_NOT_FOUND'
+            }), 404
+        
+        # Check access permissions
+        if str(g.current_user.id) != str(kyc_record.user_id) and not g.current_user.is_admin:
+            return jsonify({
+                'error': 'Access denied',
+                'code': 'ACCESS_DENIED'
+            }), 403
+        
+        if kyc_record.status not in [KYCStatus.PENDING, KYCStatus.DOCUMENTS_REQUIRED]:
+            return jsonify({
+                'error': 'KYC record is not accepting documents',
+                'code': 'INVALID_KYC_STATUS'
+            }), 400
+        
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'Request body must contain valid JSON',
+                'code': 'INVALID_JSON'
+            }), 400
         
         # Validate required fields
-        required_fields = ['document_type', 'document_number']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        required_fields = ['document_type', 'document_subtype', 'document_number', 'issuing_country', 'document_data']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                'error': f'Missing required fields: {", ".join(missing_fields)}',
+                'code': 'MISSING_FIELDS'
+            }), 400
         
-        kyc_record = KYCRecord.query.get(verification_id)
-        if not kyc_record:
-            return jsonify({'error': 'Verification record not found'}), 404
+        # Validate document type
+        try:
+            document_type = DocumentType(data['document_type'].lower())
+        except ValueError:
+            return jsonify({
+                'error': f'Invalid document type. Must be one of: {[d.value for d in DocumentType]}',
+                'code': 'INVALID_DOCUMENT_TYPE'
+            }), 400
         
-        if kyc_record.verification_status != 'pending':
-            return jsonify({'error': 'Verification is not in pending status'}), 400
+        # Validate expiry date if provided
+        expiry_date = None
+        if 'expiry_date' in data and data['expiry_date']:
+            try:
+                expiry_date = datetime.strptime(data['expiry_date'], '%Y-%m-%d').date()
+                if expiry_date <= datetime.now().date():
+                    return jsonify({
+                        'error': 'Document has expired',
+                        'code': 'DOCUMENT_EXPIRED'
+                    }), 400
+            except ValueError:
+                return jsonify({
+                    'error': 'Invalid expiry date format. Use YYYY-MM-DD',
+                    'code': 'INVALID_DATE_FORMAT'
+                }), 400
         
-        document_type = data['document_type']
-        if document_type not in ['passport', 'drivers_license', 'national_id']:
-            return jsonify({'error': 'Invalid document type'}), 400
+        # Verify document using AI/ML service
+        verification_result = document_verifier.verify_document(
+            document_type=document_type,
+            document_subtype=data['document_subtype'],
+            document_data=data['document_data'],
+            user_info={
+                'first_name': kyc_record.user.first_name,
+                'last_name': kyc_record.user.last_name,
+                'date_of_birth': kyc_record.user.date_of_birth
+            }
+        )
         
-        # Update KYC record with document information
-        kyc_record.document_type = document_type
-        kyc_record.document_number = data['document_number']
-        kyc_record.updated_at = datetime.utcnow()
+        # Create document record
+        from src.models.kyc import KYCDocument
+        document_record = KYCDocument(
+            kyc_record_id=kyc_record.id,
+            document_type=document_type,
+            document_subtype=data['document_subtype'],
+            document_number=data['document_number'],
+            issuing_country=data['issuing_country'],
+            expiry_date=expiry_date,
+            verification_status=verification_result['status'],
+            verification_confidence=verification_result.get('confidence', 0),
+            verification_details=json.dumps(verification_result.get('details', {})),
+            extracted_data=json.dumps(verification_result.get('extracted_data', {}))
+        )
         
+        db.session.add(document_record)
+        
+        # Update KYC record status based on document verification
+        if verification_result['status'] == 'verified':
+            # Check if all required documents are submitted and verified
+            required_docs = json.loads(kyc_record.required_documents)
+            submitted_docs = [doc.document_type.value for doc in kyc_record.documents if doc.verification_status == 'verified']
+            
+            if all(doc_type in submitted_docs for doc_type in required_docs):
+                kyc_record.status = KYCStatus.UNDER_REVIEW
+                kyc_record.documents_submitted_at = datetime.now(timezone.utc)
+        elif verification_result['status'] == 'failed':
+            kyc_record.status = KYCStatus.DOCUMENTS_REQUIRED
+            kyc_record.review_reason = f'Document verification failed: {verification_result.get("reason", "Unknown")}'
+        
+        kyc_record.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         
+        # Log document submission
+        audit_logger.log_compliance_event(
+            user_id=kyc_record.user_id,
+            event_type='kyc_document_submitted',
+            details={
+                'kyc_record_id': str(kyc_record.id),
+                'document_type': document_type.value,
+                'document_subtype': data['document_subtype'],
+                'verification_status': verification_result['status'],
+                'confidence': verification_result.get('confidence', 0)
+            }
+        )
+        
         return jsonify({
-            'verification_id': verification_id,
-            'document_type': document_type,
-            'status': 'document_submitted',
-            'message': 'Document submitted successfully for verification',
-            'estimated_processing_time': '1-2 business days'
-        }), 200
+            'success': True,
+            'document_id': str(document_record.id),
+            'kyc_record_id': str(kyc_record.id),
+            'document_type': document_type.value,
+            'verification_status': verification_result['status'],
+            'verification_confidence': verification_result.get('confidence', 0),
+            'kyc_status': kyc_record.status.value,
+            'extracted_data': verification_result.get('extracted_data', {}),
+            'next_steps': get_next_steps(kyc_record),
+            'submitted_at': document_record.created_at.isoformat()
+        }), 201
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Document submission error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to submit document',
+            'code': 'DOCUMENT_SUBMISSION_ERROR'
+        }), 500
 
-@kyc_aml_bp.route('/verification/<verification_id>/complete', methods=['POST'])
-def complete_verification(verification_id):
-    """Complete verification process (simulate external verification results)"""
+def get_next_steps(kyc_record):
+    """Get next steps for KYC completion"""
+    if kyc_record.status == KYCStatus.DOCUMENTS_REQUIRED:
+        required_docs = json.loads(kyc_record.required_documents)
+        submitted_docs = [doc.document_type.value for doc in kyc_record.documents if doc.verification_status == 'verified']
+        missing_docs = [doc for doc in required_docs if doc not in submitted_docs]
+        
+        if missing_docs:
+            return [f'Submit {doc.replace("_", " ")} document' for doc in missing_docs]
+    
+    elif kyc_record.status == KYCStatus.UNDER_REVIEW:
+        return ['Wait for manual review to complete']
+    
+    elif kyc_record.status == KYCStatus.MANUAL_REVIEW:
+        return ['Additional verification required - compliance team will contact you']
+    
+    return ['No further action required']
+
+@kyc_aml_bp.route('/verification/<kyc_record_id>/complete', methods=['POST'])
+@admin_required
+def complete_kyc_verification(kyc_record_id):
+    """
+    Complete KYC verification (Admin/Compliance only)
+    
+    Expected JSON payload:
+    {
+        "decision": "approve|reject|require_additional_info",
+        "risk_level": "low|medium|high|very_high",
+        "notes": "string",
+        "additional_requirements": [] (optional)
+    }
+    """
     try:
+        kyc_record = KYCRecord.query.get(kyc_record_id)
+        if not kyc_record:
+            return jsonify({
+                'error': 'KYC record not found',
+                'code': 'KYC_RECORD_NOT_FOUND'
+            }), 404
+        
+        if kyc_record.status not in [KYCStatus.UNDER_REVIEW, KYCStatus.MANUAL_REVIEW]:
+            return jsonify({
+                'error': 'KYC record is not ready for completion',
+                'code': 'INVALID_KYC_STATUS'
+            }), 400
+        
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'Request body must contain valid JSON',
+                'code': 'INVALID_JSON'
+            }), 400
         
-        kyc_record = KYCRecord.query.get(verification_id)
-        if not kyc_record:
-            return jsonify({'error': 'Verification record not found'}), 404
+        # Validate required fields
+        if 'decision' not in data:
+            return jsonify({
+                'error': 'Decision is required',
+                'code': 'DECISION_REQUIRED'
+            }), 400
         
-        if kyc_record.verification_status != 'pending':
-            return jsonify({'error': 'Verification is not in pending status'}), 400
+        decision = data['decision'].lower()
+        if decision not in ['approve', 'reject', 'require_additional_info']:
+            return jsonify({
+                'error': 'Invalid decision. Must be approve, reject, or require_additional_info',
+                'code': 'INVALID_DECISION'
+            }), 400
         
-        user = User.query.get(kyc_record.user_id)
-        
-        # Simulate verification results
-        verification_data = {
-            'document_verified': data.get('document_verified', random.choice([True, False])),
-            'biometric_verified': data.get('biometric_verified', random.choice([True, False])),
-            'watchlist_match': data.get('watchlist_match', random.random() < 0.05),  # 5% chance
-            'address_verified': data.get('address_verified', random.choice([True, False]))
-        }
-        
-        # Calculate risk score
-        user_data = {
-            'email': user.email,
-            'phone': user.phone,
-            'date_of_birth': user.date_of_birth.isoformat() if user.date_of_birth else None,
-            'address': user.address
-        }
-        
-        risk_score = calculate_risk_score(user_data, verification_data)
-        
-        # Determine verification result based on risk score and level
-        if risk_score <= 30:
-            verification_status = 'verified'
-            user_kyc_status = 'verified'
-        elif risk_score <= 60:
-            verification_status = 'verified'
-            user_kyc_status = 'verified'
-            # Could add additional monitoring
+        # Validate risk level
+        if 'risk_level' in data:
+            try:
+                risk_level = RiskLevel(data['risk_level'].lower())
+            except ValueError:
+                return jsonify({
+                    'error': f'Invalid risk level. Must be one of: {[r.value for r in RiskLevel]}',
+                    'code': 'INVALID_RISK_LEVEL'
+                }), 400
         else:
-            verification_status = 'rejected'
-            user_kyc_status = 'rejected'
+            risk_level = RiskLevel.MEDIUM  # Default
         
-        # Update KYC record
-        kyc_record.verification_status = verification_status
-        kyc_record.verification_date = datetime.utcnow()
-        kyc_record.risk_score = risk_score
-        kyc_record.notes = f"Automated verification completed. Risk score: {risk_score}"
-        kyc_record.updated_at = datetime.utcnow()
+        # Update KYC record based on decision
+        if decision == 'approve':
+            kyc_record.status = KYCStatus.APPROVED
+            kyc_record.approved_at = datetime.now(timezone.utc)
+            kyc_record.approved_by = g.current_user.id
+            
+            # Update user KYC status
+            user = kyc_record.user
+            user.kyc_status = 'verified'
+            user.kyc_level = kyc_record.verification_level.value
+            user.risk_level = risk_level.value
+            user.updated_at = datetime.now(timezone.utc)
+            
+        elif decision == 'reject':
+            kyc_record.status = KYCStatus.REJECTED
+            kyc_record.rejected_at = datetime.now(timezone.utc)
+            kyc_record.rejected_by = g.current_user.id
+            
+            # Update user KYC status
+            user = kyc_record.user
+            user.kyc_status = 'rejected'
+            user.updated_at = datetime.now(timezone.utc)
+            
+        elif decision == 'require_additional_info':
+            kyc_record.status = KYCStatus.ADDITIONAL_INFO_REQUIRED
+            kyc_record.additional_requirements = json.dumps(data.get('additional_requirements', []))
         
-        # Update user KYC status
-        user.kyc_status = user_kyc_status
-        user.updated_at = datetime.utcnow()
+        kyc_record.risk_level = risk_level
+        kyc_record.review_notes = data.get('notes', '')
+        kyc_record.reviewed_by = g.current_user.id
+        kyc_record.reviewed_at = datetime.now(timezone.utc)
+        kyc_record.updated_at = datetime.now(timezone.utc)
+        
+        # Calculate final risk score
+        kyc_record.final_risk_score = calculate_comprehensive_risk_score(kyc_record)
         
         db.session.commit()
         
+        # Log KYC completion
+        audit_logger.log_compliance_event(
+            user_id=kyc_record.user_id,
+            event_type='kyc_verification_completed',
+            details={
+                'kyc_record_id': str(kyc_record.id),
+                'decision': decision,
+                'risk_level': risk_level.value,
+                'final_risk_score': kyc_record.final_risk_score,
+                'reviewed_by': g.current_user.id
+            }
+        )
+        
+        # Send notification to user (implement notification service)
+        # notification_service.send_kyc_result_notification(kyc_record)
+        
         return jsonify({
-            'verification_id': verification_id,
-            'user_id': user.id,
-            'verification_status': verification_status,
-            'risk_score': risk_score,
-            'verification_level': kyc_record.verification_level,
-            'verification_results': verification_data,
-            'completed_at': kyc_record.verification_date.isoformat(),
-            'notes': kyc_record.notes
+            'success': True,
+            'kyc_record_id': str(kyc_record.id),
+            'user_id': str(kyc_record.user_id),
+            'decision': decision,
+            'status': kyc_record.status.value,
+            'risk_level': risk_level.value,
+            'final_risk_score': kyc_record.final_risk_score,
+            'verification_level': kyc_record.verification_level.value,
+            'completed_at': kyc_record.reviewed_at.isoformat(),
+            'notes': kyc_record.review_notes
         }), 200
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-@kyc_aml_bp.route('/verification/<verification_id>', methods=['GET'])
-def get_verification_status(verification_id):
-    """Get verification status and details"""
-    try:
-        kyc_record = KYCRecord.query.get(verification_id)
-        if not kyc_record:
-            return jsonify({'error': 'Verification record not found'}), 404
-        
+        logger.error(f"KYC completion error: {str(e)}")
         return jsonify({
-            'verification_id': kyc_record.id,
-            'user_id': kyc_record.user_id,
-            'verification_level': kyc_record.verification_level,
-            'document_type': kyc_record.document_type,
-            'verification_status': kyc_record.verification_status,
-            'verification_provider': kyc_record.verification_provider,
-            'verification_date': kyc_record.verification_date.isoformat() if kyc_record.verification_date else None,
-            'risk_score': kyc_record.risk_score,
-            'notes': kyc_record.notes,
-            'created_at': kyc_record.created_at.isoformat(),
-            'updated_at': kyc_record.updated_at.isoformat()
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+            'error': 'Failed to complete KYC verification',
+            'code': 'KYC_COMPLETION_ERROR'
+        }), 500
 
-@kyc_aml_bp.route('/user/<user_id>/verifications', methods=['GET'])
-def get_user_verifications(user_id):
-    """Get all verification records for a user"""
+def calculate_comprehensive_risk_score(kyc_record):
+    """Calculate comprehensive risk score based on all available data"""
+    risk_score = 0
+    
+    # Base risk from sanctions screening
+    sanctions_checks = SanctionsCheck.query.filter_by(kyc_record_id=kyc_record.id).all()
+    for check in sanctions_checks:
+        risk_score += check.risk_score
+    
+    # Document verification confidence
+    for document in kyc_record.documents:
+        if document.verification_confidence < 0.8:
+            risk_score += 20
+        elif document.verification_confidence < 0.9:
+            risk_score += 10
+    
+    # User profile factors
+    user = kyc_record.user
+    
+    # Age factor
+    if user.date_of_birth:
+        age = (datetime.now().date() - user.date_of_birth).days // 365
+        if age < 18:
+            risk_score += 50
+        elif age < 25:
+            risk_score += 15
+        elif age > 80:
+            risk_score += 10
+    
+    # Address verification
+    if not user.address_country:
+        risk_score += 25
+    elif user.address_country in ['US', 'CA', 'GB', 'AU', 'DE', 'FR']:  # Low-risk countries
+        risk_score -= 5
+    
+    # Verification level adjustment
+    if kyc_record.verification_level == VerificationLevel.PREMIUM:
+        risk_score -= 10
+    elif kyc_record.verification_level == VerificationLevel.BASIC:
+        risk_score += 10
+    
+    # Ensure score is between 0 and 100
+    return max(0, min(100, risk_score))
+
+@kyc_aml_bp.route('/verification/<kyc_record_id>', methods=['GET'])
+@compliance_access_required
+def get_kyc_verification_status(kyc_record_id):
+    """Get KYC verification status and details"""
     try:
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
+        kyc_record = KYCRecord.query.get(kyc_record_id)
+        if not kyc_record:
+            return jsonify({
+                'error': 'KYC record not found',
+                'code': 'KYC_RECORD_NOT_FOUND'
+            }), 404
         
-        verifications = KYCRecord.query.filter_by(user_id=user_id)\
-            .order_by(KYCRecord.created_at.desc()).all()
+        # Get documents
+        documents = []
+        for doc in kyc_record.documents:
+            documents.append({
+                'id': str(doc.id),
+                'document_type': doc.document_type.value,
+                'document_subtype': doc.document_subtype,
+                'verification_status': doc.verification_status,
+                'verification_confidence': doc.verification_confidence,
+                'submitted_at': doc.created_at.isoformat()
+            })
         
-        verification_list = []
-        for verification in verifications:
-            verification_list.append({
-                'verification_id': verification.id,
-                'verification_level': verification.verification_level,
-                'verification_status': verification.verification_status,
-                'verification_date': verification.verification_date.isoformat() if verification.verification_date else None,
-                'risk_score': verification.risk_score,
-                'created_at': verification.created_at.isoformat()
+        # Get sanctions checks
+        sanctions_checks = []
+        for check in kyc_record.sanctions_checks:
+            sanctions_checks.append({
+                'id': str(check.id),
+                'screening_result': check.screening_result,
+                'risk_score': check.risk_score,
+                'screening_date': check.created_at.isoformat()
             })
         
         return jsonify({
+            'success': True,
+            'kyc_record': {
+                'id': str(kyc_record.id),
+                'user_id': str(kyc_record.user_id),
+                'verification_level': kyc_record.verification_level.value,
+                'status': kyc_record.status.value,
+                'risk_level': kyc_record.risk_level.value if kyc_record.risk_level else None,
+                'final_risk_score': kyc_record.final_risk_score,
+                'purpose': kyc_record.purpose,
+                'verification_provider': kyc_record.verification_provider,
+                'required_documents': json.loads(kyc_record.required_documents),
+                'verification_steps': json.loads(kyc_record.verification_steps),
+                'review_notes': kyc_record.review_notes,
+                'created_at': kyc_record.created_at.isoformat(),
+                'updated_at': kyc_record.updated_at.isoformat(),
+                'approved_at': kyc_record.approved_at.isoformat() if kyc_record.approved_at else None,
+                'rejected_at': kyc_record.rejected_at.isoformat() if kyc_record.rejected_at else None
+            },
+            'documents': documents,
+            'sanctions_checks': sanctions_checks,
+            'next_steps': get_next_steps(kyc_record)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get KYC verification error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to retrieve KYC verification',
+            'code': 'GET_KYC_ERROR'
+        }), 500
+
+@kyc_aml_bp.route('/user/<user_id>/verifications', methods=['GET'])
+@compliance_access_required
+def get_user_kyc_history(user_id):
+    """Get all KYC verification records for a user"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({
+                'error': 'User not found',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 20, type=int), 100)
+        
+        # Query KYC records with pagination
+        kyc_records = KYCRecord.query.filter_by(user_id=user_id)\
+            .order_by(KYCRecord.created_at.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+        
+        verification_list = []
+        for record in kyc_records.items:
+            verification_data = {
+                'id': str(record.id),
+                'verification_level': record.verification_level.value,
+                'status': record.status.value,
+                'risk_level': record.risk_level.value if record.risk_level else None,
+                'final_risk_score': record.final_risk_score,
+                'purpose': record.purpose,
+                'created_at': record.created_at.isoformat(),
+                'approved_at': record.approved_at.isoformat() if record.approved_at else None,
+                'rejected_at': record.rejected_at.isoformat() if record.rejected_at else None
+            }
+            verification_list.append(verification_data)
+        
+        return jsonify({
+            'success': True,
             'user_id': user_id,
             'current_kyc_status': user.kyc_status,
+            'current_kyc_level': user.kyc_level,
+            'current_risk_level': user.risk_level,
             'verifications': verification_list,
-            'total_verifications': len(verification_list)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@kyc_aml_bp.route('/aml/screening', methods=['POST'])
-def aml_screening():
-    """Perform AML screening against watchlists"""
-    try:
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['user_id', 'screening_type']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
-        
-        user = User.query.get(data['user_id'])
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        screening_type = data['screening_type']
-        if screening_type not in ['sanctions', 'pep', 'adverse_media', 'comprehensive']:
-            return jsonify({'error': 'Invalid screening type'}), 400
-        
-        # Simulate AML screening results
-        screening_results = {
-            'sanctions_match': random.random() < 0.02,  # 2% chance
-            'pep_match': random.random() < 0.05,       # 5% chance
-            'adverse_media_match': random.random() < 0.03,  # 3% chance
-            'risk_level': random.choice(['low', 'medium', 'high']),
-            'confidence_score': random.randint(70, 99)
-        }
-        
-        # Determine overall result
-        any_match = any([
-            screening_results['sanctions_match'],
-            screening_results['pep_match'],
-            screening_results['adverse_media_match']
-        ])
-        
-        overall_result = 'clear' if not any_match else 'requires_review'
-        
-        return jsonify({
-            'user_id': user.id,
-            'screening_type': screening_type,
-            'overall_result': overall_result,
-            'screening_results': screening_results,
-            'screened_at': datetime.utcnow().isoformat(),
-            'next_screening_due': (datetime.utcnow() + timedelta(days=90)).isoformat()
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@kyc_aml_bp.route('/compliance/report', methods=['GET'])
-def compliance_report():
-    """Generate compliance report"""
-    try:
-        # Get date range parameters
-        days = request.args.get('days', 30, type=int)
-        start_date = datetime.utcnow() - timedelta(days=days)
-        
-        # Query verification statistics
-        total_users = User.query.count()
-        verified_users = User.query.filter_by(kyc_status='verified').count()
-        pending_users = User.query.filter_by(kyc_status='pending').count()
-        rejected_users = User.query.filter_by(kyc_status='rejected').count()
-        
-        # Recent verifications
-        recent_verifications = KYCRecord.query.filter(
-            KYCRecord.created_at >= start_date
-        ).count()
-        
-        # Risk score distribution
-        high_risk_users = KYCRecord.query.filter(
-            KYCRecord.risk_score >= 70,
-            KYCRecord.verification_status == 'verified'
-        ).count()
-        
-        return jsonify({
-            'report_period_days': days,
-            'generated_at': datetime.utcnow().isoformat(),
-            'user_statistics': {
-                'total_users': total_users,
-                'verified_users': verified_users,
-                'pending_users': pending_users,
-                'rejected_users': rejected_users,
-                'verification_rate': round((verified_users / total_users * 100), 2) if total_users > 0 else 0
-            },
-            'verification_activity': {
-                'recent_verifications': recent_verifications,
-                'high_risk_verified_users': high_risk_users
-            },
-            'compliance_metrics': {
-                'average_verification_time': '2.3 days',
-                'rejection_rate': round((rejected_users / total_users * 100), 2) if total_users > 0 else 0,
-                'manual_review_rate': '15%'
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': kyc_records.total,
+                'pages': kyc_records.pages,
+                'has_next': kyc_records.has_next,
+                'has_prev': kyc_records.has_prev
             }
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Get user KYC history error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to retrieve user KYC history',
+            'code': 'GET_KYC_HISTORY_ERROR'
+        }), 500
+
+@kyc_aml_bp.route('/aml/screening', methods=['POST'])
+@admin_required
+def perform_aml_screening():
+    """
+    Perform AML screening on a user
+    
+    Expected JSON payload:
+    {
+        "user_id": "string",
+        "screening_type": "sanctions|pep|adverse_media|all",
+        "reason": "string"
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'Request body must contain valid JSON',
+                'code': 'INVALID_JSON'
+            }), 400
+        
+        # Validate required fields
+        required_fields = ['user_id', 'screening_type']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                'error': f'Missing required fields: {", ".join(missing_fields)}',
+                'code': 'MISSING_FIELDS'
+            }), 400
+        
+        user = User.query.get(data['user_id'])
+        if not user:
+            return jsonify({
+                'error': 'User not found',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        screening_type = data['screening_type'].lower()
+        if screening_type not in ['sanctions', 'pep', 'adverse_media', 'all']:
+            return jsonify({
+                'error': 'Invalid screening type',
+                'code': 'INVALID_SCREENING_TYPE'
+            }), 400
+        
+        # Perform screening
+        screening_results = {}
+        
+        if screening_type in ['sanctions', 'all']:
+            sanctions_result = sanctions_screener.screen_individual(
+                first_name=user.first_name,
+                last_name=user.last_name,
+                date_of_birth=user.date_of_birth,
+                country=user.address_country
+            )
+            screening_results['sanctions'] = sanctions_result
+        
+        if screening_type in ['pep', 'all']:
+            pep_result = sanctions_screener.screen_pep(
+                first_name=user.first_name,
+                last_name=user.last_name,
+                country=user.address_country
+            )
+            screening_results['pep'] = pep_result
+        
+        if screening_type in ['adverse_media', 'all']:
+            media_result = sanctions_screener.screen_adverse_media(
+                first_name=user.first_name,
+                last_name=user.last_name
+            )
+            screening_results['adverse_media'] = media_result
+        
+        # Create AML record
+        aml_record = AMLRecord(
+            user_id=user.id,
+            screening_type=screening_type,
+            screening_results=json.dumps(screening_results),
+            screening_reason=data.get('reason', 'Routine AML screening'),
+            initiated_by=g.current_user.id,
+            overall_risk_score=calculate_aml_risk_score(screening_results)
+        )
+        
+        db.session.add(aml_record)
+        db.session.commit()
+        
+        # Log AML screening
+        audit_logger.log_compliance_event(
+            user_id=user.id,
+            event_type='aml_screening_performed',
+            details={
+                'aml_record_id': str(aml_record.id),
+                'screening_type': screening_type,
+                'overall_risk_score': aml_record.overall_risk_score,
+                'initiated_by': g.current_user.id
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'aml_record_id': str(aml_record.id),
+            'user_id': str(user.id),
+            'screening_type': screening_type,
+            'screening_results': screening_results,
+            'overall_risk_score': aml_record.overall_risk_score,
+            'screening_date': aml_record.created_at.isoformat()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"AML screening error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to perform AML screening',
+            'code': 'AML_SCREENING_ERROR'
+        }), 500
+
+def calculate_aml_risk_score(screening_results):
+    """Calculate overall AML risk score from screening results"""
+    risk_score = 0
+    
+    for screening_type, result in screening_results.items():
+        if result.get('status') == 'match_found':
+            if screening_type == 'sanctions':
+                risk_score += 100  # Maximum risk for sanctions match
+            elif screening_type == 'pep':
+                risk_score += 60   # High risk for PEP match
+            elif screening_type == 'adverse_media':
+                risk_score += 40   # Medium-high risk for adverse media
+        
+        # Add risk score from individual screening
+        risk_score += result.get('risk_score', 0)
+    
+    return min(100, risk_score)
+
+@kyc_aml_bp.route('/aml/suspicious-activity', methods=['POST'])
+@admin_required
+def report_suspicious_activity():
+    """
+    Report suspicious activity (SAR filing)
+    
+    Expected JSON payload:
+    {
+        "user_id": "string",
+        "activity_type": "unusual_transaction_pattern|structuring|money_laundering|other",
+        "description": "string",
+        "transaction_ids": ["string"],
+        "amount_involved": "decimal",
+        "currency": "string",
+        "priority": "low|medium|high|critical"
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'Request body must contain valid JSON',
+                'code': 'INVALID_JSON'
+            }), 400
+        
+        # Validate required fields
+        required_fields = ['user_id', 'activity_type', 'description']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                'error': f'Missing required fields: {", ".join(missing_fields)}',
+                'code': 'MISSING_FIELDS'
+            }), 400
+        
+        user = User.query.get(data['user_id'])
+        if not user:
+            return jsonify({
+                'error': 'User not found',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # Create suspicious activity record
+        suspicious_activity = SuspiciousActivity(
+            user_id=user.id,
+            activity_type=data['activity_type'],
+            description=data['description'],
+            transaction_ids=json.dumps(data.get('transaction_ids', [])),
+            amount_involved=Decimal(str(data.get('amount_involved', '0'))),
+            currency=data.get('currency', 'USD'),
+            priority=data.get('priority', 'medium'),
+            reported_by=g.current_user.id,
+            status='reported'
+        )
+        
+        db.session.add(suspicious_activity)
+        db.session.commit()
+        
+        # Log suspicious activity report
+        audit_logger.log_compliance_event(
+            user_id=user.id,
+            event_type='suspicious_activity_reported',
+            details={
+                'sar_id': str(suspicious_activity.id),
+                'activity_type': data['activity_type'],
+                'priority': data.get('priority', 'medium'),
+                'amount_involved': float(suspicious_activity.amount_involved),
+                'reported_by': g.current_user.id
+            }
+        )
+        
+        # Send alert to compliance team
+        # compliance_alert_service.send_sar_alert(suspicious_activity)
+        
+        return jsonify({
+            'success': True,
+            'sar_id': str(suspicious_activity.id),
+            'user_id': str(user.id),
+            'activity_type': data['activity_type'],
+            'status': 'reported',
+            'priority': data.get('priority', 'medium'),
+            'reported_at': suspicious_activity.created_at.isoformat(),
+            'message': 'Suspicious activity report filed successfully'
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Suspicious activity report error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to report suspicious activity',
+            'code': 'SAR_REPORT_ERROR'
+        }), 500
+
+@kyc_aml_bp.route('/compliance/dashboard', methods=['GET'])
+@admin_required
+def get_compliance_dashboard():
+    """Get compliance dashboard statistics"""
+    try:
+        # Get date ranges
+        today = datetime.now(timezone.utc).date()
+        thirty_days_ago = today - timedelta(days=30)
+        
+        # KYC statistics
+        total_kyc_records = KYCRecord.query.count()
+        pending_kyc = KYCRecord.query.filter_by(status=KYCStatus.PENDING).count()
+        approved_kyc = KYCRecord.query.filter_by(status=KYCStatus.APPROVED).count()
+        rejected_kyc = KYCRecord.query.filter_by(status=KYCStatus.REJECTED).count()
+        manual_review_kyc = KYCRecord.query.filter_by(status=KYCStatus.MANUAL_REVIEW).count()
+        
+        # Recent KYC activity
+        recent_kyc = KYCRecord.query.filter(KYCRecord.created_at >= thirty_days_ago).count()
+        
+        # AML statistics
+        total_aml_screenings = AMLRecord.query.count()
+        recent_aml_screenings = AMLRecord.query.filter(AMLRecord.created_at >= thirty_days_ago).count()
+        
+        # Suspicious activity statistics
+        total_sars = SuspiciousActivity.query.count()
+        pending_sars = SuspiciousActivity.query.filter_by(status='reported').count()
+        recent_sars = SuspiciousActivity.query.filter(SuspiciousActivity.created_at >= thirty_days_ago).count()
+        
+        # High-risk users
+        high_risk_users = User.query.filter_by(risk_level='high').count()
+        very_high_risk_users = User.query.filter_by(risk_level='very_high').count()
+        
+        return jsonify({
+            'success': True,
+            'dashboard': {
+                'kyc_statistics': {
+                    'total_records': total_kyc_records,
+                    'pending': pending_kyc,
+                    'approved': approved_kyc,
+                    'rejected': rejected_kyc,
+                    'manual_review': manual_review_kyc,
+                    'recent_submissions_30d': recent_kyc,
+                    'approval_rate': round((approved_kyc / total_kyc_records * 100), 2) if total_kyc_records > 0 else 0
+                },
+                'aml_statistics': {
+                    'total_screenings': total_aml_screenings,
+                    'recent_screenings_30d': recent_aml_screenings
+                },
+                'suspicious_activity': {
+                    'total_reports': total_sars,
+                    'pending_reports': pending_sars,
+                    'recent_reports_30d': recent_sars
+                },
+                'risk_profile': {
+                    'high_risk_users': high_risk_users,
+                    'very_high_risk_users': very_high_risk_users,
+                    'total_high_risk': high_risk_users + very_high_risk_users
+                }
+            },
+            'generated_at': datetime.now(timezone.utc).isoformat()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Compliance dashboard error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to retrieve compliance dashboard',
+            'code': 'DASHBOARD_ERROR'
+        }), 500
 

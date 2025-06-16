@@ -1,371 +1,547 @@
-# Enhanced Input Validation and Sanitization
+"""
+Advanced Input Validation and Sanitization System
+"""
+
 import re
 import html
-import bleach
+import json
+import ipaddress
 from typing import Any, Dict, List, Optional, Union
+from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
-from datetime import datetime
-import phonenumbers
 from email_validator import validate_email, EmailNotValidError
+import phonenumbers
+from phonenumbers import NumberParseException
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ValidationError(Exception):
     """Custom validation error"""
-    def __init__(self, field: str, message: str, code: str = None):
-        self.field = field
+    def __init__(self, message: str, field: str = None, code: str = None):
         self.message = message
+        self.field = field
         self.code = code
-        super().__init__(f"{field}: {message}")
+        super().__init__(message)
 
 class InputValidator:
-    """Enhanced input validation for financial industry standards"""
+    """Comprehensive input validation and sanitization"""
     
-    # Common regex patterns
-    PATTERNS = {
-        'uuid': r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
-        'card_number': r'^\d{13,19}$',
-        'cvv': r'^\d{3,4}$',
-        'routing_number': r'^\d{9}$',
-        'account_number': r'^[0-9]{8,17}$',
-        'ssn': r'^\d{3}-?\d{2}-?\d{4}$',
-        'ein': r'^\d{2}-?\d{7}$',
-        'swift_code': r'^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$',
-        'iban': r'^[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7}([A-Z0-9]?){0,16}$',
-        'currency_code': r'^[A-Z]{3}$',
-        'country_code': r'^[A-Z]{2}$',
-        'ip_address': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-        'ipv6_address': r'^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
-    }
-    
-    @staticmethod
-    def validate_string(
-        value: Any,
-        field_name: str,
-        min_length: int = 0,
-        max_length: int = 255,
-        pattern: Optional[str] = None,
-        allowed_chars: Optional[str] = None,
-        required: bool = True
-    ) -> str:
-        """Validate string input"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Field is required", "REQUIRED")
-            return ""
+    def __init__(self):
+        # Common regex patterns
+        self.patterns = {
+            'alphanumeric': re.compile(r'^[a-zA-Z0-9]+$'),
+            'alpha': re.compile(r'^[a-zA-Z]+$'),
+            'numeric': re.compile(r'^[0-9]+$'),
+            'uuid': re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.IGNORECASE),
+            'card_number': re.compile(r'^[0-9]{13,19}$'),
+            'cvv': re.compile(r'^[0-9]{3,4}$'),
+            'pin': re.compile(r'^[0-9]{4}$'),
+            'routing_number': re.compile(r'^[0-9]{9}$'),
+            'swift_code': re.compile(r'^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$'),
+            'iban': re.compile(r'^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$'),
+            'ssn': re.compile(r'^[0-9]{3}-[0-9]{2}-[0-9]{4}$'),
+            'ein': re.compile(r'^[0-9]{2}-[0-9]{7}$'),
+            'ip_address': re.compile(r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'),
+            'url': re.compile(r'^https?://(?:[-\w.])+(?:[:\d]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)?$'),
+            'base64': re.compile(r'^[A-Za-z0-9+/]*={0,2}$'),
+            'hex': re.compile(r'^[0-9a-fA-F]+$'),
+            'currency_code': re.compile(r'^[A-Z]{3}$'),
+            'country_code': re.compile(r'^[A-Z]{2}$'),
+            'postal_code_us': re.compile(r'^[0-9]{5}(-[0-9]{4})?$'),
+            'postal_code_ca': re.compile(r'^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$'),
+            'postal_code_uk': re.compile(r'^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][A-Z]{2}$')
+        }
         
+        # Dangerous patterns to detect
+        self.dangerous_patterns = [
+            re.compile(r'<script[^>]*>.*?</script>', re.IGNORECASE | re.DOTALL),
+            re.compile(r'javascript:', re.IGNORECASE),
+            re.compile(r'on\w+\s*=', re.IGNORECASE),
+            re.compile(r'<iframe[^>]*>.*?</iframe>', re.IGNORECASE | re.DOTALL),
+            re.compile(r'<object[^>]*>.*?</object>', re.IGNORECASE | re.DOTALL),
+            re.compile(r'<embed[^>]*>', re.IGNORECASE),
+            re.compile(r'<link[^>]*>', re.IGNORECASE),
+            re.compile(r'<meta[^>]*>', re.IGNORECASE),
+            re.compile(r'<style[^>]*>.*?</style>', re.IGNORECASE | re.DOTALL),
+            re.compile(r'expression\s*\(', re.IGNORECASE),
+            re.compile(r'url\s*\(', re.IGNORECASE),
+            re.compile(r'@import', re.IGNORECASE),
+            re.compile(r'vbscript:', re.IGNORECASE),
+            re.compile(r'data:', re.IGNORECASE)
+        ]
+        
+        # SQL injection patterns
+        self.sql_patterns = [
+            re.compile(r'(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)', re.IGNORECASE),
+            re.compile(r'(\b(OR|AND)\s+\d+\s*=\s*\d+)', re.IGNORECASE),
+            re.compile(r'(\b(OR|AND)\s+[\'"]?\w+[\'"]?\s*=\s*[\'"]?\w+[\'"]?)', re.IGNORECASE),
+            re.compile(r'(--|#|/\*|\*/)', re.IGNORECASE),
+            re.compile(r'(\bUNION\b.*\bSELECT\b)', re.IGNORECASE),
+            re.compile(r'(\b(EXEC|EXECUTE)\b)', re.IGNORECASE)
+        ]
+    
+    def sanitize_string(self, value: str, max_length: int = None, allow_html: bool = False) -> str:
+        """Sanitize string input"""
         if not isinstance(value, str):
-            value = str(value)
+            raise ValidationError("Value must be a string", code="INVALID_TYPE")
         
-        # Sanitize HTML
-        value = html.escape(value)
+        # Remove null bytes
+        value = value.replace('\x00', '')
+        
+        # Trim whitespace
+        value = value.strip()
         
         # Check length
-        if len(value) < min_length:
-            raise ValidationError(
-                field_name,
-                f"Must be at least {min_length} characters long",
-                "MIN_LENGTH"
-            )
+        if max_length and len(value) > max_length:
+            raise ValidationError(f"String too long (max {max_length} characters)", code="STRING_TOO_LONG")
         
-        if len(value) > max_length:
-            raise ValidationError(
-                field_name,
-                f"Must be no more than {max_length} characters long",
-                "MAX_LENGTH"
-            )
+        # HTML escape if not allowing HTML
+        if not allow_html:
+            value = html.escape(value)
         
-        # Check pattern
-        if pattern and not re.match(pattern, value):
-            raise ValidationError(
-                field_name,
-                "Invalid format",
-                "INVALID_FORMAT"
-            )
+        # Check for dangerous patterns
+        if not allow_html:
+            for pattern in self.dangerous_patterns:
+                if pattern.search(value):
+                    raise ValidationError("Potentially dangerous content detected", code="DANGEROUS_CONTENT")
         
-        # Check allowed characters
-        if allowed_chars and not all(c in allowed_chars for c in value):
-            raise ValidationError(
-                field_name,
-                "Contains invalid characters",
-                "INVALID_CHARS"
-            )
+        # Check for SQL injection patterns
+        for pattern in self.sql_patterns:
+            if pattern.search(value):
+                raise ValidationError("Potentially malicious SQL content detected", code="SQL_INJECTION")
         
         return value
     
-    @staticmethod
-    def validate_email(value: Any, field_name: str, required: bool = True) -> str:
-        """Validate email address"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Email is required", "REQUIRED")
-            return ""
+    def validate_email(self, email: str) -> str:
+        """Validate and normalize email address"""
+        if not email:
+            raise ValidationError("Email is required", field="email", code="EMAIL_REQUIRED")
+        
+        email = email.strip().lower()
         
         try:
             # Use email-validator library for comprehensive validation
-            validated_email = validate_email(value)
-            return validated_email.email
+            valid = validate_email(email)
+            return valid.email
         except EmailNotValidError as e:
-            raise ValidationError(field_name, str(e), "INVALID_EMAIL")
+            raise ValidationError(f"Invalid email format: {str(e)}", field="email", code="INVALID_EMAIL")
     
-    @staticmethod
-    def validate_phone(value: Any, field_name: str, required: bool = True) -> str:
-        """Validate phone number"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Phone number is required", "REQUIRED")
-            return ""
+    def validate_phone(self, phone: str, country_code: str = None) -> str:
+        """Validate and format phone number"""
+        if not phone:
+            raise ValidationError("Phone number is required", field="phone", code="PHONE_REQUIRED")
         
         try:
-            # Parse and validate phone number
-            parsed_number = phonenumbers.parse(value, None)
+            # Parse phone number
+            parsed_number = phonenumbers.parse(phone, country_code)
+            
+            # Validate number
             if not phonenumbers.is_valid_number(parsed_number):
-                raise ValidationError(field_name, "Invalid phone number", "INVALID_PHONE")
+                raise ValidationError("Invalid phone number", field="phone", code="INVALID_PHONE")
             
-            # Return in international format
+            # Format in international format
             return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
-        except phonenumbers.NumberParseException:
-            raise ValidationError(field_name, "Invalid phone number format", "INVALID_PHONE_FORMAT")
+        except NumberParseException as e:
+            raise ValidationError(f"Invalid phone number format: {str(e)}", field="phone", code="INVALID_PHONE_FORMAT")
     
-    @staticmethod
-    def validate_decimal(
-        value: Any,
-        field_name: str,
-        min_value: Optional[Decimal] = None,
-        max_value: Optional[Decimal] = None,
-        decimal_places: int = 2,
-        required: bool = True
-    ) -> Decimal:
-        """Validate decimal/monetary value"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Value is required", "REQUIRED")
-            return Decimal('0.00')
+    def validate_uuid(self, uuid_str: str) -> str:
+        """Validate UUID format"""
+        if not uuid_str:
+            raise ValidationError("UUID is required", code="UUID_REQUIRED")
         
-        try:
-            if isinstance(value, str):
-                # Remove common formatting characters
-                value = value.replace(',', '').replace('$', '').strip()
-            
-            decimal_value = Decimal(str(value))
-            
-            # Check decimal places
-            if decimal_value.as_tuple().exponent < -decimal_places:
-                raise ValidationError(
-                    field_name,
-                    f"Cannot have more than {decimal_places} decimal places",
-                    "INVALID_PRECISION"
-                )
-            
-            # Check range
-            if min_value is not None and decimal_value < min_value:
-                raise ValidationError(
-                    field_name,
-                    f"Must be at least {min_value}",
-                    "MIN_VALUE"
-                )
-            
-            if max_value is not None and decimal_value > max_value:
-                raise ValidationError(
-                    field_name,
-                    f"Must be no more than {max_value}",
-                    "MAX_VALUE"
-                )
-            
-            return decimal_value
-            
-        except (InvalidOperation, ValueError):
-            raise ValidationError(field_name, "Invalid decimal value", "INVALID_DECIMAL")
+        uuid_str = uuid_str.strip().lower()
+        
+        if not self.patterns['uuid'].match(uuid_str):
+            raise ValidationError("Invalid UUID format", code="INVALID_UUID")
+        
+        return uuid_str
     
-    @staticmethod
-    def validate_integer(
-        value: Any,
-        field_name: str,
-        min_value: Optional[int] = None,
-        max_value: Optional[int] = None,
-        required: bool = True
-    ) -> int:
-        """Validate integer value"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Value is required", "REQUIRED")
-            return 0
-        
-        try:
-            int_value = int(value)
-            
-            if min_value is not None and int_value < min_value:
-                raise ValidationError(
-                    field_name,
-                    f"Must be at least {min_value}",
-                    "MIN_VALUE"
-                )
-            
-            if max_value is not None and int_value > max_value:
-                raise ValidationError(
-                    field_name,
-                    f"Must be no more than {max_value}",
-                    "MAX_VALUE"
-                )
-            
-            return int_value
-            
-        except (ValueError, TypeError):
-            raise ValidationError(field_name, "Invalid integer value", "INVALID_INTEGER")
-    
-    @staticmethod
-    def validate_date(value: Any, field_name: str, required: bool = True) -> datetime:
-        """Validate date value"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Date is required", "REQUIRED")
-            return None
-        
-        if isinstance(value, datetime):
-            return value
-        
-        # Try to parse string date
-        date_formats = [
-            '%Y-%m-%d',
-            '%Y-%m-%d %H:%M:%S',
-            '%Y-%m-%dT%H:%M:%S',
-            '%Y-%m-%dT%H:%M:%SZ',
-            '%m/%d/%Y',
-            '%d/%m/%Y'
-        ]
-        
-        for fmt in date_formats:
-            try:
-                return datetime.strptime(str(value), fmt)
-            except ValueError:
-                continue
-        
-        raise ValidationError(field_name, "Invalid date format", "INVALID_DATE")
-    
-    @staticmethod
-    def validate_card_number(value: Any, field_name: str, required: bool = True) -> str:
-        """Validate credit card number using Luhn algorithm"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Card number is required", "REQUIRED")
-            return ""
+    def validate_card_number(self, card_number: str) -> str:
+        """Validate credit card number"""
+        if not card_number:
+            raise ValidationError("Card number is required", field="card_number", code="CARD_NUMBER_REQUIRED")
         
         # Remove spaces and dashes
-        card_number = re.sub(r'[\s-]', '', str(value))
+        card_number = re.sub(r'[\s-]', '', card_number)
         
         # Check format
-        if not re.match(InputValidator.PATTERNS['card_number'], card_number):
-            raise ValidationError(field_name, "Invalid card number format", "INVALID_FORMAT")
+        if not self.patterns['card_number'].match(card_number):
+            raise ValidationError("Invalid card number format", field="card_number", code="INVALID_CARD_NUMBER")
         
-        # Luhn algorithm validation
-        def luhn_check(card_num):
-            def digits_of(n):
-                return [int(d) for d in str(n)]
-            
-            digits = digits_of(card_num)
-            odd_digits = digits[-1::-2]
-            even_digits = digits[-2::-2]
-            checksum = sum(odd_digits)
-            for d in even_digits:
-                checksum += sum(digits_of(d * 2))
-            return checksum % 10 == 0
-        
-        if not luhn_check(card_number):
-            raise ValidationError(field_name, "Invalid card number", "INVALID_CARD")
+        # Validate using Luhn algorithm
+        if not self._validate_luhn(card_number):
+            raise ValidationError("Invalid card number (failed Luhn check)", field="card_number", code="INVALID_CARD_LUHN")
         
         return card_number
     
-    @staticmethod
-    def validate_currency_code(value: Any, field_name: str, required: bool = True) -> str:
+    def _validate_luhn(self, card_number: str) -> bool:
+        """Validate card number using Luhn algorithm"""
+        digits = [int(d) for d in card_number]
+        
+        # Double every second digit from right
+        for i in range(len(digits) - 2, -1, -2):
+            digits[i] *= 2
+            if digits[i] > 9:
+                digits[i] -= 9
+        
+        return sum(digits) % 10 == 0
+    
+    def validate_cvv(self, cvv: str) -> str:
+        """Validate CVV"""
+        if not cvv:
+            raise ValidationError("CVV is required", field="cvv", code="CVV_REQUIRED")
+        
+        cvv = cvv.strip()
+        
+        if not self.patterns['cvv'].match(cvv):
+            raise ValidationError("Invalid CVV format", field="cvv", code="INVALID_CVV")
+        
+        return cvv
+    
+    def validate_pin(self, pin: str) -> str:
+        """Validate PIN"""
+        if not pin:
+            raise ValidationError("PIN is required", field="pin", code="PIN_REQUIRED")
+        
+        pin = pin.strip()
+        
+        if not self.patterns['pin'].match(pin):
+            raise ValidationError("PIN must be exactly 4 digits", field="pin", code="INVALID_PIN")
+        
+        # Check for weak PINs
+        if self._is_weak_pin(pin):
+            raise ValidationError("PIN is too weak", field="pin", code="WEAK_PIN")
+        
+        return pin
+    
+    def _is_weak_pin(self, pin: str) -> bool:
+        """Check if PIN is weak"""
+        weak_pins = [
+            '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999',
+            '1234', '4321', '1122', '2211', '1212', '2121', '0123', '3210'
+        ]
+        return pin in weak_pins
+    
+    def validate_amount(self, amount: Union[str, int, float, Decimal], min_amount: Decimal = None, 
+                       max_amount: Decimal = None, currency: str = "USD") -> Decimal:
+        """Validate monetary amount"""
+        if amount is None:
+            raise ValidationError("Amount is required", field="amount", code="AMOUNT_REQUIRED")
+        
+        try:
+            # Convert to Decimal for precise monetary calculations
+            if isinstance(amount, str):
+                amount = amount.strip()
+                # Remove currency symbols
+                amount = re.sub(r'[^\d.-]', '', amount)
+            
+            decimal_amount = Decimal(str(amount))
+        except (InvalidOperation, ValueError):
+            raise ValidationError("Invalid amount format", field="amount", code="INVALID_AMOUNT")
+        
+        # Check for negative amounts
+        if decimal_amount < 0:
+            raise ValidationError("Amount cannot be negative", field="amount", code="NEGATIVE_AMOUNT")
+        
+        # Check precision (max 2 decimal places for most currencies)
+        if decimal_amount.as_tuple().exponent < -2:
+            raise ValidationError("Amount has too many decimal places", field="amount", code="INVALID_PRECISION")
+        
+        # Check minimum amount
+        if min_amount is not None and decimal_amount < min_amount:
+            raise ValidationError(f"Amount must be at least {min_amount}", field="amount", code="AMOUNT_TOO_LOW")
+        
+        # Check maximum amount
+        if max_amount is not None and decimal_amount > max_amount:
+            raise ValidationError(f"Amount cannot exceed {max_amount}", field="amount", code="AMOUNT_TOO_HIGH")
+        
+        return decimal_amount
+    
+    def validate_currency_code(self, currency: str) -> str:
         """Validate ISO 4217 currency code"""
-        if value is None or value == "":
-            if required:
-                raise ValidationError(field_name, "Currency code is required", "REQUIRED")
-            return ""
+        if not currency:
+            raise ValidationError("Currency code is required", field="currency", code="CURRENCY_REQUIRED")
         
-        currency_code = str(value).upper()
+        currency = currency.strip().upper()
         
-        if not re.match(InputValidator.PATTERNS['currency_code'], currency_code):
-            raise ValidationError(field_name, "Invalid currency code format", "INVALID_FORMAT")
+        if not self.patterns['currency_code'].match(currency):
+            raise ValidationError("Invalid currency code format", field="currency", code="INVALID_CURRENCY")
         
-        # List of common currency codes (in production, use a complete list)
+        # List of common currency codes
         valid_currencies = {
-            'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'SEK', 'NZD',
+            'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD',
             'MXN', 'SGD', 'HKD', 'NOK', 'TRY', 'ZAR', 'BRL', 'INR', 'KRW', 'PLN'
         }
         
-        if currency_code not in valid_currencies:
-            raise ValidationError(field_name, "Unsupported currency code", "UNSUPPORTED_CURRENCY")
+        if currency not in valid_currencies:
+            raise ValidationError(f"Unsupported currency code: {currency}", field="currency", code="UNSUPPORTED_CURRENCY")
         
-        return currency_code
+        return currency
     
-    @staticmethod
-    def sanitize_html(value: str, allowed_tags: List[str] = None) -> str:
-        """Sanitize HTML content"""
-        if allowed_tags is None:
-            allowed_tags = []  # No HTML tags allowed by default
+    def validate_country_code(self, country: str) -> str:
+        """Validate ISO 3166-1 alpha-2 country code"""
+        if not country:
+            raise ValidationError("Country code is required", field="country", code="COUNTRY_REQUIRED")
         
-        return bleach.clean(value, tags=allowed_tags, strip=True)
+        country = country.strip().upper()
+        
+        if not self.patterns['country_code'].match(country):
+            raise ValidationError("Invalid country code format", field="country", code="INVALID_COUNTRY")
+        
+        # List of common country codes
+        valid_countries = {
+            'US', 'CA', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK',
+            'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'SK', 'SI', 'EE', 'LV', 'LT', 'LU', 'MT',
+            'CY', 'BG', 'RO', 'HR', 'AU', 'NZ', 'JP', 'KR', 'SG', 'HK', 'IN', 'CN', 'BR', 'MX',
+            'AR', 'CL', 'CO', 'PE', 'ZA', 'NG', 'EG', 'MA', 'KE', 'GH', 'TN', 'AE', 'SA', 'IL',
+            'TR', 'RU', 'UA', 'BY', 'KZ', 'UZ', 'TH', 'VN', 'MY', 'ID', 'PH', 'TW', 'BD', 'PK'
+        }
+        
+        if country not in valid_countries:
+            raise ValidationError(f"Unsupported country code: {country}", field="country", code="UNSUPPORTED_COUNTRY")
+        
+        return country
     
-    @staticmethod
-    def validate_json_schema(data: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate data against a JSON schema"""
-        validated_data = {}
+    def validate_date(self, date_str: str, date_format: str = "%Y-%m-%d") -> date:
+        """Validate date string"""
+        if not date_str:
+            raise ValidationError("Date is required", field="date", code="DATE_REQUIRED")
+        
+        try:
+            parsed_date = datetime.strptime(date_str.strip(), date_format).date()
+            return parsed_date
+        except ValueError as e:
+            raise ValidationError(f"Invalid date format: {str(e)}", field="date", code="INVALID_DATE")
+    
+    def validate_datetime(self, datetime_str: str, datetime_format: str = "%Y-%m-%d %H:%M:%S") -> datetime:
+        """Validate datetime string"""
+        if not datetime_str:
+            raise ValidationError("Datetime is required", field="datetime", code="DATETIME_REQUIRED")
+        
+        try:
+            parsed_datetime = datetime.strptime(datetime_str.strip(), datetime_format)
+            return parsed_datetime
+        except ValueError as e:
+            raise ValidationError(f"Invalid datetime format: {str(e)}", field="datetime", code="INVALID_DATETIME")
+    
+    def validate_ip_address(self, ip: str) -> str:
+        """Validate IP address"""
+        if not ip:
+            raise ValidationError("IP address is required", field="ip", code="IP_REQUIRED")
+        
+        ip = ip.strip()
+        
+        try:
+            # Validate using ipaddress module
+            ip_obj = ipaddress.ip_address(ip)
+            return str(ip_obj)
+        except ValueError:
+            raise ValidationError("Invalid IP address format", field="ip", code="INVALID_IP")
+    
+    def validate_url(self, url: str, allowed_schemes: List[str] = None) -> str:
+        """Validate URL"""
+        if not url:
+            raise ValidationError("URL is required", field="url", code="URL_REQUIRED")
+        
+        url = url.strip()
+        
+        if not self.patterns['url'].match(url):
+            raise ValidationError("Invalid URL format", field="url", code="INVALID_URL")
+        
+        # Check allowed schemes
+        if allowed_schemes:
+            scheme = url.split('://')[0].lower()
+            if scheme not in allowed_schemes:
+                raise ValidationError(f"URL scheme not allowed: {scheme}", field="url", code="INVALID_URL_SCHEME")
+        
+        return url
+    
+    def validate_json(self, json_str: str) -> dict:
+        """Validate JSON string"""
+        if not json_str:
+            raise ValidationError("JSON is required", field="json", code="JSON_REQUIRED")
+        
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise ValidationError(f"Invalid JSON format: {str(e)}", field="json", code="INVALID_JSON")
+    
+    def validate_base64(self, base64_str: str) -> str:
+        """Validate base64 string"""
+        if not base64_str:
+            raise ValidationError("Base64 string is required", field="base64", code="BASE64_REQUIRED")
+        
+        base64_str = base64_str.strip()
+        
+        if not self.patterns['base64'].match(base64_str):
+            raise ValidationError("Invalid base64 format", field="base64", code="INVALID_BASE64")
+        
+        try:
+            import base64
+            base64.b64decode(base64_str, validate=True)
+            return base64_str
+        except Exception:
+            raise ValidationError("Invalid base64 encoding", field="base64", code="INVALID_BASE64_ENCODING")
+    
+    def validate_activation_code(self, code: str) -> bool:
+        """Validate activation code format"""
+        if not code:
+            return False
+        
+        code = code.strip().upper()
+        
+        # Activation codes should be 8-12 alphanumeric characters
+        if len(code) < 8 or len(code) > 12:
+            return False
+        
+        return self.patterns['alphanumeric'].match(code) is not None
+    
+    def validate_routing_number(self, routing_number: str) -> str:
+        """Validate US bank routing number"""
+        if not routing_number:
+            raise ValidationError("Routing number is required", field="routing_number", code="ROUTING_NUMBER_REQUIRED")
+        
+        routing_number = routing_number.strip()
+        
+        if not self.patterns['routing_number'].match(routing_number):
+            raise ValidationError("Invalid routing number format", field="routing_number", code="INVALID_ROUTING_NUMBER")
+        
+        # Validate routing number checksum
+        if not self._validate_routing_checksum(routing_number):
+            raise ValidationError("Invalid routing number checksum", field="routing_number", code="INVALID_ROUTING_CHECKSUM")
+        
+        return routing_number
+    
+    def _validate_routing_checksum(self, routing_number: str) -> bool:
+        """Validate routing number checksum"""
+        weights = [3, 7, 1, 3, 7, 1, 3, 7, 1]
+        total = sum(int(digit) * weight for digit, weight in zip(routing_number, weights))
+        return total % 10 == 0
+    
+    def validate_swift_code(self, swift_code: str) -> str:
+        """Validate SWIFT/BIC code"""
+        if not swift_code:
+            raise ValidationError("SWIFT code is required", field="swift_code", code="SWIFT_CODE_REQUIRED")
+        
+        swift_code = swift_code.strip().upper()
+        
+        if not self.patterns['swift_code'].match(swift_code):
+            raise ValidationError("Invalid SWIFT code format", field="swift_code", code="INVALID_SWIFT_CODE")
+        
+        return swift_code
+    
+    def validate_iban(self, iban: str) -> str:
+        """Validate IBAN"""
+        if not iban:
+            raise ValidationError("IBAN is required", field="iban", code="IBAN_REQUIRED")
+        
+        iban = iban.strip().upper().replace(' ', '')
+        
+        if not self.patterns['iban'].match(iban):
+            raise ValidationError("Invalid IBAN format", field="iban", code="INVALID_IBAN")
+        
+        # Validate IBAN checksum
+        if not self._validate_iban_checksum(iban):
+            raise ValidationError("Invalid IBAN checksum", field="iban", code="INVALID_IBAN_CHECKSUM")
+        
+        return iban
+    
+    def _validate_iban_checksum(self, iban: str) -> bool:
+        """Validate IBAN checksum using mod-97 algorithm"""
+        # Move first 4 characters to end
+        rearranged = iban[4:] + iban[:4]
+        
+        # Replace letters with numbers (A=10, B=11, ..., Z=35)
+        numeric_string = ''
+        for char in rearranged:
+            if char.isalpha():
+                numeric_string += str(ord(char) - ord('A') + 10)
+            else:
+                numeric_string += char
+        
+        # Calculate mod 97
+        return int(numeric_string) % 97 == 1
+    
+    def sanitize_filename(self, filename: str) -> str:
+        """Sanitize filename for safe storage"""
+        if not filename:
+            raise ValidationError("Filename is required", field="filename", code="FILENAME_REQUIRED")
+        
+        # Remove path separators and dangerous characters
+        filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', filename)
+        
+        # Remove leading/trailing dots and spaces
+        filename = filename.strip('. ')
+        
+        # Limit length
+        if len(filename) > 255:
+            name, ext = os.path.splitext(filename)
+            filename = name[:255-len(ext)] + ext
+        
+        if not filename:
+            raise ValidationError("Invalid filename", field="filename", code="INVALID_FILENAME")
+        
+        return filename
+    
+    def validate_password_complexity(self, password: str) -> Dict[str, Any]:
+        """Validate password complexity"""
+        if not password:
+            raise ValidationError("Password is required", field="password", code="PASSWORD_REQUIRED")
+        
         errors = []
+        score = 0
         
-        for field_name, field_config in schema.items():
-            field_type = field_config.get('type', 'string')
-            required = field_config.get('required', False)
-            value = data.get(field_name)
-            
-            try:
-                if field_type == 'string':
-                    validated_data[field_name] = InputValidator.validate_string(
-                        value, field_name,
-                        min_length=field_config.get('min_length', 0),
-                        max_length=field_config.get('max_length', 255),
-                        pattern=field_config.get('pattern'),
-                        required=required
-                    )
-                elif field_type == 'email':
-                    validated_data[field_name] = InputValidator.validate_email(
-                        value, field_name, required
-                    )
-                elif field_type == 'phone':
-                    validated_data[field_name] = InputValidator.validate_phone(
-                        value, field_name, required
-                    )
-                elif field_type == 'decimal':
-                    validated_data[field_name] = InputValidator.validate_decimal(
-                        value, field_name,
-                        min_value=field_config.get('min_value'),
-                        max_value=field_config.get('max_value'),
-                        decimal_places=field_config.get('decimal_places', 2),
-                        required=required
-                    )
-                elif field_type == 'integer':
-                    validated_data[field_name] = InputValidator.validate_integer(
-                        value, field_name,
-                        min_value=field_config.get('min_value'),
-                        max_value=field_config.get('max_value'),
-                        required=required
-                    )
-                elif field_type == 'date':
-                    validated_data[field_name] = InputValidator.validate_date(
-                        value, field_name, required
-                    )
-                elif field_type == 'card_number':
-                    validated_data[field_name] = InputValidator.validate_card_number(
-                        value, field_name, required
-                    )
-                elif field_type == 'currency':
-                    validated_data[field_name] = InputValidator.validate_currency_code(
-                        value, field_name, required
-                    )
-                
-            except ValidationError as e:
-                errors.append(e)
+        # Length check
+        if len(password) < 8:
+            errors.append("Password must be at least 8 characters long")
+        elif len(password) >= 12:
+            score += 2
+        else:
+            score += 1
         
-        if errors:
-            raise ValidationError("validation_failed", f"Validation failed: {[str(e) for e in errors]}")
+        # Character variety checks
+        if re.search(r'[a-z]', password):
+            score += 1
+        else:
+            errors.append("Password must contain at least one lowercase letter")
         
-        return validated_data
+        if re.search(r'[A-Z]', password):
+            score += 1
+        else:
+            errors.append("Password must contain at least one uppercase letter")
+        
+        if re.search(r'[0-9]', password):
+            score += 1
+        else:
+            errors.append("Password must contain at least one digit")
+        
+        if re.search(r'[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]', password):
+            score += 2
+        else:
+            errors.append("Password must contain at least one special character")
+        
+        # Common password check
+        common_passwords = ['password', '123456', 'qwerty', 'abc123', 'password123']
+        if password.lower() in common_passwords:
+            errors.append("Password is too common")
+            score = 0
+        
+        # Calculate strength
+        if score >= 6:
+            strength = "strong"
+        elif score >= 4:
+            strength = "medium"
+        else:
+            strength = "weak"
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'strength': strength,
+            'score': score
+        }
+
+# Global validator instance
+input_validator = InputValidator()
 
