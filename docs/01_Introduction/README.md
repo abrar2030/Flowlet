@@ -47,6 +47,6 @@ Security is a paramount concern for Flowlet. The platform incorporates measures 
 
 ## Getting Started
 
-To get started with Flowlet, refer to the `setup.md` documentation for instructions on setting up the development environment and running the application.
+To get started with Flowlet, refer to the `06_Developer_Guides/Setup_Guide.md` documentation for instructions on setting up the development environment and running the application.
 
 
