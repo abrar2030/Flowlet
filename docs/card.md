@@ -493,29 +493,29 @@ GET /api/v1/card/card_xyz/transactions?page=1&per_page=10
 }
 ```
 
-### 11. Get All Cards for a Specific Wallet
+### 11. Get All Cards for a Specific User
 
-`GET /api/v1/card/wallet/{wallet_id}`
+`GET /api/v1/card/user/{user_id}`
 
-Retrieves a list of all cards associated with a given wallet ID.
+Retrieves a list of all cards associated with a given user ID.
 
 #### Path Parameters
 
-| Parameter   | Type     | Description                |
-| :---------- | :------- | :------------------------- |
-| `wallet_id` | `string` | The unique ID of the wallet. |
+| Parameter | Type     | Description                            |
+| :-------- | :------- | :------------------------------------- |
+| `user_id` | `string` | The unique identifier of the user.     |
 
 #### Example Request
 
 ```
-GET /api/v1/card/wallet/wallet_abc
+GET /api/v1/card/user/user_123
 ```
 
 #### Example Success Response (200 OK)
 
 ```json
 {
-    "wallet_id": "wallet_abc",
+    "user_id": "user_123",
     "cards": [
         {
             "card_id": "card_xyz",
@@ -552,7 +552,7 @@ GET /api/v1/card/wallet/wallet_abc
 
 ```json
 {
-    "error": "Wallet not found"
+    "error": "User not found"
 }
 ```
 

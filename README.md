@@ -1484,3 +1484,87 @@ By contributing to the Flowlet project, contributors agree that their contributi
 
 9. Fintech chatbots: The benefits and uses of AI agents in finance
    https://www.zendesk.com/blog/fintech-chatbot/
+
+
+
+```
+GET    /v1/wallets/user/{user_id} # Get all wallets for a specific user
+POST   /v1/wallets/{id}/freeze    # Freeze/suspend a wallet
+POST   /v1/wallets/{id}/unfreeze  # Unfreeze/activate a wallet
+POST   /v1/wallets/{id}/transfer  # Transfer funds between wallets
+```
+
+
+
+
+#### Payments API
+
+The Payments API handles the movement of funds and various transaction types:
+
+```
+POST   /v1/payments/deposit                 # Deposit funds into a wallet
+POST   /v1/payments/withdraw                # Withdraw funds from a wallet
+POST   /v1/payments/bank-transfer           # Process bank transfer (ACH, SEPA, Wire)
+POST   /v1/payments/card-payment            # Process card payment
+GET    /v1/payments/transaction/{id}        # Get transaction details
+PUT    /v1/payments/transaction/{id}/status # Update transaction status
+GET    /v1/payments/exchange-rate/{from_currency}/{to_currency} # Get exchange rate
+POST   /v1/payments/currency-conversion     # Convert amount between currencies
+```
+
+
+
+
+## Adherence to Financial Industry Standards
+
+Flowlet is committed to upholding the highest standards of the financial industry, ensuring robust security, data integrity, compliance, and auditability across all its services. Our Wallet and Payment APIs are meticulously designed and implemented with these principles at their core.
+
+### Wallet API
+
+The Wallet API incorporates comprehensive measures to safeguard digital wallets and their associated transactions:
+
+-   **Enhanced Security**: All sensitive wallet data and transaction details are protected through industry-standard encryption protocols, both at rest and in transit. Access is strictly controlled via Role-Based Access Control (RBAC) and secure token-based authentication, with rigorous input validation to prevent vulnerabilities.
+-   **Guaranteed Data Integrity**: Financial operations are ACID-compliant, ensuring that all transactions are processed reliably. The system employs double-entry accounting principles for every financial movement, providing an immutable and verifiable audit trail. Monetary values are handled with `Decimal` types to guarantee precision and prevent inaccuracies.
+-   **Regulatory Compliance**: The API supports compliance with key financial regulations such as KYC, AML, GDPR, and PSD2. Wallet activities are continuously monitored for suspicious patterns, integrating with fraud detection systems for real-time analysis and alerting.
+-   **Comprehensive Auditability**: All wallet-related events are recorded as immutable entries in a detailed audit log, capturing actions, timestamps, and changes. Unique reference IDs are assigned to all transactions for easy traceability and reconciliation.
+
+### Payment API
+
+The Payment API is engineered to handle financial transactions with the utmost security and reliability, meeting stringent industry requirements:
+
+-   **Secure Transaction Processing**: Payments are processed over secure, encrypted channels. Sensitive card details are tokenized, minimizing data exposure and reducing PCI DSS compliance scope. Advanced AI/ML-driven fraud detection mechanisms continuously analyze transaction patterns to identify and prevent fraudulent activities.
+-   **Atomic Data Integrity**: All payment operations are atomic, ensuring that transactions are either fully completed or entirely rolled back, preventing partial updates. Double-entry accounting is rigorously applied to all payment transactions, creating balanced and immutable ledger entries. Monetary amounts are exclusively processed using `Decimal` data types for exact precision.
+-   **Regulatory Compliance**: The API facilitates compliance with AML and CFT regulations through robust data generation for regulatory reporting and real-time sanctions screening against global watchlists. Transaction flows adhere to specific rules of various payment schemes (e.g., ACH, SEPA, SWIFT) to ensure interoperability and compliance.
+-   **Detailed Auditability**: Every payment transaction is accompanied by comprehensive, immutable audit trails, recording all critical information and status changes. Unique reference IDs enable seamless tracking and reconciliation across internal and external systems. Precise timestamping of all events provides a clear chronological record for forensic analysis and regulatory audits.
+
+These integrated measures ensure that Flowlet's Wallet and Payment APIs provide a secure, reliable, and fully compliant foundation for embedded finance solutions.
+
+
+
+
+### Authentication API
+
+Detailed documentation for user authentication and authorization:
+- [Authentication API Reference](docs/auth.md)
+
+### Banking Integrations API
+
+Comprehensive guide to integrating with various banking systems for account and transaction management:
+- [Banking Integrations API Reference](docs/banking_integrations.md)
+
+### Ledger API
+
+Detailed documentation for the double-entry ledger system and financial reporting:
+- [Ledger API Reference](docs/ledger.md)
+
+### AI Service API
+
+Documentation for AI-powered features including fraud detection and the support chatbot:
+- [AI Service API Reference](docs/ai_service.md)
+
+### Security API
+
+Documentation for API key management, audit logging, data tokenization, and security scanning:
+- [Security API Reference](docs/security.md)
+
+

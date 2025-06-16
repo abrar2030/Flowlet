@@ -1,11 +1,19 @@
-
 # AI Service API Documentation
 
-The AI Service API provides functionalities for fraud detection and a chatbot for assistance. It leverages AI algorithms to analyze transactions for suspicious activities and offers automated responses to common queries.
+The AI Service API provides advanced artificial intelligence capabilities to enhance various aspects of the Flowlet platform, primarily focusing on fraud detection and providing intelligent support through a chatbot. These AI-driven features are crucial for maintaining the security and efficiency of financial operations in a Fintech environment.
 
 ## Base URL
 
 `/api/v1/ai`
+
+## Financial Industry Standards and Considerations
+
+- **Fraud Detection and Prevention**: The AI fraud detection module employs machine learning algorithms to analyze transaction patterns and identify suspicious activities. This is a critical component for financial institutions to mitigate financial crime, protect customer assets, and comply with anti-fraud regulations.
+- **Risk Scoring and Actionable Insights**: Transactions are assigned a risk score and categorized into risk levels (e.g., very low, low, medium, high). Based on these scores, recommended actions are provided, enabling rapid response to potential threats. This proactive approach aligns with risk management best practices in the financial sector.
+- **Auditability of AI Decisions**: While AI models make predictions, the system ensures that the factors contributing to a fraud alert are logged and auditable. This transparency is vital for regulatory compliance, allowing human reviewers to understand and validate AI-driven decisions.
+- **Continuous Learning and Adaptation**: In a production environment, the AI models would continuously learn from new data and feedback (e.g., resolved alerts, false positives) to improve their accuracy and adapt to evolving fraud techniques. This iterative improvement is key to maintaining effective fraud prevention.
+- **Intelligent Support and Efficiency**: The AI Support Chatbot provides instant, accurate assistance, reducing the load on human support teams and improving user experience. For developers, it offers quick access to API documentation and troubleshooting, accelerating integration and development cycles.
+- **Data Privacy in AI**: When processing data for AI models, strict adherence to data privacy regulations (e.g., GDPR, CCPA) is maintained. Sensitive data is handled securely, and anonymization or pseudonymization techniques are applied where appropriate.
 
 ## Endpoints
 
@@ -13,215 +21,161 @@ The AI Service API provides functionalities for fraud detection and a chatbot fo
 
 `POST /api/v1/ai/fraud-detection/analyze`
 
-Analyzes a given transaction for potential fraud using AI algorithms. It considers various factors like transaction amount, velocity, geographic location, and merchant category.
+Analyzes a given transaction for potential fraud using AI algorithms. The analysis considers various factors such as transaction amount, velocity, geographic location, time, merchant category, and device/IP information to determine a risk score and recommended action.
 
-#### Request Body
+**Permissions**: Requires appropriate authentication and authorization (e.g., `internal_service_token` or `fraud_analyst` role).
 
-| Field           | Type     | Description                                     | Required |
-| :-------------- | :------- | :---------------------------------------------- | :------- |
-| `transaction_id` | `string` | The unique ID of the transaction to analyze.    | Yes      |
-| `user_id`       | `string` | The unique ID of the user involved in the transaction. | Yes      |
-| `amount`        | `number` | The amount of the transaction.                  | Yes      |
-| `merchant_info` | `object` | Details about the merchant.                     | Yes      |
-| `wallet_id`     | `string` | Optional: The unique ID of the wallet involved. | No       |
-| `user_location` | `string` | Optional: The user's current geographic location (e.g., `US`, `GB`). | No       |
-| `new_device`    | `boolean` | Optional: Indicates if the transaction is from a new device. | No       |
-| `suspicious_ip` | `boolean` | Optional: Indicates if the transaction is from a suspicious IP address. | No       |
-
-#### `merchant_info` Object Structure
-
-| Field      | Type     | Description                                     | Required |
-| :--------- | :------- | :---------------------------------------------- | :------- |
-| `name`     | `string` | Name of the merchant.                           | Yes      |
-| `category` | `string` | Merchant category (e.g., `retail`, `food`).     | Yes      |
-| `location` | `string` | Optional: Geographic location of the merchant.  | No       |
-
-#### Example Request
-
+**Request Body**:
 ```json
 {
-    "transaction_id": "txn_001",
-    "user_id": "user_123",
-    "amount": 150.75,
-    "merchant_info": {
-        "name": "Online Gadgets",
-        "category": "electronics",
-        "location": "US"
-    },
-    "user_location": "US",
-    "new_device": false,
-    "suspicious_ip": false
+  "transaction_id": "string" (required): The unique identifier of the transaction to analyze.
+  "user_id": "string" (required): The unique identifier of the user associated with the transaction.
+  "amount": "float" (required): The transaction amount.
+  "merchant_info": {
+    "name": "string" (optional),
+    "category": "string" (optional, e.g., "gambling", "retail", "travel"),
+    "location": "string" (optional, e.g., "US", "UK")
+  } (required): Information about the merchant involved in the transaction.
+  "wallet_id": "string" (optional): The wallet ID associated with the transaction.
+  "user_location": "string" (optional): The user's current geographic location (e.g., "US", "UK").
+  "new_device": "boolean" (optional): Indicates if the transaction is from a new device for the user.
+  "suspicious_ip": "boolean" (optional): Indicates if the transaction originates from a suspicious IP address.
 }
 ```
 
-#### Example Success Response (200 OK)
-
-```json
-{
-    "transaction_id": "txn_001",
+**Responses**:
+- `200 OK`: Successfully performed fraud analysis.
+  ```json
+  {
+    "transaction_id": "string",
     "fraud_analysis": {
-        "risk_score": 20,
-        "risk_level": "low",
-        "risk_factors": [],
-        "recommended_action": "monitor",
-        "confidence": 64
+      "risk_score": "integer (0-100)",
+      "risk_level": "string (e.g., "very_low", "low", "medium", "high")",
+      "risk_factors": [
+        "string" (e.g., "unusually_high_amount", "high_velocity", "geographic_mismatch", "unusual_time", "high_risk_merchant", "new_device", "suspicious_ip", "unusual_daily_spending")
+      ],
+      "recommended_action": "string (e.g., "approve", "monitor", "require_additional_verification", "block_transaction")",
+      "confidence": "integer (0-100)"
     },
-    "alert_created": false,
-    "alert_id": null,
-    "analysis_timestamp": "2024-01-19T10:00:00.000Z",
-    "model_version": "FlowletAI-FraudDetection-v2.1"
-}
-```
-
-#### Example Error Response (400 Bad Request)
-
-```json
-{
-    "error": "Missing required field: transaction_id"
-}
-```
+    "alert_created": "boolean": True if a fraud alert was created, false otherwise.
+    "alert_id": "string" (optional): The ID of the created fraud alert, if any.
+    "analysis_timestamp": "string (ISO 8601 datetime)",
+    "model_version": "string": The version of the AI model used for analysis.
+  }
+  ```
+- `400 Bad Request`: Missing required fields or invalid input.
+- `404 Not Found`: User or transaction not found.
+- `500 Internal Server Error`: An unexpected error occurred during analysis.
 
 ### 2. Get Fraud Alerts
 
 `GET /api/v1/ai/fraud-detection/alerts`
 
-Retrieves a paginated list of fraud alerts, with optional filtering by status, risk level, or user ID.
+Retrieves a paginated list of fraud alerts, with options for filtering by status, risk level, and user ID. This endpoint allows compliance and security teams to monitor and manage potential fraud cases.
 
-#### Query Parameters
+**Permissions**: Requires appropriate authentication and authorization (e.g., `fraud_analyst` or `admin` role).
 
-| Parameter  | Type     | Description                                     | Default |
-| :--------- | :------- | :---------------------------------------------- | :------ |
-| `page`     | `integer` | The page number for pagination.                 | `1`     |
-| `per_page` | `integer` | The number of alerts per page.                  | `20`    |
-| `status`   | `string` | Optional: Filter by alert status (`open`, `resolved`, `false_positive`, `investigating`). | No       |
-| `risk_level` | `string` | Optional: Filter by risk level (`high`, `medium`, `low`, `very_low`). | No       |
-| `user_id`  | `string` | Optional: Filter alerts for a specific user.    | No       |
+**Query Parameters**:
+- `page` (integer, optional): Page number for pagination. Default is `1`.
+- `per_page` (integer, optional): Number of items per page. Default is `20`.
+- `status` (string, optional): Filter by alert status (e.g., `open`, `resolved`, `false_positive`, `investigating`).
+- `risk_level` (string, optional): Filter by risk level (e.g., `very_low`, `low`, `medium`, `high`).
+- `user_id` (string, optional): Filter alerts by the associated user ID.
 
-#### Example Request
-
-```
-GET /api/v1/ai/fraud-detection/alerts?status=open&risk_level=high
-```
-
-#### Example Success Response (200 OK)
-
-```json
-{
+**Responses**:
+- `200 OK`: Successfully retrieved fraud alerts.
+  ```json
+  {
     "alerts": [
-        {
-            "alert_id": "ALERT_XYZ789",
-            "transaction_id": "txn_005",
-            "user_id": "user_456",
-            "alert_type": "suspicious_transaction",
-            "risk_score": 75,
-            "description": "AI detected suspicious transaction: unusually_high_amount, geographic_mismatch",
-            "status": "open",
-            "created_at": "2024-01-19T11:00:00.000Z",
-            "resolved_at": null
-        }
+      {
+        "alert_id": "string",
+        "transaction_id": "string",
+        "user_id": "string",
+        "alert_type": "string (e.g., "suspicious_transaction")",
+        "risk_score": "integer",
+        "description": "string",
+        "status": "string",
+        "created_at": "string (ISO 8601 datetime)",
+        "resolved_at": "string (ISO 8601 datetime)" (optional)
+      }
     ],
     "pagination": {
-        "page": 1,
-        "per_page": 20,
-        "total": 1,
-        "pages": 1,
-        "has_next": false,
-        "has_prev": false
+      "page": "integer",
+      "per_page": "integer",
+      "total": "integer",
+      "pages": "integer",
+      "has_next": "boolean",
+      "has_prev": "boolean"
     },
     "filters_applied": {
-        "status": "open",
-        "risk_level": "high",
-        "user_id": null
+      "status": "string",
+      "risk_level": "string",
+      "user_id": "string"
     }
-}
-```
+  }
+  ```
+- `500 Internal Server Error`: An unexpected error occurred.
 
 ### 3. Resolve Fraud Alert
 
 `POST /api/v1/ai/fraud-detection/alerts/{alert_id}/resolve`
 
-Resolves a specific fraud alert, updating its status and adding resolution notes.
+Resolves a specific fraud alert, updating its status and optionally adding resolution notes. This action is typically performed by a fraud analyst after reviewing the alert.
 
-#### Path Parameters
+**Permissions**: Requires appropriate authentication and authorization (e.g., `fraud_analyst` or `admin` role).
 
-| Parameter  | Type     | Description                       |
-| :--------- | :------- | :-------------------------------- |
-| `alert_id` | `string` | The unique ID of the fraud alert. |
+**Path Parameters**:
+- `alert_id` (string, required): The unique identifier of the fraud alert to resolve.
 
-#### Request Body
-
-| Field        | Type     | Description                                     | Required |
-| :----------- | :------- | :---------------------------------------------- | :------- |
-| `resolution` | `string` | The resolution status (`resolved`, `false_positive`, `investigating`). | No       |
-| `notes`      | `string` | Optional: Additional notes about the resolution. | No       |
-
-#### Example Request
-
+**Request Body**:
 ```json
 {
-    "resolution": "false_positive",
-    "notes": "Confirmed legitimate transaction with user."
+  "resolution": "string" (optional, default: "resolved"): The resolution status (e.g., "resolved", "false_positive", "investigating").
+  "notes": "string" (optional): Any additional notes or comments regarding the resolution.
 }
 ```
 
-#### Example Success Response (200 OK)
-
-```json
-{
-    "alert_id": "ALERT_XYZ789",
-    "status": "false_positive",
-    "resolved_at": "2024-01-19T12:00:00.000Z",
+**Responses**:
+- `200 OK`: Alert resolved successfully.
+  ```json
+  {
+    "alert_id": "string",
+    "status": "string",
+    "resolved_at": "string (ISO 8601 datetime)",
     "message": "Alert resolved successfully"
-}
-```
-
-#### Example Error Response (404 Not Found)
-
-```json
-{
-    "error": "Alert not found"
-}
-```
+  }
+  ```
+- `400 Bad Request`: Invalid resolution status.
+- `404 Not Found`: Alert not found.
+- `500 Internal Server Error`: An unexpected error occurred.
 
 ### 4. AI Support Chatbot Query
 
 `POST /api/v1/ai/chatbot/query`
 
-Provides an AI-powered chatbot interface for developer and user assistance, answering queries related to Flowlet APIs and services.
+Provides an interface for the AI-powered support chatbot, allowing users and developers to ask questions and receive intelligent responses related to Flowlet APIs, services, and general assistance.
 
-#### Request Body
+**Permissions**: None (publicly accessible, or requires basic user authentication)
 
-| Field     | Type     | Description                                     | Required |
-| :-------- | :------- | :---------------------------------------------- | :------- |
-| `query`   | `string` | The user's query or question.                   | Yes      |
-| `context` | `string` | Optional: The context of the query (`general`, `developer`, `user`). | No       |
-
-#### Example Request
-
+**Request Body**:
 ```json
 {
-    "query": "How do I create a wallet?",
-    "context": "developer"
+  "query": "string" (required): The user's query or question.
+  "context": "string" (optional, default: "general"): The context of the query (e.g., "general", "developer", "user").
 }
 ```
 
-#### Example Success Response (200 OK)
-
-```json
-{
-    "conversation_id": "CONV_ABC123",
-    "response": "To create a wallet, use the POST /api/v1/wallet/create endpoint. You'll need to provide user_id, wallet_type, and currency in the request body.",
-    "confidence": 95,
-    "timestamp": "2024-01-19T13:00:00.000Z"
-}
-```
-
-#### Example Error Response (400 Bad Request)
-
-```json
-{
-    "error": "Missing required field: query"
-}
-```
+**Responses**:
+- `200 OK`: Successfully received and processed the chatbot query.
+  ```json
+  {
+    "conversation_id": "string",
+    "response": "string": The chatbot's response to the query.
+    "confidence": "integer (0-100)": The confidence level of the chatbot's response.
+    "analysis_timestamp": "string (ISO 8601 datetime)"
+  }
+  ```
+- `400 Bad Request`: Missing required fields.
+- `500 Internal Server Error`: An unexpected error occurred.
 
 

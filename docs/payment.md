@@ -388,3 +388,97 @@ GET /api/v1/payment/exchange-rate/USD/EUR
 ```
 
 
+
+
+
+### 8. Convert Amount Between Currencies
+
+`POST /api/v1/payment/currency-conversion`
+
+Converts a specified amount between two different currencies, transferring funds from a source wallet to a destination wallet.
+
+#### Request Body
+
+| Field            | Type     | Description                                     | Required |
+| :--------------- | :------- | :---------------------------------------------- | :------- |
+| `from_wallet_id` | `string` | The unique ID of the source wallet.             | Yes      |
+| `to_wallet_id`   | `string` | The unique ID of the destination wallet.        | Yes      |
+| `amount`         | `number` | The amount to convert from the source wallet.   | Yes      |
+
+#### Example Request
+
+```json
+{
+    "from_wallet_id": "wallet_abc",
+    "to_wallet_id": "wallet_xyz",
+    "amount": 100.00
+}
+```
+
+#### Example Success Response (201 Created)
+
+```json
+{
+    "conversion_id": "<generated_transaction_id>",
+    "from_wallet_id": "wallet_abc",
+    "to_wallet_id": "wallet_xyz",
+    "original_amount": "100.00",
+    "original_currency": "USD",
+    "converted_amount": "92.00",
+    "converted_currency": "EUR",
+    "exchange_rate": "0.92",
+    "status": "completed",
+    "created_at": "2024-01-16T15:00:00.000Z"
+}
+```
+
+#### Example Error Response (400 Bad Request)
+
+```json
+{
+    "error": "Insufficient balance"
+}
+```
+
+#### Example Error Response (404 Not Found)
+
+```json
+{
+    "error": "One or both wallets not found"
+}
+```
+
+
+
+
+## Financial Industry Standards and Considerations
+
+As a critical component of a FinTech platform, the Payment API is developed with rigorous adherence to financial industry standards, emphasizing security, data integrity, compliance, and auditability. Each operation within this API incorporates best practices to ensure the reliability and trustworthiness of financial transactions and user data.
+
+### Security
+
+- **Secure Transaction Processing**: All payment transactions are processed over secure channels, utilizing encryption (e.g., TLS 1.2+) for data in transit to protect sensitive payment information from interception.
+- **Tokenization**: For card payments, sensitive card details are not stored directly but are replaced with secure tokens. This minimizes the risk of data breaches and reduces PCI DSS compliance scope.
+- **Fraud Prevention**: The API integrates with advanced fraud detection mechanisms, leveraging AI and machine learning models to analyze transaction patterns and identify suspicious activities in real-time. This includes checks for velocity, geographic, and behavioral anomalies.
+- **Access Control**: Strict Role-Based Access Control (RBAC) and API key management are enforced to ensure that only authorized entities can initiate or query payment transactions. All API calls are authenticated and authorized against predefined permissions.
+
+### Data Integrity
+
+- **Atomic Transactions**: All payment operations, especially those involving fund movements (deposits, withdrawals, transfers, conversions), are designed as atomic transactions. This ensures that either all steps of a transaction are completed successfully, or none are, preventing partial updates and maintaining data consistency.
+- **Double-Entry Accounting**: Every payment transaction generates corresponding double-entry ledger entries, ensuring that the financial books are always balanced. This provides an accurate and immutable record of all financial flows, crucial for reconciliation and auditing.
+- **Precision for Monetary Values**: All monetary amounts are handled using `Decimal` data types to guarantee exact precision and avoid rounding errors or floating-point inaccuracies that can occur with standard floating-point numbers.
+
+### Compliance
+
+- **Regulatory Reporting**: The API facilitates the generation of data necessary for regulatory reporting, including transaction logs, audit trails, and customer activity records, to comply with financial regulations such as AML (Anti-Money Laundering) and CFT (Combating the Financing of Terrorism).
+- **Sanctions Screening**: Payments are subject to real-time sanctions screening against global watchlists to prevent transactions with sanctioned entities or individuals, ensuring compliance with international financial regulations.
+- **Payment Scheme Rules**: The API design and transaction flows adhere to the specific rules and requirements of various payment schemes (e.g., ACH, SEPA, SWIFT, card network rules) to ensure interoperability and compliance.
+
+### Auditability
+
+- **Comprehensive Audit Trails**: Detailed audit logs are maintained for every payment transaction, capturing essential information such as transaction initiation time, status changes, involved parties, amounts, and any associated fees. These logs are immutable and provide a complete historical record.
+- **Unique Reference IDs**: Each transaction is assigned a unique, traceable reference ID, allowing for easy tracking and reconciliation across internal systems and external payment processors.
+- **Timestamping**: All transaction events and status updates are precisely timestamped, providing a clear chronological record for forensic analysis, dispute resolution, and regulatory audits.
+
+These considerations collectively ensure that the Payment API operates within the highest standards of the financial industry, providing a secure, reliable, and compliant platform for all payment-related activities.
+
