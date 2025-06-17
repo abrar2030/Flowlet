@@ -269,7 +269,4 @@ For any questions or issues related to these GitHub Actions workflows, please re
 
 ---
 
-**Author:** Manus AI
-**Date:** June 17, 2025
-
 

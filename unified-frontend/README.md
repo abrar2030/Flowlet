@@ -196,7 +196,4 @@ For any questions, issues, or further information regarding the Flowlet Unified 
 
 ---
 
-**Author:** Manus AI
-**Date:** June 17, 2025
-
 

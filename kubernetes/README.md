@@ -182,7 +182,4 @@ For any questions or issues related to these Kubernetes configurations, please r
 
 ---
 
-**Author:** Manus AI
-**Date:** June 17, 2025
-
 

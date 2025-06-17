@@ -167,7 +167,4 @@ For any questions or issues related to these operational scripts, please refer t
 
 ---
 
-**Author:** Manus AI
-**Date:** June 17, 2025
-
 
