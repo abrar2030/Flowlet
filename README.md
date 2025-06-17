@@ -1351,8 +1351,8 @@ To set up a development environment for contributing to Flowlet:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/flowlet/flowlet-platform.git
-   cd flowlet-platform
+   git clone https://github.com/abrar2030/Flowlet
+   cd Flowlet
    ```
 
 2. **Install Dependencies**:
