@@ -1,5 +1,4 @@
-
-name: Terraform CI
+name: Terraform CI - Enhanced
 
 on:
   push:
@@ -16,15 +15,15 @@ on:
       - infrastructure/terraform/**
 
 jobs:
-  terraform:
+  terraform-validate-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.0.0 # Specify a suitable version
+        terraform_version: 1.x # Use a more flexible version
 
     - name: Terraform Init
       id: init
@@ -35,10 +34,19 @@ jobs:
       id: fmt
       run: terraform fmt -check
       working-directory: infrastructure/terraform
+      continue-on-error: true
 
     - name: Terraform Validate
       id: validate
       run: terraform validate
+      working-directory: infrastructure/terraform
+
+    - name: Run IaC linting (tflint - Placeholder)
+      run: echo "tflint placeholder: Install tflint and run tflint infrastructure/terraform"
+      working-directory: infrastructure/terraform
+
+    - name: Run IaC security scan (Checkov - Placeholder)
+      run: echo "Checkov placeholder: pip install checkov && checkov -d ."
       working-directory: infrastructure/terraform
 
     - name: Terraform Plan
@@ -46,6 +54,12 @@ jobs:
       run: terraform plan -no-color
       working-directory: infrastructure/terraform
       continue-on-error: true
+
+    - name: Check Terraform plan results
+      if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
+      run: |
+        echo "Terraform validation failed. Please check the infrastructure code."
+        exit 1
 
     - name: Update Pull Request
       uses: actions/github-script@v6
