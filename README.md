@@ -1626,3 +1626,841 @@ The `unified-frontend` has been developed with a modern, component-based archite
 - **Responsive Design**: Designed to be fully responsive, providing an optimal viewing and interaction experience across various devices, from desktops to mobile phones.
 
 These new features collectively enhance Flowlet's position as a leading embedded finance platform, offering unparalleled security, compliance, and functional breadth for businesses looking to integrate financial services seamlessly into their offerings.
+## CI/CD Pipeline Design for Flowlet
+
+To mature the CI/CD pipeline for Flowlet, especially considering the stringent requirements of the financial industry, a robust, secure, and automated approach is essential. This design incorporates best practices for continuous integration, continuous delivery, and continuous deployment, with a strong emphasis on security, compliance, and reliability.
+
+### Core Principles
+
+1.  **Automation First**: Automate every possible step in the software delivery lifecycle to reduce manual errors and increase efficiency.
+2.  **Security by Design**: Integrate security checks at every stage of the pipeline, from static code analysis to runtime protection.
+3.  **Reproducibility**: Ensure that every build and deployment is reproducible, allowing for consistent environments and easy rollbacks.
+4.  **Traceability**: Maintain a comprehensive audit trail of all changes, builds, tests, and deployments.
+5.  **Observability**: Implement robust monitoring and alerting to provide real-time insights into pipeline health and application performance.
+6.  **Compliance**: Design the pipeline to meet regulatory and industry-specific compliance standards (e.g., SOC 2, ISO 27001, GDPR, PCI DSS).
+
+### CI/CD Stages
+
+The CI/CD pipeline will be structured into several distinct stages, each with specific objectives and gates. A failure in any stage will halt the pipeline, preventing defective code from progressing further.
+
+#### 1. Source Code Management (SCM) Integration
+
+*   **Trigger**: Every push to a feature branch, pull request (PR) creation/update, and merge to `main` or `release` branches.
+*   **Objective**: Ensure code quality and consistency before integration.
+*   **Activities**:
+    *   **Branching Strategy**: Implement a robust branching strategy (e.g., GitFlow or GitHub Flow) to manage code changes effectively.
+    *   **Pull Request Reviews**: Enforce mandatory code reviews for all changes.
+    *   **Commit Linting**: Standardize commit messages to improve traceability and automated release notes generation.
+
+#### 2. Build Stage
+
+*   **Objective**: Compile source code, resolve dependencies, and create deployable artifacts.
+*   **Activities**:
+    *   **Dependency Resolution**: Fetch and cache project dependencies (e.g., `pip install` for Python, `npm install` for Node.js).
+    *   **Code Compilation/Transpilation**: Compile backend Python code (if applicable) and transpile frontend JavaScript/TypeScript.
+    *   **Artifact Generation**: Create deployable artifacts (e.g., Docker images for backend, minified static assets for frontend).
+    *   **Artifact Versioning**: Tag artifacts with unique, immutable versions (e.g., Git commit SHA, build number).
+
+#### 3. Test Stage
+
+*   **Objective**: Verify the functionality, performance, and security of the application through automated tests.
+*   **Activities**:
+    *   **Unit Tests**: Run fast, isolated tests for individual code components.
+    *   **Integration Tests**: Verify interactions between different components and services.
+    *   **API Tests**: Test backend API endpoints for correctness and performance.
+    *   **End-to-End (E2E) Tests**: Simulate user interactions with the entire application (frontend and backend).
+    *   **Performance Tests**: Conduct load and stress tests to ensure scalability and responsiveness.
+    *   **Security Tests (DAST)**: Dynamic Application Security Testing to identify vulnerabilities in the running application.
+
+#### 4. Security Scan Stage
+
+*   **Objective**: Identify and remediate security vulnerabilities early in the development lifecycle.
+*   **Activities**:
+    *   **Static Application Security Testing (SAST)**: Analyze source code for common vulnerabilities (e.g., SQL injection, XSS, insecure configurations).
+    *   **Software Composition Analysis (SCA)**: Identify known vulnerabilities in third-party libraries and dependencies.
+    *   **Container Image Scanning**: Scan Docker images for vulnerabilities and misconfigurations.
+    *   **Secrets Scanning**: Detect hardcoded secrets (e.g., API keys, passwords) in the codebase.
+
+#### 5. Infrastructure as Code (IaC) Validation Stage
+
+*   **Objective**: Validate the correctness and security of infrastructure configurations.
+*   **Activities**:
+    *   **IaC Linting**: Check Terraform, Kubernetes manifests, and Helm charts for syntax errors and best practices.
+    *   **IaC Security Scanning**: Analyze IaC for security misconfigurations and compliance violations.
+    *   **IaC Plan Review**: Generate and review execution plans for infrastructure changes to prevent unintended modifications.
+
+#### 6. Deployment Stage
+
+*   **Objective**: Deploy validated artifacts to various environments (development, staging, production).
+*   **Activities**:
+    *   **Environment Provisioning**: Automate the provisioning of infrastructure for new environments or updates to existing ones.
+    *   **Blue/Green or Canary Deployments**: Implement advanced deployment strategies to minimize downtime and risk during production releases.
+    *   **Rollback Capability**: Ensure that deployments can be quickly and safely rolled back to a previous stable version in case of issues.
+    *   **Configuration Management**: Manage environment-specific configurations securely (e.g., using Kubernetes Secrets, HashiCorp Vault).
+
+#### 7. Monitoring and Alerting Stage
+
+*   **Objective**: Continuously monitor the health, performance, and security of deployed applications and infrastructure.
+*   **Activities**:
+    *   **Application Performance Monitoring (APM)**: Track application metrics (e.g., response times, error rates, resource utilization).
+    *   **Log Aggregation and Analysis**: Centralize logs for effective troubleshooting and auditing.
+    *   **Security Information and Event Management (SIEM)**: Integrate security logs for threat detection and incident response.
+    *   **Alerting**: Configure alerts for critical issues and integrate with incident management systems.
+
+### Tooling Selection
+
+Given the requirements for a robust and secure CI/CD pipeline in the financial industry, a combination of industry-leading tools will be utilized.
+
+*   **Version Control System**: Git (hosted on GitHub/GitLab/Bitbucket)
+*   **CI/CD Orchestration**: GitHub Actions (preferred for its tight integration with GitHub, ease of use, and extensive marketplace for security and testing tools). Alternatives include GitLab CI/CD, Jenkins, Azure DevOps.
+*   **Containerization**: Docker
+*   **Container Registry**: GitHub Container Registry, Docker Hub, or a private registry.
+*   **Kubernetes Orchestration**: Kubernetes
+*   **Infrastructure as Code**: Terraform, Helm
+*   **Static Code Analysis (SAST)**: SonarQube, Bandit (for Python), ESLint (for JavaScript).
+*   **Software Composition Analysis (SCA)**: Dependabot (GitHub native), Snyk, OWASP Dependency-Check.
+*   **Container Image Scanning**: Trivy, Clair, Docker Scout.
+*   **Secrets Scanning**: GitGuardian, TruffleHog.
+*   **Dynamic Application Security Testing (DAST)**: OWASP ZAP, Burp Suite (integrated into pipeline).
+*   **Testing Frameworks**: Pytest (Python), Jest/React Testing Library (JavaScript).
+*   **Performance Testing**: Locust, JMeter.
+*   **Monitoring & Logging**: Prometheus, Grafana, ELK Stack (Elasticsearch, Logstash, Kibana), Datadog, Splunk.
+*   **Secret Management**: Kubernetes Secrets, HashiCorp Vault.
+
+### Implementation Details (GitHub Actions Example)
+
+This section outlines a high-level implementation using GitHub Actions, demonstrating how the defined stages would translate into a practical workflow.
+
+#### `.github/workflows/main.yml` (Example)
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - release/*
+
+jobs:
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run backend unit tests
+        run: pytest backend/tests/
+
+      - name: Run backend SAST (Bandit)
+        run: bandit -r backend/
+
+      - name: Run backend SCA (OWASP Dependency-Check)
+        run: | # Placeholder for OWASP Dependency-Check integration
+          # Download and run OWASP Dependency-Check
+          # Generate report and fail on high vulnerabilities
+          echo "Running OWASP Dependency-Check for backend..."
+
+      - name: Build Docker image for backend
+        run: | # Placeholder for Docker build
+          # docker build -t your-repo/flowlet-backend:$(git rev-parse HEAD) backend/
+          echo "Building backend Docker image..."
+
+      - name: Scan backend Docker image (Trivy)
+        run: | # Placeholder for Trivy scan
+          # trivy image your-repo/flowlet-backend:$(git rev-parse HEAD)
+          echo "Scanning backend Docker image with Trivy..."
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: npm install --prefix frontend/web-frontend
+
+      - name: Run frontend unit tests
+        run: npm test --prefix frontend/web-frontend
+
+      - name: Run frontend SAST (ESLint)
+        run: npm run lint --prefix frontend/web-frontend
+
+      - name: Run frontend SCA (Snyk)
+        run: | # Placeholder for Snyk integration
+          # snyk test --file=frontend/web-frontend/package.json
+          echo "Running Snyk for frontend..."
+
+      - name: Build frontend assets
+        run: npm run build --prefix frontend/web-frontend
+
+  iac-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.x
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        working-directory: infrastructure/terraform
+        continue-on-error: true
+
+      - name: Terraform validate
+        id: validate
+        run: terraform validate
+        working-directory: infrastructure/terraform
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -no-color
+        working-directory: infrastructure/terraform
+        continue-on-error: true
+
+      - name: Check Terraform plan results
+        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
+        run: |
+          echo "Terraform validation failed. Please check the infrastructure code."
+          exit 1
+
+  deploy-to-staging:
+    needs: [build-and-test-backend, build-and-test-frontend, iac-validation]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Kubernetes staging
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
+          # kubectl apply -f kubernetes/manifests/staging/
+          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n staging
+          echo "Deploying to staging environment..."
+
+  deploy-to-production:
+    needs: [deploy-to-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    # Manual approval for production deployment
+    environment:
+      name: production
+      url: https://your-production-url.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Kubernetes production
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
+          # kubectl apply -f kubernetes/manifests/production/
+          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n production
+          echo "Deploying to production environment..."
+
+```
+
+### Security Considerations
+
+*   **Least Privilege**: Ensure that CI/CD pipeline credentials and service accounts have only the minimum necessary permissions.
+*   **Secret Management**: Store all sensitive information (API keys, database credentials) in secure secret management systems (e.g., GitHub Secrets, HashiCorp Vault) and inject them into the pipeline at runtime.
+*   **Network Segmentation**: Isolate CI/CD infrastructure from production environments.
+*   **Immutable Infrastructure**: Deploy new infrastructure rather than modifying existing, reducing configuration drift.
+*   **Regular Audits**: Conduct regular security audits of the CI/CD pipeline itself.
+
+### Compliance and Governance
+
+*   **Audit Trails**: Leverage CI/CD platform features to maintain detailed audit logs of all pipeline executions, including who triggered what, when, and what changes were deployed.
+*   **Separation of Duties**: Implement clear separation of duties, ensuring that no single individual has end-to-end control over the entire deployment process.
+*   **Change Management**: Integrate with change management systems to ensure all production deployments are approved and tracked.
+*   **Automated Reporting**: Generate automated reports on security scans, test results, and deployment outcomes for compliance purposes.
+
+This comprehensive CI/CD pipeline design provides a strong foundation for Flowlet to meet the rigorous demands of the financial industry, ensuring secure, reliable, and efficient software delivery.
+
+
+
+### Static Code Analysis and Linting
+
+Static code analysis and linting are crucial for maintaining code quality, consistency, and identifying potential issues early in the development cycle. For Flowlet, we will integrate the following tools:
+
+*   **Backend (Python)**: Bandit for security-focused static analysis and Flake8 for style guide enforcement and basic error checking.
+*   **Frontend (JavaScript/TypeScript)**: ESLint for code quality and style, and Stylelint for CSS/SCSS linting.
+
+These tools will be integrated into the CI/CD pipeline to run on every pull request and push to the main branches. Failing checks will block merges, ensuring that only high-quality code is integrated.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup python, install dependencies)
+
+      - name: Run backend SAST (Bandit)
+        run: bandit -r backend/ -ll -f custom -o bandit_report.json || true # Allow failure for now, report will be generated
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit_report.json
+
+      - name: Run backend linting (Flake8)
+        run: flake8 backend/
+
+# ... (rest of backend job)
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup node, install dependencies)
+
+      - name: Run frontend linting (ESLint)
+        run: npm run lint --prefix frontend/web-frontend
+
+      - name: Run frontend style linting (Stylelint)
+        run: | # Placeholder for Stylelint integration
+          # npx stylelint "frontend/web-frontend/**/*.css" "frontend/web-frontend/**/*.scss"
+          echo "Running Stylelint for frontend..."
+
+# ... (rest of frontend job)
+```
+
+
+
+
+
+### Unit and Integration Testing
+
+Automated testing is fundamental to ensuring the reliability and correctness of the Flowlet application. The CI/CD pipeline will incorporate comprehensive unit and integration tests for both the backend and frontend components.
+
+*   **Unit Tests**: These tests focus on individual functions, methods, or classes in isolation, ensuring that each component works as expected. They are fast to execute and provide immediate feedback on code changes.
+*   **Integration Tests**: These tests verify the interactions between different modules or services, ensuring that they work together correctly. For the backend, this might involve testing API endpoints with a database or external service. For the frontend, it could involve testing component interactions or data flow.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup python, install dependencies, static analysis)
+
+      - name: Run backend unit tests
+        run: pytest backend/tests/unit/
+
+      - name: Run backend integration tests
+        run: pytest backend/tests/integration/
+
+# ... (rest of backend job)
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup node, install dependencies, linting)
+
+      - name: Run frontend unit tests
+        run: npm test --prefix frontend/web-frontend -- --testPathPattern=src/components/.*.test.js
+
+      - name: Run frontend integration tests
+        run: npm test --prefix frontend/web-frontend -- --testPathPattern=src/integration/.*.test.js
+
+# ... (rest of frontend job)
+```
+
+
+
+
+
+### Security Scanning (SAST, DAST, Dependency Scanning)
+
+Security is paramount in the financial industry. The CI/CD pipeline will integrate various security scanning tools to identify and mitigate vulnerabilities throughout the development lifecycle.
+
+*   **Static Application Security Testing (SAST)**: SAST tools analyze the application's source code for security vulnerabilities without executing the code. This helps identify issues like SQL injection, cross-site scripting (XSS), insecure direct object references, and other common weaknesses early in the development process. For Flowlet, Bandit (for Python backend) and ESLint (with security plugins for frontend) will be used.
+
+*   **Dynamic Application Security Testing (DAST)**: DAST tools test the application in its running state, simulating attacks to find vulnerabilities that might not be apparent from static code analysis. This includes testing for authentication bypasses, session management flaws, and business logic vulnerabilities. OWASP ZAP will be integrated for DAST.
+
+*   **Software Composition Analysis (SCA)**: SCA tools identify known vulnerabilities in third-party libraries and dependencies used by the application. Given the extensive use of open-source components, this is critical for managing supply chain risks. Dependabot (GitHub native) and OWASP Dependency-Check will be utilized.
+
+*   **Secrets Scanning**: This involves scanning the codebase for hardcoded secrets such as API keys, passwords, and access tokens, which can pose significant security risks if exposed. GitGuardian or TruffleHog will be used for this purpose.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup python, install dependencies, static analysis, unit/integration tests)
+
+      - name: Run backend SAST (Bandit)
+        run: bandit -r backend/ -ll -f custom -o bandit_report.json || true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit_report.json
+
+      - name: Run backend SCA (OWASP Dependency-Check)
+        run: | 
+          # Install OWASP Dependency-Check (example, adjust for actual installation)
+          # wget https://github.com/jeremylong/DependencyCheck/releases/download/vX.Y.Z/dependency-check-X.Y.Z-release.zip
+          # unzip dependency-check-X.Y.Z-release.zip
+          # ./dependency-check/bin/dependency-check.sh --project "Flowlet Backend" --scan backend/ --format JSON --out . --failOnCVSS 7.0
+          echo "Running OWASP Dependency-Check for backend..."
+
+      - name: Run secrets scanning (TruffleHog)
+        run: | # Placeholder for TruffleHog integration
+          # trufflehog filesystem . --json > trufflehog_report.json || true
+          echo "Running TruffleHog for secrets scanning..."
+
+# ... (rest of backend job)
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup node, install dependencies, linting, unit/integration tests)
+
+      - name: Run frontend SAST (ESLint with security plugins)
+        run: npm run lint:security --prefix frontend/web-frontend # Assuming a script for security linting
+
+      - name: Run frontend SCA (Snyk)
+        run: | 
+          # npm install -g snyk
+          # snyk auth ${{ secrets.SNYK_TOKEN }}
+          # snyk test --file=frontend/web-frontend/package.json --json > snyk_report.json || true
+          echo "Running Snyk for frontend..."
+
+# ... (rest of frontend job)
+
+  dast-scan:
+    needs: [deploy-to-staging] # DAST runs against a deployed application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run DAST scan (OWASP ZAP)
+        run: | 
+          # Install OWASP ZAP (example, adjust for actual installation)
+          # docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-baseline.py -t http://localhost:8080 -g zap_baseline.conf -r zap_report.xml
+          echo "Running DAST scan with OWASP ZAP..."
+
+```
+
+
+
+
+
+### Containerization and Image Scanning
+
+Containerization is essential for consistent deployments across different environments. Docker will be used to containerize both the backend and frontend applications. Image scanning will be integrated into the CI/CD pipeline to ensure that all container images are free from known vulnerabilities before deployment.
+
+*   **Containerization**: Dockerfiles will be created for the backend (Python Flask application) and the frontend (Node.js application serving static assets). These Dockerfiles will define the environment, dependencies, and application code, ensuring that the application runs consistently regardless of the underlying infrastructure.
+
+*   **Image Scanning**: Trivy will be used to scan Docker images for operating system packages, application dependencies, and misconfigurations. This helps in identifying vulnerabilities introduced through base images or application dependencies within the container.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup python, install dependencies, static analysis, unit/integration tests, security scans)
+
+      - name: Build Docker image for backend
+        run: docker build -t flowlet-backend:$(git rev-parse --short HEAD) ./backend
+
+      - name: Scan backend Docker image (Trivy)
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-backend:$(git rev-parse --short HEAD)
+
+      - name: Push backend Docker image to registry
+        run: | # Placeholder for pushing to a container registry (e.g., GitHub Container Registry)
+          # echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          # docker push ghcr.io/${{ github.repository_owner }}/flowlet-backend:$(git rev-parse --short HEAD)
+          echo "Pushing backend Docker image..."
+
+# ... (rest of backend job)
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      # ... (checkout, setup node, install dependencies, linting, unit/integration tests, security scans)
+
+      - name: Build Docker image for frontend
+        run: docker build -t flowlet-frontend:$(git rev-parse --short HEAD) ./frontend/web-frontend
+
+      - name: Scan frontend Docker image (Trivy)
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-frontend:$(git rev-parse --short HEAD)
+
+      - name: Push frontend Docker image to registry
+        run: | # Placeholder for pushing to a container registry (e.g., GitHub Container Registry)
+          # echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          # docker push ghcr.io/${{ github.repository_owner }}/flowlet-frontend:$(git rev-parse --short HEAD)
+          echo "Pushing frontend Docker image..."
+
+# ... (rest of frontend job)
+```
+
+
+
+
+
+### Infrastructure as Code (IaC) Validation
+
+Flowlet utilizes Infrastructure as Code (IaC) with Terraform for provisioning and managing its infrastructure. To ensure the integrity, security, and compliance of the infrastructure, the CI/CD pipeline will include robust IaC validation steps.
+
+*   **IaC Linting**: This involves checking the Terraform code for syntax errors, adherence to best practices, and consistency. Tools like `terraform fmt` and `tflint` will be used to automate this process.
+
+*   **IaC Security Scanning**: Tools like Checkov or Terrascan will be integrated to scan Terraform configurations for security misconfigurations, compliance violations, and potential vulnerabilities. This helps in preventing insecure infrastructure from being provisioned.
+
+*   **IaC Plan Review**: Before any infrastructure changes are applied, a `terraform plan` will be generated and reviewed. This plan provides a detailed summary of the changes that Terraform will make to the infrastructure, allowing for early detection of unintended modifications and potential risks. In a financial industry context, this step is often coupled with manual approval for production changes.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  iac-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.x
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        working-directory: infrastructure/terraform
+        continue-on-error: true
+
+      - name: Terraform validate
+        id: validate
+        run: terraform validate
+        working-directory: infrastructure/terraform
+
+      - name: Run IaC linting (tflint)
+        run: | # Placeholder for tflint integration
+          # curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          # tflint --init
+          # tflint infrastructure/terraform
+          echo "Running tflint for IaC..."
+
+      - name: Run IaC security scan (Checkov)
+        run: | # Placeholder for Checkov integration
+          # pip install checkov
+          # checkov -d infrastructure/terraform
+          echo "Running Checkov for IaC security scan..."
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -no-color
+        working-directory: infrastructure/terraform
+        continue-on-error: true
+
+      - name: Check Terraform plan results
+        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
+        run: |
+          echo "Terraform validation failed. Please check the infrastructure code."
+          exit 1
+
+# ... (rest of workflow)
+```
+
+
+
+
+
+### Automated Deployment to Staging and Production Environments
+
+Automated deployment is the final stage of the CI/CD pipeline, responsible for deploying the validated application artifacts to various environments. For Flowlet, deployments will target Kubernetes clusters, leveraging Helm charts for packaging and managing applications.
+
+*   **Staging Environment**: The staging environment will mirror the production environment as closely as possible. All successful builds that pass security and quality gates will be automatically deployed to staging. This environment is used for final testing, user acceptance testing (UAT), and showcasing new features before production release.
+
+*   **Production Environment**: Deployment to production will be a highly controlled process, typically requiring manual approval and potentially employing advanced deployment strategies to minimize risk and downtime.
+
+#### Deployment Strategies for Production
+
+To ensure high availability and minimize the impact of potential issues during production deployments, the following strategies will be considered:
+
+*   **Blue/Green Deployment**: This strategy involves running two identical production environments, 
+
+
+a "blue" environment (current production) and a "green" environment (new version). Traffic is switched from blue to green once the new version is validated. This allows for instant rollback by switching traffic back to the blue environment.
+
+*   **Canary Deployment**: This strategy involves gradually rolling out the new version to a small subset of users, monitoring its performance and stability, and then progressively increasing the rollout to more users. This helps in detecting issues early and limiting their impact.
+
+#### Implementation in GitHub Actions
+
+```yaml
+# ... (previous steps)
+
+  deploy-to-staging:
+    needs: [build-and-test-backend, build-and-test-frontend, iac-validation]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy backend to Kubernetes staging
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
+          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n staging --set image.tag=${{ github.sha }}
+          echo "Deploying backend to staging environment..."
+
+      - name: Deploy frontend to Kubernetes staging
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
+          # helm upgrade --install flowlet-frontend ./kubernetes/helm/frontend -n staging --set image.tag=${{ github.sha }}
+          echo "Deploying frontend to staging environment..."
+
+  deploy-to-production:
+    needs: [deploy-to-staging]
+    runs-on: ubuntu-latest
+    environment: production
+    # Manual approval for production deployment
+    environment:
+      name: production
+      url: https://your-production-url.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy backend to Kubernetes production
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
+          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n production --set image.tag=${{ github.sha }}
+          echo "Deploying backend to production environment..."
+
+      - name: Deploy frontend to Kubernetes production
+        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
+          # helm upgrade --install flowlet-frontend ./kubernetes/helm/frontend -n production --set image.tag=${{ github.sha }}
+          echo "Deploying frontend to production environment..."
+
+```
+
+### Rollback Strategies
+
+Despite comprehensive testing and validation, issues can sometimes arise in production. A robust CI/CD pipeline must include effective rollback strategies to quickly revert to a previous stable state, minimizing downtime and impact on users. For Flowlet, given its Kubernetes-based deployment, rollbacks will primarily leverage Kubernetes native capabilities and Helm.
+
+*   **Kubernetes Rollback**: Kubernetes deployments maintain a revision history, allowing for easy rollback to a previous deployment. This can be done using `kubectl rollout undo`.
+
+*   **Helm Rollback**: Helm also maintains a release history, enabling rollbacks to previous chart revisions using `helm rollback`.
+
+*   **Blue/Green Deployment Rollback**: If a blue/green deployment strategy is used, rollback is as simple as switching traffic back to the previously stable 
+
+
+("blue") environment.
+
+#### Implementation in GitHub Actions
+
+Rollback is typically a manual or semi-automated process triggered when an issue is detected in production. The CI/CD pipeline facilitates this by ensuring that previous stable versions are readily available.
+
+```yaml
+# Example of a manual rollback workflow trigger
+name: Manual Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback (e.g., production)'
+        required: true
+        default: 'production'
+      release_version:
+        description: 'Version to rollback to (e.g., previous Git SHA or Helm revision)'
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Rollback Kubernetes deployment
+        run: | # Example using kubectl or helm rollback
+          # kubectl rollout undo deployment/flowlet-backend -n ${{ github.event.inputs.environment }}
+          # helm rollback flowlet-backend ${{ github.event.inputs.release_version }} -n ${{ github.event.inputs.environment }}
+          echo "Rolling back ${{ github.event.inputs.environment }} to version ${{ github.event.inputs.release_version }}..."
+
+```
+
+
+
+
+
+### Monitoring and Alerting for Pipeline Health
+
+Effective monitoring and alerting are critical for maintaining the health, performance, and security of the CI/CD pipeline itself, as well as the applications it deploys. This ensures that any issues are detected and addressed promptly, minimizing disruption and maintaining operational efficiency.
+
+*   **Pipeline Health Monitoring**: This involves tracking key metrics related to pipeline execution, such as build times, success rates, failure rates, and stage durations. This helps in identifying bottlenecks, performance degradation, or recurring failures within the pipeline.
+
+*   **Application Performance Monitoring (APM)**: Once applications are deployed, APM tools provide deep visibility into their runtime behavior, including response times, error rates, resource utilization (CPU, memory, network), and transaction tracing. This helps in proactively identifying performance issues and diagnosing root causes.
+
+*   **Log Aggregation and Analysis**: Centralizing logs from all components of the CI/CD pipeline and deployed applications is essential for effective troubleshooting, auditing, and security analysis. A robust logging solution allows for quick searching, filtering, and correlation of events.
+
+*   **Alerting**: Configurable alerts will be set up to notify relevant teams (e.g., development, operations, security) of critical events, such as pipeline failures, security vulnerabilities detected, application errors, or performance degradation. Alerts will be integrated with communication channels like Slack, PagerDuty, or email.
+
+*   **Security Information and Event Management (SIEM)**: For a financial industry application, integrating security logs and events into a SIEM system is crucial for comprehensive threat detection, incident response, and compliance reporting. This provides a holistic view of security posture across the entire infrastructure and application stack.
+
+#### Tooling for Monitoring and Alerting
+
+*   **Pipeline Monitoring**: Built-in features of GitHub Actions (e.g., workflow run history, logs) combined with custom dashboards if needed.
+*   **APM**: Prometheus and Grafana (for metrics and dashboards), or commercial solutions like Datadog, New Relic.
+*   **Log Aggregation**: ELK Stack (Elasticsearch, Logstash, Kibana) or Splunk.
+*   **Alerting**: Alertmanager (with Prometheus), PagerDuty, Opsgenie.
+*   **SIEM**: Splunk, Azure Sentinel, or a dedicated SIEM solution.
+
+#### Implementation in GitHub Actions
+
+While direct integration of all monitoring tools within GitHub Actions workflow files can be complex, the pipeline will be configured to emit necessary data points and integrate with external monitoring systems. For example, build metrics can be pushed to Prometheus, and logs can be streamed to a centralized logging solution.
+
+```yaml
+# ... (previous steps)
+
+  # Example of a job to push pipeline metrics (conceptual)
+  monitor-pipeline-health:
+    needs: [build-and-test-backend, build-and-test-frontend, iac-validation, deploy-to-staging, deploy-to-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect pipeline metrics
+        run: | # Example: calculate build duration, success/failure status
+          echo "Pipeline duration: ${{ github.job.duration }}"
+          echo "Pipeline status: ${{ github.job.status }}"
+          # Push metrics to Prometheus Pushgateway or similar
+
+      - name: Notify on pipeline failure
+        if: failure()
+        run: | # Example: Send Slack notification
+          # curl -X POST -H 'Content-type: application/json' --data '{"text":"CI/CD Pipeline failed for ${{ github.repository }} on branch ${{ github.ref_name }}!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          echo "Sending failure notification..."
+
+```
+
+
+
+
+
+## Project Overview
+
+Flowlet is a comprehensive financial technology platform designed to streamline and automate various financial operations. It comprises a Python-based backend (Flask) and a modern JavaScript-based frontend (React), along with robust infrastructure managed via Terraform and Kubernetes. This project aims to provide a secure, scalable, and efficient solution for financial data processing, analysis, and management.
+
+## Getting Started
+
+To set up and run Flowlet locally for development or testing, follow the instructions below.
+
+### Prerequisites
+
+*   Docker and Docker Compose
+*   Python 3.9+
+*   Node.js 20+
+*   npm or yarn
+*   kubectl (for Kubernetes interaction)
+*   Helm (for Kubernetes package management)
+*   Terraform (for infrastructure management)
+
+### Local Development Setup
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/abrar2030/Flowlet.git
+    cd Flowlet
+    ```
+
+2.  **Backend Setup**:
+    Navigate to the `backend/` directory.
+    ```bash
+    cd backend
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    # Set up environment variables (e.g., database connection, secrets)
+    # cp .env.example .env
+    # flask db upgrade # For database migrations
+    flask run
+    ```
+
+3.  **Frontend Setup**:
+    Navigate to the `frontend/web-frontend/` directory.
+    ```bash
+    cd ../frontend/web-frontend
+    npm install
+    npm start
+    ```
+
+4.  **Access the Application**:
+    Once both backend and frontend services are running, you can access the application in your web browser, typically at `http://localhost:3000`.
+
+### Running Tests Locally
+
+*   **Backend Tests**:
+    ```bash
+    cd backend
+    pytest
+    ```
+
+*   **Frontend Tests**:
+    ```bash
+    cd frontend/web-frontend
+    npm test
+    ```
+
+## Project Structure
+
+```
+Flowlet/
+├── backend/                  # Python Flask application
+│   ├── src/                  # Source code for backend services
+│   ├── tests/                # Unit and integration tests for backend
+│   ├── requirements.txt      # Python dependencies
+│   └── Dockerfile            # Dockerfile for backend application
+├── frontend/                 # Frontend applications
+│   ├── web-frontend/         # React-based web application
+│   │   ├── src/              # Source code for web frontend
+│   │   ├── public/           # Static assets
+│   │   ├── package.json      # Node.js dependencies
+│   │   └── Dockerfile        # Dockerfile for web frontend
+│   └── mobile-frontend/      # Placeholder for mobile application
+├── kubernetes/               # Kubernetes manifests and configurations
+│   ├── manifests/            # Core Kubernetes deployments, services, etc.
+│   ├── helm/                 # Helm charts for deploying applications
+│   └── secrets/              # Kubernetes secrets management
+├── infrastructure/           # Infrastructure as Code (IaC) using Terraform
+│   ├── terraform/            # Terraform configurations for cloud resources
+│   └── docker/               # Docker-related infrastructure (e.g., Docker Compose files)
+├── docs/                     # Project documentation
+├── scripts/                  # Utility scripts (e.g., setup, deployment helpers)
+├── tests/                    # High-level E2E tests or shared test utilities
+├── .github/                  # GitHub Actions workflows for CI/CD
+└── README.md                 # Project README and CI/CD documentation
+```
+
+
+
