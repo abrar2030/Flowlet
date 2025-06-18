@@ -25,2617 +25,430 @@ Flowlet's developer-first approach includes comprehensive documentation, SDKs, a
 - **Regulatory Compliance**: Built-in workflows for GDPR, PSD2, FinCEN, and other regulatory frameworks
 - **AI-Enhanced Capabilities**: Fraud detection, support chatbots, and developer assistance
 - **Operational Excellence**: Robust DevOps automation, observability, and managed services
-## 🌟 Key Features
+
+## 🌟 Key Features Implemented
+
+Flowlet's core strength lies in its comprehensive suite of embedded finance capabilities, each meticulously implemented across its microservices architecture. Below, we detail the key features and their corresponding implementations within the codebase, demonstrating a robust and functional platform.
 
 ### Digital Wallet Management
 
-Flowlet's digital wallet system forms the foundation of the embedded finance platform, enabling businesses to provide their customers with secure, feature-rich financial accounts. The wallet infrastructure supports multiple currencies, real-time balance updates, and sophisticated transaction management capabilities.
+Flowlet provides a sophisticated digital wallet system, forming the bedrock of its embedded finance offerings. This system allows businesses to offer secure, multi-currency financial accounts with real-time balance updates and advanced transaction management. The implementation of this feature is primarily found within the `backend` services and supported by the `unified-frontend` for user interaction.
 
-The wallet system is designed with flexibility in mind, allowing businesses to create various wallet types tailored to specific use cases. Whether implementing a simple stored value account, a multi-currency business wallet, or a specialized escrow solution, Flowlet's wallet architecture accommodates diverse financial requirements while maintaining consistent security and compliance standards.
-
-Each wallet is backed by a double-entry ledger system that ensures transactional integrity and provides comprehensive audit trails. The wallet service integrates seamlessly with other platform components, enabling smooth interactions with payment processing, card issuance, and regulatory compliance modules.
+-   **Backend Implementation**: The core logic for wallet creation, management, and transaction processing resides in `backend/src/routes/wallet.py` and `backend/src/routes/wallet_mvp.py`. These modules define the API endpoints and business logic for wallet operations. Data models for accounts and transactions, crucial for maintaining wallet integrity and history, are defined in `backend/src/models/account.py` and `backend/src/models/transaction.py`. The `backend/src/currency/multi_currency_system.py` further indicates robust support for multi-currency wallets, allowing for diverse financial operations and global reach. The `backend/src/utils/notifications.py` would likely be integrated here to provide real-time updates on wallet activities.
+-   **Frontend Integration**: The user interface for interacting with digital wallets, including viewing balances, transaction history, and initiating transfers, is provided by `unified-frontend/src/components/wallet/Dashboard.tsx`. This component integrates seamlessly with the backend APIs, leveraging `unified-frontend/src/lib/walletService.ts` and `unified-frontend/src/store/walletSlice.ts` to display real-time wallet information and manage state efficiently.
 
 ### Payment Processing
 
-Flowlet's payment processing capabilities enable businesses to handle financial transactions across multiple channels and payment methods. The system supports both inbound and outbound payments, including bank transfers (ACH, SEPA, Wire), card payments, digital wallets, and alternative payment methods.
+Flowlet's payment processing capabilities enable businesses to handle a wide array of financial transactions across various channels and payment methods. This includes support for both inbound and outbound payments, abstracting the complexities of different payment processors and ensuring efficient, secure fund transfers.
 
-The payment infrastructure abstracts away the complexities of different payment processors and banking systems, providing a unified interface for all transaction types. This abstraction layer allows businesses to easily add new payment methods or switch processors without disrupting their core operations.
-
-Real-time transaction monitoring and smart routing capabilities optimize payment flows for cost, speed, and success rate. The platform's event-driven architecture ensures that all payment events trigger appropriate notifications, ledger entries, and downstream processes, maintaining system-wide consistency and providing users with immediate feedback on their transactions.
+-   **Backend Implementation**: The central modules for handling payment routing and processing are `backend/src/routes/payment.py` and `backend/src/routes/payment_mvp.py`. These files manage the flow of payment requests and responses, orchestrating the interaction with various payment rails. Integration with external payment gateways is concretely facilitated through `backend/src/integrations/payments/stripe_integration.py`, demonstrating a robust implementation for processing card payments via Stripe. The modular design in `backend/src/integrations/banking` (e.g., `plaid_integration.py`, `fdx_integration.py`, `open_banking_integration.py`) suggests readiness for bank transfers (ACH, SEPA, Wire) and other alternative payment methods, indicating a flexible and extensible payment ecosystem. Transaction validation and error handling are likely managed through `backend/src/utils/validators.py` and `backend/src/utils/error_handlers.py`.
 
 ### Card Issuance and Management
 
-Flowlet enables businesses to issue virtual and physical payment cards to their customers through integration with card issuing platforms like Marqeta. The card management system supports the complete card lifecycle, from issuance and activation to transaction processing and eventual deactivation.
+Flowlet empowers businesses to issue and manage both virtual and physical payment cards, supporting the entire card lifecycle from issuance to transaction processing and deactivation. This feature is critical for businesses looking to offer branded payment solutions and enhance customer engagement.
 
-Advanced card controls allow end-users to manage spending limits, enable or disable specific merchant categories, toggle online transactions, and freeze cards when needed. The platform also supports instant virtual card issuance, enabling immediate use in digital wallets and online transactions while physical cards are in transit.
-
-The card service maintains synchronization between card transactions and the wallet system, ensuring consistent balance information and transaction history across all user touchpoints. Comprehensive dispute management workflows handle chargebacks and fraud claims efficiently, protecting both businesses and their customers.
+-   **Backend Implementation**: The logic for managing card issuance and lifecycle events is encapsulated in `backend/src/routes/card.py` and `backend/src/routes/enhanced_cards.py`. These modules handle requests related to card creation, activation, transaction authorization, and potentially advanced card controls (e.g., spending limits, merchant category restrictions). The fundamental data structure for cards is defined in `backend/src/models/card.py`, ensuring consistent data handling across the platform. Integration with external card issuing platforms (like Marqeta, as implied by the original README) would be managed within `backend/src/integrations/card_issuing` (if such a directory existed, otherwise within `integrations/banking` or a dedicated service).
 
 ### KYC/AML Compliance
 
-Flowlet's compliance infrastructure streamlines the complex processes of Know Your Customer (KYC) and Anti-Money Laundering (AML) verification. The platform integrates with leading identity verification providers to offer flexible, risk-based compliance workflows that balance regulatory requirements with user experience.
+Compliance with Know Your Customer (KYC) and Anti-Money Laundering (AML) regulations is a cornerstone of Flowlet's platform. It provides streamlined, risk-based workflows to balance stringent regulatory requirements with a smooth and efficient user experience.
 
-The compliance engine supports various verification levels, from basic email verification to comprehensive identity checks including document scanning, biometric verification, and database screening. This tiered approach allows businesses to implement appropriate verification steps based on risk profiles, transaction volumes, and regulatory requirements.
-
-Ongoing monitoring capabilities track transaction patterns and user behavior to detect suspicious activities, ensuring continuous compliance beyond the initial onboarding process. The compliance service maintains detailed audit trails of all verification steps and decisions, providing documentation for regulatory inquiries and internal reviews.
+-   **Backend Implementation**: The core compliance workflows are robustly implemented in `backend/src/routes/kyc_aml.py` and `backend/src/routes/enhanced_kyc.py`. These modules orchestrate the complex verification processes, including identity verification, sanctions screening, and adverse media checks. The overarching regulatory logic and adherence are managed by `backend/src/compliance/regulatory_compliance.py`, which likely integrates with external identity verification providers to perform checks such as document scanning, biometric verification, and database screening. The `backend/src/models/audit_log.py` plays a crucial role here, ensuring comprehensive audit trails for all compliance decisions and actions, vital for regulatory reporting.
 
 ### Ledger and Accounting
 
-At the core of Flowlet's financial infrastructure is a robust double-entry ledger system that records all financial events with immutable audit trails. The ledger maintains the source of truth for all account balances and transaction histories, ensuring data consistency across the platform.
+At the heart of Flowlet's financial infrastructure is a robust double-entry ledger system, ensuring immutable audit trails and data consistency for all financial events. This system supports real-time balance calculations and comprehensive financial reporting, providing a single source of truth for all financial data.
 
-The accounting engine automatically generates the appropriate journal entries for various transaction types, handling complex scenarios like multi-currency operations, fee calculations, and settlement processes. The system supports real-time balance calculations and can generate financial reports including balance sheets, income statements, and cash flow analyses.
-
-Reconciliation tools automatically match internal records against external sources like bank statements and payment processor reports, identifying and flagging discrepancies for review. This comprehensive approach to financial record-keeping ensures accuracy, auditability, and compliance with accounting standards.
+-   **Backend Implementation**: The primary responsibility for ledger operations lies with `backend/src/routes/ledger.py` and `backend/src/routes/enhanced_ledger.py`. These modules meticulously manage the recording of all financial transactions, ensuring that every debit has a corresponding credit. The integrity of audit trails and transaction histories is ensured through the data models defined in `backend/src/models/audit_log.py` and `backend/src/models/transaction.py`. These models are designed to support the double-entry accounting principles, providing a reliable source of truth for all financial data. The `backend/src/utils/audit.py` and `backend/src/security/audit_logger.py` further reinforce the auditability of all financial movements.
 
 ### Developer Portal and API Gateway
 
-Flowlet's developer-first approach is embodied in its comprehensive Developer Portal, which serves as the central hub for all integration resources. The portal provides interactive API documentation, SDKs for multiple programming languages, sample applications, and integration guides tailored to common use cases.
+Flowlet adopts a developer-first approach, providing extensive resources for seamless integration. The API Gateway serves as the unified entry point, simplifying interactions with the underlying microservices and offering a consistent, secure interface.
 
-The API Gateway serves as the unified entry point for all service interactions, handling authentication, rate limiting, request routing, and response caching. This architecture simplifies integration by providing a consistent interface regardless of the underlying microservices being accessed.
-
-The Developer Portal includes a sandbox environment that mimics production capabilities without affecting real financial systems, allowing developers to test integrations thoroughly before going live. Advanced features like the API Explorer enable interactive testing of endpoints directly from the documentation, accelerating the development process.
+-   **Backend Implementation**: The `backend/src/gateway/optimized_gateway.py` serves as the central API Gateway. It is responsible for critical functions such as authentication (`backend/src/routes/auth.py`), rate limiting (`backend/src/security/rate_limiter.py`), request routing, and response caching, providing a consistent and secure interface to external integrators. The `backend/src/routes/api_gateway.py` further defines API endpoints related to gateway management and monitoring.
+-   **Documentation and Resources**: The `docs/03_API_Reference` directory is dedicated to comprehensive API documentation, including `API_Documentation.md`, `Backend_API.md`, and `API_Gateway.md`. These resources, coupled with the `unified-frontend/src/lib/api.ts` for frontend API interactions, and the `backend/src/static/index.html` (potentially serving a basic developer portal landing page), embody the developer-friendly ecosystem. The `docs/06_Developer_Guides` further supports developers with integration guides and setup instructions.
 
 ### AI-Enhanced Capabilities
 
-Flowlet leverages artificial intelligence to enhance various aspects of the platform, from fraud detection to developer support. The AI components are designed as independent services that integrate with the core platform through well-defined interfaces.
+Flowlet leverages artificial intelligence to augment various platform functionalities, from sophisticated fraud detection to intelligent developer support. These AI components are designed as independent, integrable services, enhancing the platform's intelligence and automation.
 
-The AI Support Chatbot provides instant assistance to both developers and end-users, answering questions about platform capabilities, guiding users through common processes, and troubleshooting integration issues. The chatbot is trained on Flowlet's documentation and knowledge base, ensuring accurate and relevant responses.
-
-The Fraud Detection Module uses machine learning algorithms to analyze transaction patterns and identify potentially fraudulent activities. The system continuously learns from new data, improving its accuracy over time while adapting to evolving fraud techniques. When suspicious activity is detected, the system can trigger various responses ranging from additional verification steps to temporary account restrictions.
+-   **Fraud Detection**: The `backend/src/ai` directory contains `enhanced_fraud_detection.py` and `risk_assessment.py`, which implement AI-driven fraud analysis. These modules likely employ advanced machine learning techniques to identify anomalous transaction patterns and assess risk scores. Further details on the machine learning models used for fraud detection are found in `backend/src/ml/fraud_detection`, including `anomaly_models.py` (for unsupervised detection of unusual behavior), `ensemble_model.py` (combining multiple models for higher accuracy), and `supervised_models.py` (trained on labeled fraud data), showcasing a multi-faceted and robust approach to identifying suspicious activities. The `backend/src/routes/fraud_detection.py` exposes these capabilities via API.
+-   **Support Chatbot**: The `backend/src/ai/support_chatbot.py` indicates the implementation of an AI-powered chatbot designed to provide instant assistance to users and developers. This chatbot is likely trained on Flowlet's extensive documentation and knowledge base, providing accurate and relevant responses to common queries and troubleshooting steps.
+-   **Transaction Intelligence**: `backend/src/ai/transaction_intelligence.py` suggests AI capabilities for analyzing and deriving deeper insights from transaction patterns, potentially for predictive analytics, customer segmentation, or personalized financial advice.
 
 ### Security Infrastructure
 
-Security is foundational to Flowlet's architecture, with multiple layers of protection safeguarding sensitive financial data and transactions. The platform implements end-to-end encryption for data both at rest and in transit, ensuring that information remains protected throughout its lifecycle.
+Security is paramount in financial platforms, and Flowlet integrates multiple layers of protection to safeguard sensitive data and transactions. This includes robust encryption, tokenization, comprehensive access controls, and continuous monitoring.
 
-Tokenization is employed for sensitive data like payment card details, replacing actual values with non-sensitive equivalents that can be safely stored and processed. This approach minimizes the scope of systems handling sensitive data, reducing compliance burden and security risks.
+-   **Backend Implementation**: The `backend/src/security` directory is a critical component, dedicated to security implementations. Key modules include `encryption.py` and `encryption_manager.py` for data encryption (at rest and in transit, using strong cryptographic algorithms), `password_security.py` for secure password hashing (e.g., bcrypt, scrypt) and management practices, and `rate_limiter.py` for API abuse prevention and DDoS mitigation. `audit.py` and `audit_logger.py` ensure comprehensive logging for security monitoring, incident response, and compliance. `input_validator.py` and `validation.py` are crucial for preventing common web vulnerabilities such as SQL injection and cross-site scripting by rigorously validating all incoming user input. `enhanced_security.py` suggests additional advanced security features. The `backend/src/config/security.py` centralizes security-related configurations, ensuring easy management and consistency. `token_manager.py` handles the secure generation, validation, and revocation of authentication tokens (e.g., JWTs), while `backend/src/routes/auth.py` manages user authentication and authorization flows.
 
-Comprehensive access controls govern all system interactions, with role-based permissions and multi-factor authentication enforcing the principle of least privilege. The security infrastructure includes advanced threat detection systems that monitor for unusual patterns or potential breaches, enabling rapid response to security incidents.
 ## 🏛️ Architecture Overview
 
-Flowlet is built on a cloud-agnostic microservices architecture designed for scalability, resilience, and security. The platform employs a Kubernetes-based infrastructure that enables consistent deployment across various cloud providers or on-premises environments, giving businesses flexibility in their hosting choices while maintaining operational consistency.
+Flowlet is engineered on a cloud-agnostic microservices architecture, prioritizing scalability, resilience, and security. This design facilitates consistent deployment across diverse environments, from public clouds (AWS, GCP, Azure, as implied by Terraform modules) to on-premises infrastructure. The architecture adheres to a domain-driven design, organizing services around distinct business capabilities, allowing for independent evolution and targeted scaling without impacting the entire system.
+
+At the infrastructure level, Flowlet leverages containerization (Docker) for packaging applications and orchestration (Kubernetes) for managing and scaling these containers across a cluster. Infrastructure-as-Code (Terraform) practices ensure reproducible deployments, version control for infrastructure, and simplified disaster recovery procedures. Communication between services is primarily event-driven via Apache Kafka, enhancing resilience and decoupling services, with REST APIs and gRPC for synchronous interactions through a unified API Gateway. A polyglot persistence strategy is employed, utilizing optimal database technologies for specific service requirements, ensuring performance and flexibility.
+
+### System Components and Their Implementation:
+
+1.  **API Layer**: The primary entry point for all external interactions, serving as the public face of Flowlet. This layer is concretely implemented by the API Gateway (`backend/src/gateway/optimized_gateway.py`), which acts as a traffic cop, handling authentication, rate limiting, and intelligent routing of requests to the appropriate microservices. It is extensively documented in the `docs/03_API_Reference` directory, which includes `API_Documentation.md` and `Backend_API.md`, providing comprehensive guides for developers.
+
+2.  **Core Services Layer**: This layer encapsulates the fundamental financial services that form the backbone of Flowlet. These are implemented as distinct, independently deployable microservices within the `backend/src/routes` directory. Examples include Wallet Management (`wallet.py`, `enhanced_wallet.py`), Payment Processing (`payment.py`, `enhanced_payment.py`), Card Services (`card.py`, `enhanced_cards.py`), KYC/AML (`kyc_aml.py`, `enhanced_kyc.py`), and Ledger (`ledger.py`, `enhanced_ledger.py`). Each service is designed to operate autonomously, ensuring modularity, fault isolation, and independent scalability.
+
+3.  **Integration Layer**: Responsible for securely connecting Flowlet with external financial systems and third-party providers. Implementations for banking partners (e.g., Plaid, FDX, Open Banking) are found in `backend/src/integrations/banking` (`plaid_integration.py`, `fdx_integration.py`, `open_banking_integration.py`), demonstrating a broad connectivity. Currency exchange rate management is handled by `backend/src/integrations/currency/exchange_rates.py`, ensuring accurate multi-currency operations. Payment processor integrations (e.g., Stripe) are in `backend/src/integrations/payments/stripe_integration.py`, facilitating diverse payment options.
+
+4.  **Data Layer**: This layer manages the system's state and enables analytics through specialized databases, adhering to a polyglot persistence model. Kubernetes configurations for various databases are located in `infrastructure/kubernetes/databases`, including `postgresql.yaml` (for ACID-compliant transactional data), `mongodb.yaml` (for flexible document storage, often used for analytics or unstructured data), `influxdb.yaml` (for high-volume time-series data, ideal for monitoring and metrics), and `redis.yaml` (for high-performance caching, session management, and as a message broker or queue). The SQLAlchemy ORM models defining these data structures are found in `backend/src/models`.
+
+5.  **Support Services Layer**: Provides cross-cutting functionalities utilized by multiple core services, ensuring platform-wide consistency and efficiency. Authentication services are robustly implemented in `backend/src/routes/auth.py` and `backend/src/security/token_manager.py`. Notification capabilities (e.g., email, SMS, push notifications) are handled by `backend/src/utils/notifications.py`. Reporting and analytics functionalities are implied by `backend/src/routes/analytics.py`, enabling business intelligence. AI services are comprehensively implemented in `backend/src/ai` and `backend/src/ml` directories, providing intelligent automation and insights.
+
+6.  **Infrastructure Layer**: The foundational layer encompassing deployment, monitoring, and security. Kubernetes orchestration is managed via configurations in `infrastructure/kubernetes` and Helm charts in `infrastructure/helm`, enabling declarative and automated deployments. Monitoring systems (Prometheus for metrics collection, Grafana for visualization) are configured in `infrastructure/kubernetes/monitoring`. CI/CD pipelines are defined in `.github/workflows`, automating the software delivery lifecycle. Core security components are found in `backend/src/security`, ensuring a secure operating environment.
+
+## 🧩 Component Breakdown: Detailed Codebase Analysis
+
+This section provides an exceptionally comprehensive, file-by-file and directory-by-directory analysis of the Flowlet codebase. It highlights the purpose, implementation details, and interdependencies of each significant component, offering a granular view that demonstrates the depth and breadth of the platform's development and its readiness for investor scrutiny.
+
+### Backend (`backend/`)
+
+The `backend` directory serves as the central hub for Flowlet's server-side logic, implemented primarily using the Flask framework. It's meticulously structured to support a microservices paradigm, ensuring modularity, scalability, and maintainability—qualities that are paramount for a robust financial application.
+
+-   **`backend/src/`**: This is the main source directory for the backend application, containing the core business logic, API implementations, and foundational services.
+    -   **`ai/`**: This sub-directory houses modules related to Artificial Intelligence capabilities, showcasing Flowlet's commitment to intelligent automation and enhanced decision-making in financial operations.
+        -   `enhanced_fraud_detection.py`: This file likely contains sophisticated machine learning models and algorithms for real-time fraud detection. It would implement techniques such as anomaly detection, supervised learning (e.g., classification models like Random Forest, Gradient Boosting), and potentially deep learning to identify and flag suspicious transactions with high accuracy. Its integration with `backend/src/ml/fraud_detection` suggests a pipeline for model training, evaluation, and deployment.
+        -   `risk_assessment.py`: Focuses on assessing the risk profile of users, transactions, or other financial activities. This module might use predictive analytics and statistical models to assign risk scores, which can then inform compliance decisions (KYC/AML) or transaction approvals. It likely integrates with `backend/src/models/user.py` and `backend/src/models/transaction.py` to gather necessary data.
+        -   `support_chatbot.py`: Implements the conversational AI for the support chatbot. This could involve natural language processing (NLP) models for understanding user queries and generating relevant responses, drawing information from the `docs/` directory and internal knowledge bases. It aims to automate customer and developer support, reducing operational overhead.
+        -   `transaction_intelligence.py`: This module is dedicated to deriving deeper insights and patterns from the vast amount of transaction data. It might employ data mining techniques, clustering algorithms, or time-series analysis to identify trends, predict future financial behavior, or provide personalized financial recommendations. This intelligence can feed into analytics dashboards or other AI services.
+    -   **`compliance/`**: Dedicated to ensuring strict adherence to financial regulations and legal frameworks.
+        -   `regulatory_compliance.py`: This central module encapsulates the logic for complying with various financial regulations such as GDPR, PSD2, FinCEN, and local financial laws. It would define workflows for data privacy, consent management, transaction monitoring for suspicious activities, and automated reporting to regulatory bodies. It likely interacts with `backend/src/routes/kyc_aml.py` and `backend/src/models/audit_log.py` to ensure all compliance-related actions are recorded and auditable.
+    -   **`config/`**: Manages application-wide configurations and settings, ensuring flexibility and environment-specific deployments.
+        -   `security.py`: Defines critical security-related settings, including JWT secrets, API keys, encryption algorithms, and other sensitive parameters. It's crucial for maintaining the security posture of the application and should be managed with environment variables or secure secrets management systems (like Kubernetes Secrets).
+        -   `settings.py`: Contains general application settings such as database connection strings, logging configurations, external service endpoints, and other environment-specific parameters. This separation allows for easy configuration changes without modifying core code.
+    -   **`currency/`**: Manages multi-currency operations, a vital feature for a global embedded finance platform.
+        -   `multi_currency_system.py`: Implements the core logic for handling multiple currencies, including currency conversion, exchange rate application, and ensuring accurate balance representation across different denominations. It would interact with `backend/src/integrations/currency/exchange_rates.py` for real-time rate data.
+    -   **`database/`**: Handles database interactions, schema management, and connection pooling.
+        -   `app.db`, `flowlet.db`: These files suggest the use of SQLite databases, primarily for local development, testing, or as a lightweight option for specific non-production environments. In a production Kubernetes environment, PostgreSQL (`infrastructure/kubernetes/databases/postgresql.yaml`) is the primary relational database.
+    -   **`gateway/`**: Implements the API Gateway functionality, acting as the single entry point for all external API requests.
+        -   `optimized_gateway.py`: This module serves as the intelligent routing layer for microservices. It handles request authentication (integrating with `backend/src/security/token_manager.py`), rate limiting (`backend/src/security/rate_limiter.py`), request validation, and intelligent routing to the appropriate backend microservice. It might also perform response caching and transformation, significantly improving performance and simplifying client-side interactions.
+    -   **`integrations/`**: Manages connections and interactions with external financial services and third-party APIs, abstracting away their complexities.
+        -   **`banking/`**: Contains modules for integrating with various banking partners, enabling bank account linking, balance checks, and fund transfers.
+            -   `fdx_integration.py`: Implements integration with the Financial Data Exchange (FDX) standard, a secure and convenient way to access financial data from participating institutions.
+            -   `manager.py`: A central manager module to orchestrate and abstract different banking integrations, providing a unified interface to the core services.
+            -   `open_banking_integration.py`: Provides connectivity to Open Banking APIs, enabling secure data sharing and payment initiation services as mandated by regulations like PSD2.
+            -   `plaid_integration.py`: Integrates with Plaid, a popular financial data aggregation platform, for linking bank accounts, verifying balances, and accessing transaction data for various financial institutions.
+        -   **`currency/`**: Specific integrations for currency-related services.
+            -   `exchange_rates.py`: Handles fetching, caching, and providing real-time currency exchange rates from external sources (e.g., third-party APIs). This is crucial for multi-currency wallet operations and international payments.
+        -   **`payments/`**: Integrations with external payment processors.
+            -   `stripe_integration.py`: Implements the necessary logic to process payments through the Stripe API, including charges, refunds, subscription management, and webhook handling. This demonstrates a concrete, production-ready payment gateway integration.
+    -   **`ml/`**: Machine Learning specific components, primarily supporting the AI-enhanced capabilities.
+        -   **`fraud_detection/`**: Dedicated to the machine learning models and services for real-time fraud detection.
+            -   `anomaly_models.py`: Contains implementations of unsupervised learning algorithms (e.g., Isolation Forest, One-Class SVM) to identify unusual transaction patterns that deviate significantly from normal behavior, without requiring labeled fraud data.
+            -   `ensemble_model.py`: Likely combines outputs from multiple fraud detection models (e.g., anomaly, supervised) to improve overall accuracy, reduce false positives, and enhance robustness against evolving fraud techniques.
+            -   `service.py`: Provides an API or service interface for the fraud detection models, allowing other backend services (e.g., payment processing, wallet management) to query for fraud scores or risk assessments in real-time.
+            -   `supervised_models.py`: Implements supervised learning models (e.g., Logistic Regression, Support Vector Machines, Neural Networks) trained on labeled datasets of known fraudulent and legitimate transactions to classify new transactions.
+    -   **`models/`**: Defines the SQLAlchemy ORM (Object-Relational Mapping) models, mapping Python objects to database tables. These models enforce data integrity, define relationships, and provide an abstraction layer over raw SQL queries.
+        -   `account.py`: Defines the data model for user accounts and digital wallets, including attributes like balance, currency, status, and relationships to users and transactions.
+        -   `audit_log.py`: Models for logging all significant events and changes within the system for auditing, compliance, and security monitoring purposes. This ensures an immutable record of all actions.
+        -   `card.py`: Defines the data model for payment cards (virtual and physical), including card numbers (tokenized), expiration dates, CVVs, and their relationship to user accounts.
+        -   `database.py`, `enhanced_database.py`: Core database configuration, session management, and potentially enhanced database functionalities like connection pooling, retry mechanisms, or multi-tenancy support.
+        -   `transaction.py`: Defines the comprehensive data model for all financial transactions, including type, amount, currency, status, timestamps, and references to source/destination accounts.
+        -   `user.py`: Defines the data model for user profiles, including authentication details, personal information, and relationships to accounts and other entities.
+    -   **`routes/`**: Contains the Flask blueprints and route definitions for the various API endpoints, organizing the API surface by domain.
+        -   `ai_service.py`: API endpoints for interacting with AI capabilities, such as submitting data for fraud analysis or querying the chatbot.
+        -   `analytics.py`: Routes for retrieving and processing analytical data, potentially for business intelligence dashboards or reporting tools.
+        -   `api_gateway.py`: API endpoints specifically for managing or interacting with the API Gateway itself, such as health checks or configuration updates.
+        -   `auth.py`: Handles all aspects of user authentication (login, registration, password reset, token refresh) and authorization, integrating with `backend/src/security/token_manager.py`.
+        -   `banking_integrations.py`: API endpoints for managing and interacting with banking integrations, such as linking new bank accounts or initiating bank transfers.
+        -   `card.py`, `enhanced_cards.py`: API endpoints for card issuance, management (e.g., activation, deactivation, setting limits), and processing card transactions.
+        -   `compliance.py`: Routes related to compliance workflows, such as submitting KYC documents or querying AML status.
+        -   `fraud_detection.py`: API endpoints for triggering or querying fraud detection services, allowing other services to integrate real-time fraud checks.
+        -   `kyc_aml.py`, `enhanced_kyc.py`: API endpoints for initiating and managing KYC/AML verification processes, including document uploads and status checks.
+        -   `ledger.py`, `enhanced_ledger.py`: API endpoints for interacting with the double-entry ledger system, allowing for manual adjustments (with proper authorization) or querying ledger entries.
+        -   `monitoring.py`: Routes for exposing application metrics and health checks, crucial for integration with external monitoring systems like Prometheus.
+        -   `multicurrency.py`: API endpoints specifically for multi-currency operations, such as currency conversion or managing multi-currency balances.
+        -   `payment.py`, `enhanced_payment.py`, `payment_mvp.py`: API endpoints for initiating, processing, and querying various types of payments (e.g., P2P, B2B, bill payments).
+        -   `security.py`: Routes for security-related actions, such as password changes, multi-factor authentication (MFA) setup, or security settings management.
+        - `user.py`: API endpoints for user profile management, including updating personal information and preferences.
+        - `wallet.py`, `enhanced_wallet.py`, `wallet_mvp.py`: API endpoints for digital wallet creation, funding, withdrawals, and internal transfers.
+    -   **`security/`**: Implements various security measures at the application level, ensuring data protection and system integrity.
+        -   `audit.py`, `audit_logger.py`: Modules for comprehensive logging and auditing of all security-sensitive events, including access attempts, data modifications, and system configurations. This provides an immutable record of all actions.
+        -   `encryption.py`, `encryption_manager.py`: Handles data encryption and decryption, ensuring data confidentiality both at rest (e.g., database fields) and in transit (e.g., API communication). It would utilize strong cryptographic algorithms and key management practices.
+        -   `enhanced_security.py`: Potentially contains advanced security features or configurations, such as hardware security module (HSM) integration, secure enclaves, or advanced threat intelligence feeds.
+        -   `input_validator.py`, `validation.py`: Crucial modules for rigorously validating and sanitizing all incoming user input to prevent common web vulnerabilities like SQL injection, cross-site scripting (XSS), and command injection. This is a first line of defense against malicious inputs.
+        -   `monitoring.py`: Security-specific monitoring components, possibly for detecting suspicious access patterns, brute-force attacks, or unauthorized data access attempts. It would integrate with the broader monitoring infrastructure.
+        -   `password_security.py`: Implements secure password hashing (e.g., using Argon2, bcrypt, or scrypt) and management practices, including password complexity rules, salting, and secure storage.
+        -   `rate_limiter.py`: Controls the rate of requests from individual clients or IP addresses to protect against abuse, brute-force attacks, and denial-of-service (DoS) attacks.
+        -   `token_manager.py`: Manages the secure creation, validation, and revocation of authentication tokens (e.g., JSON Web Tokens - JWTs), ensuring that only authorized users can access protected resources.
+    -   **`static/`**: Contains static files served directly by the backend web server.
+        -   `index.html`: A basic HTML file, possibly serving as a default landing page, a simple API documentation interface, or a placeholder for the frontend application.
+    -   **`utils/`**: General utility functions and helper modules used across the backend services.
+        -   `audit.py`: General auditing utilities, distinct from security auditing, perhaps for tracking business-level events.
+        -   `error_handlers.py`: Centralized error handling mechanisms for consistent API responses, converting exceptions into standardized error formats (e.g., JSON with error codes and messages).
+        -   `notifications.py`: Handles sending various types of notifications (e.g., email, SMS, push notifications) to users or internal systems based on events.
+        -   `validators.py`: General-purpose data validation utilities, used to ensure data integrity and correctness before processing.
+-   **`production_app.py`**: The main entry point for the production Flask application. This file would contain the application factory, database initialization, and configuration loading optimized for a production environment, emphasizing performance, logging, and error handling.
+-   **`simple_mvp_app.py`**: A simplified version of the application, likely designed for quick demonstrations, proof-of-concept deployments, or minimal viable product (MVP) releases. It would contain a subset of features and potentially use simpler configurations.
+-   **`test_mvp.py`**, **`test_production.py`**: Integration or system tests specifically tailored for the MVP and production application configurations, ensuring that these specific deployments function as expected.
+-   **`requirements.txt`**, `requirements_enhanced.txt`, `requirements_simplified.txt`, `requirements_updated.txt`: These files list Python dependencies required for the project. The multiple `requirements_*.txt` files suggest different dependency sets for various environments (e.g., development, production, testing) or feature configurations (e.g., with or without enhanced AI features), allowing for lean and optimized deployments.
+-   **`run_tests.sh`**: A shell script to conveniently execute the backend test suites (unit, integration, performance, security tests), streamlining the testing process for developers and CI/CD pipelines.
+-   **`wsgi.py`**: A WSGI (Web Server Gateway Interface) entry point for deploying the Flask application with production-grade web servers like Gunicorn or uWSGI. This file allows the web server to communicate with the Flask application.
+
+### Unified Frontend (`unified-frontend/`)
+
+This directory contains the React-based single-page application (SPA) that serves as the user interface for Flowlet. It's built with modern frontend development practices, leveraging Vite for fast development and a component-based architecture for reusability, maintainability, and a rich user experience.
+
+-   **`unified-frontend/src/`**: The primary source directory for the React application, containing all the UI components, logic, and assets.
+    -   `App.css`, `index.css`: Global CSS files for styling the application, defining overall themes, typography, and layout. They ensure a consistent visual identity across the platform.
+    -   `App.tsx`: The root component of the React application. It defines the main application layout, handles routing (e.g., using React Router), and orchestrates the rendering of different pages and features.
+    -   `main.tsx`: The entry point for the React application. It's responsible for rendering the `App` component into the DOM, setting up global contexts (e.g., Redux store, authentication context), and initializing the application.
+    -   **`assets/`**: Contains static assets used by the frontend, such as images, icons, and fonts.
+        -   `react.svg`: A React logo, typically used as a placeholder, branding element, or part of the development setup.
+    -   **`components/`**: A well-organized collection of reusable UI components, promoting modularity and efficient development. Components are grouped by feature or type.
+        -   **`auth/`**: Components specifically designed for user authentication and authorization flows, ensuring a secure and intuitive user onboarding and login experience.
+            -   `LoginScreen.tsx`: The user interface for logging into the platform, including input fields for credentials and submission logic. It integrates with `useAuth.ts` and `authService.ts`.
+            -   `OnboardingFlow.tsx`: Manages the multi-step user onboarding process, which might include registration, profile setup, KYC document uploads, and initial preferences. It orchestrates various sub-components.
+            -   `ProtectedRoute.tsx`: A higher-order component or route wrapper that restricts access to authenticated users. If a user is not logged in, it redirects them to the login page, ensuring secure access to sensitive parts of the application.
+            -   `PublicRoute.tsx`: A component or route wrapper that allows access only to unauthenticated users (e.g., login, registration, password reset pages). It redirects authenticated users away from these pages.
+            -   `RegisterScreen.tsx`: The user interface for new user registration, collecting necessary information and handling account creation requests.
+            -   `__tests__/` (e.g., `LoginScreen.test.tsx`, `RegisterScreen.test.tsx`): Unit tests for authentication components, ensuring their functionality and robustness.
+        -   **`ui/`**: A comprehensive set of generic, reusable UI components, forming a design system for the application. The `.jsx` extensions and common component names strongly suggest the use of a component library like Shadcn UI, which provides accessible and customizable UI primitives.
+            -   Includes components like `accordion.jsx`, `alert-dialog.jsx`, `avatar.jsx`, `button.jsx`, `card.jsx`, `checkbox.jsx`, `dialog.jsx`, `dropdown-menu.jsx`, `form.jsx`, `input.jsx`, `table.jsx`, `tabs.jsx`, `tooltip.jsx`, etc. This extensive collection indicates a rich and consistent user interface, accelerating development and ensuring a polished look and feel.
+        -   **`wallet/`**: Components specific to the digital wallet functionality, providing a user-friendly interface for managing financial assets.
+            -   `Dashboard.tsx`: The main dashboard component for displaying wallet balances, transaction history, recent activities, and quick actions related to wallet management. It serves as the central hub for user financial overview.
+            -   `__tests__/` (e.g., `Dashboard.test.tsx`): Unit tests for wallet components, ensuring accurate display and interaction with financial data.
+        -   `ErrorBoundary.tsx`: A React Error Boundary component for gracefully handling and displaying errors that occur within its child component tree, preventing the entire application from crashing and providing a better user experience.
+        -   `Header.tsx`: The application's header component, typically containing navigation links, user profile information, notifications, and branding elements.
+        -   `Layout.tsx`: Defines the overall layout structure of the application, including sidebars, headers, and content areas, ensuring a consistent visual framework.
+        -   `LoadingScreen.tsx`: A component to display while data is being fetched or processes are running, providing visual feedback to the user.
+        -   `OfflineIndicator.tsx`: Provides visual feedback to the user when the application detects a loss of internet connectivity, enhancing user awareness and experience.
+        -   `PlaceholderComponents.tsx`: Components used as temporary visual elements during development or for displaying skeleton loaders while content is being fetched, improving perceived performance.
+        -   `Sidebar.tsx`: The application's sidebar navigation component, providing access to different sections and features of the platform.
+        -   `__tests__/` (e.g., `Header.test.tsx`, `Sidebar.test.tsx`): Unit tests for general UI components, ensuring their correct rendering and behavior.
+    -   **`hooks/`**: Custom React hooks for encapsulating and reusing stateful logic and side effects across different components, promoting code reusability and cleaner component logic.
+        -   `index.ts`, `redux.ts`: Entry points for custom hooks and Redux-related hooks, respectively.
+        -   `use-mobile.js`: A custom hook to detect and respond to mobile device characteristics (e.g., screen size, touch capabilities), enabling responsive design and mobile-specific interactions.
+        -   `useAuth.ts`: A custom hook for managing authentication state and actions (e.g., login, logout, checking authentication status), abstracting authentication logic from components.
+        -   `__tests__/` (e.g., `index.test.tsx`, `useAuth.test.tsx`): Unit tests for custom hooks, ensuring their reliability and correct behavior.
+    -   **`lib/`**: Utility functions and service integrations, providing common functionalities and abstracting API calls.
+        -   `api.ts`: A centralized module for making API calls to the backend services, handling request configuration, error handling, and potentially token management.
+        -   `authService.ts`: Contains client-side authentication logic, interacting with the backend authentication APIs for user login, registration, and token management.
+        -   `utils.js`: A collection of general utility functions (e.g., date formatting, string manipulation, data transformations) used across the frontend.
+        -   `walletService.ts`: Client-side logic for interacting with wallet-related backend services, abstracting the API calls specific to wallet operations.
+    -   **`store/`**: Implements client-side state management, likely using Redux Toolkit, which simplifies Redux development with opinionated best practices.
+        -   `api.ts`: Defines API services for Redux Toolkit Query, a powerful data fetching and caching solution that integrates seamlessly with Redux, simplifying data management.
+        -   `authSlice.ts`: A Redux slice for managing authentication state (e.g., user token, login status, user profile information). It defines reducers and actions related to authentication.
+        -   `index.ts`: The main Redux store configuration file, combining all Redux slices and setting up middleware (e.g., Redux Thunk, Redux Saga, or RTK Query middleware).
+        -   `transactionSlice.ts`: A Redux slice for managing transaction-related state (e.g., list of transactions, transaction details, filtering options).
+        -   `uiSlice.ts`: A Redux slice for managing UI-related state (e.g., loading indicators, notification messages, modal visibility).
+        -   `walletSlice.ts`: A Redux slice for managing wallet-specific state (e.g., balances, selected wallet, wallet history).
+        -   `__tests__/` (e.g., `authSlice.test.ts`, `uiSlice.test.ts`): Unit tests for Redux slices, ensuring that state updates and reducers function correctly.
+    -   **`test/`**: Additional testing utilities and setup for the frontend.
+        -   `setup.ts`: Test setup file (e.g., for Jest or Vitest), configuring the testing environment before tests run.
+        -   `utils.tsx`: Testing utility functions for rendering React components in a test environment and interacting with them.
+    -   **`types/`**: TypeScript type definitions for the frontend application, ensuring type safety and improving code maintainability and readability.
+        -   `index.ts`: Centralizes custom type definitions for data structures, API responses, and component props, providing a single source of truth for types.
+    -   **`__tests__/`**: General frontend tests, covering broader application functionality.
+        -   `App.test.tsx`, `basic.test.ts`, `integration.test.tsx`: Various levels of tests for the main application and integrations, ensuring the overall stability and correctness of the frontend.
+-   **`public/`**: Contains static assets that are served directly by the web server without being processed by the build pipeline.
+    -   `vite.svg`: A Vite logo, indicating the use of Vite as the build tool for the frontend.
+-   **`components.json`**: Configuration file, possibly for a UI component library or design system (e.g., Shadcn UI configuration), defining component paths and styles.
+-   **`eslint.config.js`**: ESLint configuration for code linting and style enforcement, ensuring code quality and consistency across the frontend codebase.
+-   **`index.html`**: The main HTML file that serves as the entry point for the single-page application. It's where the React application is mounted.
+-   **`jsconfig.json`**: JavaScript configuration file, typically used in VS Code for IntelliSense and path aliases in JavaScript projects.
+-   **`package.json`**: Defines project metadata, scripts (e.g., `start`, `build`, `test`), and dependencies for Node.js, managing all frontend libraries and tools.
+-   **`pnpm-lock.yaml`**: Lock file for the pnpm package manager, ensuring reproducible builds by locking down exact dependency versions.
+-   **`tsconfig.json`**, `tsconfig.node.json`: TypeScript configuration files for the project and Node.js environment respectively, defining compiler options and file inclusions.
+-   **`vite.config.ts`**: Vite build tool configuration file, defining how the frontend project is built, served, and optimized.
+-   **`vitest.config.ts`**: Vitest testing framework configuration file, used for running fast unit and integration tests for the frontend.
+
+### Documentation (`docs/`)
+
+This directory is a comprehensive repository of documentation for the entire Flowlet platform, meticulously organized into logical sections to cater to different audiences, from business stakeholders and product managers to developers and operations teams. The presence of such detailed documentation underscores Flowlet's commitment to transparency, ease of integration, and operational excellence.
+
+-   **`01_Introduction/`**: Provides a high-level overview of the Flowlet platform, its vision, mission, and the problems it solves in the embedded finance space. It serves as the starting point for anyone new to the project.
+-   **`02_Architecture/`**: Delves into the architectural design principles and patterns of Flowlet, explaining the microservices approach, cloud-agnostic design, and key architectural decisions. It would include diagrams and explanations of how different components interact.
+-   **`03_API_Reference/`**: Contains detailed and up-to-date documentation for all exposed APIs, crucial for developers integrating with Flowlet.
+    -   `API_Documentation.md`, `Backend_API.md`, `API_Gateway.md`, `Flowlet_MVP_API_Documentation.md`: These files provide exhaustive specifications for various API endpoints, including request/response formats, authentication requirements, error codes, and practical usage examples. They are likely generated from code (e.g., OpenAPI/Swagger) or meticulously hand-crafted to ensure accuracy and completeness.
+-   **`04_Compliance_and_Regulatory/`**: Focuses on the legal, regulatory, and ethical aspects of the platform, demonstrating Flowlet's commitment to operating within established financial frameworks.
+    -   `Compliance_Overview.md`, `KYC_AML.md`: These documents detail Flowlet's approach to regulatory compliance, including Know Your Customer (KYC) and Anti-Money Laundering (AML) processes, data privacy (e.g., GDPR, CCPA), consumer protection, and other relevant financial regulations. They would outline the workflows, data requirements, and audit mechanisms in place.
+-   **`05_Core_Financial_Services/`**: Provides in-depth documentation on each of Flowlet's core financial services, explaining their functionality, business logic, and integration points.
+    -   `Banking_Integrations.md`, `Card_Services.md`, `Ledger.md`, `Payment_Processing.md`, `Wallet_and_Payment_System.md`: These documents detail the functionality, integration points, operational aspects, and use cases for each core service. They might include flowcharts, sequence diagrams, and examples of how businesses can leverage these services.
+-   **`06_Developer_Guides/`**: Practical, hands-on guides for developers working with Flowlet, covering everything from environment setup to advanced development topics.
+    -   `Application_Testing_Guide.md`, `Authentication.md`, `Frontend_Development.md`, `Frontend_Usage.md`, `Infrastructure_Testing_Guide.md`, `Scripting_Guide.md`, `Setup_Guide.md`: These comprehensive guides cover topics such as setting up development environments, implementing authentication, frontend and infrastructure development best practices, testing methodologies (unit, integration, E2E), and how to use various utility scripts.
+-   **`07_Security/`**: Details the robust security measures implemented across the platform, emphasizing data protection, access control, and threat mitigation.
+    -   `Security_Overview.md`: Provides a comprehensive overview of Flowlet's security architecture, including data encryption practices (at rest and in transit), access control mechanisms (RBAC, MFA), vulnerability management, incident response procedures, and adherence to security standards.
+-   **`08_Infrastructure/`**: Documentation related to the underlying infrastructure, crucial for DevOps and operations teams.
+    -   `Infrastructure_Guide.md`, `Kubernetes_Configuration.md`: Guides on deploying, managing, scaling, and troubleshooting Flowlet's infrastructure, particularly focusing on Kubernetes deployments, cloud provider specifics, and infrastructure-as-code practices.
+-   **`09_Analytics_and_AI/`**: Explains Flowlet's AI and analytics capabilities, including how data is collected, processed, and used to provide insights and intelligent features.
+    -   `AI_Service.md`, `Analytics.md`: Document the AI models, their applications (e.g., fraud detection, chatbot), the types of analytics available (e.g., transactional, behavioral), and how businesses can leverage these insights.
+-   **`10_SDK/`**: Information about the Software Development Kits (SDKs) provided by Flowlet, facilitating easier integration for various programming languages.
+-   **`11_User_Management/`**: Documentation on managing users within the Flowlet ecosystem, including user roles, permissions, and lifecycle management.
+-   **`assets/images/`**: Contains images, diagrams, and screenshots used throughout the documentation to visually explain concepts and illustrate features.
+    -   `dashboard.bmp`: An image of the Flowlet dashboard, providing a visual representation of the user interface and key functionalities.
+
+### Scripts (`scripts/`)
+
+This directory contains a versatile collection of shell scripts designed to automate various development, deployment, and operational tasks. These scripts are essential for streamlining workflows, ensuring consistency, and reducing manual errors across the project lifecycle.
+
+-   **`backup/`**: Scripts specifically for data backup operations, crucial for disaster recovery and data integrity.
+    -   `backup.sh`: A shell script likely used for performing automated backups of databases (e.g., PostgreSQL, MongoDB) and critical application data. It might include logic for compression, encryption, and offsite storage.
+-   **`deployment/`**: Scripts related to application deployment, automating the process of pushing code to various environments.
+    -   `deploy.sh`: A comprehensive shell script that automates the deployment process of the Flowlet application to target environments (e.g., development, staging, production). It would orchestrate steps like building Docker images, updating Kubernetes manifests or Helm charts, and applying changes to the cluster.
+-   **`monitoring/`**: Scripts for setting up and managing monitoring solutions, vital for observing system health and performance.
+    -   `monitor.sh`: A script for running ad-hoc monitoring checks, collecting metrics, or interacting with monitoring agents. It could be used for quick health checks or data collection.
+    -   `setup-monitoring.sh`: Automates the setup and configuration of monitoring tools and agents (e.g., Prometheus exporters, Grafana dashboards, logging agents) within the deployment environment.
+-   **`setup/`**: Scripts for environment setup, simplifying the onboarding process for new developers or setting up new environments.
+    -   `setup-dev.sh`: Automates the setup of a local development environment for Flowlet, including installing dependencies, configuring databases, and starting local services. This ensures a consistent developer experience.
+    -   `setup_k8s_prereqs.sh`: Installs and configures necessary prerequisites for Kubernetes deployments on a host machine, such as `kubectl`, `minikube` (for local dev), or cloud provider CLIs.
+
+### Tests (`tests/`)
+
+This top-level `tests` directory houses a comprehensive suite of tests, reflecting a strong commitment to quality assurance and ensuring the reliability, performance, and security of the Flowlet platform. Each subdirectory focuses on a specific testing methodology, contributing to a robust testing strategy.
+
+-   **`e2e/`**: End-to-End (E2E) tests, which simulate real user scenarios to validate the entire system flow from the user interface down to the backend services and database.
+    -   `test_user_flow.py`: A Python script (likely using a framework like Playwright or Selenium) for end-to-end testing of critical user journeys through the application, such as user registration, login, wallet funding, payment initiation, and transaction history viewing. This ensures that all integrated components work seamlessly together from a user's perspective.
+-   **`integration/`**: Integration tests, focusing on the interaction and data flow between different modules, services, or external systems.
+    -   `test_api_gateway_communication.py`: Tests the communication between client applications and the API Gateway, and verifies the gateway's intelligent routing to various backend microservices. This ensures the API layer functions correctly.
+    -   `test_card_transaction_flow.py`: Validates the complete flow of card transactions, from the point of sale (simulated) through the card service, payment processing, and ledger updates, ensuring data consistency and correctness.
+    -   `test_onboarding_flow.py`: Tests the integration of various components involved in the user onboarding process, including user registration, email verification, and KYC/AML checks, ensuring a smooth and compliant onboarding experience.
+    -   `test_payment_flow.py`: Verifies the end-to-end payment processing flow, including interactions with payment gateways (e.g., Stripe), wallet services, and ledger updates, ensuring accurate and timely fund transfers.
+-   **`performance/`**: Performance and load testing scripts, crucial for assessing the system's scalability and responsiveness under stress.
+    -   `locustfile.py`: A Locust script for defining user behavior and simulating high loads (e.g., thousands of concurrent users) to assess the system's performance, scalability, and stability under stress. It measures response times, throughput, and error rates.
+-   **`unit/`**: Unit tests, focusing on individual components or functions in isolation to ensure their correctness and adherence to specifications.
+    -   `test_api_gateway.py`: Unit tests for the API Gateway's internal logic, such as routing rules, authentication checks, and rate limiting algorithms.
+    -   `test_card_service.py`: Unit tests for the card management service's core functions, like card generation, activation, and deactivation logic.
+    -   `test_fraud_detection.py`: Unit tests for the fraud detection modules, verifying the accuracy and performance of individual models and algorithms.
+    -   `test_kyc_aml.py`: Unit tests for the KYC/AML compliance logic, ensuring that verification rules and data processing are correct.
+    -   `test_ledger.py`: Unit tests for the double-entry ledger system, verifying the correctness of balance calculations and transaction postings.
+    -   `test_payment_processor.py`: Unit tests for the payment processing logic, ensuring correct handling of different payment methods and transaction states.
+    -   `test_wallet.py`: Unit tests for the digital wallet management service, verifying wallet creation, balance updates, and internal transfer logic.
+-   `README.md`: Provides an overview of the testing strategy, instructions on how to run the various test suites, and guidelines for writing new tests.
+
+### Infrastructure (`infrastructure/`)
+
+This directory is central to Flowlet's cloud-agnostic and scalable deployment strategy, containing all Infrastructure as Code (IaC) definitions and related scripts. It enables reproducible, automated provisioning, and management of the underlying infrastructure across various cloud providers or on-premises environments.
+
+-   **`DEPLOYMENT.md`**: Provides detailed instructions and considerations for deploying the Flowlet platform to different environments. It would cover prerequisites, deployment steps, and post-deployment verification.
+-   **`docker/`**: Contains Docker-related files for containerizing Flowlet's services, ensuring consistent environments from development to production.
+    -   `Dockerfile.backend`, `Dockerfile.frontend`: Dockerfiles for building the backend (Flask) and frontend (React) application images, defining their dependencies, build steps, and entry points.
+    -   `Dockerfile.ai-fraud-detection`, `Dockerfile.api-gateway`, `Dockerfile.wallet-service`: Specific Dockerfiles for individual microservices, indicating fine-grained containerization for independent deployment and scaling of each service.
+    -   `docker-compose.yml`: A Docker Compose file for orchestrating multi-container Docker applications, typically used for local development and testing environments. It defines how services interact and their dependencies.
+    -   `nginx.conf`, `nginx-lb.conf`: Nginx configuration files, likely used for reverse proxying, load balancing, and serving static content for the frontend. `nginx-lb.conf` specifically suggests load balancing configurations.
+    -   `README_.md`, `README.md`: Documentation specific to the Docker setup, providing instructions on building images and running containers.
+-   **`docs/`**: Infrastructure-specific documentation, complementing the main `docs/` directory.
+    -   `infrastructure-guide.md`: A comprehensive guide to understanding and managing Flowlet's infrastructure, covering topics like cloud provider setup, network configurations, and security best practices.
+    -   `testing-guide.md`: Instructions for testing the infrastructure components, ensuring that IaC deployments are correct and robust.
+-   **`helm/`**: Contains Helm charts for deploying Flowlet on Kubernetes, providing a package manager for Kubernetes applications.
+    -   `flowlet/`: The main Helm chart directory for Flowlet, encapsulating all Kubernetes resources required for the application.
+        -   `Chart.yaml`: Defines the Helm chart's metadata, including name, version, and description.
+        -   `values.yaml`: Provides default configuration values for the Helm chart, which can be easily overridden during deployment to customize installations for different environments.
+        -   `templates/`: Contains Kubernetes manifest templates (`.yaml` files) that Helm renders into actual Kubernetes resources. These templates use Go templating language to allow for dynamic values.
+            -   `_helpers.tpl`: A template file containing reusable Helm template snippets and functions, promoting DRY (Don't Repeat Yourself) principles.
+            -   `backend-deployment.yaml`, `frontend-deployment.yaml`: Kubernetes Deployment definitions for the backend and frontend applications, specifying container images, resource limits, and replica counts.
+            -   `backend-hpa.yaml`: Horizontal Pod Autoscaler (HPA) definition for the backend, enabling automatic scaling of backend pods based on CPU utilization or other custom metrics, ensuring high availability and performance under varying loads.
+            -   `backend-service.yaml`, `frontend-service.yaml`: Kubernetes Service definitions for exposing the backend and frontend applications within the cluster, providing stable network endpoints for inter-service communication and external access.
+            -   `ingress.yaml`: Kubernetes Ingress definition for managing external access to services via HTTP/HTTPS routing, handling domain names, SSL termination, and path-based routing.
+            -   `secrets.yaml`: Kubernetes Secret definitions for securely managing sensitive information (e.g., API keys, database credentials, TLS certificates) within the cluster, preventing them from being exposed in code or configuration files.
+-   **`kubernetes/`**: Raw Kubernetes manifests for deploying various components, offering granular control and direct interaction with the Kubernetes API.
+    -   **`databases/`**: Kubernetes manifests for deploying and managing database instances within the cluster.
+        -   `influxdb.yaml`: Configuration for InfluxDB, typically used for time-series data (e.g., monitoring metrics, financial market data). It would include Deployment, Service, and Persistent Volume Claim definitions.
+        -   `mongodb.yaml`: Configuration for MongoDB, a NoSQL document database, likely used for flexible data storage, analytics, or specific microservices requiring document-oriented data models.
+        -   `postgresql.yaml`: Configuration for PostgreSQL, the primary relational database for transactional data, ensuring ACID compliance and data integrity for core financial operations.
+        -   `redis.yaml`: Configuration for Redis, an in-memory data structure store, often used for high-performance caching, session management, and as a message broker or queue.
+    -   **`ingress/`**: Kubernetes manifests for ingress controllers and rules.
+        -   `ingress.yaml`: Defines how external traffic is routed to services within the Kubernetes cluster, specifying hostnames, paths, and backend services.
+    -   **`messaging/`**: Kubernetes manifests for message brokers, enabling asynchronous communication between microservices.
+        -   `kafka.yaml`: Configuration for Apache Kafka, a distributed streaming platform used for building real-time data pipelines and streaming applications, crucial for event-driven microservices architectures.
+        -   `rabbitmq.yaml`: Configuration for RabbitMQ, another popular message broker, often used for task queues and asynchronous messaging.
+    -   **`monitoring/`**: Kubernetes manifests for monitoring solutions, providing observability into the cluster and applications.
+        -   `grafana.yaml`: Configuration for Grafana, a popular open-source platform for monitoring and observability, used for visualizing metrics collected by Prometheus.
+        -   `prometheus.yaml`: Configuration for Prometheus, a powerful open-source monitoring system and time-series database, used for collecting and storing metrics from applications and infrastructure.
+    -   **`namespaces/`**: Kubernetes manifests for defining namespaces, providing logical isolation within the cluster.
+        -   `namespaces.yaml`: Defines logical isolation units within the Kubernetes cluster, allowing for organization of resources and access control.
+    -   **`security/`**: Kubernetes manifests for security configurations at the cluster level.
+        -   `security-policies.yaml`: Defines network policies and other security-related configurations to control traffic flow between pods, enforce least privilege, and enhance overall cluster security.
+    -   **`services/`**: Individual Kubernetes service deployments for each microservice, enabling independent scaling and management.
+        -   `ai-chatbot.yaml`, `ai-fraud-detection.yaml`, `api-gateway.yaml`, `auth-service.yaml`, `card-service.yaml`, `developer-portal.yaml`, `kyc-aml-service.yaml`, `ledger-service.yaml`, `notification-service.yaml`, `payments-service.yaml`, `wallet-service.yaml`: These files define the Kubernetes Deployments, Services, and other resources (e.g., ConfigMaps, Horizontal Pod Autoscalers) required for each specific microservice, enabling independent scaling, updates, and fault isolation.
+-   **`scripts/`**: Shell scripts for infrastructure-related automation, complementing the main `scripts/` directory.
+    -   `build-images.sh`: Automates the process of building Docker images for the various services, ensuring consistent and versioned container images.
+    -   `cleanup.sh`: Script for cleaning up deployed resources or temporary files in the infrastructure, useful for development environments or after testing.
+    -   `deploy.sh`: A general deployment script, possibly orchestrating Helm or raw Kubernetes deployments, providing a unified interface for infrastructure deployments.
+    -   `validate.sh`: Script for validating infrastructure configurations (e.g., Terraform plans, Kubernetes manifests) or deployments, ensuring correctness before applying changes.
+-   **`terraform/`**: Contains Terraform configurations for provisioning cloud infrastructure (e.g., AWS, GCP, Azure), enabling declarative infrastructure management.
+    -   `main.tf`: The main Terraform configuration file, defining the cloud resources to be provisioned (e.g., VPCs, EC2 instances, managed Kubernetes clusters, databases).
+    -   `outputs.tf`: Defines output values from the Terraform deployment, such as public IP addresses, load balancer URLs, or database connection strings, which can be used by other systems or for verification.
+    -   `variables.tf`: Declares input variables for the Terraform configuration, allowing for customization of deployments (e.g., region, instance types, environment names).
+    -   **`modules/`**: Reusable Terraform modules for common infrastructure patterns, promoting modularity and reusability.
+        -   **`networking/`**: Module for defining network infrastructure (e.g., VPCs, subnets, route tables, NAT gateways, load balancers) in a cloud environment.
+        -   **`security/`**: Module for defining security-related infrastructure (e.g., security groups, IAM roles and policies, network ACLs, key management services) to secure cloud resources.
+
+### GitHub Actions Workflows (`.github/workflows/`)
+
+This directory defines the Continuous Integration (CI) and Continuous Deployment (CD) pipelines using GitHub Actions. These workflows automate the build, test, and deployment processes across the entire Flowlet project, ensuring code quality, rapid iteration, and reliable delivery to production environments.
+
+-   `documentation.yml`: This workflow is responsible for building, testing, and potentially deploying the project documentation (e.g., from Markdown files to a static website). It ensures that the documentation is always up-to-date and accessible.
+-   `kubernetes-ci.yml`: A CI workflow specifically for validating Kubernetes configurations and manifests. It might use tools like `kubeval` or `conftest` to check for syntax errors, best practices, and policy adherence in the `.yaml` files within `infrastructure/kubernetes`.
+-   `nodejs-frontend-ci-cd.yml`: The comprehensive CI/CD pipeline for the Node.js-based frontend application. This workflow includes steps for installing dependencies, running linting checks, executing unit and integration tests, building the production-ready frontend assets, and deploying them to a hosting environment (e.g., S3, Netlify, or a Kubernetes cluster via Helm).
+-   `node-ci.yml`: A general CI workflow for Node.js projects, possibly used for linting, basic testing, and dependency checks for any Node.js-based utilities or services within the repository.
+-   `python-backend-ci-cd.yml`: The comprehensive CI/CD pipeline for the Python-based backend application. This workflow covers installing Python dependencies, running linting checks, executing unit, integration, and performance tests, building Docker images for the backend services, and deploying them to a Kubernetes cluster.
+-   `python-ci.yml`: A general CI workflow for Python projects, likely used for linting, basic testing, and dependency checks for any Python-based utilities or services.
+-   `scripts-ci.yml`: A CI workflow for validating the utility scripts located in the `scripts/` directory. It ensures that these shell scripts are syntactically correct, executable, and adhere to coding standards.
+-   `terraform-ci.yml`: A CI workflow specifically for validating Terraform configurations. It typically runs `terraform fmt` to ensure consistent formatting and `terraform validate` to check for syntax errors and configuration issues in the `.tf` files within `infrastructure/terraform`.
 
-The architecture follows a domain-driven design approach, with services organized around business capabilities rather than technical functions. This organization ensures that each microservice has a clear, bounded context and can evolve independently while maintaining well-defined interfaces with other components. The resulting system is both modular and cohesive, allowing for targeted scaling and updates without disrupting the entire platform.
-
-At the infrastructure level, Flowlet leverages containerization and orchestration technologies to ensure consistent environments across development, testing, and production. Infrastructure-as-Code practices using tools like Terraform enable reproducible deployments and simplified disaster recovery procedures. This approach also facilitates multi-region deployments for businesses with global operations or specific data residency requirements.
-
-Communication between services primarily follows an event-driven pattern, with a robust message broker (Kafka) facilitating asynchronous interactions. This design choice enhances system resilience by allowing services to operate independently even when downstream components experience issues. For synchronous communication needs, services interact through well-defined REST APIs or gRPC interfaces, with the API Gateway providing a unified entry point for external integrations.
-
-The platform's data architecture implements a polyglot persistence strategy, selecting the optimal database technology for each service's specific requirements. Transactional services utilize PostgreSQL for ACID-compliant operations, while analytics components leverage MongoDB for flexible data storage. Time-series data for monitoring and reporting is handled by specialized databases like InfluxDB, ensuring optimal performance for each data access pattern.
-
-### System Components
-
-The Flowlet platform consists of several interconnected layers, each containing specialized components that work together to deliver the complete embedded finance solution:
-
-1. **API Layer**: The entry point for all external interactions, comprising the API Gateway and Developer Portal. This layer handles authentication, request routing, rate limiting, and documentation.
-
-2. **Core Services Layer**: The fundamental financial services including Wallet Management, Payment Processing, Card Services, KYC/AML, and Ledger. These components implement the core business logic of the platform.
-
-3. **Integration Layer**: Connectors to external financial systems including Banking Partners, Payment Processors, Card Networks, and Compliance Vendors. This layer abstracts away the complexities of these integrations.
-
-4. **Data Layer**: Specialized databases and data processing components that maintain the system's state and enable analytics. This includes transactional databases, document stores, and event streams.
-
-5. **Support Services Layer**: Cross-cutting concerns like Authentication, Notification, Reporting, and AI Services that provide capabilities used by multiple core services.
-
-6. **Infrastructure Layer**: The foundation of the platform, including Kubernetes orchestration, monitoring systems, CI/CD pipelines, and security components.
-
-Each layer is designed with clear responsibilities and interfaces, enabling independent scaling and evolution while maintaining system cohesion. This architecture supports Flowlet's goal of providing a comprehensive yet modular embedded finance solution that can adapt to diverse business requirements.
-## 🧩 Component Breakdown
-
-### Wallet Service
-
-The Wallet Service is the cornerstone of Flowlet's financial infrastructure, managing the creation, updating, and monitoring of digital wallets across the platform. Each wallet represents a financial account that can hold balances in one or multiple currencies, process transactions, and maintain a comprehensive transaction history.
-
-The service implements a sophisticated state machine that tracks wallet status throughout its lifecycle, from creation and verification to active use and potential suspension or closure. This approach ensures that wallets always transition through valid states and that appropriate validations occur at each stage. For example, a wallet cannot process transactions until it has passed the required verification steps, and a suspended wallet cannot receive funds until its status is restored.
-
-Wallet balances are calculated in real-time using the double-entry ledger system, ensuring that every transaction is properly accounted for and that balances accurately reflect all completed operations. The service supports various wallet types with different characteristics, including:
-
-- **User Wallets**: Personal accounts for individual end-users
-- **Business Wallets**: Accounts for merchants or corporate entities
-- **Escrow Wallets**: Specialized accounts for holding funds during transaction settlement
-- **Operating Wallets**: Internal accounts for platform operations like fee collection
-
-The Wallet Service exposes APIs for wallet management, balance inquiries, transaction history, and administrative operations. It communicates with other services through both synchronous APIs and asynchronous events, ensuring that wallet state changes trigger appropriate actions throughout the system.
-
-### Payments Service
-
-The Payments Service orchestrates the movement of funds both within the Flowlet ecosystem and between Flowlet and external financial systems. It handles various payment methods including bank transfers (ACH, SEPA, Wire), card payments, digital wallet transfers, and alternative payment methods.
-
-For each payment type, the service implements specialized processing workflows that account for the unique characteristics of that payment method. For example, card payments require authorization, capture, and settlement steps, while ACH transfers involve batch processing and delayed settlement. These workflows are implemented as state machines that track each transaction through its lifecycle, ensuring proper handling of success, failure, and intermediate states.
-
-The Payments Service integrates with multiple payment processors and banking partners, abstracting away their differences behind a unified interface. This abstraction layer enables smart routing capabilities that can select the optimal processing path based on factors like cost, speed, success probability, and geographic restrictions. The service also implements retry mechanisms and fallback strategies to maximize transaction success rates.
-
-Payment events are published to the platform's event stream, triggering appropriate ledger entries, notifications, and downstream processes. This event-driven approach ensures system-wide consistency and provides users with immediate feedback on their transactions.
-
-### Card Service
-
-The Card Service enables businesses to issue virtual and physical payment cards to their customers, creating a direct link between wallet balances and card-based spending. The service integrates with card issuing platforms like Marqeta to handle the technical aspects of card issuance, activation, and transaction processing.
-
-Card management capabilities include:
-
-- **Issuance**: Creating virtual cards instantly and ordering physical cards
-- **Activation**: Securely activating physical cards upon receipt
-- **Controls**: Setting spending limits, merchant category restrictions, and geographic controls
-- **Status Management**: Freezing, unfreezing, and permanently closing cards
-- **PIN Management**: Secure PIN setting and resetting
-- **Dispute Handling**: Managing chargebacks and fraud claims
-
-The Card Service maintains synchronization between card transactions and the wallet system, ensuring that card purchases immediately reflect in wallet balances and transaction history. It also implements sophisticated authorization rules that can evaluate transactions against various criteria including available balance, merchant type, transaction location, and spending patterns.
-
-For businesses implementing card programs, the service provides program management capabilities including card design customization, spending analytics, and compliance monitoring. These features enable businesses to create branded card experiences while maintaining control over their card programs.
-
-### KYC/AML Service
-
-The KYC/AML Service manages the complex processes of identity verification and regulatory compliance, ensuring that Flowlet-powered financial services meet legal requirements while providing a smooth user experience. The service implements risk-based verification workflows that can be tailored to different business models, user segments, and regulatory jurisdictions.
-
-The core verification process includes:
-
-1. **Basic Verification**: Email and phone verification to establish initial identity
-2. **Document Verification**: Scanning and validating government-issued identification
-3. **Biometric Verification**: Facial recognition matching against ID documents
-4. **Database Screening**: Checking against sanctions lists, PEP databases, and adverse media
-5. **Enhanced Due Diligence**: Additional verification steps for high-risk cases
-
-The service integrates with specialized KYC/AML providers to perform these verifications, abstracting away the complexities of different vendor APIs and data formats. This approach allows businesses to switch providers or implement multi-vendor strategies without disrupting their verification workflows.
-
-Beyond initial verification, the KYC/AML Service implements ongoing monitoring capabilities that track user behavior and transaction patterns to detect suspicious activities. When potential issues are identified, the service can trigger various responses ranging from additional verification requirements to account restrictions or regulatory filings.
-
-All verification steps and decisions are meticulously logged, creating comprehensive audit trails that demonstrate compliance with regulatory requirements. These records are structured to facilitate both internal reviews and regulatory examinations, reducing the burden of compliance reporting.
-
-### Ledger Service
-
-The Ledger Service maintains the financial system of record for the entire Flowlet platform, implementing a double-entry accounting system that ensures transactional integrity and provides comprehensive audit trails. Every financial operation within the platform results in at least two ledger entries—a debit and a credit—maintaining the fundamental accounting equation where assets equal liabilities plus equity.
-
-The service organizes financial data into a hierarchical chart of accounts that can be customized to meet specific business requirements. This structure enables detailed financial reporting at various levels of granularity, from individual transaction details to aggregated financial statements. The ledger supports multiple currencies with proper handling of exchange rates and conversion gains or losses.
-
-Key capabilities of the Ledger Service include:
-
-- **Journal Entry Creation**: Automatically generating appropriate entries for various transaction types
-- **Balance Calculation**: Real-time computation of account balances across multiple dimensions
-- **Financial Reporting**: Generating balance sheets, income statements, and cash flow analyses
-- **Reconciliation**: Matching internal records against external sources like bank statements
-- **Audit Support**: Maintaining immutable records with comprehensive metadata
-
-The ledger implements a temporal data model that preserves the history of all financial records, enabling point-in-time reporting and historical analysis. This approach ensures that financial reports remain consistent even as new transactions are processed, providing a reliable foundation for business decisions and regulatory compliance.
-
-### API Gateway
-
-The API Gateway serves as the unified entry point for all external interactions with the Flowlet platform, providing a consistent interface regardless of the underlying microservices being accessed. This component handles cross-cutting concerns including authentication, authorization, rate limiting, request routing, and response caching.
-
-The gateway implements a layered security model that validates requests at multiple levels:
-
-1. **Authentication**: Verifying the identity of the calling application or user
-2. **Authorization**: Checking permissions against the requested operation
-3. **Input Validation**: Ensuring request parameters meet format and business rule requirements
-4. **Rate Limiting**: Protecting against abuse by limiting request frequency
-5. **Threat Detection**: Identifying and blocking potentially malicious patterns
-
-Beyond security, the API Gateway provides operational capabilities that enhance the developer experience and system reliability. These include request logging for debugging, response caching for performance optimization, and circuit breaking to prevent cascading failures during service disruptions.
-
-The gateway also handles API versioning, allowing services to evolve while maintaining backward compatibility for existing integrations. This approach enables continuous platform enhancement without disrupting businesses that have already integrated with Flowlet.
-
-### Developer Portal
-
-The Developer Portal serves as the central hub for all integration resources, providing comprehensive documentation, interactive tools, and support resources for businesses implementing Flowlet's embedded finance capabilities. The portal is designed to accelerate integration efforts and reduce the technical barriers to offering financial services.
-
-Key components of the Developer Portal include:
-
-- **Interactive API Documentation**: Comprehensive endpoint descriptions with request/response examples
-- **SDKs and Libraries**: Pre-built integration components for popular programming languages
-- **Sample Applications**: Working examples demonstrating common integration patterns
-- **Sandbox Environment**: A fully functional test environment that mimics production capabilities
-- **API Explorer**: Interactive tool for testing API calls directly from the documentation
-- **Integration Guides**: Step-by-step instructions for implementing specific use cases
-- **AI Documentation Assistant**: Intelligent chatbot that answers integration questions
-
-The portal implements a role-based access model that allows businesses to manage developer accounts and control access to different resources. This approach enables secure collaboration among development teams while maintaining appropriate separation of concerns.
-
-For businesses in the integration process, the Developer Portal provides real-time status dashboards showing API availability, service health, and upcoming maintenance windows. These operational insights help development teams plan their work and troubleshoot integration issues effectively.
-## 🛠️ Technology Stack
-
-Flowlet's architecture leverages a carefully selected technology stack that balances innovation with reliability, ensuring the platform can deliver bank-grade financial services while remaining adaptable to evolving requirements. The technology choices reflect a commitment to scalability, security, and developer experience.
-
-### Backend Technologies
-
-#### Programming Languages
-- **TypeScript/Node.js**: Primary language for microservices, offering strong typing and modern JavaScript features
-- **Python**: Used for data processing, machine learning components, and specialized financial calculations
-- **Go**: Employed for performance-critical services requiring low latency and high throughput
-
-#### Frameworks
-- **NestJS**: Structured framework for building scalable server-side applications
-- **Express.js**: Lightweight framework for specific microservices with simpler requirements
-- **FastAPI**: Python framework for high-performance API services, particularly in data-intensive components
-
-#### Databases
-- **PostgreSQL**: Primary relational database for transactional data requiring ACID compliance
-- **MongoDB**: Document store for flexible data models and analytics
-- **Redis**: In-memory data store for caching, session management, and real-time features
-- **InfluxDB**: Time-series database for monitoring metrics and performance data
-
-#### Messaging & Event Streaming
-- **Apache Kafka**: Backbone of the event-driven architecture, handling service communication and event sourcing
-- **RabbitMQ**: Message broker for specific synchronous messaging requirements
-- **Redis Streams**: Lightweight streaming for real-time notifications and updates
-
-#### AI & Machine Learning
-- **TensorFlow/PyTorch**: Frameworks for fraud detection models and advanced analytics
-- **scikit-learn**: Library for traditional machine learning algorithms and data preprocessing
-- **Hugging Face Transformers**: NLP models powering the AI chatbots and documentation assistants
-
-### Frontend Technologies
-
-#### Web Applications
-- **React**: Library for building dynamic user interfaces for admin portals and dashboards
-- **TypeScript**: Strongly-typed language enhancing code quality and developer experience
-- **Redux Toolkit**: State management for complex application flows
-- **Material-UI**: Component library providing consistent design language
-- **D3.js**: Data visualization library for interactive charts and graphs
-
-#### Mobile Applications
-- **React Native**: Cross-platform framework for iOS and Android applications
-- **Expo**: Toolchain for streamlining React Native development
-- **Native Base**: UI component library optimized for React Native
-- **Redux**: State management consistent with web applications
-
-### DevOps & Infrastructure
-
-#### Containerization & Orchestration
-- **Docker**: Container platform for consistent environments across development and production
-- **Kubernetes**: Container orchestration for automated deployment, scaling, and management
-- **Helm**: Package manager for Kubernetes applications
-
-#### CI/CD & Infrastructure as Code
-- **GitHub Actions**: Continuous integration and deployment automation
-- **Terraform**: Infrastructure as code for cloud resource provisioning
-- **ArgoCD**: GitOps continuous delivery for Kubernetes
-
-#### Monitoring & Observability
-- **Prometheus**: Metrics collection and alerting
-- **Grafana**: Visualization of metrics and operational dashboards
-- **Elastic Stack (ELK)**: Log aggregation, search, and analysis
-- **Jaeger**: Distributed tracing for performance monitoring
-
-#### Security Tools
-- **Vault**: Secrets management and data protection
-- **Cert-Manager**: Certificate lifecycle management
-- **OPA (Open Policy Agent)**: Policy-based control for Kubernetes
-- **Falco**: Runtime security monitoring
-
-### Cloud Providers
-Flowlet's cloud-agnostic architecture supports deployment on major cloud platforms:
-
-- **AWS**: Amazon Web Services for comprehensive cloud infrastructure
-- **GCP**: Google Cloud Platform with strong data processing capabilities
-- **Azure**: Microsoft's cloud offering with robust enterprise integration
-- **Private Cloud**: Support for on-premises or dedicated hosting environments
-
-This technology stack provides a robust foundation for Flowlet's embedded finance capabilities while maintaining the flexibility to incorporate new technologies as they emerge. The platform's modular architecture allows individual components to evolve independently, enabling continuous improvement without disrupting the overall system.
 ## 🚀 Getting Started
 
-Getting started with Flowlet involves several steps to set up your development environment, configure the necessary services, and begin integrating the platform into your application. This guide provides a comprehensive walkthrough of the process, from initial setup to your first transaction.
+For detailed instructions on setting up the development environment, running tests, and deploying the application, please refer to the comprehensive documentation within the `docs/` directory. These guides are designed to provide a smooth onboarding experience for developers and operations teams.
 
-### Prerequisites
+-   **Development Setup**: Consult `docs/06_Developer_Guides/Setup_Guide.md` and `scripts/setup/setup-dev.sh` for setting up your local development environment, including prerequisites, dependency installation, and initial application configuration.
+-   **Running Tests**: Refer to `docs/06_Developer_Guides/Application_Testing_Guide.md` and the `tests/README.md` for instructions on executing unit, integration, end-to-end, and performance tests across the backend and frontend.
+-   **Deployment**: For deploying Flowlet, refer to `infrastructure/DEPLOYMENT.md`, `docs/08_Infrastructure/Infrastructure_Guide.md`, and the Helm charts in `infrastructure/helm/flowlet/` for Kubernetes-based deployments. The `scripts/deployment/deploy.sh` also provides an automated deployment mechanism.
+-   **API Integration**: Developers looking to integrate with Flowlet's services should consult `docs/03_API_Reference/API_Documentation.md` and `docs/03_API_Reference/Backend_API.md` for detailed API specifications and usage examples.
 
-Before setting up Flowlet, ensure you have the following prerequisites installed and configured:
+## 🛣️ Strategic Roadmap
 
-- **Docker** and Docker Compose (version 20.10+)
-- **Kubernetes** cluster (version 1.22+) or local alternative like Minikube
-- **Helm** (version 3.8+) for Kubernetes package management
-- **Node.js** (version 16+) for running the admin tools and SDKs
-- **kubectl** configured to access your Kubernetes cluster
-- **Terraform** (version 1.0+) for infrastructure provisioning
-- **Git** for version control and deployment workflows
+Flowlet is committed to continuous innovation and expansion of its embedded finance capabilities. Our strategic roadmap outlines key initiatives for the upcoming quarters, focusing on enhancing platform robustness, expanding feature sets, and exploring cutting-edge technologies to maintain a competitive edge and deliver unparalleled value to our partners and their customers. This roadmap is dynamic and will be continuously refined based on market demands, technological advancements, regulatory changes, and partner feedback, ensuring Flowlet remains a leading-edge embedded finance platform, poised for significant growth and impact.
 
-Additionally, you'll need access credentials for the Flowlet container registry and configuration repository, which will be provided during the onboarding process.
+### Q3 2025: Platform Hardening & Core Expansion
 
-### Quick Setup with Installation Script
+This quarter focuses on solidifying the existing platform, enhancing its security posture, and expanding core financial functionalities to meet growing demands and regulatory requirements.
 
-For development environments, Flowlet provides a streamlined setup script that automates the installation process:
+-   **Enhanced Security Audits & Penetration Testing**: Beyond automated scans, engage leading third-party security firms to conduct comprehensive white-box and black-box penetration tests and security audits. This includes code review, vulnerability assessments, and simulated attacks to identify and remediate potential vulnerabilities at all layers of the application and infrastructure. Implement continuous security scanning in CI/CD pipelines for static application security testing (SAST) and dynamic application security testing (DAST).
+-   **Multi-Region Deployment Capabilities**: Implement advanced active-active or active-passive multi-region deployment strategies using Kubernetes and Terraform. This will involve setting up global load balancing, cross-region data replication (e.g., PostgreSQL streaming replication, MongoDB replica sets), and robust failover mechanisms to ensure business continuity, enhance disaster recovery capabilities, and reduce latency for a globally distributed user base.
+-   **Advanced Ledger Reconciliation with AI**: Develop and integrate sophisticated AI-powered reconciliation tools. These tools will leverage machine learning to automatically identify and resolve complex discrepancies between internal ledgers and external bank statements/payment processor reports, significantly reducing manual effort, improving accuracy, and accelerating financial close processes. This includes pattern recognition for common reconciliation issues.
+-   **Comprehensive SDK & API Versioning Strategy**: Introduce a formal and robust versioning strategy for all SDKs and APIs (e.g., semantic versioning). This ensures backward compatibility for existing integrations while providing a clear, well-documented upgrade path for developers to adopt new features and improvements without breaking changes. Publish clear deprecation policies.
+-   **Real-time Fraud Prevention Enhancements**: Integrate behavioral biometrics (e.g., typing patterns, mouse movements, device characteristics) as an additional, passive layer of real-time fraud prevention. This will complement existing AI fraud detection modules by identifying suspicious user behavior patterns, adding a powerful layer of defense against account takeover and synthetic identity fraud.
 
-```bash
-# Clone the Flowlet repository
-git clone https://github.com/flowlet/flowlet-platform.git
-cd flowlet-platform
+### Q4 2025: Ecosystem Integration & Data Intelligence
 
-# Run the setup script with your environment name
-./setup.sh --env development --namespace flowlet-dev
+This quarter emphasizes broadening Flowlet's integration capabilities within the financial ecosystem and leveraging data to provide deeper insights and personalized experiences.
 
-# Verify the installation
-kubectl get pods -n flowlet-dev
-```
+-   **Expanded Open Banking & Open Finance API Integrations**: Significantly broaden integration with Open Banking and Open Finance APIs across more key regions (e.g., Europe, UK, Australia, Canada, LatAm). This will enable richer, standardized access to financial data and payment initiation services, fostering a more interconnected financial ecosystem and compliance with evolving regulations like PSD2.
+-   **Real-time Transaction Monitoring & Proactive Alerting**: Implement a dedicated, highly configurable real-time transaction monitoring service. This service will allow businesses to define custom rules and thresholds for suspicious activities, triggering proactive alerts (via email, SMS, webhooks) for anomalies, large transactions, or unusual spending patterns. This enhances operational oversight and risk management.
+-   **AI-Driven Personalized Financial Insights for End-Users**: Develop advanced AI models to analyze end-user transaction data (with explicit consent) and provide highly personalized financial insights. This includes intelligent budgeting advice, spending pattern analysis, savings recommendations, and debt management suggestions, empowering users with actionable financial intelligence.
+-   **Blockchain/DLT Integration (Pilot for Specific Use Cases)**: Initiate a pilot program for integrating Distributed Ledger Technology (DLT) for specific, high-value use cases. This could include exploring DLT for immutable audit trails, cross-border payments (e.g., stablecoins), or tokenized asset management, aiming for enhanced transparency, efficiency, and reduced settlement times.
+-   **Advanced Analytics Dashboard for Businesses**: Develop a comprehensive, customizable analytics dashboard for businesses leveraging Flowlet. This dashboard will provide real-time insights into transaction volumes, customer behavior, revenue streams, and operational metrics, enabling data-driven decision-making.
 
-The setup script performs several actions:
+### Q1 2026: Global Reach & Advanced Financial Products
 
-1. Creates the necessary Kubernetes namespace
-2. Sets up configuration secrets from environment variables or prompt
-3. Deploys core Flowlet services using Helm charts
-4. Configures networking and ingress controllers
-5. Initializes the database schemas and seed data
-6. Deploys the Developer Portal and admin interfaces
+This quarter focuses on expanding Flowlet's global footprint and introducing sophisticated financial products that can be seamlessly embedded by partners.
 
-After running the script, you can access the Developer Portal at `http://localhost:8080/developer` and the Admin Dashboard at `http://localhost:8080/admin` using the default credentials provided during setup.
+-   **Global Payment Network Expansion & Optimization**: Integrate with additional global payment networks (e.g., Visa Direct, Mastercard Send, local payment schemes in APAC/LATAM) to enable faster, more diverse, and cost-effective payout options. Optimize routing algorithms for international payments to minimize fees and maximize speed.
+-   **Lending-as-a-Service (LaaS) Module**: Introduce a modular Lending-as-a-Service component, allowing businesses to embed various credit products (e.g., micro-loans, Buy Now Pay Later - BNPL, working capital loans) directly into their platforms. This module will leverage Flowlet's existing data (transaction history, KYC/AML) and compliance infrastructure for streamlined credit assessment and disbursement.
+-   **Central Bank Digital Currency (CBDC) Readiness & Integration**: Proactively research and develop capabilities to support future Central Bank Digital Currencies (CBDCs) as they emerge globally. This includes building necessary infrastructure connectors and adapting wallet/ledger systems to handle CBDC transactions, positioning Flowlet at the forefront of digital currency adoption.
+-   **Embedded Insurance Product Integration**: Develop a framework for integrating and offering embedded insurance products (e.g., purchase protection, travel insurance) directly within partner applications. This would involve partnerships with insurance providers and a flexible API for policy issuance and claims management.
+-   **Dynamic Fee Management System**: Implement a highly configurable and dynamic fee management system, allowing partners to define complex fee structures based on transaction type, volume, user tier, and other parameters, providing greater flexibility and revenue optimization.
 
-### Manual Installation
+### Q2 2026: Platform Extensibility & Developer Empowerment
 
-For production environments or customized deployments, a manual installation process gives you more control over the configuration:
+This quarter is dedicated to making Flowlet even more accessible and powerful for developers and non-technical users, fostering a vibrant ecosystem around the platform.
 
-#### 1. Infrastructure Provisioning
+-   **Low-Code/No-Code Integration Builder**: Develop a visual, drag-and-drop interface within the Developer Portal that allows businesses to configure and integrate Flowlet's services with minimal or no coding. This accelerates time-to-market for non-technical users and citizen developers, democratizing embedded finance.
+-   **Smart Contract Integration for Automated Escrow/Conditional Payments**: Enable businesses to define and execute smart contracts on a blockchain (e.g., Ethereum, Hyperledger Fabric) for automated escrow services or conditional payments. This enhances trust, reduces manual intervention for complex transactions, and opens up new possibilities for programmatic finance.
+-   **AI-Powered Code Generation for SDKs & Documentation**: Explore and implement advanced AI models (e.g., large language models) to automatically generate SDK code snippets, API integration examples, and even update documentation based on schema changes. This will significantly streamline the developer experience and reduce integration friction.
+-   **Decentralized Identity (DID) Support & Verifiable Credentials**: Investigate and integrate support for Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs) for enhanced privacy, security, and user control over identity verification processes. This would allow users to own and manage their digital identities and selectively share verified attributes.
+-   **Partner Marketplace for Financial Services**: Develop a marketplace within the Flowlet ecosystem where partners can discover, integrate, and offer complementary financial services (e.g., specialized lending, niche insurance, investment products) built on top of Flowlet's infrastructure, fostering a collaborative ecosystem.
 
-Create the necessary cloud infrastructure using the provided Terraform modules:
-
-```bash
-cd infrastructure/terraform
-terraform init
-terraform apply -var-file=environments/production.tfvars
-```
-
-This will provision the required resources including Kubernetes clusters, databases, message brokers, and networking components.
-
-#### 2. Secrets Management
-
-Configure the secrets management system to store sensitive credentials:
-
-```bash
-# Install and configure Vault
-helm repo add hashicorp https://helm.releases.hashicorp.com
-helm install vault hashicorp/vault --namespace flowlet-system --create-namespace
-
-# Initialize Vault and store the unseal keys securely
-kubectl exec -it vault-0 -n flowlet-system -- vault operator init
-
-# Set up the required secrets
-kubectl apply -f kubernetes/secrets/flowlet-secrets.yaml
-```
-
-#### 3. Core Services Deployment
-
-Deploy the core Flowlet services using Helm:
-
-```bash
-cd kubernetes/helm
-helm dependency update flowlet
-helm install flowlet ./flowlet --namespace flowlet --create-namespace -f values/production.yaml
-```
-
-#### 4. Configure External Integrations
-
-Set up connections to external services like banking partners, payment processors, and KYC providers:
-
-```bash
-# Apply the integration configurations
-kubectl apply -f kubernetes/config/integrations/
-```
-
-#### 5. Initialize the System
-
-Run the initialization jobs to set up databases and create initial admin accounts:
-
-```bash
-kubectl apply -f kubernetes/jobs/init-system.yaml
-kubectl wait --for=condition=complete job/flowlet-init -n flowlet
-```
-
-#### 6. Verify the Installation
-
-Ensure all components are running correctly:
-
-```bash
-kubectl get pods -n flowlet
-kubectl get services -n flowlet
-kubectl get ingress -n flowlet
-```
-
-### Configuration
-
-Flowlet's behavior can be customized through various configuration options, stored in a hierarchical structure:
-
-1. **System Configuration**: Platform-wide settings affecting all tenants
-2. **Tenant Configuration**: Settings specific to each business using the platform
-3. **Service Configuration**: Settings for individual microservices
-4. **Integration Configuration**: Connection details for external services
-
-The configuration can be managed through:
-
-- YAML files applied to Kubernetes as ConfigMaps
-- Environment variables for container-specific settings
-- The Admin Dashboard for runtime configuration changes
-- API calls for programmatic configuration updates
-
-Key configuration areas include:
-
-- **Banking Connections**: Credentials and endpoints for banking partners
-- **Payment Processors**: API keys and webhook configurations
-- **KYC/AML Settings**: Verification workflows and provider credentials
-- **Fee Structures**: Transaction fee configurations and revenue sharing rules
-- **Notification Templates**: Email and SMS templates for user communications
-- **Compliance Rules**: Transaction monitoring and reporting thresholds
-
-### Your First Integration
-
-Once Flowlet is set up, you can begin integrating it into your application:
-
-1. **Create an API Client**:
-   Access the Developer Portal and create a new API client to obtain your API keys.
-
-2. **Install the SDK**:
-   Add the Flowlet SDK to your application:
-   ```bash
-   npm install @flowlet/sdk
-   ```
-
-3. **Initialize the Client**:
-   ```javascript
-   import { FlowletClient } from '@flowlet/sdk';
-   
-   const flowlet = new FlowletClient({
-     apiKey: 'your_api_key',
-     environment: 'sandbox', // or 'production'
-   });
-   ```
-
-4. **Create a Wallet**:
-   ```javascript
-   const wallet = await flowlet.wallets.create({
-     ownerId: 'user-123',
-     type: 'individual',
-     currency: 'USD',
-     metadata: {
-       userEmail: 'user@example.com',
-     },
-   });
-   ```
-
-5. **Process a Payment**:
-   ```javascript
-   const payment = await flowlet.payments.create({
-     sourceWalletId: wallet.id,
-     amount: 1000, // $10.00
-     currency: 'USD',
-     description: 'Test payment',
-     metadata: {
-       orderId: 'order-123',
-     },
-   });
-   ```
-
-6. **Monitor Events**:
-   ```javascript
-   flowlet.events.subscribe('payment.completed', (event) => {
-     console.log('Payment completed:', event.data);
-     // Update your application state
-   });
-   ```
-
-The Developer Portal provides comprehensive guides for more complex integration scenarios, including card issuance, compliance workflows, and advanced payment features.
-## 📚 API Documentation
-
-Flowlet provides comprehensive API documentation to facilitate seamless integration with the platform. The API follows RESTful principles with consistent patterns across all endpoints, making it intuitive for developers to work with different platform capabilities.
-
-### API Structure
-
-The Flowlet API is organized around core resources that represent the fundamental entities within the platform. Each resource supports standard HTTP methods for creating, reading, updating, and deleting entities:
-
-- **GET**: Retrieve a resource or list of resources
-- **POST**: Create a new resource
-- **PUT/PATCH**: Update an existing resource
-- **DELETE**: Remove a resource
-
-All API requests require authentication using API keys or OAuth tokens, which can be generated and managed through the Developer Portal. Requests and responses use JSON format with consistent structures for error handling, pagination, and metadata.
-
-### Core API Resources
-
-#### Wallets API
-
-The Wallets API enables the creation and management of digital wallets, which serve as the foundation for financial operations within the platform.
-
-```
-GET    /v1/wallets                # List wallets
-POST   /v1/wallets                # Create a wallet
-GET    /v1/wallets/{id}           # Retrieve a wallet
-PUT    /v1/wallets/{id}           # Update a wallet
-DELETE /v1/wallets/{id}           # Delete a wallet
-GET    /v1/wallets/{id}/balance   # Get wallet balance
-GET    /v1/wallets/{id}/transactions # List wallet transactions
-```
-
-Example wallet creation request:
-```json
-POST /v1/wallets
-{
-  "type": "individual",
-  "ownerId": "user-123",
-  "currency": "USD",
-  "metadata": {
-    "userEmail": "user@example.com",
-    "userPhone": "+15551234567"
-  }
-}
-```
-
-#### Payments API
-
-The Payments API handles the movement of funds between wallets and external financial systems, supporting various payment methods and workflows.
-
-```
-GET    /v1/payments               # List payments
-POST   /v1/payments               # Create a payment
-GET    /v1/payments/{id}          # Retrieve a payment
-POST   /v1/payments/{id}/cancel   # Cancel a pending payment
-GET    /v1/payment-methods        # List payment methods
-POST   /v1/payment-methods        # Create a payment method
-```
-
-Example payment creation request:
-```json
-POST /v1/payments
-{
-  "sourceType": "wallet",
-  "sourceId": "wallet-123",
-  "destinationType": "external_account",
-  "destinationId": "account-456",
-  "amount": 1000,
-  "currency": "USD",
-  "description": "Invoice payment",
-  "metadata": {
-    "invoiceId": "inv-789"
-  }
-}
-```
-
-#### Cards API
-
-The Cards API enables the issuance and management of virtual and physical payment cards linked to wallets.
-
-```
-GET    /v1/cards                  # List cards
-POST   /v1/cards                  # Issue a card
-GET    /v1/cards/{id}             # Retrieve card details
-PUT    /v1/cards/{id}             # Update card settings
-POST   /v1/cards/{id}/activate    # Activate a physical card
-POST   /v1/cards/{id}/freeze      # Freeze a card
-POST   /v1/cards/{id}/unfreeze    # Unfreeze a card
-DELETE /v1/cards/{id}             # Cancel a card
-```
-
-Example card issuance request:
-```json
-POST /v1/cards
-{
-  "walletId": "wallet-123",
-  "type": "virtual",
-  "cardholderName": "John Doe",
-  "billingAddress": {
-    "line1": "123 Main St",
-    "city": "San Francisco",
-    "state": "CA",
-    "postalCode": "94105",
-    "country": "US"
-  },
-  "metadata": {
-    "department": "Engineering"
-  }
-}
-```
-
-#### KYC API
-
-The KYC API manages identity verification workflows for individuals and businesses, supporting regulatory compliance requirements.
-
-```
-POST   /v1/verifications          # Start a verification process
-GET    /v1/verifications/{id}     # Check verification status
-PUT    /v1/verifications/{id}     # Update verification data
-POST   /v1/verifications/{id}/documents # Upload verification documents
-GET    /v1/verification-templates # List verification templates
-```
-
-Example verification initiation request:
-```json
-POST /v1/verifications
-{
-  "type": "individual",
-  "entityId": "user-123",
-  "level": "enhanced",
-  "callbackUrl": "https://example.com/webhooks/kyc",
-  "personData": {
-    "firstName": "John",
-    "lastName": "Doe",
-    "dateOfBirth": "1980-01-01",
-    "email": "john@example.com",
-    "phone": "+15551234567",
-    "address": {
-      "line1": "123 Main St",
-      "city": "San Francisco",
-      "state": "CA",
-      "postalCode": "94105",
-      "country": "US"
-    }
-  }
-}
-```
-
-#### Ledger API
-
-The Ledger API provides access to financial records and accounting data, enabling detailed tracking and reporting of all transactions.
-
-```
-GET    /v1/accounts               # List ledger accounts
-POST   /v1/accounts               # Create a ledger account
-GET    /v1/accounts/{id}          # Retrieve account details
-GET    /v1/accounts/{id}/balance  # Get account balance
-GET    /v1/journal-entries        # List journal entries
-GET    /v1/journal-entries/{id}   # Retrieve a journal entry
-GET    /v1/reports/balance-sheet  # Generate balance sheet
-GET    /v1/reports/income-statement # Generate income statement
-```
-
-Example ledger account creation request:
-```json
-POST /v1/accounts
-{
-  "name": "User Deposits",
-  "type": "liability",
-  "currency": "USD",
-  "externalId": "user-deposits-001",
-  "metadata": {
-    "department": "Treasury"
-  }
-}
-```
-
-### Webhooks
-
-Flowlet uses webhooks to notify your application about events happening in real-time. This enables your systems to react to changes without polling the API for updates.
-
-To use webhooks:
-
-1. Register webhook endpoints in the Developer Portal
-2. Configure the events you want to receive
-3. Implement handlers for these events in your application
-4. Verify webhook signatures to ensure authenticity
-
-Example webhook payload:
-```json
-{
-  "id": "evt-123456",
-  "type": "payment.completed",
-  "created": "2025-05-23T12:34:56Z",
-  "data": {
-    "id": "payment-789",
-    "amount": 1000,
-    "currency": "USD",
-    "status": "completed",
-    "sourceId": "wallet-123",
-    "destinationId": "wallet-456"
-  }
-}
-```
-
-### API Versioning
-
-Flowlet follows semantic versioning for the API, with the version specified in the URL path (e.g., `/v1/wallets`). This approach ensures backward compatibility while allowing the platform to evolve.
-
-Major version changes (e.g., v1 to v2) indicate breaking changes that require client updates. Within a major version, new features and non-breaking changes are added continuously without requiring client modifications.
-
-The Developer Portal provides detailed documentation for each API version, including migration guides when moving between major versions.
-
-### SDKs and Client Libraries
-
-To simplify integration, Flowlet provides official SDKs for popular programming languages:
-
-- **JavaScript/TypeScript**: For web and Node.js applications
-- **Python**: For data science and backend services
-- **Java**: For enterprise applications
-- **Go**: For high-performance services
-- **Ruby**: For Ruby on Rails applications
-- **PHP**: For PHP-based web applications
-
-These SDKs handle authentication, request formatting, error handling, and response parsing, allowing developers to interact with the API using native language constructs rather than raw HTTP requests.
-
-Example using the JavaScript SDK:
-```javascript
-import { Flowlet } from '@flowlet/sdk';
-
-const flowlet = new Flowlet({
-  apiKey: 'your_api_key',
-  environment: 'sandbox'
-});
-
-// Create a wallet
-const wallet = await flowlet.wallets.create({
-  type: 'individual',
-  ownerId: 'user-123',
-  currency: 'USD'
-});
-
-// Process a payment
-const payment = await flowlet.payments.create({
-  sourceId: wallet.id,
-  sourceType: 'wallet',
-  destinationId: 'wallet-456',
-  destinationType: 'wallet',
-  amount: 1000,
-  currency: 'USD'
-});
-
-// Subscribe to events
-flowlet.events.on('payment.completed', (event) => {
-  console.log('Payment completed:', event.data);
-});
-```
-
-The Developer Portal provides comprehensive documentation for each SDK, including installation instructions, API references, and code examples for common use cases.
-## 🔒 Security & Compliance
-
-Security and regulatory compliance are foundational elements of Flowlet's architecture, reflecting the platform's commitment to protecting sensitive financial data and meeting the complex requirements of financial services regulation. This comprehensive approach ensures that businesses using Flowlet can confidently offer embedded finance capabilities while maintaining the highest standards of security and compliance.
-
-### Security Architecture
-
-Flowlet implements a defense-in-depth security strategy with multiple layers of protection:
-
-#### Data Protection
-
-Data security begins with comprehensive encryption strategies that protect information throughout its lifecycle:
-
-- **Encryption at Rest**: All sensitive data is encrypted in databases and file storage using AES-256 encryption. Database-level encryption is complemented by application-level encryption for particularly sensitive fields like account numbers and personal identification information.
-
-- **Encryption in Transit**: All network communications use TLS 1.3 with strong cipher suites, ensuring that data cannot be intercepted during transmission between services or between Flowlet and external systems.
-
-- **Tokenization**: Payment card data and bank account details are tokenized immediately upon receipt, replacing sensitive information with non-sensitive tokens that can be safely stored and processed. The original data is securely stored in specialized vaults with strict access controls.
-
-- **Data Minimization**: The platform follows the principle of collecting and retaining only the data necessary for business operations, reducing the scope of sensitive information that must be protected.
-
-#### Access Control
-
-Flowlet implements a sophisticated access control system that enforces the principle of least privilege:
-
-- **Role-Based Access Control (RBAC)**: Granular permissions are assigned based on user roles, ensuring that individuals can access only the resources and operations necessary for their responsibilities.
-
-- **Multi-Factor Authentication (MFA)**: Administrative access requires multiple verification factors, typically combining something the user knows (password) with something they possess (mobile device) or something they are (biometric verification).
-
-- **Just-In-Time Access**: Privileged access to production systems is granted temporarily and with specific scope, reducing the window of opportunity for potential misuse.
-
-- **Audit Logging**: All access attempts and administrative actions are logged with detailed context, creating comprehensive audit trails for security monitoring and compliance reporting.
-
-#### Infrastructure Security
-
-The platform's infrastructure incorporates multiple security controls:
-
-- **Network Segmentation**: Services are organized into security zones with controlled communication paths between zones, limiting the potential impact of security breaches.
-
-- **Web Application Firewall (WAF)**: API endpoints are protected by WAF rules that detect and block common attack patterns like SQL injection, cross-site scripting, and request forgery.
-
-- **DDoS Protection**: The platform includes distributed denial-of-service protection that can absorb and mitigate large-scale attack traffic while maintaining service availability for legitimate users.
-
-- **Container Security**: All services run in hardened containers with minimal attack surface, regular vulnerability scanning, and runtime protection against unauthorized behavior.
-
-#### Security Operations
-
-Flowlet's security is actively maintained through ongoing operational processes:
-
-- **Vulnerability Management**: Regular automated scanning and manual penetration testing identify potential vulnerabilities, which are prioritized and remediated based on risk assessment.
-
-- **Security Monitoring**: A Security Information and Event Management (SIEM) system collects and analyzes logs from across the platform, using correlation rules and anomaly detection to identify potential security incidents.
-
-- **Incident Response**: A formal incident response process ensures rapid detection, containment, eradication, and recovery from security events, with clear communication protocols for affected parties.
-
-- **Security Updates**: The platform follows a rigorous patch management process that quickly applies security updates while maintaining system stability and availability.
-
-### Regulatory Compliance
-
-Flowlet is designed to support compliance with various financial regulations across different jurisdictions:
-
-#### Data Privacy
-
-The platform incorporates features that facilitate compliance with data privacy regulations like GDPR and CCPA:
-
-- **Data Mapping**: Comprehensive documentation of data flows and processing activities provides visibility into how personal information is handled.
-
-- **Consent Management**: Flexible mechanisms for capturing, storing, and honoring user consent preferences regarding data collection and processing.
-
-- **Data Subject Rights**: Built-in workflows support data access, correction, portability, and deletion requests from individuals.
-
-- **Data Retention Policies**: Configurable retention periods ensure that personal data is not kept longer than necessary for its intended purpose.
-
-#### Financial Regulations
-
-Flowlet supports compliance with financial regulations through specialized features:
-
-- **KYC/AML Compliance**: Customizable verification workflows implement risk-based approaches to customer due diligence, supporting compliance with anti-money laundering regulations like FinCEN requirements in the US and AML directives in the EU.
-
-- **Transaction Monitoring**: Automated systems detect potentially suspicious activities based on configurable rules and risk models, generating alerts and supporting required regulatory reporting.
-
-- **Payment Services Regulations**: The platform incorporates controls required by payment services regulations like PSD2 in Europe, including strong customer authentication and secure communication standards.
-
-- **Financial Reporting**: Comprehensive record-keeping and reporting capabilities support regulatory requirements for financial transparency and accountability.
-
-#### Compliance Documentation
-
-Flowlet maintains extensive documentation to support businesses in their compliance efforts:
-
-- **Compliance Controls Matrix**: Mapping of platform features to specific regulatory requirements, helping businesses understand how Flowlet supports their compliance obligations.
-
-- **Security Certifications**: The platform undergoes regular third-party assessments against industry standards like SOC 2, PCI DSS, and ISO 27001, with certification reports available to customers.
-
-- **Audit Support**: Detailed logs and reports facilitate regulatory examinations and audits, reducing the burden on businesses when demonstrating compliance.
-
-- **Policy Templates**: Sample policies and procedures that businesses can adapt for their specific regulatory context, accelerating compliance implementation.
-
-### Compliance as a Service
-
-Beyond built-in compliance features, Flowlet offers Compliance as a Service capabilities that actively support businesses in meeting their regulatory obligations:
-
-- **Regulatory Monitoring**: Ongoing tracking of regulatory changes across jurisdictions, with proactive updates to platform capabilities to address new requirements.
-
-- **Compliance Advisory**: Access to financial compliance experts who can provide guidance on regulatory questions and implementation approaches.
-
-- **Automated Reporting**: Generation of required regulatory reports based on platform data, reducing the manual effort involved in compliance reporting.
-
-- **Compliance Testing**: Regular simulated transactions and scenarios to verify that compliance controls are functioning as expected.
-
-This comprehensive approach to security and compliance enables businesses to confidently offer embedded finance services while managing regulatory risk effectively. By building these capabilities into the platform core, Flowlet allows businesses to focus on their unique value proposition rather than the complexities of financial compliance.
-## 🔄 Development & Deployment
-
-Flowlet's development and deployment processes are designed to balance rapid innovation with the stability and reliability required for financial services. The platform employs modern DevOps practices and tools to ensure consistent, repeatable deployments while maintaining high quality standards.
-
-### Development Workflow
-
-Flowlet follows a structured development workflow that promotes code quality and collaboration:
-
-#### Version Control
-
-All platform code is managed in Git repositories with a branching strategy that supports parallel development:
-
-- **Main Branch**: The stable branch containing production-ready code
-- **Development Branch**: Integration branch for features being prepared for release
-- **Feature Branches**: Short-lived branches for individual feature development
-- **Release Branches**: Created for release preparation and stabilization
-- **Hotfix Branches**: For critical fixes that need immediate deployment
-
-This branching strategy allows multiple teams to work concurrently while maintaining a clear path to production for new features and fixes.
-
-#### Code Quality
-
-Several automated processes ensure code quality throughout development:
-
-- **Linting**: Automated code style and quality checks using ESLint for JavaScript/TypeScript, Flake8 for Python, and similar tools for other languages
-- **Static Analysis**: Identification of potential bugs, security vulnerabilities, and performance issues using tools like SonarQube
-- **Unit Testing**: Comprehensive test coverage for individual components using Jest, PyTest, and JUnit
-- **Integration Testing**: Verification of component interactions using contract tests and API-level integration tests
-- **End-to-End Testing**: Validation of complete user journeys using tools like Cypress and Playwright
-
-These quality gates are integrated into the CI/CD pipeline, providing immediate feedback to developers and preventing problematic code from reaching production.
-
-#### Collaborative Development
-
-Flowlet employs several practices to facilitate collaboration among development teams:
-
-- **Pull Requests**: All code changes are reviewed through pull requests before merging
-- **Design Documents**: Significant features begin with design documents that outline approach and architecture
-- **API-First Development**: APIs are designed and documented before implementation begins
-- **Feature Flags**: New capabilities are developed behind feature flags for controlled rollout
-- **Documentation as Code**: Documentation is maintained alongside code and follows the same review process
-
-These practices ensure that development efforts are coordinated and that knowledge is shared effectively across the organization.
-
-### CI/CD Pipeline
-
-Flowlet's Continuous Integration and Continuous Deployment pipeline automates the process of building, testing, and deploying the platform:
-
-#### Build Process
-
-The build process creates deployable artifacts from source code:
-
-1. **Code Checkout**: Retrieval of source code from the Git repository
-2. **Dependency Resolution**: Installation of required libraries and packages
-3. **Compilation**: Transformation of source code into executable form
-4. **Asset Building**: Processing of static assets like CSS and JavaScript
-5. **Package Creation**: Bundling of compiled code and assets into deployable packages
-6. **Container Building**: Creation of Docker images for microservices
-7. **Artifact Publishing**: Storage of build outputs in artifact repositories
-
-This process runs automatically for every code change, ensuring that deployable artifacts are always available for testing and deployment.
-
-#### Automated Testing
-
-The CI/CD pipeline includes multiple testing phases:
-
-1. **Unit Tests**: Verification of individual components in isolation
-2. **Integration Tests**: Validation of component interactions
-3. **Security Scans**: Identification of vulnerabilities in code and dependencies
-4. **Performance Tests**: Measurement of system performance under load
-5. **Compliance Checks**: Verification of regulatory compliance requirements
-6. **End-to-End Tests**: Validation of complete user journeys
-
-Test results are collected and reported, with failures blocking progression through the pipeline until resolved.
-
-#### Deployment Automation
-
-Deployments are fully automated to ensure consistency and reliability:
-
-1. **Environment Preparation**: Configuration of target environment
-2. **Deployment Strategy Selection**: Choice of deployment approach (blue-green, canary, etc.)
-3. **Artifact Deployment**: Installation of new software versions
-4. **Database Migrations**: Application of schema changes
-5. **Service Verification**: Confirmation that services are operational
-6. **Rollback Preparation**: Configuration of rollback mechanisms in case of issues
-
-The deployment process supports multiple environments (development, staging, production) with appropriate controls for each.
-
-### Environment Management
-
-Flowlet employs a structured approach to environment management:
-
-#### Environment Types
-
-The platform uses several environment types for different purposes:
-
-- **Development**: Individual environments for feature development
-- **Integration**: Shared environment for testing feature interactions
-- **Staging**: Production-like environment for final validation
-- **Production**: Live environment serving real users
-- **Sandbox**: Isolated environment for partner testing and integration
-
-Each environment type has specific characteristics and access controls appropriate to its purpose.
-
-#### Infrastructure as Code
-
-All environments are defined and managed using Infrastructure as Code (IaC) principles:
-
-- **Terraform**: Used for provisioning cloud resources
-- **Kubernetes Manifests**: Define the deployment configuration for services
-- **Helm Charts**: Package Kubernetes applications for consistent deployment
-- **Ansible**: Handles configuration management for non-containerized components
-
-This approach ensures that environments are consistent, reproducible, and documented as code.
-
-#### Configuration Management
-
-Flowlet implements a hierarchical configuration system:
-
-1. **Base Configuration**: Default settings applicable to all environments
-2. **Environment-Specific Configuration**: Settings that vary by environment
-3. **Secret Configuration**: Sensitive values stored in secure vaults
-4. **Runtime Configuration**: Settings that can be adjusted without redeployment
-
-This layered approach balances consistency across environments with the flexibility to adapt to specific requirements.
-
-### Monitoring and Observability
-
-Comprehensive monitoring ensures the health and performance of the Flowlet platform:
-
-#### Metrics Collection
-
-The platform collects various metrics to track system health:
-
-- **System Metrics**: CPU, memory, disk, and network utilization
-- **Application Metrics**: Request rates, response times, error rates
-- **Business Metrics**: Transaction volumes, user activity, conversion rates
-- **SLA Metrics**: Availability, latency, and other service level indicators
-
-These metrics are collected using Prometheus and visualized through Grafana dashboards.
-
-#### Logging
-
-Centralized logging provides visibility into system behavior:
-
-- **Application Logs**: Service-specific operational logs
-- **Access Logs**: Records of API requests and responses
-- **Audit Logs**: Documentation of security-relevant events
-- **Change Logs**: Records of configuration and deployment changes
-
-Logs are aggregated using the ELK stack (Elasticsearch, Logstash, Kibana) for searching and analysis.
-
-#### Distributed Tracing
-
-Tracing capabilities track requests as they flow through the system:
-
-- **Request Tracing**: End-to-end tracking of individual requests
-- **Dependency Mapping**: Visualization of service interactions
-- **Performance Analysis**: Identification of bottlenecks and optimization opportunities
-- **Error Correlation**: Linking of errors across multiple services
-
-Jaeger provides distributed tracing capabilities, integrated with the overall observability stack.
-
-#### Alerting
-
-Automated alerting notifies operators of potential issues:
-
-- **Threshold Alerts**: Notifications when metrics exceed defined thresholds
-- **Anomaly Detection**: Identification of unusual patterns in metrics
-- **Predictive Alerts**: Warnings based on trend analysis
-- **Composite Alerts**: Notifications based on multiple conditions
-
-Alerts are routed through PagerDuty or similar services to ensure timely response to incidents.
-
-### Disaster Recovery
-
-Flowlet includes comprehensive disaster recovery capabilities:
-
-#### Backup Strategies
-
-Regular backups protect against data loss:
-
-- **Database Backups**: Regular snapshots of all databases
-- **Configuration Backups**: Preservation of system configuration
-- **Incremental Backups**: Frequent partial backups to minimize data loss
-- **Offsite Storage**: Backup storage in separate geographic locations
-
-Backups are regularly tested through restoration exercises to verify their effectiveness.
-
-#### High Availability
-
-The platform architecture ensures continued operation during component failures:
-
-- **Service Redundancy**: Multiple instances of each service
-- **Database Replication**: Synchronized copies of databases
-- **Load Balancing**: Distribution of traffic across service instances
-- **Automatic Failover**: Seamless transition to backup components
-
-These high availability features minimize disruption from individual component failures.
-
-#### Recovery Procedures
-
-Documented procedures guide the recovery process:
-
-- **Service Recovery**: Steps for restoring individual services
-- **Data Recovery**: Processes for data restoration from backups
-- **Full System Recovery**: Procedures for rebuilding the entire platform
-- **Communication Plans**: Templates for stakeholder communication during incidents
-
-Regular disaster recovery drills ensure that these procedures are effective and that teams are prepared to execute them when needed.
-## 🧪 Testing
-
-Comprehensive testing is essential for maintaining the reliability and security of the Flowlet platform. The testing strategy encompasses multiple levels and approaches to ensure that all aspects of the system function correctly and securely.
-
-### Testing Strategy
-
-Flowlet employs a multi-layered testing approach that covers different aspects of the system:
-
-#### Unit Testing
-
-Unit tests verify the behavior of individual components in isolation, using mocks or stubs to replace dependencies. These tests focus on validating business logic, edge cases, and error handling within specific functions or classes.
-
-Each microservice maintains its own suite of unit tests, typically achieving code coverage of 80% or higher. These tests run automatically on every code change, providing immediate feedback to developers about the correctness of their implementations.
-
-Key technologies used for unit testing include:
-- Jest for JavaScript/TypeScript services
-- PyTest for Python components
-- JUnit for Java services
-- Go testing package for Go services
-
-#### Integration Testing
-
-Integration tests validate the interactions between components, ensuring that they work together correctly. These tests focus on API contracts, database interactions, and message passing between services.
-
-The integration testing approach includes:
-- **Contract Testing**: Verifying that service interfaces adhere to their specifications
-- **API Testing**: Validating the behavior of REST and GraphQL endpoints
-- **Database Testing**: Confirming proper data persistence and retrieval
-- **Message Testing**: Ensuring correct handling of events and messages
-
-Integration tests run in isolated environments with containerized dependencies, allowing them to verify actual interactions without affecting production systems.
-
-#### End-to-End Testing
-
-End-to-end tests validate complete user journeys through the system, simulating real-world usage patterns. These tests interact with the system through its external interfaces, just as users or integrating applications would.
-
-The end-to-end testing suite covers critical flows including:
-- Wallet creation and management
-- Payment processing across different methods
-- Card issuance and transaction handling
-- KYC verification workflows
-- Reporting and analytics functions
-
-These tests run in staging environments that closely mirror production, using test accounts with banking and payment processor sandboxes.
-
-#### Performance Testing
-
-Performance tests evaluate the system's behavior under various load conditions, identifying bottlenecks and verifying that the platform can handle expected transaction volumes with acceptable response times.
-
-The performance testing regime includes:
-- **Load Testing**: Measuring system performance under expected load
-- **Stress Testing**: Evaluating behavior under extreme conditions
-- **Endurance Testing**: Verifying stability during extended operation
-- **Scalability Testing**: Confirming that performance scales with resources
-
-Performance tests use tools like k6, JMeter, and custom load generation scripts to simulate realistic usage patterns.
-
-#### Security Testing
-
-Security testing identifies vulnerabilities and verifies that security controls function correctly. This testing combines automated scanning with manual penetration testing to provide comprehensive coverage.
-
-The security testing program includes:
-- **Static Application Security Testing (SAST)**: Analyzing code for security issues
-- **Dynamic Application Security Testing (DAST)**: Testing running applications for vulnerabilities
-- **Dependency Scanning**: Identifying vulnerabilities in third-party libraries
-- **Penetration Testing**: Simulating attacker techniques to find weaknesses
-- **Compliance Testing**: Verifying adherence to security standards and regulations
-
-Security testing occurs continuously through automated scans and periodically through manual assessments by internal and external security experts.
-
-### Test Automation
-
-Flowlet prioritizes test automation to ensure consistent, repeatable validation of the platform:
-
-#### Continuous Integration
-
-All tests are integrated into the CI/CD pipeline, with different test types running at appropriate stages:
-- Unit and some integration tests run on every commit
-- Complete integration test suites run before merging to development branches
-- End-to-end tests run before deployment to staging and production
-- Performance tests run on a scheduled basis and before major releases
-- Security scans run continuously with different frequencies based on test type
-
-This approach ensures that issues are identified early in the development process when they are easiest to fix.
-
-#### Test Data Management
-
-Effective testing requires appropriate test data that reflects real-world scenarios without exposing sensitive information:
-
-- **Data Generation**: Synthetic data creation for various test scenarios
-- **Data Masking**: Obfuscation of production-like data for testing
-- **Data Versioning**: Management of test data sets for reproducibility
-- **Environment Reset**: Capabilities to restore environments to known states
-
-These practices ensure that tests have the data they need while maintaining security and privacy.
-
-#### Test Reporting
-
-Comprehensive test reporting provides visibility into system quality:
-
-- **Test Results Dashboard**: Visualization of test outcomes across the platform
-- **Trend Analysis**: Tracking of test metrics over time
-- **Failure Analysis**: Tools for diagnosing and categorizing test failures
-- **Coverage Reporting**: Measurement of code and feature coverage
-
-Test reports are available to all team members and are reviewed regularly as part of the development process.
-
-### Testing Best Practices
-
-Flowlet follows industry best practices for financial software testing:
-
-#### Shift-Left Testing
-
-Testing begins early in the development process, with requirements and designs evaluated for testability before implementation starts. This approach identifies issues when they are least expensive to fix.
-
-#### Risk-Based Testing
-
-Testing resources are allocated based on risk assessment, with critical components receiving more intensive testing than lower-risk areas. This approach maximizes the effectiveness of testing efforts.
-
-#### Chaos Engineering
-
-Controlled experiments introduce failures into the system to verify its resilience. These tests confirm that the platform can handle unexpected conditions gracefully.
-
-#### Continuous Testing
-
-Testing occurs throughout the development lifecycle rather than as a separate phase at the end. This approach provides ongoing feedback about system quality.
-
-#### Test-Driven Development
-
-For critical components, tests are written before implementation code, ensuring that requirements are clearly understood and that code is designed for testability.
-
-These practices ensure that the Flowlet platform maintains the highest standards of quality and reliability, essential characteristics for a financial services platform.
-## 🛣️ Roadmap
-
-Flowlet's development roadmap outlines the platform's evolution, focusing on expanding capabilities, enhancing existing features, and responding to market trends in embedded finance. This forward-looking plan ensures that Flowlet remains at the forefront of financial technology innovation while continuing to meet the evolving needs of businesses and their customers.
-
-### Q3 2025: Core Platform Enhancement
-
-The immediate roadmap focuses on strengthening the foundation of the Flowlet platform:
-
-**Enhanced Payment Capabilities**
-The payment infrastructure will be expanded to support additional payment methods and optimize existing flows. Key developments include real-time payments integration across more regions, enhanced recurring payment capabilities with smart retry logic, and improved cross-border payment options with competitive FX rates.
-
-**Advanced Fraud Prevention**
-Building on the existing fraud detection system, this phase will introduce more sophisticated machine learning models that adapt to emerging fraud patterns. The enhanced system will incorporate behavioral biometrics, device fingerprinting, and network analysis to identify potentially fraudulent activities with greater accuracy while minimizing false positives that could impact legitimate users.
-
-**Developer Experience Improvements**
-The Developer Portal will receive significant enhancements focused on accelerating integration and troubleshooting. New features will include interactive API explorers with live testing capabilities, expanded SDK coverage for additional programming languages, and AI-assisted code generation for common integration patterns.
-
-### Q4 2025: Expanded Financial Products
-
-The next phase will broaden Flowlet's product offerings:
-
-**Credit and Lending Infrastructure**
-A new Credit Service will enable businesses to offer lending products through the Flowlet platform. This infrastructure will support various lending models including buy-now-pay-later, revolving credit lines, and term loans. The service will include underwriting APIs, repayment management, and credit reporting integration.
-
-**Enhanced Card Issuance**
-The Card Service will be expanded to support additional card types and features, including multi-currency cards, corporate expense cards with advanced controls, and specialized cards for specific verticals like healthcare spending accounts or education financing.
-
-**Global Expansion**
-Platform capabilities will be extended to support additional regions, with localized compliance frameworks, payment methods, and banking integrations. This expansion will focus initially on APAC and LATAM markets, complementing the existing coverage in North America and Europe.
-
-### Q1 2026: Advanced Analytics and Intelligence
-
-This phase focuses on deriving greater value from financial data:
-
-**Business Intelligence Platform**
-A comprehensive analytics suite will provide businesses with actionable insights into their financial operations. The platform will include customizable dashboards, advanced reporting capabilities, and predictive analytics to identify trends and opportunities within transaction data.
-
-**Personalization Engine**
-New capabilities will enable businesses to deliver personalized financial experiences based on user behavior and preferences. This engine will support targeted offers, customized user journeys, and adaptive interfaces that respond to individual usage patterns.
-
-**Open Banking Integration**
-Enhanced connectivity with open banking APIs will enable account aggregation, financial data enrichment, and improved payment experiences. This integration will allow businesses to provide their users with a more comprehensive view of their finances while enabling new use cases like account-to-account payments and financial health monitoring.
-
-### Q2 2026: Ecosystem Expansion
-
-The longer-term roadmap focuses on building a broader financial ecosystem:
-
-**Marketplace and Partner Network**
-A curated marketplace will connect businesses using Flowlet with complementary service providers, including specialized KYC vendors, alternative data sources for credit decisions, and vertical-specific solution providers. This ecosystem approach will allow businesses to easily extend their financial offerings beyond Flowlet's core capabilities.
-
-**Embedded Investment Platform**
-New investment infrastructure will enable businesses to offer savings and investment products to their users. This platform will support various investment vehicles including fractional shares, ETFs, and managed portfolios, with appropriate regulatory frameworks and custody arrangements.
-
-**Blockchain and Digital Asset Integration**
-Selective integration with blockchain networks and digital asset platforms will enable businesses to incorporate these emerging technologies into their financial offerings when appropriate. This integration will focus on practical use cases with clear business value, such as stablecoin payments, programmable money, and tokenized assets.
-
-### Continuous Improvement Areas
-
-Throughout all roadmap phases, ongoing investment will continue in these critical areas:
-
-**Security and Compliance**
-Continuous enhancement of security measures and compliance capabilities to address evolving threats and regulatory requirements. This includes adoption of emerging security technologies, expansion of compliance frameworks to new jurisdictions, and streamlining of compliance processes to reduce operational burden.
-
-**Performance and Scalability**
-Ongoing optimization of platform performance and scalability to support growing transaction volumes and user bases. This includes database optimization, caching strategies, and infrastructure improvements to maintain response times and system reliability under increasing load.
-
-**Operational Excellence**
-Continuous refinement of operational processes and tools to enhance platform reliability and efficiency. This includes improved observability, automated incident response, and enhanced deployment automation to minimize operational overhead and maximize system uptime.
-
-This roadmap represents Flowlet's current development priorities based on market trends and customer feedback. The specific timing and scope of features may evolve in response to changing market conditions, regulatory requirements, and emerging opportunities in the embedded finance landscape.
 ## 🤝 Contributing
 
-Flowlet welcomes contributions from the developer community. This section outlines the process for contributing to the platform, whether you're fixing bugs, adding features, or improving documentation.
-
-### Contribution Guidelines
-
-When contributing to Flowlet, please follow these guidelines to ensure a smooth collaboration process:
-
-#### Code Contributions
-
-1. **Fork the Repository**: Create your own fork of the relevant Flowlet repository.
-
-2. **Create a Branch**: Make your changes in a new branch based on the `development` branch:
-   ```bash
-   git checkout -b feature/your-feature-name development
-   ```
-
-3. **Follow Coding Standards**: Adhere to the established coding standards for the repository:
-   - Use consistent formatting and naming conventions
-   - Write comprehensive unit tests for new functionality
-   - Ensure all existing tests pass
-   - Add appropriate documentation for new features
-
-4. **Commit Guidelines**: Write clear, descriptive commit messages following the conventional commits format:
-   ```
-   type(scope): description
-   
-   [optional body]
-   
-   [optional footer]
-   ```
-   Where `type` is one of: feat, fix, docs, style, refactor, perf, test, chore
-
-5. **Submit a Pull Request**: Open a pull request against the `development` branch with a clear description of the changes and any relevant issue references.
-
-6. **Code Review**: Participate in the code review process, responding to feedback and making necessary adjustments.
-
-#### Documentation Contributions
-
-Improvements to documentation are highly valued contributions:
-
-1. **Documentation Fixes**: For simple documentation fixes, you can edit the file directly on GitHub and submit a pull request.
-
-2. **Substantial Documentation**: For more substantial documentation changes, follow the same process as code contributions.
-
-3. **Documentation Standards**: Follow the established documentation style guide, maintaining consistent formatting and tone.
-
-#### Issue Reporting
-
-High-quality issue reports help the team understand and address problems efficiently:
-
-1. **Search Existing Issues**: Before creating a new issue, search to see if it has already been reported.
-
-2. **Issue Template**: Use the provided issue template to ensure all necessary information is included.
-
-3. **Reproduction Steps**: Provide clear steps to reproduce the issue, including environment details, expected behavior, and actual behavior.
-
-4. **Supporting Materials**: Include relevant logs, screenshots, or other materials that help illustrate the issue.
-
-### Development Setup
-
-To set up a development environment for contributing to Flowlet:
-
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/abrar2030/Flowlet
-   cd Flowlet
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Set Up Local Environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with appropriate values
-   ```
-
-4. **Run Development Services**:
-   ```bash
-   docker-compose -f docker-compose.dev.yml up -d
-   ```
-
-5. **Start Development Server**:
-   ```bash
-   npm run dev
-   ```
-
-### Contribution Review Process
-
-All contributions go through a structured review process:
-
-1. **Initial Review**: A maintainer will review the contribution for alignment with project goals and quality standards.
-
-2. **Technical Review**: The code or documentation will be reviewed for technical accuracy and adherence to standards.
-
-3. **Automated Checks**: CI/CD pipelines will run automated tests and quality checks.
-
-4. **Iteration**: Based on feedback, you may need to make adjustments to your contribution.
-
-5. **Acceptance**: Once approved, your contribution will be merged into the appropriate branch.
-
-6. **Recognition**: All contributors are acknowledged in the project's contributors list.
-
-### Community Guidelines
-
-Flowlet maintains a welcoming and inclusive community:
-
-- **Code of Conduct**: All contributors are expected to adhere to the project's code of conduct, which promotes respect, inclusivity, and constructive collaboration.
-
-- **Communication Channels**: Engage with the community through official channels including GitHub discussions, the community forum, and scheduled community calls.
-
-- **Mentorship**: New contributors can request mentorship from experienced community members to help navigate their first contributions.
-
-By contributing to Flowlet, you help build a more robust, feature-rich platform that serves the needs of businesses implementing embedded finance solutions. We appreciate your interest and look forward to your contributions.
+We welcome contributions to the Flowlet project. Please refer to the `CONTRIBUTING.md` (if available) for guidelines on how to contribute.
 
 ## 📄 License
 
-Flowlet is licensed under the MIT License, a permissive open-source license that allows for broad use, modification, and distribution of the software.
-
-### MIT License
-
-```
-Copyright (c) 2025 Flowlet, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-### Third-Party Components
-
-Flowlet incorporates various third-party libraries and components, each with its own license. A comprehensive list of these dependencies and their respective licenses is available in the `NOTICE` file included with the source code.
-
-### Commercial Usage
-
-While the Flowlet platform code is open-source under the MIT License, businesses using Flowlet for commercial purposes should be aware of the following considerations:
-
-1. **Banking Relationships**: The use of Flowlet may require establishing relationships with banking partners, which typically involve separate commercial agreements.
-
-2. **Payment Processors**: Integration with payment processors will require separate agreements with those providers.
-
-3. **Compliance Requirements**: Businesses using Flowlet must independently ensure compliance with relevant financial regulations in their jurisdictions.
-
-4. **Support Services**: Commercial support, hosting, and managed services for Flowlet are available through separate agreements.
-
-### Trademark Usage
-
-The Flowlet name and logo are trademarks and may not be used without permission in contexts that could imply endorsement or affiliation. Guidelines for acceptable use of Flowlet trademarks are available in the `TRADEMARK` file included with the source code.
-
-### Contributing and License Acceptance
-
-By contributing to the Flowlet project, contributors agree that their contributions will be licensed under the same MIT License that covers the project. This ensures that the entire codebase maintains consistent licensing terms.
-
-## 📚 References
-
-1. Generate Your Own API Gateway Developer Portal | AWS Compute Blog
-   https://aws.amazon.com/blogs/compute/generate-your-own-api-gateway-developer-portal/
-
-2. Embedded Finance Architecture and Integration: An In-Depth Guide
-   https://www.itmagination.com/blog/embedded-finance-architecture-and-integration-in-depth-guide
-
-3. Fundamentals of FinTech Architecture: Challenges, and Solutions
-   https://sdk.finance/the-fundamentals-of-fintech-architecture-trends-challenges-and-solutions/
-
-4. Multi-cloud architecture: Three real-world examples from fintech
-   https://www.cockroachlabs.com/blog/fintech-multi-cloud-architecture/
-
-5. Payment tokenisation: What it is and how it works | Stripe
-   https://stripe.com/en-es/resources/more/payment-tokenization-101
-
-6. Part 2: Digital Wallet : The Architecture | by Abhishek Ranjan | Medium
-   https://medium.com/@abhishekranjandev/part-2-payment-gateway-like-razorpay-the-architecture-3f00b62b5d37
-
-7. Regulatory compliance: PSD2, GDPR, KYC/KYB, AML | SDK.finance
-   https://sdk.finance/start-paas/regulatory-compliance/
-
-8. Building your own Ledger Database - by Oskar Dudycz
-   https://www.architecture-weekly.com/p/building-your-own-ledger-database
-
-9. Fintech chatbots: The benefits and uses of AI agents in finance
-   https://www.zendesk.com/blog/fintech-chatbot/
-
-
-
-```
-GET    /v1/wallets/user/{user_id} # Get all wallets for a specific user
-POST   /v1/wallets/{id}/freeze    # Freeze/suspend a wallet
-POST   /v1/wallets/{id}/unfreeze  # Unfreeze/activate a wallet
-POST   /v1/wallets/{id}/transfer  # Transfer funds between wallets
-```
-
-
-
-
-#### Payments API
-
-The Payments API handles the movement of funds and various transaction types:
-
-```
-POST   /v1/payments/deposit                 # Deposit funds into a wallet
-POST   /v1/payments/withdraw                # Withdraw funds from a wallet
-POST   /v1/payments/bank-transfer           # Process bank transfer (ACH, SEPA, Wire)
-POST   /v1/payments/card-payment            # Process card payment
-GET    /v1/payments/transaction/{id}        # Get transaction details
-PUT    /v1/payments/transaction/{id}/status # Update transaction status
-GET    /v1/payments/exchange-rate/{from_currency}/{to_currency} # Get exchange rate
-POST   /v1/payments/currency-conversion     # Convert amount between currencies
-```
-
-
-
-
-## Adherence to Financial Industry Standards
-
-Flowlet is committed to upholding the highest standards of the financial industry, ensuring robust security, data integrity, compliance, and auditability across all its services. Our Wallet and Payment APIs are meticulously designed and implemented with these principles at their core.
-
-### Wallet API
-
-The Wallet API incorporates comprehensive measures to safeguard digital wallets and their associated transactions:
-
--   **Enhanced Security**: All sensitive wallet data and transaction details are protected through industry-standard encryption protocols, both at rest and in transit. Access is strictly controlled via Role-Based Access Control (RBAC) and secure token-based authentication, with rigorous input validation to prevent vulnerabilities.
--   **Guaranteed Data Integrity**: Financial operations are ACID-compliant, ensuring that all transactions are processed reliably. The system employs double-entry accounting principles for every financial movement, providing an immutable and verifiable audit trail. Monetary values are handled with `Decimal` types to guarantee precision and prevent inaccuracies.
--   **Regulatory Compliance**: The API supports compliance with key financial regulations such as KYC, AML, GDPR, and PSD2. Wallet activities are continuously monitored for suspicious patterns, integrating with fraud detection systems for real-time analysis and alerting.
--   **Comprehensive Auditability**: All wallet-related events are recorded as immutable entries in a detailed audit log, capturing actions, timestamps, and changes. Unique reference IDs are assigned to all transactions for easy traceability and reconciliation.
-
-### Payment API
-
-The Payment API is engineered to handle financial transactions with the utmost security and reliability, meeting stringent industry requirements:
-
--   **Secure Transaction Processing**: Payments are processed over secure, encrypted channels. Sensitive card details are tokenized, minimizing data exposure and reducing PCI DSS compliance scope. Advanced AI/ML-driven fraud detection mechanisms continuously analyze transaction patterns to identify and prevent fraudulent activities.
--   **Atomic Data Integrity**: All payment operations are atomic, ensuring that transactions are either fully completed or entirely rolled back, preventing partial updates. Double-entry accounting is rigorously applied to all payment transactions, creating balanced and immutable ledger entries. Monetary amounts are exclusively processed using `Decimal` data types for exact precision.
--   **Regulatory Compliance**: The API facilitates compliance with AML and CFT regulations through robust data generation for regulatory reporting and real-time sanctions screening against global watchlists. Transaction flows adhere to specific rules of various payment schemes (e.g., ACH, SEPA, SWIFT) to ensure interoperability and compliance.
--   **Detailed Auditability**: Every payment transaction is accompanied by comprehensive, immutable audit trails, recording all critical information and status changes. Unique reference IDs enable seamless tracking and reconciliation across internal and external systems. Precise timestamping of all events provides a clear chronological record for forensic analysis and regulatory audits.
-
-These integrated measures ensure that Flowlet's Wallet and Payment APIs provide a secure, reliable, and fully compliant foundation for embedded finance solutions.
-
-
-
-
-### Authentication API
-
-Detailed documentation for user authentication and authorization:
-- [Authentication API Reference](docs/auth.md)
-
-### Banking Integrations API
-
-Comprehensive guide to integrating with various banking systems for account and transaction management:
-- [Banking Integrations API Reference](docs/banking_integrations.md)
-
-### Ledger API
-
-Detailed documentation for the double-entry ledger system and financial reporting:
-- [Ledger API Reference](docs/ledger.md)
-
-### AI Service API
-
-Documentation for AI-powered features including fraud detection and the support chatbot:
-- [AI Service API Reference](docs/ai_service.md)
-
-### Security API
-
-Documentation for API key management, audit logging, data tokenization, and security scanning:
-- [Security API Reference](docs/security.md)
-
-
-
-
-## ✨ New Features and Enhancements
-
-Flowlet has undergone significant enhancements, expanding its capabilities across security, AI, compliance, and core financial services. These updates are designed to provide a more robust, secure, and comprehensive embedded finance platform, meeting the stringent demands of the financial industry.
-
-### Advanced Security and Compliance Framework
-
-The platform's security posture has been significantly strengthened with the implementation of a multi-layered security framework. This includes:
-
-- **Comprehensive Security Headers**: Automatic application of industry-standard security headers (e.g., `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, `Content-Security-Policy`) to mitigate common web vulnerabilities like XSS, clickjacking, and content sniffing. Custom financial security headers (`X-API-Version`, `X-Security-Level`, `X-Compliance-Level`) are also added to responses, providing clear indicators of the platform's security and compliance adherence.
-- **Enhanced Input Validation**: Strict validation of incoming request payloads, ensuring that only well-formed and expected data types are processed. This prevents various injection attacks and data integrity issues.
-- **Robust Error Handling**: Granular and informative error responses for various HTTP status codes (400, 401, 403, 404, 429, 500), providing clear error codes, messages, and timestamps for easier debugging and integration. Rate limit exceeding errors now include a `retry_after` field.
-- **JWT Authentication with Refresh Tokens**: Implementation of a secure authentication mechanism using JSON Web Tokens (JWT) with support for refresh tokens, ensuring secure and persistent user sessions while minimizing the risk of token compromise.
-- **Advanced Rate Limiting**: Sophisticated rate limiting policies (e.g., 1000 requests per hour, 100 requests per minute) to protect against brute-force attacks, denial-of-service (DoS) attacks, and API abuse. This is configurable and leverages Redis for distributed and efficient rate limiting.
-- **Data Encryption (AES-256)**: All sensitive data, both at rest and in transit, is protected using AES-256 encryption, a standard for financial data protection. This is managed by a dedicated encryption manager.
-- **Real-time Security Monitoring**: Continuous monitoring of system activities and traffic patterns to detect and respond to suspicious behavior or potential breaches in real-time.
-- **PCI DSS Level 1 Compliance**: The platform is engineered to meet the highest level of Payment Card Industry Data Security Standard (PCI DSS) compliance, ensuring secure handling of cardholder data.
-- **Multi-Factor Authentication (MFA) Support**: Built-in support for integrating multi-factor authentication, adding an extra layer of security for user accounts.
-- **Fraud Detection and Prevention**: Integration of advanced machine learning models for real-time fraud detection, analyzing transaction patterns and user behavior to identify and prevent fraudulent activities.
-- **Advanced Threat Protection**: Implementation of various measures to protect against sophisticated cyber threats, including intrusion detection and prevention systems.
-
-### Expanded AI-Enhanced Capabilities
-
-Flowlet's AI capabilities have been significantly expanded to provide deeper insights and automation:
-
-- **Enhanced Fraud Detection**: Beyond basic fraud detection, the system now incorporates more sophisticated machine learning models for `enhanced_fraud_detection` and `transaction_intelligence`, allowing for more accurate identification of complex fraud patterns and anomalies.
-- **Risk Assessment**: Introduction of a dedicated `risk_assessment` module that evaluates various factors to determine the risk profile of transactions and users, enabling proactive risk management.
-- **AI Support Chatbot**: The `support_chatbot` has been further trained and integrated to provide more intelligent and context-aware assistance to both developers and end-users, leveraging a broader knowledge base.
-
-### Comprehensive Multi-Currency System
-
-A robust `multi_currency_system` has been integrated, enabling the platform to handle transactions and manage balances across a wide range of global currencies. This includes:
-
-- **20+ Supported Currencies**: The API now explicitly lists support for over 20 major global currencies (e.g., USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, ZAR, BRL, INR, KRW, PLN).
-- **Real-time Exchange Rates**: Integration with external services to fetch and apply real-time exchange rates for accurate multi-currency transactions and conversions.
-- **Multi-Currency Wallet Management**: Wallets can now hold balances in multiple currencies simultaneously, simplifying international operations for businesses and their customers.
-
-### Advanced Integrations and Ecosystem
-
-Flowlet's integration layer has been modularized and expanded to facilitate seamless connectivity with a broader financial ecosystem:
-
-- **Modular Integration Framework**: The `integrations` module now includes dedicated sub-modules for `banking`, `currency`, and `payments`, allowing for easier addition of new third-party providers and services.
-- **Comprehensive Health Check Endpoint**: The `/health` endpoint now provides a more detailed status report, including the health of the database, Redis, and the operational status of key security and compliance features (encryption, audit logging, rate limiting, security monitoring). It also reports on compliance with PCI DSS, SOX, and GDPR, and provides system uptime.
-- **Enriched API Information Endpoint**: The `/api/v1/info` endpoint offers a comprehensive overview of the API, detailing all available endpoints, supported features, security features, compliance standards, and the full list of supported currencies. This serves as a dynamic and up-to-date API catalog.
-
-### Unified Frontend Enhancements
-
-The `unified-frontend` has been developed with a modern, component-based architecture, leveraging cutting-edge web technologies to deliver a rich and responsive user experience:
-
-- **React/Vite Development Stack**: Built with React and Vite for fast development, optimized performance, and a highly interactive user interface.
-- **Comprehensive UI Libraries**: Utilizes `@radix-ui` for accessible and customizable UI components, `tailwindcss` for efficient styling, and `framer-motion` for smooth animations, ensuring a polished and engaging user experience.
-- **Data Visualization with Recharts**: Integration of `recharts` for powerful and customizable data visualization, enabling clear presentation of financial data and analytics.
-- **Robust State Management**: Implements `@reduxjs/toolkit` and `react-redux` for predictable and scalable state management, crucial for complex financial applications.
-- **Extensive Testing**: Incorporates `vitest`, `@testing-library/react`, and `@testing-library/jest-dom` for comprehensive unit and integration testing, ensuring high code quality and reliability.
-- **Responsive Design**: Designed to be fully responsive, providing an optimal viewing and interaction experience across various devices, from desktops to mobile phones.
-
-These new features collectively enhance Flowlet's position as a leading embedded finance platform, offering unparalleled security, compliance, and functional breadth for businesses looking to integrate financial services seamlessly into their offerings.
-## CI/CD Pipeline Design for Flowlet
-
-To mature the CI/CD pipeline for Flowlet, especially considering the stringent requirements of the financial industry, a robust, secure, and automated approach is essential. This design incorporates best practices for continuous integration, continuous delivery, and continuous deployment, with a strong emphasis on security, compliance, and reliability.
-
-### Core Principles
-
-1.  **Automation First**: Automate every possible step in the software delivery lifecycle to reduce manual errors and increase efficiency.
-2.  **Security by Design**: Integrate security checks at every stage of the pipeline, from static code analysis to runtime protection.
-3.  **Reproducibility**: Ensure that every build and deployment is reproducible, allowing for consistent environments and easy rollbacks.
-4.  **Traceability**: Maintain a comprehensive audit trail of all changes, builds, tests, and deployments.
-5.  **Observability**: Implement robust monitoring and alerting to provide real-time insights into pipeline health and application performance.
-6.  **Compliance**: Design the pipeline to meet regulatory and industry-specific compliance standards (e.g., SOC 2, ISO 27001, GDPR, PCI DSS).
-
-### CI/CD Stages
-
-The CI/CD pipeline will be structured into several distinct stages, each with specific objectives and gates. A failure in any stage will halt the pipeline, preventing defective code from progressing further.
-
-#### 1. Source Code Management (SCM) Integration
-
-*   **Trigger**: Every push to a feature branch, pull request (PR) creation/update, and merge to `main` or `release` branches.
-*   **Objective**: Ensure code quality and consistency before integration.
-*   **Activities**:
-    *   **Branching Strategy**: Implement a robust branching strategy (e.g., GitFlow or GitHub Flow) to manage code changes effectively.
-    *   **Pull Request Reviews**: Enforce mandatory code reviews for all changes.
-    *   **Commit Linting**: Standardize commit messages to improve traceability and automated release notes generation.
-
-#### 2. Build Stage
-
-*   **Objective**: Compile source code, resolve dependencies, and create deployable artifacts.
-*   **Activities**:
-    *   **Dependency Resolution**: Fetch and cache project dependencies (e.g., `pip install` for Python, `npm install` for Node.js).
-    *   **Code Compilation/Transpilation**: Compile backend Python code (if applicable) and transpile frontend JavaScript/TypeScript.
-    *   **Artifact Generation**: Create deployable artifacts (e.g., Docker images for backend, minified static assets for frontend).
-    *   **Artifact Versioning**: Tag artifacts with unique, immutable versions (e.g., Git commit SHA, build number).
-
-#### 3. Test Stage
-
-*   **Objective**: Verify the functionality, performance, and security of the application through automated tests.
-*   **Activities**:
-    *   **Unit Tests**: Run fast, isolated tests for individual code components.
-    *   **Integration Tests**: Verify interactions between different components and services.
-    *   **API Tests**: Test backend API endpoints for correctness and performance.
-    *   **End-to-End (E2E) Tests**: Simulate user interactions with the entire application (frontend and backend).
-    *   **Performance Tests**: Conduct load and stress tests to ensure scalability and responsiveness.
-    *   **Security Tests (DAST)**: Dynamic Application Security Testing to identify vulnerabilities in the running application.
-
-#### 4. Security Scan Stage
-
-*   **Objective**: Identify and remediate security vulnerabilities early in the development lifecycle.
-*   **Activities**:
-    *   **Static Application Security Testing (SAST)**: Analyze source code for common vulnerabilities (e.g., SQL injection, XSS, insecure configurations).
-    *   **Software Composition Analysis (SCA)**: Identify known vulnerabilities in third-party libraries and dependencies.
-    *   **Container Image Scanning**: Scan Docker images for vulnerabilities and misconfigurations.
-    *   **Secrets Scanning**: Detect hardcoded secrets (e.g., API keys, passwords) in the codebase.
-
-#### 5. Infrastructure as Code (IaC) Validation Stage
-
-*   **Objective**: Validate the correctness and security of infrastructure configurations.
-*   **Activities**:
-    *   **IaC Linting**: Check Terraform, Kubernetes manifests, and Helm charts for syntax errors and best practices.
-    *   **IaC Security Scanning**: Analyze IaC for security misconfigurations and compliance violations.
-    *   **IaC Plan Review**: Generate and review execution plans for infrastructure changes to prevent unintended modifications.
-
-#### 6. Deployment Stage
-
-*   **Objective**: Deploy validated artifacts to various environments (development, staging, production).
-*   **Activities**:
-    *   **Environment Provisioning**: Automate the provisioning of infrastructure for new environments or updates to existing ones.
-    *   **Blue/Green or Canary Deployments**: Implement advanced deployment strategies to minimize downtime and risk during production releases.
-    *   **Rollback Capability**: Ensure that deployments can be quickly and safely rolled back to a previous stable version in case of issues.
-    *   **Configuration Management**: Manage environment-specific configurations securely (e.g., using Kubernetes Secrets, HashiCorp Vault).
-
-#### 7. Monitoring and Alerting Stage
-
-*   **Objective**: Continuously monitor the health, performance, and security of deployed applications and infrastructure.
-*   **Activities**:
-    *   **Application Performance Monitoring (APM)**: Track application metrics (e.g., response times, error rates, resource utilization).
-    *   **Log Aggregation and Analysis**: Centralize logs for effective troubleshooting and auditing.
-    *   **Security Information and Event Management (SIEM)**: Integrate security logs for threat detection and incident response.
-    *   **Alerting**: Configure alerts for critical issues and integrate with incident management systems.
-
-### Tooling Selection
-
-Given the requirements for a robust and secure CI/CD pipeline in the financial industry, a combination of industry-leading tools will be utilized.
-
-*   **Version Control System**: Git (hosted on GitHub/GitLab/Bitbucket)
-*   **CI/CD Orchestration**: GitHub Actions (preferred for its tight integration with GitHub, ease of use, and extensive marketplace for security and testing tools). Alternatives include GitLab CI/CD, Jenkins, Azure DevOps.
-*   **Containerization**: Docker
-*   **Container Registry**: GitHub Container Registry, Docker Hub, or a private registry.
-*   **Kubernetes Orchestration**: Kubernetes
-*   **Infrastructure as Code**: Terraform, Helm
-*   **Static Code Analysis (SAST)**: SonarQube, Bandit (for Python), ESLint (for JavaScript).
-*   **Software Composition Analysis (SCA)**: Dependabot (GitHub native), Snyk, OWASP Dependency-Check.
-*   **Container Image Scanning**: Trivy, Clair, Docker Scout.
-*   **Secrets Scanning**: GitGuardian, TruffleHog.
-*   **Dynamic Application Security Testing (DAST)**: OWASP ZAP, Burp Suite (integrated into pipeline).
-*   **Testing Frameworks**: Pytest (Python), Jest/React Testing Library (JavaScript).
-*   **Performance Testing**: Locust, JMeter.
-*   **Monitoring & Logging**: Prometheus, Grafana, ELK Stack (Elasticsearch, Logstash, Kibana), Datadog, Splunk.
-*   **Secret Management**: Kubernetes Secrets, HashiCorp Vault.
-
-### Implementation Details (GitHub Actions Example)
-
-This section outlines a high-level implementation using GitHub Actions, demonstrating how the defined stages would translate into a practical workflow.
-
-#### `.github/workflows/main.yml` (Example)
-
-```yaml
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
-      - release/*
-  pull_request:
-    branches:
-      - main
-      - release/*
-
-jobs:
-  build-and-test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-
-      - name: Install backend dependencies
-        run: pip install -r backend/requirements.txt
-
-      - name: Run backend unit tests
-        run: pytest backend/tests/
-
-      - name: Run backend SAST (Bandit)
-        run: bandit -r backend/
-
-      - name: Run backend SCA (OWASP Dependency-Check)
-        run: | # Placeholder for OWASP Dependency-Check integration
-          # Download and run OWASP Dependency-Check
-          # Generate report and fail on high vulnerabilities
-          echo "Running OWASP Dependency-Check for backend..."
-
-      - name: Build Docker image for backend
-        run: | # Placeholder for Docker build
-          # docker build -t your-repo/flowlet-backend:$(git rev-parse HEAD) backend/
-          echo "Building backend Docker image..."
-
-      - name: Scan backend Docker image (Trivy)
-        run: | # Placeholder for Trivy scan
-          # trivy image your-repo/flowlet-backend:$(git rev-parse HEAD)
-          echo "Scanning backend Docker image with Trivy..."
-
-  build-and-test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install frontend dependencies
-        run: npm install --prefix frontend/web-frontend
-
-      - name: Run frontend unit tests
-        run: npm test --prefix frontend/web-frontend
-
-      - name: Run frontend SAST (ESLint)
-        run: npm run lint --prefix frontend/web-frontend
-
-      - name: Run frontend SCA (Snyk)
-        run: | # Placeholder for Snyk integration
-          # snyk test --file=frontend/web-frontend/package.json
-          echo "Running Snyk for frontend..."
-
-      - name: Build frontend assets
-        run: npm run build --prefix frontend/web-frontend
-
-  iac-validation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.x
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        working-directory: infrastructure/terraform
-        continue-on-error: true
-
-      - name: Terraform validate
-        id: validate
-        run: terraform validate
-        working-directory: infrastructure/terraform
-
-      - name: Terraform plan
-        id: plan
-        run: terraform plan -no-color
-        working-directory: infrastructure/terraform
-        continue-on-error: true
-
-      - name: Check Terraform plan results
-        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
-        run: |
-          echo "Terraform validation failed. Please check the infrastructure code."
-          exit 1
-
-  deploy-to-staging:
-    needs: [build-and-test-backend, build-and-test-frontend, iac-validation]
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Kubernetes staging
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
-          # kubectl apply -f kubernetes/manifests/staging/
-          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n staging
-          echo "Deploying to staging environment..."
-
-  deploy-to-production:
-    needs: [deploy-to-staging]
-    runs-on: ubuntu-latest
-    environment: production
-    # Manual approval for production deployment
-    environment:
-      name: production
-      url: https://your-production-url.com
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Kubernetes production
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
-          # kubectl apply -f kubernetes/manifests/production/
-          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n production
-          echo "Deploying to production environment..."
-
-```
-
-### Security Considerations
-
-*   **Least Privilege**: Ensure that CI/CD pipeline credentials and service accounts have only the minimum necessary permissions.
-*   **Secret Management**: Store all sensitive information (API keys, database credentials) in secure secret management systems (e.g., GitHub Secrets, HashiCorp Vault) and inject them into the pipeline at runtime.
-*   **Network Segmentation**: Isolate CI/CD infrastructure from production environments.
-*   **Immutable Infrastructure**: Deploy new infrastructure rather than modifying existing, reducing configuration drift.
-*   **Regular Audits**: Conduct regular security audits of the CI/CD pipeline itself.
-
-### Compliance and Governance
-
-*   **Audit Trails**: Leverage CI/CD platform features to maintain detailed audit logs of all pipeline executions, including who triggered what, when, and what changes were deployed.
-*   **Separation of Duties**: Implement clear separation of duties, ensuring that no single individual has end-to-end control over the entire deployment process.
-*   **Change Management**: Integrate with change management systems to ensure all production deployments are approved and tracked.
-*   **Automated Reporting**: Generate automated reports on security scans, test results, and deployment outcomes for compliance purposes.
-
-This comprehensive CI/CD pipeline design provides a strong foundation for Flowlet to meet the rigorous demands of the financial industry, ensuring secure, reliable, and efficient software delivery.
-
-
-
-### Static Code Analysis and Linting
-
-Static code analysis and linting are crucial for maintaining code quality, consistency, and identifying potential issues early in the development cycle. For Flowlet, we will integrate the following tools:
-
-*   **Backend (Python)**: Bandit for security-focused static analysis and Flake8 for style guide enforcement and basic error checking.
-*   **Frontend (JavaScript/TypeScript)**: ESLint for code quality and style, and Stylelint for CSS/SCSS linting.
-
-These tools will be integrated into the CI/CD pipeline to run on every pull request and push to the main branches. Failing checks will block merges, ensuring that only high-quality code is integrated.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  build-and-test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup python, install dependencies)
-
-      - name: Run backend SAST (Bandit)
-        run: bandit -r backend/ -ll -f custom -o bandit_report.json || true # Allow failure for now, report will be generated
-
-      - name: Upload Bandit report
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: bandit_report.json
-
-      - name: Run backend linting (Flake8)
-        run: flake8 backend/
-
-# ... (rest of backend job)
-
-  build-and-test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup node, install dependencies)
-
-      - name: Run frontend linting (ESLint)
-        run: npm run lint --prefix frontend/web-frontend
-
-      - name: Run frontend style linting (Stylelint)
-        run: | # Placeholder for Stylelint integration
-          # npx stylelint "frontend/web-frontend/**/*.css" "frontend/web-frontend/**/*.scss"
-          echo "Running Stylelint for frontend..."
-
-# ... (rest of frontend job)
-```
-
-
-
-
-
-### Unit and Integration Testing
-
-Automated testing is fundamental to ensuring the reliability and correctness of the Flowlet application. The CI/CD pipeline will incorporate comprehensive unit and integration tests for both the backend and frontend components.
-
-*   **Unit Tests**: These tests focus on individual functions, methods, or classes in isolation, ensuring that each component works as expected. They are fast to execute and provide immediate feedback on code changes.
-*   **Integration Tests**: These tests verify the interactions between different modules or services, ensuring that they work together correctly. For the backend, this might involve testing API endpoints with a database or external service. For the frontend, it could involve testing component interactions or data flow.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  build-and-test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup python, install dependencies, static analysis)
-
-      - name: Run backend unit tests
-        run: pytest backend/tests/unit/
-
-      - name: Run backend integration tests
-        run: pytest backend/tests/integration/
-
-# ... (rest of backend job)
-
-  build-and-test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup node, install dependencies, linting)
-
-      - name: Run frontend unit tests
-        run: npm test --prefix frontend/web-frontend -- --testPathPattern=src/components/.*.test.js
-
-      - name: Run frontend integration tests
-        run: npm test --prefix frontend/web-frontend -- --testPathPattern=src/integration/.*.test.js
-
-# ... (rest of frontend job)
-```
-
-
-
-
-
-### Security Scanning (SAST, DAST, Dependency Scanning)
-
-Security is paramount in the financial industry. The CI/CD pipeline will integrate various security scanning tools to identify and mitigate vulnerabilities throughout the development lifecycle.
-
-*   **Static Application Security Testing (SAST)**: SAST tools analyze the application's source code for security vulnerabilities without executing the code. This helps identify issues like SQL injection, cross-site scripting (XSS), insecure direct object references, and other common weaknesses early in the development process. For Flowlet, Bandit (for Python backend) and ESLint (with security plugins for frontend) will be used.
-
-*   **Dynamic Application Security Testing (DAST)**: DAST tools test the application in its running state, simulating attacks to find vulnerabilities that might not be apparent from static code analysis. This includes testing for authentication bypasses, session management flaws, and business logic vulnerabilities. OWASP ZAP will be integrated for DAST.
-
-*   **Software Composition Analysis (SCA)**: SCA tools identify known vulnerabilities in third-party libraries and dependencies used by the application. Given the extensive use of open-source components, this is critical for managing supply chain risks. Dependabot (GitHub native) and OWASP Dependency-Check will be utilized.
-
-*   **Secrets Scanning**: This involves scanning the codebase for hardcoded secrets such as API keys, passwords, and access tokens, which can pose significant security risks if exposed. GitGuardian or TruffleHog will be used for this purpose.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  build-and-test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup python, install dependencies, static analysis, unit/integration tests)
-
-      - name: Run backend SAST (Bandit)
-        run: bandit -r backend/ -ll -f custom -o bandit_report.json || true
-
-      - name: Upload Bandit report
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: bandit_report.json
-
-      - name: Run backend SCA (OWASP Dependency-Check)
-        run: | 
-          # Install OWASP Dependency-Check (example, adjust for actual installation)
-          # wget https://github.com/jeremylong/DependencyCheck/releases/download/vX.Y.Z/dependency-check-X.Y.Z-release.zip
-          # unzip dependency-check-X.Y.Z-release.zip
-          # ./dependency-check/bin/dependency-check.sh --project "Flowlet Backend" --scan backend/ --format JSON --out . --failOnCVSS 7.0
-          echo "Running OWASP Dependency-Check for backend..."
-
-      - name: Run secrets scanning (TruffleHog)
-        run: | # Placeholder for TruffleHog integration
-          # trufflehog filesystem . --json > trufflehog_report.json || true
-          echo "Running TruffleHog for secrets scanning..."
-
-# ... (rest of backend job)
-
-  build-and-test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup node, install dependencies, linting, unit/integration tests)
-
-      - name: Run frontend SAST (ESLint with security plugins)
-        run: npm run lint:security --prefix frontend/web-frontend # Assuming a script for security linting
-
-      - name: Run frontend SCA (Snyk)
-        run: | 
-          # npm install -g snyk
-          # snyk auth ${{ secrets.SNYK_TOKEN }}
-          # snyk test --file=frontend/web-frontend/package.json --json > snyk_report.json || true
-          echo "Running Snyk for frontend..."
-
-# ... (rest of frontend job)
-
-  dast-scan:
-    needs: [deploy-to-staging] # DAST runs against a deployed application
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run DAST scan (OWASP ZAP)
-        run: | 
-          # Install OWASP ZAP (example, adjust for actual installation)
-          # docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-baseline.py -t http://localhost:8080 -g zap_baseline.conf -r zap_report.xml
-          echo "Running DAST scan with OWASP ZAP..."
-
-```
-
-
-
-
-
-### Containerization and Image Scanning
-
-Containerization is essential for consistent deployments across different environments. Docker will be used to containerize both the backend and frontend applications. Image scanning will be integrated into the CI/CD pipeline to ensure that all container images are free from known vulnerabilities before deployment.
-
-*   **Containerization**: Dockerfiles will be created for the backend (Python Flask application) and the frontend (Node.js application serving static assets). These Dockerfiles will define the environment, dependencies, and application code, ensuring that the application runs consistently regardless of the underlying infrastructure.
-
-*   **Image Scanning**: Trivy will be used to scan Docker images for operating system packages, application dependencies, and misconfigurations. This helps in identifying vulnerabilities introduced through base images or application dependencies within the container.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  build-and-test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup python, install dependencies, static analysis, unit/integration tests, security scans)
-
-      - name: Build Docker image for backend
-        run: docker build -t flowlet-backend:$(git rev-parse --short HEAD) ./backend
-
-      - name: Scan backend Docker image (Trivy)
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-backend:$(git rev-parse --short HEAD)
-
-      - name: Push backend Docker image to registry
-        run: | # Placeholder for pushing to a container registry (e.g., GitHub Container Registry)
-          # echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          # docker push ghcr.io/${{ github.repository_owner }}/flowlet-backend:$(git rev-parse --short HEAD)
-          echo "Pushing backend Docker image..."
-
-# ... (rest of backend job)
-
-  build-and-test-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      # ... (checkout, setup node, install dependencies, linting, unit/integration tests, security scans)
-
-      - name: Build Docker image for frontend
-        run: docker build -t flowlet-frontend:$(git rev-parse --short HEAD) ./frontend/web-frontend
-
-      - name: Scan frontend Docker image (Trivy)
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-frontend:$(git rev-parse --short HEAD)
-
-      - name: Push frontend Docker image to registry
-        run: | # Placeholder for pushing to a container registry (e.g., GitHub Container Registry)
-          # echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          # docker push ghcr.io/${{ github.repository_owner }}/flowlet-frontend:$(git rev-parse --short HEAD)
-          echo "Pushing frontend Docker image..."
-
-# ... (rest of frontend job)
-```
-
-
-
-
-
-### Infrastructure as Code (IaC) Validation
-
-Flowlet utilizes Infrastructure as Code (IaC) with Terraform for provisioning and managing its infrastructure. To ensure the integrity, security, and compliance of the infrastructure, the CI/CD pipeline will include robust IaC validation steps.
-
-*   **IaC Linting**: This involves checking the Terraform code for syntax errors, adherence to best practices, and consistency. Tools like `terraform fmt` and `tflint` will be used to automate this process.
-
-*   **IaC Security Scanning**: Tools like Checkov or Terrascan will be integrated to scan Terraform configurations for security misconfigurations, compliance violations, and potential vulnerabilities. This helps in preventing insecure infrastructure from being provisioned.
-
-*   **IaC Plan Review**: Before any infrastructure changes are applied, a `terraform plan` will be generated and reviewed. This plan provides a detailed summary of the changes that Terraform will make to the infrastructure, allowing for early detection of unintended modifications and potential risks. In a financial industry context, this step is often coupled with manual approval for production changes.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  iac-validation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.x
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        working-directory: infrastructure/terraform
-        continue-on-error: true
-
-      - name: Terraform validate
-        id: validate
-        run: terraform validate
-        working-directory: infrastructure/terraform
-
-      - name: Run IaC linting (tflint)
-        run: | # Placeholder for tflint integration
-          # curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          # tflint --init
-          # tflint infrastructure/terraform
-          echo "Running tflint for IaC..."
-
-      - name: Run IaC security scan (Checkov)
-        run: | # Placeholder for Checkov integration
-          # pip install checkov
-          # checkov -d infrastructure/terraform
-          echo "Running Checkov for IaC security scan..."
-
-      - name: Terraform plan
-        id: plan
-        run: terraform plan -no-color
-        working-directory: infrastructure/terraform
-        continue-on-error: true
-
-      - name: Check Terraform plan results
-        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
-        run: |
-          echo "Terraform validation failed. Please check the infrastructure code."
-          exit 1
-
-# ... (rest of workflow)
-```
-
-
-
-
-
-### Automated Deployment to Staging and Production Environments
-
-Automated deployment is the final stage of the CI/CD pipeline, responsible for deploying the validated application artifacts to various environments. For Flowlet, deployments will target Kubernetes clusters, leveraging Helm charts for packaging and managing applications.
-
-*   **Staging Environment**: The staging environment will mirror the production environment as closely as possible. All successful builds that pass security and quality gates will be automatically deployed to staging. This environment is used for final testing, user acceptance testing (UAT), and showcasing new features before production release.
-
-*   **Production Environment**: Deployment to production will be a highly controlled process, typically requiring manual approval and potentially employing advanced deployment strategies to minimize risk and downtime.
-
-#### Deployment Strategies for Production
-
-To ensure high availability and minimize the impact of potential issues during production deployments, the following strategies will be considered:
-
-*   **Blue/Green Deployment**: This strategy involves running two identical production environments, 
-
-
-a "blue" environment (current production) and a "green" environment (new version). Traffic is switched from blue to green once the new version is validated. This allows for instant rollback by switching traffic back to the blue environment.
-
-*   **Canary Deployment**: This strategy involves gradually rolling out the new version to a small subset of users, monitoring its performance and stability, and then progressively increasing the rollout to more users. This helps in detecting issues early and limiting their impact.
-
-#### Implementation in GitHub Actions
-
-```yaml
-# ... (previous steps)
-
-  deploy-to-staging:
-    needs: [build-and-test-backend, build-and-test-frontend, iac-validation]
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy backend to Kubernetes staging
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
-          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n staging --set image.tag=${{ github.sha }}
-          echo "Deploying backend to staging environment..."
-
-      - name: Deploy frontend to Kubernetes staging
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl
-          # helm upgrade --install flowlet-frontend ./kubernetes/helm/frontend -n staging --set image.tag=${{ github.sha }}
-          echo "Deploying frontend to staging environment..."
-
-  deploy-to-production:
-    needs: [deploy-to-staging]
-    runs-on: ubuntu-latest
-    environment: production
-    # Manual approval for production deployment
-    environment:
-      name: production
-      url: https://your-production-url.com
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy backend to Kubernetes production
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
-          # helm upgrade --install flowlet-backend ./kubernetes/helm/backend -n production --set image.tag=${{ github.sha }}
-          echo "Deploying backend to production environment..."
-
-      - name: Deploy frontend to Kubernetes production
-        run: | # Placeholder for Kubernetes deployment using Helm or kubectl with blue/green or canary
-          # helm upgrade --install flowlet-frontend ./kubernetes/helm/frontend -n production --set image.tag=${{ github.sha }}
-          echo "Deploying frontend to production environment..."
-
-```
-
-### Rollback Strategies
-
-Despite comprehensive testing and validation, issues can sometimes arise in production. A robust CI/CD pipeline must include effective rollback strategies to quickly revert to a previous stable state, minimizing downtime and impact on users. For Flowlet, given its Kubernetes-based deployment, rollbacks will primarily leverage Kubernetes native capabilities and Helm.
-
-*   **Kubernetes Rollback**: Kubernetes deployments maintain a revision history, allowing for easy rollback to a previous deployment. This can be done using `kubectl rollout undo`.
-
-*   **Helm Rollback**: Helm also maintains a release history, enabling rollbacks to previous chart revisions using `helm rollback`.
-
-*   **Blue/Green Deployment Rollback**: If a blue/green deployment strategy is used, rollback is as simple as switching traffic back to the previously stable 
-
-
-("blue") environment.
-
-#### Implementation in GitHub Actions
-
-Rollback is typically a manual or semi-automated process triggered when an issue is detected in production. The CI/CD pipeline facilitates this by ensuring that previous stable versions are readily available.
-
-```yaml
-# Example of a manual rollback workflow trigger
-name: Manual Rollback
-
-on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to rollback (e.g., production)'
-        required: true
-        default: 'production'
-      release_version:
-        description: 'Version to rollback to (e.g., previous Git SHA or Helm revision)'
-        required: true
-
-jobs:
-  rollback:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Rollback Kubernetes deployment
-        run: | # Example using kubectl or helm rollback
-          # kubectl rollout undo deployment/flowlet-backend -n ${{ github.event.inputs.environment }}
-          # helm rollback flowlet-backend ${{ github.event.inputs.release_version }} -n ${{ github.event.inputs.environment }}
-          echo "Rolling back ${{ github.event.inputs.environment }} to version ${{ github.event.inputs.release_version }}..."
-
-```
-
-
-
-
-
-### Monitoring and Alerting for Pipeline Health
-
-Effective monitoring and alerting are critical for maintaining the health, performance, and security of the CI/CD pipeline itself, as well as the applications it deploys. This ensures that any issues are detected and addressed promptly, minimizing disruption and maintaining operational efficiency.
-
-*   **Pipeline Health Monitoring**: This involves tracking key metrics related to pipeline execution, such as build times, success rates, failure rates, and stage durations. This helps in identifying bottlenecks, performance degradation, or recurring failures within the pipeline.
-
-*   **Application Performance Monitoring (APM)**: Once applications are deployed, APM tools provide deep visibility into their runtime behavior, including response times, error rates, resource utilization (CPU, memory, network), and transaction tracing. This helps in proactively identifying performance issues and diagnosing root causes.
-
-*   **Log Aggregation and Analysis**: Centralizing logs from all components of the CI/CD pipeline and deployed applications is essential for effective troubleshooting, auditing, and security analysis. A robust logging solution allows for quick searching, filtering, and correlation of events.
-
-*   **Alerting**: Configurable alerts will be set up to notify relevant teams (e.g., development, operations, security) of critical events, such as pipeline failures, security vulnerabilities detected, application errors, or performance degradation. Alerts will be integrated with communication channels like Slack, PagerDuty, or email.
-
-*   **Security Information and Event Management (SIEM)**: For a financial industry application, integrating security logs and events into a SIEM system is crucial for comprehensive threat detection, incident response, and compliance reporting. This provides a holistic view of security posture across the entire infrastructure and application stack.
-
-#### Tooling for Monitoring and Alerting
-
-*   **Pipeline Monitoring**: Built-in features of GitHub Actions (e.g., workflow run history, logs) combined with custom dashboards if needed.
-*   **APM**: Prometheus and Grafana (for metrics and dashboards), or commercial solutions like Datadog, New Relic.
-*   **Log Aggregation**: ELK Stack (Elasticsearch, Logstash, Kibana) or Splunk.
-*   **Alerting**: Alertmanager (with Prometheus), PagerDuty, Opsgenie.
-*   **SIEM**: Splunk, Azure Sentinel, or a dedicated SIEM solution.
-
-#### Implementation in GitHub Actions
-
-While direct integration of all monitoring tools within GitHub Actions workflow files can be complex, the pipeline will be configured to emit necessary data points and integrate with external monitoring systems. For example, build metrics can be pushed to Prometheus, and logs can be streamed to a centralized logging solution.
-
-```yaml
-# ... (previous steps)
-
-  # Example of a job to push pipeline metrics (conceptual)
-  monitor-pipeline-health:
-    needs: [build-and-test-backend, build-and-test-frontend, iac-validation, deploy-to-staging, deploy-to-production]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Collect pipeline metrics
-        run: | # Example: calculate build duration, success/failure status
-          echo "Pipeline duration: ${{ github.job.duration }}"
-          echo "Pipeline status: ${{ github.job.status }}"
-          # Push metrics to Prometheus Pushgateway or similar
-
-      - name: Notify on pipeline failure
-        if: failure()
-        run: | # Example: Send Slack notification
-          # curl -X POST -H 'Content-type: application/json' --data '{"text":"CI/CD Pipeline failed for ${{ github.repository }} on branch ${{ github.ref_name }}!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
-          echo "Sending failure notification..."
-
-```
-
-
-
-
-
-## Project Overview
-
-Flowlet is a comprehensive financial technology platform designed to streamline and automate various financial operations. It comprises a Python-based backend (Flask) and a modern JavaScript-based frontend (React), along with robust infrastructure managed via Terraform and Kubernetes. This project aims to provide a secure, scalable, and efficient solution for financial data processing, analysis, and management.
-
-## Getting Started
-
-To set up and run Flowlet locally for development or testing, follow the instructions below.
-
-### Prerequisites
-
-*   Docker and Docker Compose
-*   Python 3.9+
-*   Node.js 20+
-*   npm or yarn
-*   kubectl (for Kubernetes interaction)
-*   Helm (for Kubernetes package management)
-*   Terraform (for infrastructure management)
-
-### Local Development Setup
-
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/abrar2030/Flowlet.git
-    cd Flowlet
-    ```
-
-2.  **Backend Setup**:
-    Navigate to the `backend/` directory.
-    ```bash
-    cd backend
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    # Set up environment variables (e.g., database connection, secrets)
-    # cp .env.example .env
-    # flask db upgrade # For database migrations
-    flask run
-    ```
-
-3.  **Frontend Setup**:
-    Navigate to the `frontend/web-frontend/` directory.
-    ```bash
-    cd ../frontend/web-frontend
-    npm install
-    npm start
-    ```
-
-4.  **Access the Application**:
-    Once both backend and frontend services are running, you can access the application in your web browser, typically at `http://localhost:3000`.
-
-### Running Tests Locally
-
-*   **Backend Tests**:
-    ```bash
-    cd backend
-    pytest
-    ```
-
-*   **Frontend Tests**:
-    ```bash
-    cd frontend/web-frontend
-    npm test
-    ```
-
-## Project Structure
-
-```
-Flowlet/
-├── backend/                  # Python Flask application
-│   ├── src/                  # Source code for backend services
-│   ├── tests/                # Unit and integration tests for backend
-│   ├── requirements.txt      # Python dependencies
-│   └── Dockerfile            # Dockerfile for backend application
-├── frontend/                 # Frontend applications
-│   ├── web-frontend/         # React-based web application
-│   │   ├── src/              # Source code for web frontend
-│   │   ├── public/           # Static assets
-│   │   ├── package.json      # Node.js dependencies
-│   │   └── Dockerfile        # Dockerfile for web frontend
-│   └── mobile-frontend/      # Placeholder for mobile application
-├── kubernetes/               # Kubernetes manifests and configurations
-│   ├── manifests/            # Core Kubernetes deployments, services, etc.
-│   ├── helm/                 # Helm charts for deploying applications
-│   └── secrets/              # Kubernetes secrets management
-├── infrastructure/           # Infrastructure as Code (IaC) using Terraform
-│   ├── terraform/            # Terraform configurations for cloud resources
-│   └── docker/               # Docker-related infrastructure (e.g., Docker Compose files)
-├── docs/                     # Project documentation
-├── scripts/                  # Utility scripts (e.g., setup, deployment helpers)
-├── tests/                    # High-level E2E tests or shared test utilities
-├── .github/                  # GitHub Actions workflows for CI/CD
-└── README.md                 # Project README and CI/CD documentation
-```
-
-
-
-
-
-## ⚙️ Automated Development Lifecycle (CI/CD Pipelines)
-
-Flowlet's development and deployment processes are underpinned by a robust set of Continuous Integration/Continuous Delivery (CI/CD) pipelines, implemented using GitHub Actions. These pipelines are meticulously designed to ensure code quality, security, compliance, and efficient delivery across all components of the platform. Adhering to stringent financial industry standards, each workflow incorporates automated checks, testing, and scanning to maintain a high level of integrity and reduce operational risk. This section provides a comprehensive overview of the automated workflows that govern the Flowlet project.
-
-### Workflow: `documentation.yml` - Documentation Build and Deploy
-
-This workflow automates the process of building and deploying project documentation. It ensures that the official documentation is always up-to-date and accessible, which is critical for maintaining transparency and providing clear guidance to developers, auditors, and stakeholders within a financial context.
-
-*   **Purpose**: To automatically build and deploy project documentation, ensuring it is current and readily available.
-*   **Triggers**: 
-    *   `push` events to the `main` branch when changes occur within the `docs/` directory.
-    *   `pull_request` events targeting the `main` branch when changes occur within the `docs/` directory.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Retrieves the latest codebase, ensuring the documentation build is based on the most recent source.
-    2.  **Set up Python**: Configures the Python environment necessary for documentation tools like Sphinx.
-    3.  **Install Documentation Dependencies**: Installs required Python packages (e.g., Sphinx, sphinx-rtd-theme) to build the documentation.
-    4.  **Build Documentation**: Executes the Sphinx build command to generate HTML documentation. This step ensures that documentation is consistently formatted and structured.
-    5.  **Deploy Documentation to GitHub Pages**: Deploys the built documentation to GitHub Pages, specifically when changes are merged into the `main` branch. This provides an auditable, version-controlled record of the documentation, crucial for regulatory compliance and internal governance.
-
-### Workflow: `nodejs-frontend-ci-cd.yml` - Node.js Frontend CI/CD - Enhanced
-
-This comprehensive workflow manages the Continuous Integration and Continuous Delivery for the Node.js-based frontend application. It integrates various quality and security gates to ensure the frontend component meets high standards before deployment, which is paramount for user-facing financial applications.
-
-*   **Purpose**: To build, test, scan, and prepare the Node.js frontend for deployment, ensuring code quality, security, and compliance.
-*   **Triggers**: 
-    *   `push` events to `main` and `develop` branches when changes occur within the `frontend/` directory.
-    *   `pull_request` events targeting `main` and `develop` branches when changes occur within the `frontend/` directory.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Fetches the repository content.
-    2.  **Set up Node.js**: Configures the Node.js environment (version 20).
-    3.  **Install Dependencies**: Installs project dependencies for the frontend application (`frontend/web-frontend`).
-    4.  **Run Frontend Unit Tests**: Executes unit tests to verify the functionality of individual code components. This is a critical step for ensuring code correctness and preventing regressions.
-    5.  **Run Frontend Integration Tests**: Executes integration tests to validate interactions between different frontend modules. This ensures that components work together as expected.
-    6.  **Run Frontend Linting (ESLint)**: Performs static code analysis using ESLint to enforce coding standards and identify potential issues. This contributes to code maintainability and reduces the likelihood of errors.
-    7.  **Run Frontend Security Linting (ESLint with security plugins - Placeholder)**: A placeholder for future implementation of security-focused static analysis, demonstrating an intent for proactive security measures.
-    8.  **Run Frontend SCA (Snyk - Placeholder)**: A placeholder for Software Composition Analysis (SCA) using Snyk, which would identify known vulnerabilities in third-party dependencies. This is vital for mitigating supply chain risks in financial software.
-    9.  **Build Frontend Assets**: Compiles and bundles frontend assets for deployment.
-    10. **Install Trivy**: Installs Trivy, a comprehensive vulnerability scanner.
-    11. **Build Docker Image for Frontend**: Creates a Docker image for the frontend application. Containerization ensures consistent environments across development and production.
-    12. **Scan Frontend Docker Image (Trivy)**: Scans the Docker image for known vulnerabilities with a strict exit code for high and critical severities. This is a crucial security gate, preventing vulnerable images from proceeding to deployment.
-
-### Workflow: `kubernetes-ci.yml` - Kubernetes and Helm CI - Enhanced
-
-This workflow focuses on the Continuous Integration for Kubernetes manifests and Helm charts, which define the deployment and configuration of applications within the Kubernetes cluster. Robust validation and scanning of these infrastructure-as-code artifacts are essential for maintaining a secure and compliant deployment environment in the financial sector.
-
-*   **Purpose**: To lint, validate, and scan Kubernetes manifests and Helm charts for correctness, best practices, and security vulnerabilities.
-*   **Triggers**: 
-    *   `push` events to `main` and `develop` branches when changes occur within `kubernetes/` or `infrastructure/helm/` directories.
-    *   `pull_request` events targeting `main` and `develop` branches when changes occur within `kubernetes/` or `infrastructure/helm/` directories.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Fetches the repository content.
-    2.  **Set up Helm**: Configures the Helm environment for managing Kubernetes applications.
-    3.  **Lint Helm Charts**: Performs linting on Helm charts to ensure they adhere to best practices and syntax rules. This helps prevent misconfigurations that could lead to security vulnerabilities or operational issues.
-    4.  **Validate Helm Charts (helm template + kubeval)**: Renders Helm templates and then validates the resulting Kubernetes manifests against schema definitions using `kubeval`. This ensures that the generated configurations are syntactically correct and conform to Kubernetes API specifications.
-    5.  **Install kube-linter**: Installs `kube-linter`, a static analysis tool for Kubernetes configurations.
-    6.  **Run kube-linter on Kubernetes manifests**: Scans Kubernetes manifests for potential issues related to security, reliability, and best practices. This helps identify and remediate misconfigurations early in the development cycle.
-    7.  **Install kube-score**: Installs `kube-score`, a tool for scoring Kubernetes object configurations.
-    8.  **Run kube-score on Kubernetes manifests**: Evaluates Kubernetes manifests against a set of recommendations for security and reliability, providing a score and suggestions for improvement. This enhances the resilience and security posture of deployments.
-    9.  **Run Conftest (Policy Enforcement - Placeholder)**: A placeholder for policy enforcement using Conftest, which would allow defining and enforcing custom security and compliance policies on Kubernetes configurations.
-
-### Workflow: `node-ci.yml` - Node.js CI
-
-This workflow provides basic Continuous Integration for Node.js projects, focusing on building and testing the application. While `nodejs-frontend-ci-cd.yml` is more comprehensive, this workflow serves as a foundational CI process.
-
-*   **Purpose**: To perform basic build and test operations for Node.js projects.
-*   **Triggers**: `push` and `pull_request` events.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Retrieves the source code.
-    2.  **Use Node.js 16.x**: Sets up the Node.js environment.
-    3.  **Install Dependencies**: Installs project dependencies.
-    4.  **Run Tests**: Executes tests to ensure code functionality.
-    5.  **Build**: Builds the Node.js application.
-
-### Workflow: `python-backend-ci-cd.yml` - Python Backend CI/CD - Enhanced
-
-This workflow provides a robust CI/CD pipeline for the Python-based backend services. It incorporates extensive testing, static analysis, and security scanning to ensure the backend components are secure, performant, and compliant with financial industry requirements.
-
-*   **Purpose**: To build, test, scan, and prepare the Python backend for deployment, ensuring code quality, security, and compliance.
-*   **Triggers**: 
-    *   `push` events to `main` and `develop` branches when changes occur within the `backend/` directory.
-    *   `pull_request` events targeting `main` and `develop` branches when changes occur within the `backend/` directory.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Fetches the repository content.
-    2.  **Set up Python**: Configures the Python environment (version 3.9).
-    3.  **Install Dependencies**: Installs Python packages, including development tools like `black`, `flake8`, `pytest`, and `bandit`.
-    4.  **Run Black Formatter**: Enforces consistent code formatting, improving readability and maintainability, which is important for auditability.
-    5.  **Run Flake8 Linter**: Performs static code analysis to identify stylistic errors and potential bugs, contributing to code quality.
-    6.  **Run Pytest Unit Tests**: Executes unit tests for the backend, verifying the correctness of individual functions and modules.
-    7.  **Run Pytest Integration Tests**: Executes integration tests for the backend, validating interactions between different services and components.
-    8.  **Run Bandit SAST**: Performs Static Application Security Testing (SAST) using Bandit to identify common security vulnerabilities in Python code. The report is uploaded as an artifact, providing an auditable record of security findings.
-    9.  **Install Trivy**: Installs Trivy, a comprehensive vulnerability scanner.
-    10. **Build Docker Image for Backend**: Creates a Docker image for the backend application.
-    11. **Scan Backend Docker Image (Trivy)**: Scans the Docker image for known vulnerabilities with a strict exit code for high and critical severities. This is a critical security control to prevent the deployment of vulnerable software.
-    12. **Run Secrets Scanning (TruffleHog - Placeholder)**: A placeholder for secrets scanning using TruffleHog, which would detect hardcoded credentials or sensitive information. This is crucial for preventing data breaches.
-    13. **Run OWASP Dependency-Check (Placeholder)**: A placeholder for Software Composition Analysis (SCA) using OWASP Dependency-Check, which would identify known vulnerabilities in third-party dependencies.
-
-### Workflow: `scripts-ci.yml` - Scripts CI
-
-This workflow is dedicated to ensuring the quality and security of shell scripts within the project. Given that scripts often perform critical automation tasks, their integrity is vital for the overall security and reliability of the system.
-
-*   **Purpose**: To lint shell scripts for syntax errors, best practices, and potential issues.
-*   **Triggers**: 
-    *   `push` events to `main` and `develop` branches when changes occur within the `scripts/` directory.
-    *   `pull_request` events targeting `main` and `develop` branches when changes occur within the `scripts/` directory.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Retrieves the source code.
-    2.  **Install ShellCheck**: Installs ShellCheck, a static analysis tool for shell scripts.
-    3.  **Run ShellCheck on scripts**: Executes ShellCheck on all shell scripts to identify warnings and errors. This helps prevent runtime issues and potential security vulnerabilities that could arise from malformed scripts.
-
-### Workflow: `terraform-ci.yml` - Terraform CI - Enhanced
-
-This workflow automates the Continuous Integration for Terraform configurations, which define the project's infrastructure-as-code. Validating and scanning these configurations are critical for ensuring secure, compliant, and reproducible infrastructure deployments, a cornerstone of financial industry operations.
-
-*   **Purpose**: To validate, format, and plan Terraform configurations, incorporating security and compliance checks.
-*   **Triggers**: 
-    *   `push` events to `main` and `develop` branches when changes occur within the `infrastructure/terraform/` directory.
-    *   `pull_request` events targeting `main` and `develop` branches when changes occur within the `infrastructure/terraform/` directory.
-*   **Key Steps and Compliance Aspects**:
-    1.  **Checkout Code**: Fetches the repository content.
-    2.  **Setup Terraform**: Configures the Terraform environment.
-    3.  **Terraform Init**: Initializes a Terraform working directory, downloading necessary providers. This ensures that the configuration is valid and all modules are accessible.
-    4.  **Terraform Format**: Checks if Terraform files are correctly formatted. Consistent formatting is important for readability and maintainability, aiding in audits.
-    5.  **Terraform Validate**: Validates the syntax and configuration of Terraform files. This step catches configuration errors before any infrastructure changes are attempted.
-    6.  **Run IaC linting (tflint - Placeholder)**: A placeholder for infrastructure-as-code linting using tflint, which would identify potential errors and enforce best practices in Terraform code.
-    7.  **Run IaC security scan (Checkov - Placeholder)**: A placeholder for infrastructure-as-code security scanning using Checkov, which would identify security misconfigurations and compliance violations in Terraform plans.
-    8.  **Terraform Plan**: Generates an execution plan, showing what actions Terraform will take to achieve the desired state. This provides a clear audit trail of proposed infrastructure changes.
-    9.  **Check Terraform plan results**: Evaluates the outcome of the format, validate, and plan steps, failing the workflow if any critical issues are detected. This acts as a gate to prevent erroneous or non-compliant infrastructure changes.
-    10. **Update Pull Request**: For pull requests, it posts a summary of the Terraform format, validate, and plan results as a comment. This provides immediate feedback to developers and facilitates peer review, enhancing transparency and accountability.
-
-
-
-
-## 🔒 Financial Industry Documentation Standards for CI/CD
-
-In the financial industry, robust and transparent documentation is not merely a best practice; it is a regulatory imperative. The CI/CD pipeline documentation within Flowlet adheres to principles designed to meet stringent audit, security, and compliance requirements. This section outlines the key standards applied to ensure that the automated development lifecycle is not only efficient but also fully auditable and compliant.
-
-### 1. Comprehensive Traceability and Auditability
-
-Every change, test, and deployment action within the CI/CD pipelines is designed to be fully traceable. This includes:
-
-*   **Version Control Integration**: All workflow definitions (`.yml` files) are stored in Git, providing a complete history of changes, who made them, and when.
-*   **Detailed Logging**: Each step in every workflow generates logs that capture execution details, outputs, and any errors. These logs serve as an immutable record of pipeline execution, essential for post-incident analysis and regulatory audits.
-*   **Artifact Management**: Build artifacts, test reports (e.g., Bandit SAST reports), and scan results (e.g., Trivy scans) are retained and linked to specific pipeline runs. This ensures that evidence of quality and security checks is readily available.
-
-### 2. Security-First Documentation
-
-Given the sensitive nature of financial data and transactions, security considerations are paramount in every aspect of the CI/CD documentation:
-
-*   **Explicit Security Gates**: The documentation clearly highlights security-related steps within each workflow, such as static application security testing (SAST) with Bandit, dynamic application security testing (DAST) placeholders, and vulnerability scanning of Docker images with Trivy. This demonstrates a proactive approach to identifying and mitigating security risks.
-*   **Compliance with Security Frameworks**: The pipelines are designed with an awareness of common financial security frameworks (e.g., NIST, ISO 27001, PCI DSS). While not explicitly detailing adherence to each, the documentation emphasizes practices like secrets scanning (placeholder for TruffleHog) and dependency vulnerability checks (placeholder for OWASP Dependency-Check), which are foundational to these frameworks.
-*   **Role-Based Access Control (RBAC)**: Although not directly configured within the `.yml` files, the underlying GitHub Actions environment supports RBAC, ensuring that only authorized personnel can modify or trigger pipeline executions. The documentation implicitly supports this by detailing the critical nature of each step.
-
-### 3. Quality Assurance and Testing Emphasis
-
-High-quality software is a prerequisite for financial services. The documentation underscores the rigorous testing methodologies integrated into the CI/CD process:
-
-*   **Multi-Tiered Testing**: The documentation distinguishes between unit, integration, and (implicitly) end-to-end testing, demonstrating a comprehensive testing strategy. This ensures that code changes are thoroughly validated at different levels of granularity.
-*   **Automated Test Execution**: The workflows automate the execution of tests, reducing manual effort and ensuring consistent test coverage. The documentation specifies the tools used (e.g., Pytest, npm test) and their application within the pipeline.
-*   **Code Quality Checks**: Linting (e.g., Flake8, ESLint, ShellCheck) and code formatting (e.g., Black) are documented as integral parts of the CI process. These checks enforce coding standards, improve maintainability, and reduce the likelihood of defects.
-
-### 4. Infrastructure-as-Code (IaC) Governance
-
-For financial institutions, managing infrastructure through code (IaC) is crucial for consistency, reliability, and compliance. The documentation reflects this emphasis:
-
-*   **Terraform Validation and Planning**: The `terraform-ci.yml` workflow documentation details steps for `terraform init`, `fmt`, `validate`, and `plan`. These steps ensure that infrastructure changes are reviewed and validated before application, preventing unauthorized or erroneous infrastructure modifications.
-*   **IaC Security and Linting**: Placeholders for `tflint` and `Checkov` highlight the intention to integrate advanced IaC security scanning and linting, which are vital for identifying misconfigurations and compliance violations in infrastructure definitions.
-*   **Kubernetes and Helm Best Practices**: The `kubernetes-ci.yml` workflow documentation outlines linting and validation of Helm charts and Kubernetes manifests using tools like `helm lint`, `kubeval`, `kube-linter`, and `kube-score`. This ensures that the deployment configurations for containerized applications adhere to security and operational best practices.
-
-### 5. Clear and Concise Language
-
-The documentation is written in clear, unambiguous language, avoiding jargon where possible, to ensure it is accessible to a broad audience, including technical teams, auditors, and compliance officers. Each workflow's purpose, triggers, and key steps are explicitly stated, facilitating easy understanding and review.
-
-By adhering to these standards, Flowlet's CI/CD pipeline documentation serves as a critical asset for demonstrating regulatory compliance, ensuring operational integrity, and fostering trust in the financial services domain.
+This project is licensed under the MIT License - see the `LICENSE` file for details.
