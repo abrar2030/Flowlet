@@ -4,7 +4,7 @@
 ![Test Coverage](https://img.shields.io/badge/coverage-91%25-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-![Flowlet Dashboard](https://private-us-east-1.manuscdn.com/sessionFile/FuKWiAZ8NAXNJJaAWV1QqD/sandbox/4xREHaTpo3q8BSpBWzevAy-images_1750205754727_na1fn_L2hvbWUvdWJ1bnR1L0Zsb3dsZXQvZG9jcy9hc3NldHMvaW1hZ2VzL2Rhc2hib2FyZA.bmp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRnVLV2lBWjhOQVhOSkphQVdWMVFxRC9zYW5kYm94LzR4UkVIYVRwbzNxOEJTcEJXemV2QXktaW1hZ2VzXzE3NTAyMDU3NTQ3MjdfbmExZm5fTDJodmJXVXZkV0oxYm5SMUwwWnNiM2RzWlhRdlpHOWpjeTloYzNObGRITXZhVzFoWjJWekwyUmhjMmhpYjJGeVpBLmJtcCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc2NzIyNTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=ZTIA1xCKT~4zWdEcLe5yyrwJbipVEVLwluMkiw9wn-vnaaSPRpA98B0EOdz6~ljiDaxmoDbdEwNycq-nl9Lqnei3WRGFjYWzAZ7Ilr13LdtzOWskOIo0YqGaCt~hz8qQuU1spk7DCMpVocFhEzfbqohLlaVGn~uUU77exlQm3Es1Zea57z9wrByJK6J0z1MDlUC4x2~3BPdAhA31eoZcvo6HpkjE8Wz9YztHh-FUzA-yYPeUQqeUgdWGMnRZL0Vw3R-xom4b~zE1w-SZM9t10XyuLi00AxQ5NUnx5zssvtMel~DMTdd9gkKWaVmlARfN2LCS9-GC5pTGZxvqRstTlw__)
+![Flowlet Dashboard](docs/assets/images/dashboard.bmp)
 
 > **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience.
 
