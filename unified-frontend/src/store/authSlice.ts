@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, User, LoginCredentials, RegisterData, ApiResponse } from '@/types';
-import { authApi } from '@/lib/api';
+import { AuthState, User, LoginCredentials, RegisterData } from '@/types';
+import { authService, AuthResponse } from '@/lib/authService';
+import { ApiError } from '@/lib/api';
 
 const initialState: AuthState = {
   user: null,
@@ -15,14 +16,13 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
-      const response = await authApi.login(credentials);
-      if (response.success && response.data) {
-        localStorage.setItem('authToken', response.data.token);
-        return response.data;
-      }
-      throw new Error(response.error || 'Login failed');
+      const response = await authService.login(credentials);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue(error.message || 'Login failed');
     }
   }
 );
@@ -31,14 +31,13 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      const response = await authApi.register(userData);
-      if (response.success && response.data) {
-        localStorage.setItem('authToken', response.data.token);
-        return response.data;
-      }
-      throw new Error(response.error || 'Registration failed');
+      const response = await authService.register(userData);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue(error.message || 'Registration failed');
     }
   }
 );
@@ -47,8 +46,7 @@ export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await authApi.logout();
-      localStorage.removeItem('authToken');
+      await authService.logout();
       return null;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -60,19 +58,17 @@ export const validateToken = createAsyncThunk(
   'auth/validateToken',
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No token found');
+      if (!authService.isAuthenticated()) {
+        throw new Error('No valid token found');
       }
       
-      const response = await authApi.validateToken(token);
-      if (response.success && response.data) {
-        return response.data;
-      }
-      throw new Error(response.error || 'Token validation failed');
+      const user = await authService.getCurrentUser();
+      return { user, token: 'validated' }; // Token is managed by TokenManager
     } catch (error: any) {
-      localStorage.removeItem('authToken');
-      return rejectWithValue(error.message);
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue(error.message || 'Token validation failed');
     }
   }
 );
@@ -81,15 +77,14 @@ export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await authApi.refreshToken();
-      if (response.success && response.data) {
-        localStorage.setItem('authToken', response.data.token);
-        return response.data;
-      }
-      throw new Error(response.error || 'Token refresh failed');
+      const token = await authService.refreshToken();
+      const user = authService.getCurrentUserFromStorage();
+      return { user, token };
     } catch (error: any) {
-      localStorage.removeItem('authToken');
-      return rejectWithValue(error.message);
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue(error.message || 'Token refresh failed');
     }
   }
 );
@@ -121,7 +116,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.token = action.payload.access_token;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -142,7 +137,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.token = action.payload.access_token;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {

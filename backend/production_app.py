@@ -1383,6 +1383,717 @@ def get_account_transactions(account_id):
             'code': 'TRANSACTION_HISTORY_FAILED'
         }), 500
 
+# ============================================================================
+# CARD MANAGEMENT ENDPOINTS
+# ============================================================================
+
+@app.route('/api/v1/cards', methods=['GET'])
+@limiter.limit("100 per minute")
+@require_auth
+def get_user_cards():
+    """Get all cards for the authenticated user"""
+    try:
+        user_id = g.current_user.id
+        cards = Card.query.filter_by(user_id=user_id).all()
+        
+        create_audit_log(
+            action='GET_CARDS',
+            resource_type='card',
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': [card.to_dict() for card in cards]
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error retrieving cards: {str(e)}')
+        create_audit_log(
+            action='GET_CARDS',
+            resource_type='card',
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to retrieve cards',
+            'code': 'CARDS_RETRIEVAL_FAILED'
+        }), 500
+
+@app.route('/api/v1/cards', methods=['POST'])
+@limiter.limit("10 per hour")
+@require_auth
+def issue_card():
+    """Issue a new card for the user"""
+    try:
+        data = request.get_json()
+        user_id = g.current_user.id
+        
+        # Validate required fields
+        required_fields = ['account_id', 'card_type']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'error': f'Missing required field: {field}',
+                    'code': 'MISSING_FIELD'
+                }), 400
+        
+        # Verify account ownership
+        account = Account.query.filter_by(
+            id=data['account_id'],
+            user_id=user_id
+        ).first()
+        
+        if not account:
+            return jsonify({
+                'error': 'Account not found or access denied',
+                'code': 'ACCOUNT_NOT_FOUND'
+            }), 404
+        
+        # Check card limit
+        existing_cards = Card.query.filter_by(user_id=user_id).count()
+        if existing_cards >= app.config['MAX_CARDS_PER_USER']:
+            return jsonify({
+                'error': 'Maximum number of cards reached',
+                'code': 'CARD_LIMIT_EXCEEDED'
+            }), 400
+        
+        # Generate card details
+        card_number = f"****-****-****-{secrets.randbelow(9000) + 1000}"
+        expiry_year = datetime.now().year + 4
+        expiry_month = datetime.now().month
+        
+        # Create new card
+        new_card = Card(
+            user_id=user_id,
+            account_id=data['account_id'],
+            card_number=card_number,
+            card_type=data['card_type'],
+            card_brand='visa',  # Default to Visa
+            expiry_month=expiry_month,
+            expiry_year=expiry_year,
+            cardholder_name=f"{g.current_user.first_name} {g.current_user.last_name}",
+            status='inactive',  # Cards start inactive until activated
+            daily_limit=data.get('daily_limit', 1000.00),
+            monthly_limit=data.get('monthly_limit', 10000.00)
+        )
+        
+        db.session.add(new_card)
+        db.session.commit()
+        
+        create_audit_log(
+            action='ISSUE_CARD',
+            resource_type='card',
+            resource_id=new_card.id,
+            user_id=user_id,
+            success=True,
+            details={'card_type': data['card_type'], 'account_id': data['account_id']}
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': new_card.to_dict(),
+            'message': 'Card issued successfully'
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error issuing card: {str(e)}')
+        create_audit_log(
+            action='ISSUE_CARD',
+            resource_type='card',
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to issue card',
+            'code': 'CARD_ISSUANCE_FAILED'
+        }), 500
+
+@app.route('/api/v1/cards/<card_id>', methods=['GET'])
+@limiter.limit("100 per minute")
+@require_auth
+def get_card_details(card_id):
+    """Get details of a specific card"""
+    try:
+        user_id = g.current_user.id
+        card = Card.query.filter_by(id=card_id, user_id=user_id).first()
+        
+        if not card:
+            return jsonify({
+                'error': 'Card not found or access denied',
+                'code': 'CARD_NOT_FOUND'
+            }), 404
+        
+        create_audit_log(
+            action='GET_CARD_DETAILS',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': card.to_dict()
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error retrieving card details: {str(e)}')
+        create_audit_log(
+            action='GET_CARD_DETAILS',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to retrieve card details',
+            'code': 'CARD_DETAILS_FAILED'
+        }), 500
+
+@app.route('/api/v1/cards/<card_id>/activate', methods=['POST'])
+@limiter.limit("10 per hour")
+@require_auth
+def activate_card(card_id):
+    """Activate a card"""
+    try:
+        data = request.get_json()
+        user_id = g.current_user.id
+        
+        card = Card.query.filter_by(id=card_id, user_id=user_id).first()
+        
+        if not card:
+            return jsonify({
+                'error': 'Card not found or access denied',
+                'code': 'CARD_NOT_FOUND'
+            }), 404
+        
+        if card.status == 'active':
+            return jsonify({
+                'error': 'Card is already active',
+                'code': 'CARD_ALREADY_ACTIVE'
+            }), 400
+        
+        # In a real implementation, you would verify the activation code
+        # For now, we'll just activate the card
+        card.status = 'active'
+        card.updated_at = datetime.now(timezone.utc)
+        
+        db.session.commit()
+        
+        create_audit_log(
+            action='ACTIVATE_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Card activated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error activating card: {str(e)}')
+        create_audit_log(
+            action='ACTIVATE_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to activate card',
+            'code': 'CARD_ACTIVATION_FAILED'
+        }), 500
+
+@app.route('/api/v1/cards/<card_id>/block', methods=['POST'])
+@limiter.limit("20 per hour")
+@require_auth
+def block_card(card_id):
+    """Block a card"""
+    try:
+        user_id = g.current_user.id
+        card = Card.query.filter_by(id=card_id, user_id=user_id).first()
+        
+        if not card:
+            return jsonify({
+                'error': 'Card not found or access denied',
+                'code': 'CARD_NOT_FOUND'
+            }), 404
+        
+        card.status = 'blocked'
+        card.updated_at = datetime.now(timezone.utc)
+        
+        db.session.commit()
+        
+        create_audit_log(
+            action='BLOCK_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Card blocked successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error blocking card: {str(e)}')
+        create_audit_log(
+            action='BLOCK_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to block card',
+            'code': 'CARD_BLOCK_FAILED'
+        }), 500
+
+@app.route('/api/v1/cards/<card_id>/unblock', methods=['POST'])
+@limiter.limit("20 per hour")
+@require_auth
+def unblock_card(card_id):
+    """Unblock a card"""
+    try:
+        user_id = g.current_user.id
+        card = Card.query.filter_by(id=card_id, user_id=user_id).first()
+        
+        if not card:
+            return jsonify({
+                'error': 'Card not found or access denied',
+                'code': 'CARD_NOT_FOUND'
+            }), 404
+        
+        if card.status != 'blocked':
+            return jsonify({
+                'error': 'Card is not blocked',
+                'code': 'CARD_NOT_BLOCKED'
+            }), 400
+        
+        card.status = 'active'
+        card.updated_at = datetime.now(timezone.utc)
+        
+        db.session.commit()
+        
+        create_audit_log(
+            action='UNBLOCK_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Card unblocked successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error unblocking card: {str(e)}')
+        create_audit_log(
+            action='UNBLOCK_CARD',
+            resource_type='card',
+            resource_id=card_id,
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to unblock card',
+            'code': 'CARD_UNBLOCK_FAILED'
+        }), 500
+
+# ============================================================================
+# ENHANCED AUTHENTICATION ENDPOINTS
+# ============================================================================
+
+@app.route('/api/v1/auth/profile', methods=['GET'])
+@limiter.limit("100 per minute")
+@require_auth
+def get_user_profile():
+    """Get current user profile"""
+    try:
+        user = g.current_user
+        
+        create_audit_log(
+            action='GET_PROFILE',
+            resource_type='user',
+            resource_id=user.id,
+            user_id=user.id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': user.to_dict()
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error retrieving user profile: {str(e)}')
+        return jsonify({
+            'error': 'Failed to retrieve profile',
+            'code': 'PROFILE_RETRIEVAL_FAILED'
+        }), 500
+
+@app.route('/api/v1/auth/profile', methods=['PUT'])
+@limiter.limit("20 per hour")
+@require_auth
+def update_user_profile():
+    """Update user profile"""
+    try:
+        data = request.get_json()
+        user = g.current_user
+        
+        # Update allowed fields
+        allowed_fields = ['first_name', 'last_name', 'phone_number']
+        updated_fields = []
+        
+        for field in allowed_fields:
+            if field in data:
+                setattr(user, field, data[field])
+                updated_fields.append(field)
+        
+        user.updated_at = datetime.now(timezone.utc)
+        db.session.commit()
+        
+        create_audit_log(
+            action='UPDATE_PROFILE',
+            resource_type='user',
+            resource_id=user.id,
+            user_id=user.id,
+            success=True,
+            details={'updated_fields': updated_fields}
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': user.to_dict(),
+            'message': 'Profile updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating user profile: {str(e)}')
+        create_audit_log(
+            action='UPDATE_PROFILE',
+            resource_type='user',
+            resource_id=g.current_user.id,
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to update profile',
+            'code': 'PROFILE_UPDATE_FAILED'
+        }), 500
+
+@app.route('/api/v1/auth/refresh', methods=['POST'])
+@limiter.limit("50 per hour")
+def refresh_access_token():
+    """Refresh access token using refresh token"""
+    try:
+        data = request.get_json()
+        refresh_token = data.get('refresh_token')
+        
+        if not refresh_token:
+            return jsonify({
+                'error': 'Refresh token is required',
+                'code': 'MISSING_REFRESH_TOKEN'
+            }), 400
+        
+        # Verify refresh token
+        try:
+            payload = verify_jwt_token(refresh_token)
+            if payload.get('type') != 'refresh':
+                raise ValueError('Invalid token type')
+        except:
+            return jsonify({
+                'error': 'Invalid refresh token',
+                'code': 'INVALID_REFRESH_TOKEN'
+            }), 401
+        
+        user_id = payload.get('user_id')
+        user = User.query.get(user_id)
+        
+        if not user:
+            return jsonify({
+                'error': 'User not found',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # Generate new access token
+        new_access_token = generate_jwt_token(user_id, 'access')
+        
+        create_audit_log(
+            action='REFRESH_TOKEN',
+            resource_type='auth',
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'access_token': new_access_token,
+                'user': user.to_dict()
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error refreshing token: {str(e)}')
+        return jsonify({
+            'error': 'Failed to refresh token',
+            'code': 'TOKEN_REFRESH_FAILED'
+        }), 500
+
+@app.route('/api/v1/auth/logout', methods=['POST'])
+@limiter.limit("50 per hour")
+@require_auth
+def logout_user():
+    """Logout user and invalidate tokens"""
+    try:
+        user_id = g.current_user.id
+        
+        # In a real implementation, you would invalidate the tokens
+        # For now, we'll just log the logout action
+        
+        create_audit_log(
+            action='LOGOUT',
+            resource_type='auth',
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Logged out successfully'
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error during logout: {str(e)}')
+        return jsonify({
+            'error': 'Failed to logout',
+            'code': 'LOGOUT_FAILED'
+        }), 500
+
+# ============================================================================
+# DASHBOARD AND ANALYTICS ENDPOINTS
+# ============================================================================
+
+@app.route('/api/v1/dashboard/summary', methods=['GET'])
+@limiter.limit("100 per minute")
+@require_auth
+def get_dashboard_summary():
+    """Get dashboard summary for the user"""
+    try:
+        user_id = g.current_user.id
+        
+        # Get user accounts
+        accounts = Account.query.filter_by(user_id=user_id).all()
+        total_balance = sum(account.balance for account in accounts)
+        
+        # Get user cards
+        cards_count = Card.query.filter_by(user_id=user_id).count()
+        
+        # Get recent transactions (last 10)
+        recent_transactions = []
+        for account in accounts:
+            transactions = Transaction.query.filter_by(
+                account_id=account.id
+            ).order_by(Transaction.created_at.desc()).limit(5).all()
+            recent_transactions.extend([t.to_dict() for t in transactions])
+        
+        # Sort by date and limit to 10
+        recent_transactions.sort(key=lambda x: x['created_at'], reverse=True)
+        recent_transactions = recent_transactions[:10]
+        
+        # Calculate monthly spending and income
+        current_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        monthly_spending = 0
+        monthly_income = 0
+        
+        for account in accounts:
+            transactions = Transaction.query.filter(
+                Transaction.account_id == account.id,
+                Transaction.created_at >= current_month,
+                Transaction.status == 'completed'
+            ).all()
+            
+            for transaction in transactions:
+                if transaction.transaction_type in ['withdrawal', 'transfer']:
+                    monthly_spending += transaction.amount
+                elif transaction.transaction_type == 'deposit':
+                    monthly_income += transaction.amount
+        
+        summary = {
+            'total_balance': float(total_balance),
+            'total_accounts': len(accounts),
+            'total_cards': cards_count,
+            'recent_transactions': recent_transactions,
+            'monthly_spending': float(monthly_spending),
+            'monthly_income': float(monthly_income)
+        }
+        
+        create_audit_log(
+            action='GET_DASHBOARD_SUMMARY',
+            resource_type='dashboard',
+            user_id=user_id,
+            success=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': summary
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error retrieving dashboard summary: {str(e)}')
+        create_audit_log(
+            action='GET_DASHBOARD_SUMMARY',
+            resource_type='dashboard',
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to retrieve dashboard summary',
+            'code': 'DASHBOARD_SUMMARY_FAILED'
+        }), 500
+
+@app.route('/api/v1/analytics/spending', methods=['GET'])
+@limiter.limit("100 per minute")
+@require_auth
+def get_spending_analytics():
+    """Get spending analytics for the user"""
+    try:
+        user_id = g.current_user.id
+        account_id = request.args.get('account_id')
+        period = request.args.get('period', 'month')
+        
+        # Calculate date range based on period
+        now = datetime.now()
+        if period == 'week':
+            start_date = now - timedelta(days=7)
+        elif period == 'month':
+            start_date = now - timedelta(days=30)
+        elif period == 'quarter':
+            start_date = now - timedelta(days=90)
+        elif period == 'year':
+            start_date = now - timedelta(days=365)
+        else:
+            start_date = now - timedelta(days=30)
+        
+        # Get user accounts
+        if account_id:
+            accounts = Account.query.filter_by(id=account_id, user_id=user_id).all()
+        else:
+            accounts = Account.query.filter_by(user_id=user_id).all()
+        
+        if not accounts:
+            return jsonify({
+                'error': 'No accounts found',
+                'code': 'NO_ACCOUNTS_FOUND'
+            }), 404
+        
+        total_spent = 0
+        categories = {}
+        daily_spending = {}
+        
+        for account in accounts:
+            transactions = Transaction.query.filter(
+                Transaction.account_id == account.id,
+                Transaction.created_at >= start_date,
+                Transaction.transaction_type.in_(['withdrawal', 'transfer']),
+                Transaction.status == 'completed'
+            ).all()
+            
+            for transaction in transactions:
+                total_spent += transaction.amount
+                
+                # Categorize spending (simplified)
+                category = 'Other'
+                if 'grocery' in transaction.description.lower():
+                    category = 'Groceries'
+                elif 'gas' in transaction.description.lower() or 'fuel' in transaction.description.lower():
+                    category = 'Transportation'
+                elif 'restaurant' in transaction.description.lower() or 'food' in transaction.description.lower():
+                    category = 'Dining'
+                elif 'shop' in transaction.description.lower():
+                    category = 'Shopping'
+                
+                categories[category] = categories.get(category, 0) + transaction.amount
+                
+                # Daily spending trends
+                date_key = transaction.created_at.strftime('%Y-%m-%d')
+                daily_spending[date_key] = daily_spending.get(date_key, 0) + transaction.amount
+        
+        # Convert categories to list with percentages
+        category_list = []
+        for category, amount in categories.items():
+            percentage = (amount / total_spent * 100) if total_spent > 0 else 0
+            category_list.append({
+                'category': category,
+                'amount': float(amount),
+                'percentage': round(percentage, 2)
+            })
+        
+        # Convert daily spending to trends list
+        trends = []
+        for date, amount in sorted(daily_spending.items()):
+            trends.append({
+                'date': date,
+                'amount': float(amount)
+            })
+        
+        analytics = {
+            'total_spent': float(total_spent),
+            'categories': category_list,
+            'trends': trends
+        }
+        
+        create_audit_log(
+            action='GET_SPENDING_ANALYTICS',
+            resource_type='analytics',
+            user_id=user_id,
+            success=True,
+            details={'period': period, 'account_id': account_id}
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': analytics
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error retrieving spending analytics: {str(e)}')
+        create_audit_log(
+            action='GET_SPENDING_ANALYTICS',
+            resource_type='analytics',
+            user_id=g.current_user.id,
+            success=False,
+            error_message=str(e)
+        )
+        return jsonify({
+            'error': 'Failed to retrieve spending analytics',
+            'code': 'ANALYTICS_FAILED'
+        }), 500
+
 # Initialize database
 def create_tables():
     """Create database tables"""

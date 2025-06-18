@@ -2,12 +2,16 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
   avatar?: string;
-  role: UserRole;
-  preferences: UserPreferences;
-  createdAt: string;
-  updatedAt: string;
+  role?: UserRole;
+  is_verified: boolean;
+  kyc_status?: 'pending' | 'verified' | 'rejected';
+  preferences?: UserPreferences;
+  created_at: string;
+  updated_at: string;
 }
 
 export enum UserRole {
@@ -50,9 +54,9 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  confirmPassword: string;
-  name: string;
-  acceptTerms: boolean;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
 }
 
 // Wallet and Transaction types

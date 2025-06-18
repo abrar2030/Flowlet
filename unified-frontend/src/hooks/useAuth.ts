@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './redux';
 import { validateToken, refreshToken } from '@/store/authSlice';
+import { authService } from '@/lib/authService';
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -9,13 +10,12 @@ export const useAuth = () => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('authToken');
-      if (storedToken && !isAuthenticated) {
+      if (authService.isAuthenticated() && !isAuthenticated) {
         try {
           await dispatch(validateToken()).unwrap();
         } catch (error) {
           console.error('Token validation failed:', error);
-          localStorage.removeItem('authToken');
+          authService.logout();
         }
       }
       setInitialized(true);

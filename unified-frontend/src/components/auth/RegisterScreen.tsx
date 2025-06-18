@@ -15,7 +15,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  first_name: z.string().min(2, 'First name must be at least 2 characters'),
+  last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string(),
@@ -46,7 +47,10 @@ const RegisterScreen: React.FC = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await dispatch(registerUser(data)).unwrap();
+      // Remove confirmPassword and acceptTerms from the data sent to the API
+      const { confirmPassword, acceptTerms, ...registerData } = data;
+      
+      await dispatch(registerUser(registerData)).unwrap();
       toast.success('Account created successfully!');
       navigate('/onboarding');
     } catch (error: any) {
@@ -75,16 +79,30 @@ const RegisterScreen: React.FC = () => {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="first_name">First Name</Label>
               <Input
-                id="name"
+                id="first_name"
                 type="text"
-                placeholder="Enter your full name"
-                {...register('name')}
-                className={errors.name ? 'border-destructive' : ''}
+                placeholder="Enter your first name"
+                {...register('first_name')}
+                className={errors.first_name ? 'border-destructive' : ''}
               />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+              {errors.first_name && (
+                <p className="text-sm text-destructive">{errors.first_name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input
+                id="last_name"
+                type="text"
+                placeholder="Enter your last name"
+                {...register('last_name')}
+                className={errors.last_name ? 'border-destructive' : ''}
+              />
+              {errors.last_name && (
+                <p className="text-sm text-destructive">{errors.last_name.message}</p>
               )}
             </div>
 
