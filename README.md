@@ -1626,5 +1626,3 @@ The `unified-frontend` has been developed with a modern, component-based archite
 - **Responsive Design**: Designed to be fully responsive, providing an optimal viewing and interaction experience across various devices, from desktops to mobile phones.
 
 These new features collectively enhance Flowlet's position as a leading embedded finance platform, offering unparalleled security, compliance, and functional breadth for businesses looking to integrate financial services seamlessly into their offerings.
-
-
