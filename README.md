@@ -4,7 +4,7 @@
 ![Test Coverage](https://img.shields.io/badge/coverage-91%25-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-![Flowlet Dashboard](docs/assets/images/dashboard.bmp)
+![Flowlet Dashboard](https://private-us-east-1.manuscdn.com/sessionFile/FuKWiAZ8NAXNJJaAWV1QqD/sandbox/4xREHaTpo3q8BSpBWzevAy-images_1750205754727_na1fn_L2hvbWUvdWJ1bnR1L0Zsb3dsZXQvZG9jcy9hc3NldHMvaW1hZ2VzL2Rhc2hib2FyZA.bmp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRnVLV2lBWjhOQVhOSkphQVdWMVFxRC9zYW5kYm94LzR4UkVIYVRwbzNxOEJTcEJXemV2QXktaW1hZ2VzXzE3NTAyMDU3NTQ3MjdfbmExZm5fTDJodmJXVXZkV0oxYm5SMUwwWnNiM2RzWlhRdlpHOWpjeTloYzNObGRITXZhVzFoWjJWekwyUmhjMmhpYjJGeVpBLmJtcCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc2NzIyNTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=ZTIA1xCKT~4zWdEcLe5yyrwJbipVEVLwluMkiw9wn-vnaaSPRpA98B0EOdz6~ljiDaxmoDbdEwNycq-nl9Lqnei3WRGFjYWzAZ7Ilr13LdtzOWskOIo0YqGaCt~hz8qQuU1spk7DCMpVocFhEzfbqohLlaVGn~uUU77exlQm3Es1Zea57z9wrByJK6J0z1MDlUC4x2~3BPdAhA31eoZcvo6HpkjE8Wz9YztHh-FUzA-yYPeUQqeUgdWGMnRZL0Vw3R-xom4b~zE1w-SZM9t10XyuLi00AxQ5NUnx5zssvtMel~DMTdd9gkKWaVmlARfN2LCS9-GC5pTGZxvqRstTlw__)
 
 > **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience.
 
@@ -1566,5 +1566,65 @@ Documentation for AI-powered features including fraud detection and the support 
 
 Documentation for API key management, audit logging, data tokenization, and security scanning:
 - [Security API Reference](docs/security.md)
+
+
+
+
+## ✨ New Features and Enhancements
+
+Flowlet has undergone significant enhancements, expanding its capabilities across security, AI, compliance, and core financial services. These updates are designed to provide a more robust, secure, and comprehensive embedded finance platform, meeting the stringent demands of the financial industry.
+
+### Advanced Security and Compliance Framework
+
+The platform's security posture has been significantly strengthened with the implementation of a multi-layered security framework. This includes:
+
+- **Comprehensive Security Headers**: Automatic application of industry-standard security headers (e.g., `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, `Content-Security-Policy`) to mitigate common web vulnerabilities like XSS, clickjacking, and content sniffing. Custom financial security headers (`X-API-Version`, `X-Security-Level`, `X-Compliance-Level`) are also added to responses, providing clear indicators of the platform's security and compliance adherence.
+- **Enhanced Input Validation**: Strict validation of incoming request payloads, ensuring that only well-formed and expected data types are processed. This prevents various injection attacks and data integrity issues.
+- **Robust Error Handling**: Granular and informative error responses for various HTTP status codes (400, 401, 403, 404, 429, 500), providing clear error codes, messages, and timestamps for easier debugging and integration. Rate limit exceeding errors now include a `retry_after` field.
+- **JWT Authentication with Refresh Tokens**: Implementation of a secure authentication mechanism using JSON Web Tokens (JWT) with support for refresh tokens, ensuring secure and persistent user sessions while minimizing the risk of token compromise.
+- **Advanced Rate Limiting**: Sophisticated rate limiting policies (e.g., 1000 requests per hour, 100 requests per minute) to protect against brute-force attacks, denial-of-service (DoS) attacks, and API abuse. This is configurable and leverages Redis for distributed and efficient rate limiting.
+- **Data Encryption (AES-256)**: All sensitive data, both at rest and in transit, is protected using AES-256 encryption, a standard for financial data protection. This is managed by a dedicated encryption manager.
+- **Real-time Security Monitoring**: Continuous monitoring of system activities and traffic patterns to detect and respond to suspicious behavior or potential breaches in real-time.
+- **PCI DSS Level 1 Compliance**: The platform is engineered to meet the highest level of Payment Card Industry Data Security Standard (PCI DSS) compliance, ensuring secure handling of cardholder data.
+- **Multi-Factor Authentication (MFA) Support**: Built-in support for integrating multi-factor authentication, adding an extra layer of security for user accounts.
+- **Fraud Detection and Prevention**: Integration of advanced machine learning models for real-time fraud detection, analyzing transaction patterns and user behavior to identify and prevent fraudulent activities.
+- **Advanced Threat Protection**: Implementation of various measures to protect against sophisticated cyber threats, including intrusion detection and prevention systems.
+
+### Expanded AI-Enhanced Capabilities
+
+Flowlet's AI capabilities have been significantly expanded to provide deeper insights and automation:
+
+- **Enhanced Fraud Detection**: Beyond basic fraud detection, the system now incorporates more sophisticated machine learning models for `enhanced_fraud_detection` and `transaction_intelligence`, allowing for more accurate identification of complex fraud patterns and anomalies.
+- **Risk Assessment**: Introduction of a dedicated `risk_assessment` module that evaluates various factors to determine the risk profile of transactions and users, enabling proactive risk management.
+- **AI Support Chatbot**: The `support_chatbot` has been further trained and integrated to provide more intelligent and context-aware assistance to both developers and end-users, leveraging a broader knowledge base.
+
+### Comprehensive Multi-Currency System
+
+A robust `multi_currency_system` has been integrated, enabling the platform to handle transactions and manage balances across a wide range of global currencies. This includes:
+
+- **20+ Supported Currencies**: The API now explicitly lists support for over 20 major global currencies (e.g., USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, TRY, ZAR, BRL, INR, KRW, PLN).
+- **Real-time Exchange Rates**: Integration with external services to fetch and apply real-time exchange rates for accurate multi-currency transactions and conversions.
+- **Multi-Currency Wallet Management**: Wallets can now hold balances in multiple currencies simultaneously, simplifying international operations for businesses and their customers.
+
+### Advanced Integrations and Ecosystem
+
+Flowlet's integration layer has been modularized and expanded to facilitate seamless connectivity with a broader financial ecosystem:
+
+- **Modular Integration Framework**: The `integrations` module now includes dedicated sub-modules for `banking`, `currency`, and `payments`, allowing for easier addition of new third-party providers and services.
+- **Comprehensive Health Check Endpoint**: The `/health` endpoint now provides a more detailed status report, including the health of the database, Redis, and the operational status of key security and compliance features (encryption, audit logging, rate limiting, security monitoring). It also reports on compliance with PCI DSS, SOX, and GDPR, and provides system uptime.
+- **Enriched API Information Endpoint**: The `/api/v1/info` endpoint offers a comprehensive overview of the API, detailing all available endpoints, supported features, security features, compliance standards, and the full list of supported currencies. This serves as a dynamic and up-to-date API catalog.
+
+### Unified Frontend Enhancements
+
+The `unified-frontend` has been developed with a modern, component-based architecture, leveraging cutting-edge web technologies to deliver a rich and responsive user experience:
+
+- **React/Vite Development Stack**: Built with React and Vite for fast development, optimized performance, and a highly interactive user interface.
+- **Comprehensive UI Libraries**: Utilizes `@radix-ui` for accessible and customizable UI components, `tailwindcss` for efficient styling, and `framer-motion` for smooth animations, ensuring a polished and engaging user experience.
+- **Data Visualization with Recharts**: Integration of `recharts` for powerful and customizable data visualization, enabling clear presentation of financial data and analytics.
+- **Robust State Management**: Implements `@reduxjs/toolkit` and `react-redux` for predictable and scalable state management, crucial for complex financial applications.
+- **Extensive Testing**: Incorporates `vitest`, `@testing-library/react`, and `@testing-library/jest-dom` for comprehensive unit and integration testing, ensuring high code quality and reliability.
+- **Responsive Design**: Designed to be fully responsive, providing an optimal viewing and interaction experience across various devices, from desktops to mobile phones.
+
+These new features collectively enhance Flowlet's position as a leading embedded finance platform, offering unparalleled security, compliance, and functional breadth for businesses looking to integrate financial services seamlessly into their offerings.
 
 
