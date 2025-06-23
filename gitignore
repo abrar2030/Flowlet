@@ -146,3 +146,54 @@ terraform.rc
 # Specific project files
 git-auto-commit.sh
 
+
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+.localized
+.Trashes
+
+# Editor/IDE specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.tmproj
+*.iml
+*.ipr
+*.iws
+
+# Backup and temporary files
+*~
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# Log files
+*.log
+log/
+logs/
+
+# Database files
+*.sqlite3
+*.db
+*.sql
+
+# Dependency management caches
+.npm/
+.yarn-cache/
+.pip_cache/
+
+# Build artifacts
+build/
+dist/
+*.o
+*.pyc
+*.class
+
+
