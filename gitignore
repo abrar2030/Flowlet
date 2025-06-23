@@ -196,4 +196,6 @@ dist/
 *.pyc
 *.class
 
+# Specific project files
+git-auto-commit.sh
 
