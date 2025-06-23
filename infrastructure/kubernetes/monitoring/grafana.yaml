@@ -6,13 +6,14 @@ metadata:
 data:
   grafana.ini: |
     [analytics]
-    check_for_updates = true
+    check_for_updates = false
     
     [grafana_net]
     url = https://grafana.net
     
     [log]
     mode = console
+    level = info
     
     [paths]
     data = /var/lib/grafana/data
@@ -21,14 +22,25 @@ data:
     provisioning = /etc/grafana/provisioning
     
     [server]
-    root_url = http://localhost:3000/
+    root_url = %(protocol)s://%(domain)s:%(http_port)s/grafana/
+    serve_from_sub_path = true
     
     [security]
-    admin_user = admin
-    admin_password = admin123
+    # Admin password should be managed via Kubernetes secrets or external secret management
+    # admin_user = admin
+    # admin_password = admin123
+    allow_embedding = false
+    cookie_samesite = lax
     
     [users]
     allow_sign_up = false
+    allow_org_create = false
+    
+    [auth.anonymous]
+    enabled = false
+    
+    [auth.basic]
+    enabled = true
 
   datasources.yml: |
     apiVersion: 1
@@ -38,14 +50,24 @@ data:
       access: proxy
       url: http://prometheus.flowlet-monitoring.svc.cluster.local:9090
       isDefault: true
+      jsonData:
+        timeInterval: "5s"
     - name: InfluxDB
       type: influxdb
       access: proxy
       url: http://influxdb.flowlet-data.svc.cluster.local:8086
       database: flowlet-metrics
       user: admin
-      secureJsonData:
-        password: password123
+      secureJsonFromExternalSecrets:
+        password: flowlet-influxdb-password
+      jsonData:
+        timeInterval: "5s"
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki.flowlet-monitoring.svc.cluster.local:3100
+      jsonData:
+        timeInterval: "5s"
 
   dashboards.yml: |
     apiVersion: 1
@@ -59,13 +81,26 @@ data:
       allowUiUpdates: true
       options:
         path: /var/lib/grafana/dashboards
+    - name: 'kubernetes'
+      orgId: 1
+      folder: 'Kubernetes'
+      type: file
+      options:
+        path: /var/lib/grafana/dashboards/kubernetes
+    - name: 'security'
+      orgId: 1
+      folder: 'Security'
+      type: file
+      options:
+        path: /var/lib/grafana/dashboards/security
 
+  # Placeholder for flowlet-overview.json - actual content will be more detailed
   flowlet-overview.json: |
     {
       "dashboard": {
         "id": null,
-        "title": "Flowlet Platform Overview",
-        "tags": ["flowlet"],
+        "title": "Flowlet Platform Overview (Enhanced)",
+        "tags": ["flowlet", "overview", "financial"],
         "style": "dark",
         "timezone": "browser",
         "panels": [
@@ -75,7 +110,7 @@ data:
             "type": "stat",
             "targets": [
               {
-                "expr": "up{job=\"flowlet-services\"}",
+                "expr": "up{job=~\"flowlet-.*\"}",
                 "legendFormat": "{{kubernetes_name}}"
               }
             ],
@@ -96,66 +131,82 @@ data:
           },
           {
             "id": 2,
-            "title": "Request Rate",
+            "title": "API Gateway Request Rate",
             "type": "graph",
             "targets": [
               {
-                "expr": "rate(http_requests_total[5m])",
-                "legendFormat": "{{kubernetes_name}}"
+                "expr": "sum(rate(http_requests_total{job=\"flowlet-backend\", service=\"api-gateway\"}[5m]))",
+                "legendFormat": "API Gateway"
               }
             ],
             "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
           },
           {
             "id": 3,
-            "title": "Response Time",
+            "title": "Overall Response Time (95th Percentile)",
             "type": "graph",
             "targets": [
               {
-                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
                 "legendFormat": "95th percentile"
-              },
-              {
-                "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
-                "legendFormat": "50th percentile"
               }
             ],
             "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
           },
           {
             "id": 4,
-            "title": "Error Rate",
+            "title": "Error Rate (5xx)",
             "type": "graph",
             "targets": [
               {
-                "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
-                "legendFormat": "{{kubernetes_name}} errors"
+                "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))",
+                "legendFormat": "Total 5xx Errors"
               }
             ],
             "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
           },
           {
             "id": 5,
-            "title": "Database Connections",
+            "title": "Database Connections (PostgreSQL)",
             "type": "graph",
             "targets": [
               {
-                "expr": "database_connections_active",
+                "expr": "pg_stat_activity_count{datname=\"flowlet\"}",
                 "legendFormat": "Active connections"
-              },
-              {
-                "expr": "database_connections_idle",
-                "legendFormat": "Idle connections"
               }
             ],
             "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "Kubernetes Node CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(node_cpu_seconds_total{mode=\"idle\"}) by (instance)",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+          },
+          {
+            "id": 7,
+            "title": "Kubernetes Pod Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{namespace=\"flowlet-core\"}) by (pod)",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
           }
         ],
         "time": {
-          "from": "now-1h",
+          "from": "now-6h",
           "to": "now"
         },
-        "refresh": "5s"
+        "refresh": "10s"
       }
     }
 ---
@@ -165,7 +216,7 @@ metadata:
   name: grafana
   namespace: flowlet-monitoring
 spec:
-  replicas: 1
+  replicas: 2 # Increased replicas for high availability
   selector:
     matchLabels:
       app: grafana
@@ -173,15 +224,57 @@ spec:
     metadata:
       labels:
         app: grafana
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 472 # Grafana default user ID
+        fsGroup: 472
       containers:
       - name: grafana
-        image: grafana/grafana:10.1.0
+        image: grafana/grafana:10.1.0 # Use a specific, stable version
         ports:
         - containerPort: 3000
+          name: http
         env:
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: grafana-admin-credentials
+              key: admin-user
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: "admin123"
+          valueFrom:
+            secretKeyRef:
+              name: grafana-admin-credentials
+              key: admin-password
+        - name: GF_SERVER_ROOT_URL
+          value: "https://grafana.flowlet.com" # Example: Replace with actual external URL
+        - name: GF_AUTH_GENERIC_OAUTH_ENABLED
+          value: "true"
+        - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: grafana-oauth-credentials
+              key: client-id
+        - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: grafana-oauth-credentials
+              key: client-secret
+        - name: GF_AUTH_GENERIC_OAUTH_SCOPES
+          value: "openid profile email"
+        - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+          value: "https://your-idp.com/oauth2/authorize" # Replace with your IdP auth URL
+        - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
+          value: "https://your-idp.com/oauth2/token" # Replace with your IdP token URL
+        - name: GF_AUTH_GENERIC_OAUTH_API_URL
+          value: "https://your-idp.com/oauth2/userinfo" # Replace with your IdP userinfo URL
+        - name: GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS
+          value: "your-company.com"
+        - name: GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH
+          value: "contains(roles[*], 'admin') && 'Admin' || contains(roles[*], 'editor') && 'Editor' || 'Viewer'"
         volumeMounts:
         - name: grafana-config
           mountPath: /etc/grafana/grafana.ini
@@ -197,13 +290,31 @@ spec:
           subPath: flowlet-overview.json
         - name: grafana-storage
           mountPath: /var/lib/grafana
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
       volumes:
       - name: grafana-config
         configMap:
@@ -211,6 +322,7 @@ spec:
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: grafana-storage-pvc
+      serviceAccountName: grafana-serviceaccount
 ---
 apiVersion: v1
 kind: Service
@@ -222,8 +334,9 @@ spec:
     app: grafana
   ports:
   - port: 3000
-    targetPort: 3000
-  type: LoadBalancer
+    targetPort: http
+    name: http
+  type: ClusterIP # Changed to ClusterIP, Ingress will handle external access
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -235,5 +348,68 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 20Gi # Increased storage
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-serviceaccount
+  namespace: flowlet-monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grafana-reader
+  namespace: flowlet-monitoring
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["pods", "services", "endpoints", "ingresses", "deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "podmonitors"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana-reader-binding
+  namespace: flowlet-monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: grafana-reader
+subjects:
+- kind: ServiceAccount
+  name: grafana-serviceaccount
+  namespace: flowlet-monitoring
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: flowlet-monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /grafana/$1
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Assuming cert-manager is installed
+spec:
+  tls:
+  - hosts:
+    - grafana.flowlet.com # Replace with your actual Grafana domain
+    secretName: grafana-tls-secret
+  rules:
+  - host: grafana.flowlet.com # Replace with your actual Grafana domain
+    http:
+      paths:
+      - path: /grafana/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+
 
