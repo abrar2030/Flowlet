@@ -1,6 +1,3 @@
-# Enhanced Security Infrastructure
-# Financial Industry Standards Compliant
-
 import os
 import hashlib
 import hmac

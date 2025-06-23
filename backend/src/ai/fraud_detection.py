@@ -1,8 +1,3 @@
-"""
-Enhanced AI Fraud Detection Module for Financial Industry Standards
-Implements explainable AI models with real-time monitoring and regulatory compliance
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest, RandomForestClassifier

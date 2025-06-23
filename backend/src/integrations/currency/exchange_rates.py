@@ -1,6 +1,3 @@
-# Enhanced Currency Exchange and Multi-Currency Support
-# Financial Industry Standards Compliant
-
 import requests
 import json
 import logging

@@ -1,6 +1,3 @@
-# Enhanced Wallet Service Implementation
-# Financial Industry Standards Compliant
-
 from flask import Blueprint, request, jsonify, g
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address

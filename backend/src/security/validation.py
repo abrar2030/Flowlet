@@ -1,6 +1,3 @@
-# Enhanced Input Validation and Sanitization
-# Financial Industry Standards Compliant
-
 import re
 import decimal
 from decimal import Decimal, InvalidOperation

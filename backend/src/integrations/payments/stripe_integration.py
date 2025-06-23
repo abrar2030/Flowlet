@@ -1,6 +1,3 @@
-# Enhanced Payment Processor Integrations
-# Financial Industry Standards Compliant
-
 import requests
 import json
 import logging

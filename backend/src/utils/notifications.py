@@ -1,6 +1,3 @@
-# Enhanced Notification System
-# Financial Industry Standards Compliant
-
 import json
 import logging
 from datetime import datetime, timezone

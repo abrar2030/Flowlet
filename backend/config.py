@@ -1,6 +1,3 @@
-# Enhanced Configuration for Flowlet Backend
-# Financial Industry Standards Compliant
-
 import os
 from datetime import timedelta
 
