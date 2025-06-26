@@ -20,13 +20,7 @@ from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
 
 # Create blueprint
-enhanced_kyc_bp = Blueprint('enhanced_kyc', __name__, url_prefix='/api/v1/kyc')
-
-# Configure rate limiting
-limiter = Limiter(key_func=get_remote_address)
-
-logger = logging.getLogger(__name__)
-
+kyc_bp = Blueprint('kyc', __name__, url_prefix='/api/v1/kyc')
 class VerificationLevel(Enum):
     """KYC verification levels"""
     BASIC = "basic"
@@ -52,7 +46,7 @@ class DocumentType(Enum):
 
 class KYCAMLService:
     """
-    Enhanced KYC/AML Service implementing financial industry standards
+    KYC/AML Service implementing financial industry standards
     Provides comprehensive identity verification and compliance workflows
     """
     

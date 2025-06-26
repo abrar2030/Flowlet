@@ -1,4 +1,4 @@
-# Enhanced Card Management System
+
 from flask import Blueprint, request, jsonify
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -7,18 +7,18 @@ import json
 import secrets
 import hashlib
 from sqlalchemy import and_, or_, func
-from src.models.enhanced_database import Card, Wallet, Transaction
+from src.models.database import Card, Wallet, Transaction
 from src.security.audit_logger import AuditLogger
 from src.security.input_validator import InputValidator, ValidationError
 from src.security.rate_limiter import rate_limit
-from src.security.token_manager import enhanced_token_required, require_permissions
+from src.security.token_manager import token_required, require_permissions
 from src.security.encryption_manager import TokenizationManager
 from src.security.password_security import PasswordSecurity
 
-enhanced_cards_bp = Blueprint('enhanced_cards', __name__)
+cards_bp = Blueprint(\'cards\', __name__)
 
-class EnhancedCardManager:
-    """Enhanced card management with advanced security and controls"""
+class CardManager:
+    """Card management with advanced security and controls"""
     
     def __init__(self):
         self.tokenization_manager = TokenizationManager()
@@ -44,8 +44,8 @@ class EnhancedCardManager:
         spending_limits: Optional[Dict[str, Decimal]] = None,
         merchant_controls: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Create a new virtual card with enhanced security"""
-        from src.models.enhanced_database import db, Wallet
+        """Create a new virtual card with security"""
+        from src.models.database import db, Wallet
         
         # Verify wallet exists and is active
         wallet = db.session.query(Wallet).get(wallet_id)
@@ -173,9 +173,7 @@ class EnhancedCardManager:
         controls: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Update card controls and spending limits"""
-        from src.models.enhanced_database import db
-        
-        # Get card and verify ownership
+        from src.models.database import db
         card = db.session.query(Card)\
             .join(Card.wallet)\
             .filter(Card.id == card_id)\
@@ -232,9 +230,7 @@ class EnhancedCardManager:
         transaction_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Authorize card transaction with real-time controls"""
-        from src.models.enhanced_database import db
-        
-        # Get card details
+        from src.models.database import db
         card = db.session.query(Card).get(card_id)
         if not card:
             return {'authorized': False, 'reason': 'Card not found'}
@@ -370,9 +366,7 @@ class EnhancedCardManager:
     
     def get_card_analytics(self, card_id: str, user_id: str, days: int = 30) -> Dict[str, Any]:
         """Get spending analytics for a card"""
-        from src.models.enhanced_database import db
-        
-        # Verify card ownership
+        from src.models.database import db
         card = db.session.query(Card)\
             .join(Card.wallet)\
             .filter(Card.id == card_id)\
