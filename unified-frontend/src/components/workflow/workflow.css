@@ -1,0 +1,270 @@
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Dark mode grid pattern */
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+}
+
+/* Workflow node animations */
+.workflow-node {
+  transition: all 0.2s ease-in-out;
+}
+
+.workflow-node:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.workflow-node.selected {
+  box-shadow: 0 0 0 2px hsl(var(--primary));
+}
+
+.workflow-node.running {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Connection lines */
+.workflow-connection {
+  stroke: hsl(var(--border));
+  stroke-width: 2;
+  fill: none;
+  marker-end: url(#arrowhead);
+}
+
+.workflow-connection.active {
+  stroke: hsl(var(--primary));
+  stroke-width: 3;
+}
+
+/* Node handles */
+.node-handle {
+  transition: all 0.2s ease-in-out;
+}
+
+.node-handle:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Drag and drop styles */
+.drag-over {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  border: 2px dashed hsl(var(--primary));
+}
+
+/* Workflow canvas zoom controls */
+.zoom-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+/* Node palette styles */
+.node-palette {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.node-palette::-webkit-scrollbar {
+  width: 6px;
+}
+
+.node-palette::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.node-palette::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.node-palette::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--border));
+}
+
+/* Properties panel animations */
+.properties-panel {
+  transition: transform 0.3s ease-in-out;
+}
+
+.properties-panel.hidden {
+  transform: translateX(100%);
+}
+
+/* Workflow status indicators */
+.status-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-indicator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.status-indicator.running::after {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .workflow-designer {
+    flex-direction: column;
+  }
+  
+  .node-palette {
+    width: 100%;
+    height: 200px;
+    order: 2;
+  }
+  
+  .workflow-canvas {
+    order: 1;
+    height: calc(100vh - 300px);
+  }
+  
+  .properties-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 100%;
+    max-width: 400px;
+    z-index: 50;
+    background: hsl(var(--background));
+    border-left: 1px solid hsl(var(--border));
+  }
+}
+
+/* Loading states */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Workflow execution visualization */
+.execution-path {
+  stroke: hsl(var(--primary));
+  stroke-width: 3;
+  stroke-dasharray: 5, 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Node type specific styles */
+.node-trigger {
+  border-left: 4px solid hsl(var(--primary));
+}
+
+.node-action {
+  border-left: 4px solid hsl(var(--secondary));
+}
+
+.node-condition {
+  border-left: 4px solid hsl(var(--warning));
+}
+
+.node-security {
+  border-left: 4px solid hsl(var(--destructive));
+}
+
+/* Accessibility improvements */
+.workflow-node:focus {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.node-handle:focus {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.3) 1px, transparent 1px);
+  }
+  
+  .dark .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .workflow-node,
+  .node-handle,
+  .properties-panel {
+    transition: none;
+  }
+  
+  .workflow-node.running,
+  .status-indicator.running::after,
+  .execution-path {
+    animation: none;
+  }
+}
+
