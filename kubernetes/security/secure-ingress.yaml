@@ -22,7 +22,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: flowlet-frontend-service
+            name: flowlet-frontend
             port:
               number: 80
   tls:

@@ -1,0 +1,35 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  # Don't log requests to the following resources.
+  - level: None
+    resources:
+      - group: ""
+        resources: ["events"]
+
+  # Don't log requests to the following readonly APIs.
+  - level: None
+    resources:
+      - group: ""
+        resources: ["endpoints", "services", "services/status"]
+    verbs: ["get", "list", "watch"]
+
+  # Don't log health checks.
+  - level: None
+    nonResourceURLs:
+      - /healthz*
+      - /version
+      - /swagger*
+
+  # Log the request body of configmap changes in the kube-system namespace.
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["configmaps"]
+    namespaces: ["kube-system"]
+
+  # Log all other requests at the Metadata level.
+  - level: Metadata
+    omitStages: ["RequestReceived"]
+
+

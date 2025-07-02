@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: velero
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: velero
+  namespace: velero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: velero
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: velero
+    spec:
+      serviceAccountName: velero
+      containers:
+      - name: velero
+        image: velero/velero:v1.13.0
+        args:
+          - server
+        volumeMounts:
+          - name: plugins
+            mountPath: /target/plugins
+        env:
+          - name: VELERO_SCRATCH_DIR
+            value: /tmp
+      volumes:
+        - name: plugins
+          emptyDir: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: velero
+  namespace: velero
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: velero-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin # For simplicity, using cluster-admin. In production, use a more restricted role.
+subjects:
+- kind: ServiceAccount
+  name: velero
+  namespace: velero
+
+
