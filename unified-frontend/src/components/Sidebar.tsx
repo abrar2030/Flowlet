@@ -10,8 +10,7 @@ import {
   Settings,
   PiggyBank,
   AlertTriangle,
-  X,
-  Zap
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,6 @@ const navigationItems = [
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
   { icon: CreditCard, label: 'Cards', path: '/cards' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
-  { icon: Zap, label: 'Workflows', path: '/workflows' },
   { icon: PiggyBank, label: 'Budgeting', path: '/budgeting' },
   { icon: MessageSquare, label: 'AI Chat', path: '/chat' },
   { icon: AlertTriangle, label: 'Fraud Alerts', path: '/alerts' },

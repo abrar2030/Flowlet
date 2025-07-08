@@ -17,7 +17,6 @@ import OnboardingFlow from '@/components/auth/OnboardingFlow';
 
 // Main App Components
 import Dashboard from '@/components/wallet/Dashboard';
-import WorkflowMain from '@/components/workflow/WorkflowMain';
 import {
   WalletScreen,
   TransactionHistory,
@@ -127,10 +126,6 @@ function App() {
                 
                 {/* Analytics */}
                 <Route path="analytics" element={<AnalyticsScreen />} />
-                
-                {/* Workflow Designer */}
-                <Route path="workflows" element={<WorkflowMain />} />
-                <Route path="workflows/*" element={<WorkflowMain />} />
                 
                 {/* Financial Planning */}
                 <Route path="financial-planning" element={<AdvancedBudgetingScreen />} />
