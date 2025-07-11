@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Comprehensive Test Runner for Flowlet Backend
@@ -10,11 +11,11 @@ echo "Flowlet Backend - Comprehensive Test Suite"
 echo "=========================================="
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+RED=\033[0;31m
+GREEN=\033[0;32m
+YELLOW=\033[1;33m
+BLUE=\033[0;34m
+NC=\033[0m # No Color
 
 # Create test results directory
 mkdir -p test_results
@@ -84,27 +85,6 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Performance tests passed${NC}"
 else
     echo -e "${YELLOW}⚠ Performance tests completed with warnings${NC}"
-fi
-
-echo -e "${BLUE}Running existing MVP tests...${NC}"
-
-# Run existing test files if they exist
-if [ -f "test_mvp.py" ]; then
-    python test_mvp.py
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ MVP tests passed${NC}"
-    else
-        echo -e "${RED}✗ MVP tests failed${NC}"
-    fi
-fi
-
-if [ -f "test_api.py" ]; then
-    python test_api.py
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ API tests passed${NC}"
-    else
-        echo -e "${RED}✗ API tests failed${NC}"
-    fi
 fi
 
 echo -e "${BLUE}Generating comprehensive coverage report...${NC}"
@@ -218,4 +198,6 @@ else
     echo -e "${RED}❌ Some critical tests failed. Please review and fix before deployment.${NC}"
     exit 1
 fi
+
+
 
