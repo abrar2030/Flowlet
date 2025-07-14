@@ -1,48 +1,79 @@
-// Core types for the application
-export interface User {
+// Improved TypeScript type definitions for Flowlet unified-frontend
+
+// ============================================================================
+// Core Types
+// ============================================================================
+
+export interface BaseEntity {
   id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// ============================================================================
+// User & Authentication Types
+// ============================================================================
+
+export interface User extends BaseEntity {
   email: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
-  avatar?: string;
-  role?: UserRole;
-  is_verified: boolean;
-  kyc_status?: 'pending' | 'verified' | 'rejected';
-  preferences?: UserPreferences;
-  created_at: string;
-  updated_at: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  address?: Address;
+  profilePicture?: string;
+  role: UserRole;
+  permissions: Permission[];
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  kycStatus: KYCStatus;
+  mfaEnabled: boolean;
+  lastLoginAt?: string;
+  status: UserStatus;
 }
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  PREMIUM = 'premium',
+export type UserRole = 'customer' | 'admin' | 'support' | 'compliance';
+
+export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending_verification';
+
+export type KYCStatus = 'not_started' | 'in_progress' | 'completed' | 'rejected' | 'expired';
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
 }
 
-export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system';
-  language: string;
-  currency: string;
-  notifications: NotificationSettings;
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
 }
 
-export interface NotificationSettings {
-  email: boolean;
-  push: boolean;
-  sms: boolean;
-  transactionAlerts: boolean;
-  securityAlerts: boolean;
-  marketingEmails: boolean;
-}
-
-// Authentication types
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
 }
 
 export interface LoginCredentials {
@@ -54,255 +85,413 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  acceptTerms: boolean;
+  acceptPrivacy: boolean;
 }
 
-// Wallet and Transaction types
-export interface Wallet {
-  id: string;
+export interface MFASetupData {
+  secret: string;
+  qrCode: string;
+  backupCodes: string[];
+}
+
+export interface BiometricAuthData {
+  publicKey: string;
+  credentialId: string;
+  deviceName: string;
+}
+
+// ============================================================================
+// Financial Types
+// ============================================================================
+
+export interface Account extends BaseEntity {
+  accountNumber: string;
+  accountType: AccountType;
+  balance: Money;
+  availableBalance: Money;
+  currency: Currency;
+  status: AccountStatus;
   userId: string;
-  balance: number;
-  currency: string;
-  type: WalletType;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  bankName: string;
+  routingNumber?: string;
+  swiftCode?: string;
+  iban?: string;
 }
 
-export enum WalletType {
-  CHECKING = 'checking',
-  SAVINGS = 'savings',
-  INVESTMENT = 'investment',
-  CRYPTO = 'crypto',
-}
+export type AccountType = 'checking' | 'savings' | 'credit' | 'investment' | 'business';
 
-export interface Transaction {
-  id: string;
-  walletId: string;
-  type: TransactionType;
+export type AccountStatus = 'active' | 'inactive' | 'frozen' | 'closed';
+
+export interface Money {
   amount: number;
-  currency: string;
-  description: string;
-  category: TransactionCategory;
+  currency: Currency;
+  formatted: string;
+}
+
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'JPY' | 'AUD' | 'CHF';
+
+export interface Transaction extends BaseEntity {
+  transactionId: string;
+  accountId: string;
+  amount: Money;
+  type: TransactionType;
   status: TransactionStatus;
+  category: TransactionCategory;
+  description: string;
+  merchantName?: string;
+  merchantCategory?: string;
+  reference?: string;
   fromAccount?: string;
   toAccount?: string;
+  fee?: Money;
+  exchangeRate?: number;
+  location?: TransactionLocation;
   metadata?: Record<string, any>;
-  createdAt: string;
-  updatedAt: string;
+  processedAt?: string;
+  settledAt?: string;
 }
 
-export enum TransactionType {
-  DEPOSIT = 'deposit',
-  WITHDRAWAL = 'withdrawal',
-  TRANSFER = 'transfer',
-  PAYMENT = 'payment',
-  REFUND = 'refund',
+export type TransactionType = 'debit' | 'credit' | 'transfer' | 'payment' | 'refund' | 'fee' | 'interest';
+
+export type TransactionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'reversed';
+
+export type TransactionCategory = 
+  | 'food_dining'
+  | 'transportation'
+  | 'shopping'
+  | 'entertainment'
+  | 'healthcare'
+  | 'utilities'
+  | 'income'
+  | 'transfer'
+  | 'fees'
+  | 'other';
+
+export interface TransactionLocation {
+  latitude: number;
+  longitude: number;
+  address?: string;
+  city?: string;
+  country?: string;
 }
 
-export enum TransactionCategory {
-  FOOD = 'food',
-  TRANSPORT = 'transport',
-  ENTERTAINMENT = 'entertainment',
-  UTILITIES = 'utilities',
-  HEALTHCARE = 'healthcare',
-  SHOPPING = 'shopping',
-  INCOME = 'income',
-  OTHER = 'other',
+export interface TransferRequest {
+  fromAccountId: string;
+  toAccountId?: string;
+  recipientEmail?: string;
+  recipientPhone?: string;
+  amount: number;
+  currency: Currency;
+  description?: string;
+  scheduledAt?: string;
+  recurring?: RecurringTransferConfig;
 }
 
-export enum TransactionStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
+export interface RecurringTransferConfig {
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  endDate?: string;
+  maxOccurrences?: number;
 }
 
-// Card types
-export interface Card {
-  id: string;
-  userId: string;
-  walletId: string;
-  cardNumber: string;
+// ============================================================================
+// Card Types
+// ============================================================================
+
+export interface Card extends BaseEntity {
+  cardNumber: string; // Masked: **** **** **** 1234
   cardType: CardType;
-  expiryDate: string;
-  cardholderName: string;
-  isActive: boolean;
-  isBlocked: boolean;
-  dailyLimit: number;
-  monthlyLimit: number;
-  createdAt: string;
-  updatedAt: string;
+  cardBrand: CardBrand;
+  expiryMonth: number;
+  expiryYear: number;
+  holderName: string;
+  status: CardStatus;
+  accountId: string;
+  isVirtual: boolean;
+  spendingLimits: SpendingLimits;
+  features: CardFeature[];
+  lastUsedAt?: string;
 }
 
-export enum CardType {
-  DEBIT = 'debit',
-  CREDIT = 'credit',
-  PREPAID = 'prepaid',
-  VIRTUAL = 'virtual',
+export type CardType = 'debit' | 'credit' | 'prepaid' | 'virtual';
+
+export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'discover';
+
+export type CardStatus = 'active' | 'inactive' | 'blocked' | 'expired' | 'lost' | 'stolen';
+
+export interface SpendingLimits {
+  daily: Money;
+  weekly: Money;
+  monthly: Money;
+  perTransaction: Money;
+  atmDaily: Money;
 }
 
-// Analytics types
-export interface AnalyticsData {
-  totalBalance: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  savingsRate: number;
-  topCategories: CategorySpending[];
-  transactionTrends: TransactionTrend[];
-  budgetProgress: BudgetProgress[];
+export type CardFeature = 'contactless' | 'chip' | 'magnetic_stripe' | 'virtual_numbers' | 'freeze_unfreeze';
+
+export interface CardTransaction extends Transaction {
+  cardId: string;
+  authorizationCode?: string;
+  merchantId?: string;
+  isContactless: boolean;
+  isOnline: boolean;
+}
+
+// ============================================================================
+// Security & Compliance Types
+// ============================================================================
+
+export interface SecurityEvent extends BaseEntity {
+  userId: string;
+  eventType: SecurityEventType;
+  severity: SecuritySeverity;
+  description: string;
+  ipAddress: string;
+  userAgent: string;
+  location?: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolvedBy?: string;
+}
+
+export type SecurityEventType = 
+  | 'login_attempt'
+  | 'login_success'
+  | 'login_failure'
+  | 'password_change'
+  | 'mfa_enabled'
+  | 'mfa_disabled'
+  | 'suspicious_activity'
+  | 'account_locked'
+  | 'data_breach_attempt';
+
+export type SecuritySeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface AuditLog extends BaseEntity {
+  userId: string;
+  action: string;
+  resource: string;
+  resourceId: string;
+  changes?: Record<string, { from: any; to: any }>;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: string;
+}
+
+export interface ComplianceCheck extends BaseEntity {
+  userId: string;
+  checkType: ComplianceCheckType;
+  status: ComplianceStatus;
+  result: Record<string, any>;
+  riskScore: number;
+  flags: string[];
+  reviewedBy?: string;
+  reviewedAt?: string;
+  notes?: string;
+}
+
+export type ComplianceCheckType = 'kyc' | 'aml' | 'sanctions' | 'pep' | 'fraud';
+
+export type ComplianceStatus = 'pass' | 'fail' | 'review_required' | 'pending';
+
+// ============================================================================
+// Analytics & Reporting Types
+// ============================================================================
+
+export interface SpendingAnalytics {
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  totalSpent: Money;
+  totalIncome: Money;
+  netFlow: Money;
+  categoryBreakdown: CategorySpending[];
+  trends: SpendingTrend[];
+  budgetComparison?: BudgetComparison;
 }
 
 export interface CategorySpending {
   category: TransactionCategory;
-  amount: number;
+  amount: Money;
   percentage: number;
-  change: number;
+  transactionCount: number;
+  averageAmount: Money;
 }
 
-export interface TransactionTrend {
+export interface SpendingTrend {
   date: string;
-  income: number;
-  expenses: number;
-  net: number;
+  amount: Money;
+  category?: TransactionCategory;
 }
 
-export interface BudgetProgress {
+export interface BudgetComparison {
+  budgeted: Money;
+  spent: Money;
+  remaining: Money;
+  percentageUsed: number;
+  isOverBudget: boolean;
+}
+
+export interface Budget extends BaseEntity {
+  userId: string;
+  name: string;
   category: TransactionCategory;
-  budgeted: number;
-  spent: number;
-  remaining: number;
-  percentage: number;
+  amount: Money;
+  period: 'monthly' | 'weekly' | 'yearly';
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  alerts: BudgetAlert[];
 }
 
-// Security types
-export interface SecuritySettings {
-  twoFactorEnabled: boolean;
+export interface BudgetAlert {
+  threshold: number; // Percentage
+  isEnabled: boolean;
+  lastTriggered?: string;
+}
+
+// ============================================================================
+// UI & Component Types
+// ============================================================================
+
+export interface Theme {
+  mode: 'light' | 'dark' | 'system';
+  primaryColor: string;
+  accentColor: string;
+  fontSize: 'small' | 'medium' | 'large';
+}
+
+export interface NotificationPreferences {
+  email: boolean;
+  push: boolean;
+  sms: boolean;
+  inApp: boolean;
+  categories: {
+    transactions: boolean;
+    security: boolean;
+    marketing: boolean;
+    updates: boolean;
+  };
+}
+
+export interface AppSettings {
+  theme: Theme;
+  notifications: NotificationPreferences;
+  language: string;
+  currency: Currency;
+  timezone: string;
   biometricEnabled: boolean;
-  loginNotifications: boolean;
-  deviceTrust: DeviceTrust[];
-  securityQuestions: SecurityQuestion[];
+  autoLockTimeout: number; // minutes
 }
 
-export interface DeviceTrust {
-  deviceId: string;
-  deviceName: string;
-  lastUsed: string;
-  isTrusted: boolean;
-  location?: string;
-}
+// ============================================================================
+// API Response Types
+// ============================================================================
 
-export interface SecurityQuestion {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-// API Response types
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
-  error?: string;
   message?: string;
-  timestamp: string;
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  error?: string;
+  errors?: Record<string, string[]>;
+  meta?: {
+    timestamp: string;
+    requestId: string;
+    version: string;
   };
 }
 
-// Form types
+export interface PaginatedApiResponse<T> extends ApiResponse<T[]> {
+  pagination: PaginationMeta;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+  field?: string;
+}
+
+// ============================================================================
+// Form Types
+// ============================================================================
+
 export interface FormField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea';
-  required?: boolean;
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'checkbox' | 'radio';
+  required: boolean;
   placeholder?: string;
   options?: { value: string; label: string }[];
-  validation?: any;
-}
-
-// Component props types
-export interface BaseComponentProps {
-  className?: string;
-  children?: React.ReactNode;
-}
-
-export interface LoadingState {
-  isLoading: boolean;
-  error?: string | null;
-}
-
-// Theme types
-export interface ThemeConfig {
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-    foreground: string;
-    muted: string;
-    border: string;
-    destructive: string;
-    warning: string;
-    success: string;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+    custom?: (value: any) => string | undefined;
   };
-  fonts: {
-    sans: string[];
-    mono: string[];
-  };
-  spacing: Record<string, string>;
-  borderRadius: Record<string, string>;
 }
 
-// Error types
-export interface AppError {
-  code: string;
-  message: string;
-  details?: any;
+export interface FormState {
+  values: Record<string, any>;
+  errors: Record<string, string>;
+  touched: Record<string, boolean>;
+  isSubmitting: boolean;
+  isValid: boolean;
+}
+
+// ============================================================================
+// Utility Types
+// ============================================================================
+
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+export type ValueOf<T> = T[keyof T];
+
+export type NonEmptyArray<T> = [T, ...T[]];
+
+// ============================================================================
+// Event Types
+// ============================================================================
+
+export interface AppEvent {
+  type: string;
+  payload?: any;
   timestamp: string;
 }
 
-export interface ValidationError {
-  field: string;
-  message: string;
+export interface TransactionEvent extends AppEvent {
+  type: 'transaction:created' | 'transaction:updated' | 'transaction:failed';
+  payload: {
+    transactionId: string;
+    userId: string;
+    amount: Money;
+    status: TransactionStatus;
+  };
 }
 
-// Navigation types
-export interface NavigationItem {
-  id: string;
-  label: string;
-  icon: string;
-  path: string;
-  children?: NavigationItem[];
-  requiresAuth?: boolean;
-  roles?: UserRole[];
+export interface SecurityEvent extends AppEvent {
+  type: 'security:login' | 'security:logout' | 'security:suspicious_activity';
+  payload: {
+    userId: string;
+    ipAddress: string;
+    userAgent: string;
+    severity?: SecuritySeverity;
+  };
 }
 
-// Notification types
-export interface Notification {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  actionUrl?: string;
-}
+// ============================================================================
+// Export all types
+// ============================================================================
 
-// Feature flags
-export interface FeatureFlags {
-  enableBiometric: boolean;
-  enableCrypto: boolean;
-  enableInvestments: boolean;
-  enableAI: boolean;
-  enableAdvancedAnalytics: boolean;
-}
+export * from './api';
+export * from './components';
+export * from './hooks';
 

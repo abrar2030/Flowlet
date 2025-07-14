@@ -15,14 +15,16 @@ import LoginScreen from '@/components/auth/LoginScreen';
 import RegisterScreen from '@/components/auth/RegisterScreen';
 import OnboardingFlow from '@/components/auth/OnboardingFlow';
 
-// Main App Components
+// Page Components - Organized by feature
 import Dashboard from '@/components/wallet/Dashboard';
+import WalletScreen from '@/components/pages/wallet/WalletScreen';
+import TransactionHistory from '@/components/pages/transactions/TransactionHistory';
+import SendMoney from '@/components/pages/transactions/SendMoney';
+import ReceiveMoney from '@/components/pages/transactions/ReceiveMoney';
+import CardsScreen from '@/components/pages/cards/CardsScreen';
+
+// Placeholder imports for components not yet refactored
 import {
-  WalletScreen,
-  TransactionHistory,
-  SendMoney,
-  ReceiveMoney,
-  CardsScreen,
   CardDetails,
   IssueCard,
   AnalyticsScreen,
