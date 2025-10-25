@@ -19,7 +19,6 @@
 | [Architecture Overview](#️-architecture-overview) | Insight into the cloud-agnostic microservices design. |
 | [Component Breakdown](#-component-breakdown-detailed-codebase-analysis) | Granular analysis of the codebase structure and purpose. |
 | [Getting Started](#-getting-started) | Instructions for setting up and running the platform. |
-| [Strategic Roadmap](#️-strategic-roadmap) | Future plans and strategic direction. |
 | [Contributing](#-contributing) | Guidelines for community contributions. |
 | [License](#-license) | Licensing information. |
 
