@@ -15,10 +15,10 @@ from enum import Enum
 import json
 import uuid
 from collections import defaultdict, deque
-import hashlib
 
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
+
+
+
 
 
 class EventSeverity(Enum):
@@ -181,8 +181,8 @@ class SecurityMonitoringService:
     - Incident response workflow management
     """
     
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
-        self.db = db_session
+    def __init__(self, db_client: Any, config: Dict[str, Any] = None):
+        self.db = db_client
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
         

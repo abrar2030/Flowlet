@@ -1,5 +1,5 @@
 """
-Enhanced Security Module
+Security Module
 =======================
 
 Advanced security features for financial applications including fraud detection,
@@ -10,7 +10,7 @@ from .fraud_detection import FraudDetectionEngine
 from .threat_prevention import ThreatPreventionService
 from .security_monitoring import SecurityMonitoringService
 from .authentication import AdvancedAuthenticationService
-from .encryption import EncryptionService
+from .encryption_service import EncryptionService
 
 __all__ = [
     'FraudDetectionEngine',

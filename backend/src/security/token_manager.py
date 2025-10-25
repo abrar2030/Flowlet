@@ -1,4 +1,4 @@
-# Enhanced JWT Token Management
+# JWT Token Management
 import jwt
 import redis
 from datetime import datetime, timedelta
@@ -9,7 +9,7 @@ import secrets
 import json
 
 class TokenManager:
-    """Enhanced JWT token management for financial industry standards"""
+    """JWT token management for financial industry standards"""
     
     def __init__(self, redis_client=None):
         self.redis_client = redis_client or redis.Redis.from_url(
@@ -183,8 +183,8 @@ class TokenManager:
             if ttl > 0:
                 self.redis_client.setex(key, ttl, json.dumps(data))
 
-def enhanced_token_required(f):
-    """Enhanced decorator for token authentication with detailed logging"""
+def token_required(f):
+    """Decorator for token authentication with detailed logging"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None

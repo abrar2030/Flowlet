@@ -1,4 +1,4 @@
-# Enhanced Password Security Module
+# Password Security Module
 import bcrypt
 import re
 import secrets
@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 class PasswordSecurity:
-    """Enhanced password security for financial industry standards"""
+    """Password security for financial industry standards"""
     
     @staticmethod
     def hash_password(password: str) -> str:

@@ -138,7 +138,7 @@ class AuditLogger:
     def __init__(self, database_url: Optional[str] = None):
         self.database_url = database_url or os.environ.get(
             'AUDIT_DATABASE_URL',
-            'sqlite:///audit_logs.db'
+            'sqlite:///:memory:'
         )
         self.engine = create_engine(self.database_url)
         Base.metadata.create_all(self.engine)
@@ -209,8 +209,7 @@ class AuditLogger:
         """Log audit event to database and file"""
         try:
             # Log to database
-            session = self.Session()
-            try:
+            with self.Session() as session:
                 record = AuditLogRecord(
                     id=event.event_id,
                     event_type=event.event_type.value,
@@ -229,8 +228,6 @@ class AuditLogger:
                 )
                 session.add(record)
                 session.commit()
-            finally:
-                session.close()
             
             # Log to file as backup
             log_message = json.dumps(asdict(event), default=str)

@@ -1,5 +1,5 @@
 """
-Advanced Input Validation and Sanitization System
+Input Validation and Sanitization System
 """
 
 import re
