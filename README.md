@@ -54,50 +54,66 @@ Flowlet's strength lies in its comprehensive suite of embedded finance capabilit
 
 Flowlet provides a sophisticated digital wallet system that forms the foundation of its embedded finance offerings. This system enables businesses to offer secure, multi-currency financial accounts with real-time balance updates and advanced transaction management.
 
-*   **Backend Implementation**: The core logic for wallet creation, management, and transaction processing is found in `backend/src/routes/wallet.py` and `backend/src/routes/wallet_mvp.py`, which define the API endpoints and business logic. Data models for accounts and transactions, crucial for integrity and history, are defined in `backend/src/models/account.py` and `backend/src/models/transaction.py`. Robust support for multi-currency wallets is handled by `backend/src/currency/multi_currency_system.py`, and real-time updates are facilitated by `backend/src/utils/notifications.py`.
-*   **Frontend Integration**: The user interface for interacting with digital wallets, including viewing balances and transaction history, is managed by `unified-frontend/src/components/wallet/Dashboard.tsx`. This component integrates with the backend via `unified-frontend/src/lib/walletService.ts` and manages state efficiently using `unified-frontend/src/store/walletSlice.ts` to display real-time information.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/routes/wallet.py`, `backend/src/routes/wallet_mvp.py`, `backend/src/models/account.py`, `backend/src/models/transaction.py`, `backend/src/currency/multi_currency_system.py`, `backend/src/utils/notifications.py` | Core logic for wallet creation, management, and transaction processing; defines API endpoints, business logic, data models, multi-currency support, and real-time updates. |
+| **Frontend Integration** | `unified-frontend/src/components/wallet/Dashboard.tsx`, `unified-frontend/src/lib/walletService.ts`, `unified-frontend/src/store/walletSlice.ts` | User interface for viewing balances and transaction history, integrating with the backend and managing state for real-time display. |
 
 ### 💳 Payment Processing
 
 Flowlet's payment processing capabilities allow businesses to handle a wide array of financial transactions across various channels and payment methods. The system abstracts the complexities of different payment processors to ensure efficient and secure fund transfers.
 
-*   **Backend Implementation**: Central modules for payment routing and processing are `backend/src/routes/payment.py` and `backend/src/routes/payment_mvp.py`. External payment gateway integration is concretely facilitated through `backend/src/integrations/payments/stripe_integration.py`. The modular design in `backend/src/integrations/banking` (e.g., `plaid_integration.py`, `fdx_integration.py`, `open_banking_integration.py`) suggests readiness for bank transfers (ACH, SEPA, Wire) and other alternative payment methods. Transaction validation and error handling are managed via `backend/src/utils/validators.py` and `backend/src/utils/error_handlers.py`.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/routes/payment.py`, `backend/src/routes/payment_mvp.py`, `backend/src/integrations/payments/stripe_integration.py`, `backend/src/integrations/banking/`, `backend/src/utils/validators.py`, `backend/src/utils/error_handlers.py` | Central modules for payment routing and processing, external payment gateway integration, support for bank transfers, and transaction validation/error handling. |
 
 ### 💳 Card Issuance and Management
 
 The platform enables businesses to issue and manage both virtual and physical payment cards, supporting the entire card lifecycle from issuance to transaction processing and deactivation.
 
-*   **Backend Implementation**: Logic for card issuance and lifecycle events is encapsulated in `backend/src/routes/card.py` and `backend/src/routes/enhanced_cards.py`. These modules handle card creation, activation, transaction authorization, and advanced controls. The fundamental data structure for cards is defined in `backend/src/models/card.py`, ensuring consistent data handling across the platform.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/routes/card.py`, `backend/src/routes/enhanced_cards.py`, `backend/src/models/card.py` | Encapsulates logic for card issuance, lifecycle events, creation, activation, transaction authorization, advanced controls, and defining the fundamental card data structure. |
 
 ### ⚖️ KYC/AML Compliance
 
 Compliance with Know Your Customer (KYC) and Anti-Money Laundering (AML) regulations is a cornerstone of Flowlet. The platform provides streamlined, risk-based workflows to balance stringent regulatory requirements with a smooth user experience.
 
-*   **Backend Implementation**: Core compliance workflows are implemented in `backend/src/routes/kyc_aml.py` and `backend/src/routes/enhanced_kyc.py`. These modules orchestrate complex verification processes, including identity verification and sanctions screening. The overarching regulatory logic is managed by `backend/src/compliance/regulatory_compliance.py`, which likely integrates with external identity verification providers. Crucially, `backend/src/models/audit_log.py` ensures comprehensive audit trails for all compliance decisions.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/routes/kyc_aml.py`, `backend/src/routes/enhanced_kyc.py`, `backend/src/compliance/regulatory_compliance.py`, `backend/src/models/audit_log.py` | Implements core compliance workflows, orchestrates complex verification processes (identity/sanctions screening), manages overarching regulatory logic, and ensures comprehensive audit trails. |
 
 ### 📊 Ledger and Accounting
 
 At the heart of Flowlet's financial infrastructure is a robust double-entry ledger system, which ensures immutable audit trails and data consistency for all financial events.
 
-*   **Backend Implementation**: Primary responsibility for ledger operations lies with `backend/src/routes/ledger.py` and `backend/src/routes/enhanced_ledger.py`. These modules manage the meticulous recording of all financial transactions, ensuring every debit has a corresponding credit. The integrity of audit trails is reinforced through `backend/src/models/audit_log.py` and `backend/src/models/transaction.py`, which are designed to support double-entry accounting principles. Further auditability is provided by `backend/src/utils/audit.py` and `backend/src/security/audit_logger.py`.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/routes/ledger.py`, `backend/src/routes/enhanced_ledger.py`, `backend/src/models/audit_log.py`, `backend/src/models/transaction.py`, `backend/src/utils/audit.py`, `backend/src/security/audit_logger.py` | Manages the meticulous recording of all financial transactions, reinforces the integrity of audit trails for double-entry accounting, and provides further auditability. |
 
 ### 🌐 Developer Portal and API Gateway
 
 Flowlet adopts a developer-first approach, offering extensive resources for seamless integration. The API Gateway serves as the unified, secure entry point for all interactions with the underlying microservices.
 
-*   **Backend Implementation**: The gateway functionality is implemented in `backend/src/gateway/optimized_gateway.py`, which handles authentication, rate limiting, and intelligent routing. The developer experience is supported by comprehensive documentation found in the `docs/03_API_Reference` directory.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Backend Implementation** | `backend/src/gateway/optimized_gateway.py`, `docs/03_API_Reference` | Implements gateway functionality (authentication, rate limiting, intelligent routing) and supports the developer experience with comprehensive documentation. |
 
 ### 🧠 AI-Enhanced Capabilities
 
 Flowlet leverages artificial intelligence to augment platform functionalities, from sophisticated fraud detection to intelligent developer support. These AI components are designed as independent, integrable services.
 
-*   **Implementation Details**: The `backend/src/ai` directory contains `enhanced_fraud_detection.py` and `risk_assessment.py`, which implement AI-driven fraud analysis using machine learning techniques. Further details on the models are in `backend/src/ml/fraud_detection`, including `anomaly_models.py` and `ensemble_model.py`. AI-powered support is provided by `backend/src/ai/support_chatbot.py`, and `backend/src/ai/transaction_intelligence.py` suggests capabilities for deriving deeper insights from transaction patterns.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Implementation Details** | `backend/src/ai/enhanced_fraud_detection.py`, `backend/src/ai/risk_assessment.py`, `backend/src/ml/fraud_detection/`, `backend/src/ai/support_chatbot.py`, `backend/src/ai/transaction_intelligence.py` | Implements AI-driven fraud analysis, risk assessment, and machine learning models; provides AI-powered support and derives deeper insights from transaction patterns. |
 
 ### 🔒 Security Infrastructure
 
 Security is paramount, and Flowlet integrates multiple layers of protection to safeguard sensitive data and transactions, including robust encryption, tokenization, and comprehensive access controls.
 
-*   **Implementation Details**: The `backend/src/security` directory is dedicated to security, featuring modules like `encryption.py` and `encryption_manager.py` for data protection, `password_security.py` for secure password hashing, and `rate_limiter.py` for API abuse prevention. `audit.py` and `audit_logger.py` ensure comprehensive logging for security monitoring, and `input_validator.py` is crucial for preventing common web vulnerabilities. Authentication and authorization flows are managed by `backend/src/routes/auth.py` and `backend/src/security/token_manager.py`.
+| Component | Key Files/Modules | Purpose |
+| :--- | :--- | :--- |
+| **Implementation Details** | `backend/src/security/`, `backend/src/routes/auth.py`, `backend/src/security/token_manager.py` | Dedicated to security, featuring modules for data protection (encryption), secure password hashing, API abuse prevention (rate limiting), comprehensive logging (audit), input validation, and managing authentication/authorization flows. |
 
 ---
 
