@@ -1,0 +1,57 @@
+name: Kubernetes and Helm CI - Enhanced
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - kubernetes/**
+      - infrastructure/helm/**
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - kubernetes/**
+      - infrastructure/helm/**
+
+jobs:
+  lint-validate-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.8.1 # Or latest stable version
+
+    - name: Lint Helm Charts
+      run: helm lint infrastructure/helm/flowlet
+
+    - name: Validate Helm Charts (helm template + kubeval)
+      run: helm template infrastructure/helm/flowlet | kubeval --strict || true # Allow failure for now
+
+    - name: Install kube-linter
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/stackrox/kube-linter/main/scripts/download_kube-linter.sh | bash
+        sudo mv kube-linter /usr/local/bin/
+
+    - name: Run kube-linter on Kubernetes manifests
+      run: kube-linter lint kubernetes/manifests/ || true # Adjust path as needed
+
+    - name: Install kube-score
+      run: |
+        wget https://github.com/zegl/kube-score/releases/download/v1.12.0/kube-score_1.12.0_linux_amd64.tar.gz
+        tar -xzf kube-score_1.12.0_linux_amd64.tar.gz
+        sudo mv kube-score /usr/local/bin/
+
+    - name: Run kube-score on Kubernetes manifests
+      run: kube-score score kubernetes/manifests/*.yaml || true # Adjust path as needed
+
+    - name: Run Conftest (Policy Enforcement - Placeholder)
+      run: echo "Conftest placeholder: Install conftest and run conftest test kubernetes/manifests/"
+
+

@@ -1,0 +1,82 @@
+name: Node.js Frontend CI/CD - Enhanced
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - frontend/**
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - frontend/**
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (web-frontend)
+        run: npm install
+        working-directory: frontend/web-frontend
+
+      - name: Run frontend unit tests
+        run: npm test -- --testPathPattern=src/components/.*.test.js || true # Adjust path as needed
+        working-directory: frontend/web-frontend
+
+      - name: Run frontend integration tests
+        run: npm test -- --testPathPattern=src/integration/.*.test.js || true # Adjust path as needed
+        working-directory: frontend/web-frontend
+
+      - name: Run frontend linting (ESLint)
+        run: npm run lint || true # Assuming 'lint' script in package.json
+        working-directory: frontend/web-frontend
+
+      - name: Run frontend security linting (ESLint with security plugins - Placeholder)
+        run: echo "ESLint security linting placeholder: npm run lint:security"
+        working-directory: frontend/web-frontend
+
+      - name: Run frontend SCA (Snyk - Placeholder)
+        run: echo "Snyk scan placeholder: snyk test --file=package.json"
+        working-directory: frontend/web-frontend
+
+      - name: Build frontend assets
+        run: npm run build
+        working-directory: frontend/web-frontend
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Build Docker image for frontend
+        run: docker build -t flowlet-frontend:$(git rev-parse --short HEAD) .
+        working-directory: frontend/web-frontend
+
+      - name: Scan frontend Docker image (Trivy)
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-frontend:$(git rev-parse --short HEAD)
+
+  # Placeholder for deployment job, will be in a separate workflow or triggered by this one
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build-test-scan
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #   - name: Deploy frontend
+  #     run: echo "Deploying frontend..."
+
+

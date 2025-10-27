@@ -1,0 +1,29 @@
+name: Python CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r Flowlet/backend/requirements.txt
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 Flowlet/backend --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 Flowlet/backend --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest Flowlet/backend/test_api.py
+        pytest Flowlet/backend/test_offline.py
+
+
