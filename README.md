@@ -260,10 +260,6 @@ If you prefer to run the components directly on your host machine for developmen
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions from the community. Please refer to our (implied) `CONTRIBUTING.md` for detailed guidelines on setting up your development environment, submitting pull requests, and our code of conduct.
-
 ## 📄 License
 
 Flowlet is distributed under the MIT License. See the (implied) `LICENSE` file for more information.
