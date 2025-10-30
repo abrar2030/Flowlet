@@ -6,7 +6,7 @@
 
 ![Flowlet Dashboard](docs/assets/images/dashboard.bmp)
 
-> **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience.
+> **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience. The repository has been significantly updated from its original state, migrating to a more robust, containerized, and microservices-oriented architecture.
 
 ---
 
@@ -18,7 +18,7 @@
 | [Key Features Implemented](#-key-features-implemented) | Detailed breakdown of core financial capabilities. |
 | [Architecture Overview](#️-architecture-overview) | Insight into the cloud-agnostic microservices design. |
 | [Component Breakdown](#-component-breakdown-detailed-codebase-analysis) | Granular analysis of the codebase structure and purpose. |
-| [Getting Started](#-getting-started) | Instructions for setting up and running the platform. |
+| [Getting Started](#-getting-started) | **Updated** instructions for setting up and running the platform using Docker Compose. |
 | [Contributing](#-contributing) | Guidelines for community contributions. |
 | [License](#-license) | Licensing information. |
 
@@ -42,7 +42,7 @@ The platform's core value proposition is defined by the following key highlights
 4.  **Bank-Grade Security**: Implements end-to-end encryption, tokenization, and comprehensive audit trails to safeguard all sensitive data and transactions.
 5.  **Regulatory Compliance**: Offers built-in workflows for adherence to critical regulatory frameworks, including GDPR, PSD2, and FinCEN.
 6.  **AI-Enhanced Capabilities**: Incorporates artificial intelligence for advanced fraud detection, intelligent support chatbots, and developer assistance.
-7.  **Operational Excellence**: Achieved through robust DevOps automation, advanced observability tools, and managed services for reliable operation.
+7.  **Operational Excellence**: Achieved through robust DevOps automation, advanced observability tools (Prometheus & Grafana), and managed services for reliable operation.
 
 ---
 
@@ -121,7 +121,7 @@ Security is paramount, and Flowlet integrates multiple layers of protection to s
 
 Flowlet is engineered on a **cloud-agnostic microservices architecture**, designed for maximum scalability, resilience, and security. This approach facilitates consistent deployment across diverse environments, from public clouds to on-premises infrastructure. The system adheres to a **Domain-Driven Design (DDD)**, organizing services around distinct business capabilities for independent evolution and targeted scaling.
 
-The infrastructure leverages **containerization (Docker)** for application packaging and **orchestration (Kubernetes)** for managing and scaling containers. **Infrastructure-as-Code (Terraform)** ensures reproducible deployments and simplified disaster recovery. Communication is primarily **event-driven via Apache Kafka**, enhancing resilience and decoupling services, supplemented by REST APIs and gRPC for synchronous interactions through the unified API Gateway. A **polyglot persistence strategy** is employed, utilizing optimal database technologies for specific service requirements.
+The infrastructure leverages **containerization (Docker)** for application packaging and **orchestration (Kubernetes)** for managing and scaling containers. **Infrastructure-as-Code (Terraform)** ensures reproducible deployments and simplified disaster recovery. Communication is primarily **event-driven via Apache Kafka** (implied by the microservices architecture and common patterns), enhancing resilience and decoupling services, supplemented by REST APIs and gRPC for synchronous interactions through the unified API Gateway. A **polyglot persistence strategy** is employed, utilizing optimal database technologies for specific service requirements, including **PostgreSQL** and **Redis** for caching/session management, as seen in the Docker Compose configuration.
 
 ### System Components and Implementation Layers
 
@@ -132,7 +132,7 @@ The Flowlet platform is logically divided into six key layers, each with a defin
 3.  **Integration Layer**: Responsible for securely connecting Flowlet with external financial systems. Integrations for banking partners (e.g., Plaid, FDX) are in `backend/src/integrations/banking`, and payment processor integrations (e.g., Stripe) are in `backend/src/integrations/payments`.
 4.  **Data Layer**: Manages system state and analytics using a polyglot persistence model. Kubernetes configurations for various databases (`postgresql.yaml`, `mongodb.yaml`, `redis.yaml`) are in `infrastructure/kubernetes/databases`. The SQLAlchemy ORM models are defined in `backend/src/models`.
 5.  **Support Services Layer**: Provides cross-cutting functionalities. This includes authentication services (`backend/src/routes/auth.py`), notification capabilities (`backend/src/utils/notifications.py`), and the comprehensive AI services in `backend/src/ai` and `backend/src/ml`.
-6.  **Infrastructure Layer**: The foundational layer for deployment, monitoring, and security. Kubernetes orchestration is managed via configurations in `infrastructure/kubernetes` and Helm charts in `infrastructure/helm`. Monitoring systems (Prometheus/Grafana) are configured in `infrastructure/kubernetes/monitoring`, and CI/CD pipelines are defined in `.github/workflows`.
+6.  **Infrastructure Layer**: The foundational layer for deployment, monitoring, and security. Kubernetes orchestration is managed via configurations in `infrastructure/kubernetes` and Helm charts in `infrastructure/helm`. Monitoring systems (**Prometheus/Grafana**) are configured in `infrastructure/kubernetes/monitoring`, and CI/CD pipelines are defined in `.github/workflows`.
 
 ---
 
@@ -142,7 +142,7 @@ This section provides a granular, file-by-file and directory-by-directory analys
 
 ### Backend (`backend/`)
 
-The `backend` directory is the central hub for Flowlet's server-side logic, implemented using the Flask framework and structured for a microservices paradigm.
+The `backend` directory is the central hub for Flowlet's server-side logic, implemented using the **Flask** framework and structured for a microservices paradigm. The primary entry point for local development is **`main.py`**, which uses the `create_app()` factory pattern.
 
 | Directory/File | Description | Key Components and Files |
 | :--- | :--- | :--- |
@@ -153,24 +153,24 @@ The `backend` directory is the central hub for Flowlet's server-side logic, impl
 | `backend/src/gateway/` | Implements the API Gateway functionality, acting as the single entry point. | `optimized_gateway.py` (Routing, authentication, rate limiting) |
 | `backend/src/integrations/` | Manages connections with external financial services and third-party APIs. | `banking/` (`plaid_integration.py`, `open_banking_integration.py`), `currency/` (`exchange_rates.py`), `payments/` (`stripe_integration.py`) |
 | `backend/src/ml/` | Contains Machine Learning specific components, primarily for fraud detection. | `fraud_detection/` (`anomaly_models.py`, `ensemble_model.py`, `supervised_models.py`) |
-| `backend/src/models/` | Defines the SQLAlchemy ORM models for database mapping. | `account.py`, `audit_log.py`, `card.py`, `transaction.py`, `user.py` |
+| `backend/src/models/` | Defines the **SQLAlchemy ORM** models for database mapping. | `account.py`, `audit_log.py`, `card.py`, `transaction.py`, `user.py` |
 | `backend/src/routes/` | Contains Flask blueprints and API endpoint definitions, organized by domain. | `auth.py`, `card.py`, `kyc_aml.py`, `ledger.py`, `payment.py`, `wallet.py` |
 | `backend/src/security/` | Implements application-level security measures. | `encryption.py`, `password_security.py`, `rate_limiter.py`, `token_manager.py`, `input_validator.py` |
 | `backend/src/utils/` | General utility functions and helper modules. | `error_handlers.py`, `notifications.py`, `validators.py` |
-| Root Files | Main application entry points and configuration. | `production_app.py`, `simple_mvp_app.py`, `requirements.txt`, `run_tests.sh`, `wsgi.py` |
+| Root Files | Main application entry points and configuration. | **`main.py`** (Primary entry point), `requirements.txt`, `run_tests.sh`, `wsgi.py` |
 
 ### Unified Frontend (`unified-frontend/`)
 
-This directory contains the React-based Single-Page Application (SPA) built with modern frontend development practices.
+This directory contains the **React-based Single-Page Application (SPA)** built with **TypeScript**, leveraging **Vite** for the build system, and **pnpm** for package management. It uses **Redux Toolkit** for state management and a comprehensive set of **Radix UI** components for a modern design system.
 
 | Directory/File | Description | Key Components and Files |
 | :--- | :--- | :--- |
-| `unified-frontend/src/components/` | Reusable UI components, promoting modularity and efficiency. | `auth/` (Login, Register, Onboarding), `ui/` (Generic components like `button.jsx`, `card.jsx`), `wallet/` (`Dashboard.tsx`) |
+| `unified-frontend/src/components/` | Reusable UI components, promoting modularity and efficiency. | `auth/` (Login, Register, Onboarding), `ui/` (Generic components like `button.tsx`, `card.tsx`), `wallet/` (`Dashboard.tsx`) |
 | `unified-frontend/src/hooks/` | Custom React hooks for encapsulating and reusing stateful logic. | `useAuth.ts` (Authentication state), `use-mobile.js` (Responsive design logic) |
 | `unified-frontend/src/lib/` | Utility functions and service integrations. | `api.ts` (Centralized API calls), `authService.ts`, `walletService.ts`, `utils.js` |
-| `unified-frontend/src/store/` | Client-side state management, likely using Redux Toolkit. | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration) |
-| `unified-frontend/src/types/` | TypeScript type definitions for type safety. | `index.ts` (Centralized custom type definitions) |
-| Root Files | Main application files and configuration. | `main.tsx` (Entry point), `index.html`, `package.json`, `tsconfig.json`, `vite.config.ts` |
+| `unified-frontend/src/store/` | Client-side state management using **Redux Toolkit**. | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration) |
+| `unified-frontend/src/types/` | **TypeScript** type definitions for type safety. | `index.ts` (Centralized custom type definitions) |
+| Root Files | Main application files and configuration. | `main.tsx` (Entry point), `package.json`, `tsconfig.json`, `vite.config.ts` |
 
 ### Documentation (`docs/`)
 
@@ -189,10 +189,11 @@ The `docs/` directory is a comprehensive repository of documentation catering to
 
 ### Infrastructure (`infrastructure/`)
 
-This directory contains all the Infrastructure-as-Code (IaC) definitions for deploying and managing the Flowlet platform.
+This directory contains all the Infrastructure-as-Code (IaC) definitions for deploying and managing the Flowlet platform, including a robust **Docker Compose** setup for local development.
 
 | Directory/File | Description | Key Components and Files |
 | :--- | :--- | :--- |
+| `infrastructure/docker/` | Dockerfiles and configuration for local environment. | **`docker-compose.yml`** (Full stack local environment), `Dockerfile.backend`, `Dockerfile.frontend`, `nginx-lb.conf` |
 | `infrastructure/kubernetes/` | Kubernetes manifests for deploying the application and its dependencies. | `databases/` (`postgresql.yaml`, `mongodb.yaml`, `redis.yaml`), `monitoring/` (Prometheus, Grafana), `services/` (Core service deployments) |
 | `infrastructure/helm/` | Helm charts for templating and managing Kubernetes deployments. | `flowlet-chart/` (Main application chart) |
 | `infrastructure/terraform/` | Terraform configurations for provisioning cloud resources (e.g., AWS, GCP). | `aws/`, `gcp/` (Provider-specific resource definitions) |
@@ -211,34 +212,58 @@ Contains the CI/CD pipeline definitions, automating the software delivery lifecy
 
 ## 🚀 Getting Started
 
-To get a local copy of the project up and running, follow these steps:
+The recommended way to run Flowlet locally is using **Docker Compose**, which sets up the entire environment including the PostgreSQL database, Redis cache, Backend API, Frontend web application, and a local Nginx load balancer.
 
-1.  **Prerequisites**: Ensure you have Docker, Docker Compose, and Python 3.11+ installed.
-2.  **Clone the Repository**:
-    \`\`\`bash
-    git clone [repository-url]
+### Prerequisites
+
+*   **Git**
+*   **Docker** and **Docker Compose** (or Docker Desktop)
+
+### Setup with Docker Compose (Recommended)
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/abrar2030/Flowlet
     cd Flowlet
-    \`\`\`
-3.  **Setup the Backend**:
-    \`\`\`bash
+    ```
+2.  **Start the Services**:
+    Navigate to the Docker infrastructure directory and start all services. This will build the images and run the containers.
+    ```bash
+    cd infrastructure/docker
+    docker compose up --build -d
+    ```
+3.  **Access the Application**:
+    *   **Frontend Web App**: `http://localhost:80` (via Nginx load balancer)
+    *   **Backend API**: `http://localhost:8000` (direct access)
+    *   **Grafana Dashboard**: `http://localhost:3001` (User: `admin`, Password: `admin123` or value of `GRAFANA_PASSWORD` env var)
+
+### Manual Setup (For Development)
+
+If you prefer to run the components directly on your host machine for development:
+
+1.  **Prerequisites**: Python 3.11+, PostgreSQL database instance, Redis instance, Node.js (v18+), and pnpm.
+2.  **Setup the Backend (Python/Flask)**:
+    ```bash
     cd backend
     pip install -r requirements.txt
-    python production_app.py
-    \`\`\`
-4.  **Setup the Frontend**:
-    \`\`\`bash
-    cd ../unified-frontend
+    # Set environment variables for DB connection (e.g., DATABASE_URL)
+    python main.py
+    ```
+    The backend API will be available at `http://localhost:5000` (default Flask port).
+3.  **Setup the Frontend (React/TypeScript)**:
+    ```bash
+    cd unified-frontend
     pnpm install
     pnpm run dev
-    \`\`\`
-5.  **Access the Application**: The frontend will typically be available at \`http://localhost:5173\` and the backend API at \`http://localhost:5000\`.
+    ```
+    The frontend will typically be available at `http://localhost:5173`.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community. Please refer to our `CONTRIBUTING.md` (implied) for detailed guidelines on setting up your development environment, submitting pull requests, and our code of conduct.
+We welcome contributions from the community. Please refer to our (implied) `CONTRIBUTING.md` for detailed guidelines on setting up your development environment, submitting pull requests, and our code of conduct.
 
 ## 📄 License
 
-Flowlet is distributed under the MIT License. See the `LICENSE` file (implied) for more information.
+Flowlet is distributed under the MIT License. See the (implied) `LICENSE` file for more information.
