@@ -282,22 +282,3 @@ API documentation is available in the `/docs` directory.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Review existing issues and discussions
-
-## 🔄 Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
-
-## 🙏 Acknowledgments
-
-- Built with modern React and TypeScript
-- UI components based on Radix UI and Tailwind CSS
-- Security best practices from OWASP guidelines
-- Financial industry standards compliance
-

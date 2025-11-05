@@ -242,28 +242,3 @@ npm run test:integration
 ## 📄 License
 
 This project is proprietary software owned by Flowlet Financial, Inc. All rights reserved.
-
-## 🆘 Support
-
-### Security Issues
-For security vulnerabilities, please email: security@flowlet.com
-
-### General Support
-- Documentation: https://docs.flowlet.com
-- Support Portal: https://support.flowlet.com
-- Email: support@flowlet.com
-
-## 🔄 Version History
-
-### v1.0.0 (Current)
-- Initial enhanced frontend implementation
-- Comprehensive security framework
-- GDPR and PCI DSS compliance
-- Real-time monitoring and threat detection
-- Multi-factor authentication
-- Client-side encryption
-
----
-
-**Note**: This enhanced frontend is designed for financial applications and includes enterprise-grade security features. Regular security audits and updates are essential for maintaining the security posture.
-

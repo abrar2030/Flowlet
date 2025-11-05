@@ -300,29 +300,3 @@ npm run test:mobile
 ## 📄 License
 
 This project is proprietary software owned by Flowlet Financial, Inc. All rights reserved.
-
-## 🆘 Support
-
-### Security Issues
-For mobile security vulnerabilities, please email: mobile-security@flowlet.com
-
-### General Support
-- Mobile Documentation: https://docs.flowlet.com/mobile
-- Support Portal: https://support.flowlet.com
-- Email: mobile-support@flowlet.com
-
-## 🔄 Version History
-
-### v1.0.0 (Current)
-- Initial enhanced mobile frontend implementation
-- Comprehensive mobile security framework
-- GDPR and PCI DSS compliance for mobile
-- Real-time monitoring and threat detection
-- Biometric and PIN authentication
-- Hardware security integration
-- Native mobile app capabilities
-
----
-
-**Note**: This enhanced mobile frontend is designed specifically for financial applications and includes enterprise-grade security features optimized for mobile devices. Regular security audits and updates are essential for maintaining the security posture on mobile platforms.
-
