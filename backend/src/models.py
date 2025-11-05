@@ -1,4 +1,3 @@
-
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
@@ -165,5 +164,3 @@ class Transaction(db.Model):
             "created_at": self.created_at.isoformat(),
             "processed_at": self.processed_at.isoformat() if self.processed_at else None
         }
-
-

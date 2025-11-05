@@ -44,14 +44,16 @@ def create_admin():
         print(f"Admin user created: {admin_email}")
 
 if __name__ == "__main__":
-    # Initialize database on first run
-    with app.app_context():
-        db.create_all()
-    
     # Run the application
+    # The database is initialized in app.py's init_db function, which is called
+    # if the app is run directly, or via the init_db CLI command.
+    # The app.config.get('DEBUG', False) should be used, but we'll ensure it's set
+    # based on an environment variable for consistency.
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+    
     app.run(
         host="0.0.0.0", 
         port=int(os.environ.get("PORT", 5000)),
-        debug=app.config.get('DEBUG', False)
+        debug=debug_mode
     )
 

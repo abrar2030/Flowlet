@@ -280,14 +280,19 @@ def send_money():
         if missing_fields:
             return jsonify({"success": False, "error": f"Missing required fields: {", ".join(missing_fields)}"}), 400
         
+        # Validate amount is a number and convert to Decimal
+        try:
+            amount = Decimal(str(data["amount"]))
+        except Exception:
+            return jsonify({"success": False, "error": "Invalid amount format"}), 400
+            
+        if amount <= 0:
+            return jsonify({"success": False, "error": "Amount must be positive"}), 400
+            
         # Verify account belongs to user
         from_account = Account.query.filter_by(id=data["from_account_id"], user_id=user.id).first()
         if not from_account:
             return jsonify({"success": False, "error": "Account not found"}), 404
-        
-        amount = Decimal(str(data["amount"]))
-        if amount <= 0:
-            return jsonify({"success": False, "error": "Amount must be positive"}), 400
         
         if from_account.available_balance < amount:
             return jsonify({"success": False, "error": "Insufficient funds"}), 400

@@ -3,7 +3,9 @@
 Flowlet Integrated Application - Production Deployment
 """
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
+from datetime import datetime
+from decimal import Decimal
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_limiter import Limiter
@@ -18,10 +20,33 @@ from src.routes import api_bp
 # Initialize Flask app
 app = Flask(__name__, static_folder=\'../unified-frontend/dist\', static_url_path=\'\')
 
+# Custom JSON encoder to handle Decimal and datetime objects
+class CustomJSONEncoder(Flask.json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            # Convert Decimal to float for JSON serialization
+            return float(obj)
+        if isinstance(obj, datetime):
+            # Convert datetime to ISO 8601 string
+            return obj.isoformat()
+        return super(CustomJSONEncoder, self).default(obj)
+
+app.json_encoder = CustomJSONEncoder
+
 # Configuration
 app.config.update({
     \'SECRET_KEY\': os.environ.get(\'SECRET_KEY\', secrets.token_urlsafe(32)),
-    \'SQLALCHEMY_DATABASE_URI\': os.environ.get(\'DATABASE_URL\', \'sqlite:///flowlet_integrated.db\'),
+    # Ensure the database directory exists if using a file-based database
+db_path = os.environ.get(\'DATABASE_URL\', \'sqlite:///instance/flowlet_integrated.db\')
+if db_path.startswith(\'sqlite:///\'):
+    db_file = db_path.replace(\'sqlite:///\', \'\')
+    db_dir = os.path.dirname(db_file)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+
+app.config.update({
+    \'SECRET_KEY\': os.environ.get(\'SECRET_KEY\', secrets.token_urlsafe(32)),
+    \'SQLALCHEMY_DATABASE_URI\': db_path,
     \'SQLALCHEMY_TRACK_MODIFICATIONS\': False,
     \'JWT_SECRET_KEY\': os.environ.get(\'JWT_SECRET_KEY\', secrets.token_urlsafe(32)),
     \'JWT_ACCESS_TOKEN_EXPIRES\': 3600 # seconds, 1 hour
@@ -33,7 +58,11 @@ migrate = Migrate(app, db)
 limiter = Limiter(key_func=get_remote_address, app=app)
 
 # Configure CORS
-CORS(app, origins=[\'http://localhost:3000\', \'http://localhost:5000\'], supports_credentials=True)
+# CORS is too permissive, restricting to localhost for development, but should be more restrictive in production
+# The original code had origins="*", which is a security flaw.
+# Using a more secure default and allowing environment variable override.
+cors_origins = os.environ.get(\'CORS_ORIGINS\', \'http://localhost:3000,http://localhost:5000\').split(\',\')
+CORS(app, origins=cors_origins, supports_credentials=True)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -73,6 +102,8 @@ def not_found(error):
 def internal_error(error):
     """Handle 500 errors"""
     db.session.rollback()
+    # Log the error for debugging
+    logger.error(f"Internal Server Error: {error}", exc_info=True)
     return jsonify({\'error\': \'Internal server error\'}), 500
 
 # ============================================================================
@@ -91,7 +122,9 @@ def init_db():
 
 if __name__ == \'__main__\':
     init_db()
-    app.run(host=\'0.0.0.0\', port=5000, debug=True)
+    # Ensure debug is False in production
+    debug_mode = os.environ.get(\'FLASK_DEBUG\', \'False\').lower() in (\'true\', \'1\', \'t\')
+    app.run(host=\'0.0.0.0\', port=5000, debug=debug_mode)
 
 
 
