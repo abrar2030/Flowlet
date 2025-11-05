@@ -243,33 +243,6 @@ Prometheus alerting rules monitor:
 - **Performance Tuning** - Optimization guidelines
 - **Security Procedures** - Security incident response
 
-## 🤝 Support
-
-### Community
-
-- **GitHub Issues** - Bug reports and feature requests
-- **Documentation** - Comprehensive guides and tutorials
-- **Examples** - Sample implementations and use cases
-
-### Enterprise Support
-
-- **24/7 Support** - Critical issue response
-- **Professional Services** - Implementation assistance
-- **Training** - Developer and operations training
-- **Custom Development** - Tailored feature development
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- **API Documentation**: https://docs.flowlet.com
-- **Developer Portal**: https://portal.flowlet.com
-- **Status Page**: https://status.flowlet.com
-- **Security**: https://security.flowlet.com
-
----
-
-For questions, support, or contributions, please visit our [GitHub repository](https://github.com/flowlet/infrastructure) or contact our support team.
-

@@ -161,25 +161,9 @@ This structured approach ensures clear separation of concerns, enhances maintain
 *   **Auditing:** Monitor access to Secrets and log all attempts to read or modify them.
 *   **External Secrets Management:** For highly sensitive data or advanced secret management features (e.g., dynamic secrets, fine-grained access control, secret leasing), consider integrating with external secrets management systems.
 
-## Contributing to Kubernetes Configurations
-
-Contributions to the Kubernetes configurations are vital for maintaining a secure, scalable, and efficient deployment of the Flowlet platform. When contributing, please adhere to the following guidelines:
-
-1.  **Understand Kubernetes Best Practices:** Familiarize yourself with Kubernetes best practices for security, reliability, and performance.
-2.  **Adhere to Financial Industry Standards:** Ensure all configurations align with relevant financial industry security and compliance standards.
-3.  **Validate Manifests:** Use tools like `kubeval` or `kustomize dry-run` to validate your Kubernetes manifests before applying them.
-4.  **Test Thoroughly:** Test all configuration changes in a non-production environment before promoting them to production.
-5.  **Document Changes:** Provide clear and concise documentation for any new manifests or modifications to existing ones, explaining their purpose and impact.
-6.  **Submit Pull Requests:** All contributions should be submitted via pull requests, allowing for peer review and automated checks.
-
 ## License
 
 The Kubernetes configurations within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.
-
-## Contact
-
-For any questions or issues related to these Kubernetes configurations, please refer to the project maintainers or open an issue on the GitHub repository.
-
 ---
 
 

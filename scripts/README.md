@@ -161,10 +161,6 @@ Contributions to the operational scripts are highly encouraged to enhance the re
 
 The scripts within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.
 
-## Contact
-
-For any questions or issues related to these operational scripts, please refer to the project maintainers or open an issue on the GitHub repository.
-
 ---
 
 
