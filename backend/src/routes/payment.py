@@ -16,10 +16,10 @@ from ..security.encryption import encrypt_sensitive_data, decrypt_sensitive_data
 from ..security.validation import validate_currency, validate_amount, validate_payment_method
 from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
-from ..integrations.payments.stripe_integration import StripePaymentProcessor
-from ..integrations.payments.ach_integration import ACHPaymentProcessor
-from ..integrations.payments.wire_integration import WirePaymentProcessor
-from ..integrations.payments.sepa_integration import SEPAPaymentProcessor
+from src.integrations.payments.stripe_integration import StripePaymentProcessor
+from src.integrations.payments.ach_integration import ACHPaymentProcessor
+from src.integrations.payments.wire_integration import WirePaymentProcessor
+from src.integrations.payments.sepa_integration import SEPAPaymentProcessor
 
 # Create blueprint
 payment_bp = Blueprint(\'payment\', __name__, url_prefix=\'/api/v1/payments\')

@@ -15,7 +15,7 @@ from ..security.encryption import encrypt_sensitive_data, decrypt_sensitive_data
 from ..security.validation import validate_currency, validate_amount, validate_wallet_type
 from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
-from ..integrations.currency.exchange_rates import get_exchange_rate, convert_currency
+from src.integrations.currency.exchange_rates import get_exchange_rate, convert_currency
 
 # Create blueprint
 wallet_bp = Blueprint(\'wallet\', __name__, url_prefix=\'/api/v1/wallets\')
