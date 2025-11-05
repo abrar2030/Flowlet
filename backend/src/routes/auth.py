@@ -203,18 +203,18 @@ def register():
                 details={'reason': 'email_exists', 'email': data['email'], 'ip': request.remote_addr}
             )
             return jsonify({
-                'error': 'User with this email already exists',
-                'code': 'EMAIL_EXISTS'
-            }), 409
+                'error': 'Invalid registration details',
+                'code': 'REGISTRATION_FAILED'
+            }), 400
         
         # Check if phone number already exists (if provided)
         if 'phone' in data and data['phone']:
             existing_phone = User.query.filter_by(phone=data['phone']).first()
             if existing_phone:
                 return jsonify({
-                    'error': 'User with this phone number already exists',
-                    'code': 'PHONE_EXISTS'
-                }), 409
+                    'error': 'Invalid registration details',
+                    'code': 'REGISTRATION_FAILED'
+                }), 400
         
         # Hash password securely
         password_hash = password_manager.hash_password(data['password'])
@@ -363,6 +363,7 @@ def login():
                 event_type='login_failed',
                 details={'reason': 'user_not_found', 'email': data['email'], 'ip': request.remote_addr}
             )
+            # Return a generic error to prevent user enumeration
             return jsonify({
                 'error': 'Invalid email or password',
                 'code': 'INVALID_CREDENTIALS'

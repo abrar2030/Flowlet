@@ -6,12 +6,12 @@ class Config:
     """Base configuration class"""
     
     # Basic Flask Configuration
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-key-change-in-production"
+    SECRET_KEY = os.environ.get("SECRET_KEY") # MUST be set in production
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "sqlite:///flowlet_integrated.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT Configuration
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "jwt-secret-change-in-production"
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") # MUST be set in production
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     
     # Rate Limiting
@@ -42,7 +42,7 @@ config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
     "production": ProductionConfig,
-    "default": DevelopmentConfig
+    # "default": DevelopmentConfig # Removed to prevent accidental use of development settings
 }
 
 

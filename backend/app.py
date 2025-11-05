@@ -24,8 +24,8 @@ app = Flask(__name__, static_folder=\'../unified-frontend/dist\', static_url_pat
 class CustomJSONEncoder(Flask.json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
-            # Convert Decimal to float for JSON serialization
-            return float(obj)
+            # Convert Decimal to string for JSON serialization to maintain precision
+            return str(obj)
         if isinstance(obj, datetime):
             # Convert datetime to ISO 8601 string
             return obj.isoformat()
@@ -123,8 +123,8 @@ def init_db():
 if __name__ == \'__main__\':
     init_db()
     # Ensure debug is False in production
-    debug_mode = os.environ.get(\'FLASK_DEBUG\', \'False\').lower() in (\'true\', \'1\', \'t\')
-    app.run(host=\'0.0.0.0\', port=5000, debug=debug_mode)
+    # The main entry point should not run in debug mode.
+    app.run(host=\'0.0.0.0\', port=5000, debug=False)
 
 
 
