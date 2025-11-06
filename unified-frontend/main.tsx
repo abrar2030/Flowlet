@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App-updated';
+import App from './App';
 import './index.css';
 
 // Performance monitoring with better error handling

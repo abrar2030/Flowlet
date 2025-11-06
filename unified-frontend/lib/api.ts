@@ -1,6 +1,20 @@
 // Improved API Client Configuration for Flowlet Frontend
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
+// Utility function for safe base64 decoding (JWT payload)
+const safeB64Decode = (str: string): string => {
+  try {
+    // Replace characters that might be missing in a URL-safe base64 string
+    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    // Pad with '=' until it's a multiple of 4
+    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    return atob(padded);
+  } catch (e) {
+    console.error('Base64 decoding failed:', e);
+    return '{}'; // Return empty object string on failure
+  }
+};
+
 // API Configuration
 const API_CONFIG = {
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
@@ -100,7 +114,7 @@ class TokenManager {
     try {
       if (!token) return true;
       
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(safeB64Decode(token.split('.')[1]));
       const currentTime = Date.now();
       const expiryTime = (payload.exp * 1000) - this.TOKEN_EXPIRY_BUFFER;
       
@@ -114,7 +128,7 @@ class TokenManager {
   static getTokenExpiryTime(token: string): number | null {
     try {
       if (!token) return null;
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(safeB64Decode(token.split('.')[1]));
       return payload.exp * 1000;
     } catch (error) {
       console.error('Failed to get token expiry:', error);
