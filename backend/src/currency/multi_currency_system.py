@@ -246,10 +246,15 @@ class ExchangeRateService:
             if not rate:
                 raise ValueError(f"Exchange rate not available for {from_currency} to {to_currency}")
             
-            # Calculate conversion
+            # Calculate conversion using Decimal for precision
             converted_amount = amount * rate.rate
-            conversion_fee = converted_amount * self.conversion_fee_rate
-            net_amount = converted_amount - conversion_fee
+            
+            # Ensure all calculations use Decimal and are rounded to a consistent precision (e.g., 8 decimal places)
+            precision = Decimal('0.00000001')
+            
+            conversion_fee = (converted_amount * self.conversion_fee_rate).quantize(precision, rounding=ROUND_HALF_UP)
+            net_amount = (converted_amount - conversion_fee).quantize(precision, rounding=ROUND_HALF_UP)
+            converted_amount = converted_amount.quantize(precision, rounding=ROUND_HALF_UP)
             
             # Create conversion record
             conversion = CurrencyConversion(

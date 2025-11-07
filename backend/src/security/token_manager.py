@@ -214,8 +214,8 @@ def token_required(f):
                 'code': 'INVALID_TOKEN'
             }), 401
         
-        # Add user context to request
-        request.current_user = payload
+        # Add user context to Flask global context
+        g.current_user = payload
         
         # Log token usage for audit
         # # # from src.security.audit_logger import AuditLogger # Circular import fix
@@ -230,14 +230,14 @@ def require_permissions(required_permissions):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            if not hasattr(request, 'current_user'):
+            if not hasattr(g, 'current_user'):
                 return jsonify({
                     'error': 'Authentication required',
                     'code': 'AUTH_REQUIRED'
                 }), 401
             
-            user_permissions = request.current_user.get('permissions', [])
-            user_role = request.current_user.get('role', 'user')
+            user_permissions = g.current_user.get('permissions', [])
+            user_role = g.current_user.get('role', 'user')
             
             # Admin role has all permissions
             if user_role == 'admin':

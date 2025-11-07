@@ -228,7 +228,7 @@ class WalletService:
             Dict containing balance information
         """
         try:
-            wallet = Wallet.query.get(wallet_id)
+            wallet = Wallet.query.with_for_update().get(wallet_id)
             if not wallet:
                 return {
                     'success': False,
@@ -265,7 +265,8 @@ class WalletService:
             if wallet.balance != ledger_balance:
                 logger.warning(f"Balance mismatch for wallet {wallet_id}: "
                              f"wallet={wallet.balance}, ledger={ledger_balance}")
-                wallet.balance = ledger_balance
+                wallet.balance = new_balance
+        db.session.add(wallet) # Explicitly mark as dirty for clarity and safetynce
                 wallet.updated_at = datetime.now(timezone.utc)
                 db.session.commit()
             
@@ -735,10 +736,12 @@ class WalletService:
             }
 
 # API Routes
-@enhanced_wallet_bp.route('', methods=['POST'])
+@enfrom ..security.token_manager import token_required
+
+@wallet_bp.route('/', methods=['POST'])
 @limiter.limit("10 per minute")
-def create_wallet():
-    """Create a new wallet"""
+@token_required
+def create_wallet_route():    """Create a new wallet"""
     try:
         data = request.get_json()
         

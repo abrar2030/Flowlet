@@ -523,10 +523,12 @@ class PaymentService:
             }
 
 # API Routes
-@enhanced_payment_bp.route('', methods=['POST'])
-@limiter.limit("20 per minute")
-def process_payment():
-    """Process a payment"""
+@enhafrom ..security.token_manager import token_required
+
+@payment_bp.route('/', methods=['POST'])
+@limiter.limit("10 per minute")
+@token_required
+def process_payment_route():  """Process a payment"""
     try:
         data = request.get_json()
         
