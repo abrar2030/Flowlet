@@ -10,7 +10,7 @@ class Config:
     """Base configuration class with security-focused defaults"""
     
     # Basic Flask configuration
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-super-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
@@ -28,7 +28,7 @@ class Config:
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://localhost:6379'
     
     # Security configuration
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)  # Short-lived access tokens
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)    # Longer-lived refresh tokens
     JWT_ALGORITHM = 'HS256'
@@ -56,7 +56,7 @@ class Config:
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
     
     # Encryption configuration
-    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY') or SECRET_KEY
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
     
     # Audit logging
     AUDIT_LOG_RETENTION_DAYS = 2555  # 7 years for financial compliance
@@ -120,7 +120,7 @@ class Config:
     @staticmethod
     def validate_config():
         """Validate critical configuration settings"""
-        required_vars = ['SECRET_KEY', 'JWT_SECRET_KEY']
+        required_vars = ['SECRET_KEY', 'JWT_SECRET_KEY', 'DATABASE_URL']
         missing_vars = [var for var in required_vars if not os.environ.get(var)]
         
         if missing_vars:

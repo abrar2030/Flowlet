@@ -16,6 +16,8 @@ import logging
 
 from src.models import db
 from src.routes import api_bp
+from src.config.settings import config
+from src.utils.error_handlers import register_error_handlers
 
 def create_app():
     # Initialize Flask app
@@ -35,22 +37,21 @@ def create_app():
     app.json_encoder = CustomJSONEncoder
 
     # Configuration
-    app.config.update({
-        \'SECRET_KEY\': os.environ.get(\'SECRET_KEY\', secrets.token_urlsafe(32)),
-        \'SQLALCHEMY_TRACK_MODIFICATIONS\': False,
-        \'JWT_SECRET_KEY\': os.environ.get(\'JWT_SECRET_KEY\', secrets.token_urlsafe(32)),
-        \'JWT_ACCESS_TOKEN_EXPIRES\': 3600 # seconds, 1 hour
-    })
+    # Load configuration from settings.py
+    config_name = os.environ.get('FLASK_CONFIG', 'default')
+    app.config.from_object(config[config_name])
+    
+    # Validate critical configuration
+    config[config_name].validate_config()
 
     # Ensure the database directory exists if using a file-based database
-    db_path = os.environ.get(\'DATABASE_URL\', \'sqlite:///instance/flowlet_integrated.db\')
-    if db_path.startswith(\'sqlite:///\'):
-        db_file = db_path.replace(\'sqlite:///\', \'\')
+    # Ensure the database directory exists if using a file-based database
+    db_path = app.config['SQLALCHEMY_DATABASE_URI']
+    if db_path and db_path.startswith('sqlite:///'):
+        db_file = db_path.replace('sqlite:///', '')
         db_dir = os.path.dirname(db_file)
         if db_dir and not os.path.exists(db_dir):
             os.makedirs(db_dir, exist_ok=True)
-    
-    app.config[\'SQLALCHEMY_DATABASE_URI\'] = db_path
 
     # Initialize extensions
     db.init_app(app)
@@ -93,18 +94,17 @@ def create_app():
     # ERROR HANDLERS
     # ============================================================================
 
-    @app.errorhandler(404)
-    def not_found(error):
-        """Handle 404 errors by serving the React app"""
-        return send_from_directory(app.static_folder, \'index.html\')
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        """Handle 500 errors"""
-        db.session.rollback()
-        # Log the error for debugging
-        logger.error(f"Internal Server Error: {error}", exc_info=True)
-        return jsonify({\'error\': \'Internal server error\'}), 500
+    # Register error handlers
+    register_error_handlers(app)
+    
+    # Initialize database if it's a file-based SQLite database and the file doesn't exist
+    db_path = app.config['SQLALCHEMY_DATABASE_URI']
+    if db_path and db_path.startswith('sqlite:///'):
+        db_file = db_path.replace('sqlite:///', '')
+        if not os.path.exists(db_file):
+            with app.app_context():
+                db.create_all()
+                logger.info("Database initialized successfully")
     
     return app
 
@@ -113,10 +113,10 @@ def create_app():
 # ============================================================================
 
 def init_db(app):
-    """Initialize database"""
+    """Initialize database (deprecated, logic moved to create_app)"""
     with app.app_context():
         db.create_all()
-        logger.info("Database initialized successfully")
+        app.logger.info("Database initialized successfully")
 
 
 
