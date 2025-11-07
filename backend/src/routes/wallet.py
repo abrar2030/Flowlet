@@ -289,9 +289,207 @@ class WalletService:
                 'message': 'Failed to retrieve wallet balance'
             }
     
-    @staticmethod
-    def transfer_funds(from_wallet_id: str, to_wallet_id: str, amount: Decimal, 
-                      description: str = None, reference_id: str = None) -> Dict:
+   @staticmethod
+    def transfer_funds(from_wallet_id: str, to_wallet_id: str, amount: Decimal, description: str, reference_id: str = None) -> Dict:
+        """
+        Transfer funds between two wallets, handling multi-currency conversion.
+        
+        Args:
+            from_wallet_id: ID of the wallet to debit
+            to_wallet_id: ID of the wallet to credit
+            amount: Amount to transfer (in source wallet currency)
+            description: Description of the transfer
+            reference_id: Optional client-provided idempotency key
+            
+        Returns:
+            Dict containing success status or error details
+        """
+        try:
+            # Start a transaction block for atomicity and use row-level locking for race condition prevention
+            with db.session.begin_nested():
+                # 1. Idempotency Check
+                if reference_id:
+                    # Check if transaction with this reference_id already exists
+                    existing_transaction = Transaction.query.filter_by(reference_id=reference_id).first()
+                    if existing_transaction:
+                        # Log idempotent request
+                        # User ID is not available here, should be passed in a real scenario, using None for now
+                        log_audit_event(
+                            user_id=None, 
+                            action='FUNDS_TRANSFER_IDEMPOTENT',
+                            resource_type='transfer',
+                            resource_id=existing_transaction.id,
+                            details={'reference_id': reference_id}
+                        )
+                        return {
+                            'success': True,
+                            'message': 'Transfer already processed (idempotent)',
+                            'transfer_id': existing_transaction.id
+                        }
+                
+                # 2. Get wallets with row-level lock (SELECT ... FOR UPDATE)
+                # Order by ID to prevent deadlocks
+                wallet_ids = sorted([from_wallet_id, to_wallet_id])
+                
+                # Use .filter(Wallet.id.in_(wallet_ids)) to select both wallets
+                wallets = Wallet.query.filter(Wallet.id.in_(wallet_ids)).with_for_update().all()
+                
+                if len(wallets) != 2:
+                    return {'success': False, 'error': 'WALLET_NOT_FOUND', 'message': 'One or both wallets not found'}
+                
+                from_wallet = next((w for w in wallets if w.id == from_wallet_id), None)
+                to_wallet = next((w for w in wallets if w.id == to_wallet_id), None)
+                
+                if not from_wallet or not to_wallet:
+                    return {'success': False, 'error': 'WALLET_NOT_FOUND', 'message': 'One or both wallets not found'}
+                
+                # 3. Currency Conversion
+                transfer_amount = amount
+                if from_wallet.currency != to_wallet.currency:
+                    # Use Decimal for conversion to maintain precision
+                    rate_result = convert_currency(amount, from_wallet.currency, to_wallet.currency)
+                    if not rate_result['success']:
+                        return {'success': False, 'error': 'CURRENCY_CONVERSION_FAILED', 'message': rate_result['message']}
+                    transfer_amount = rate_result['converted_amount']
+                
+                # 4. Business Rule Validation
+                if from_wallet.balance < amount:
+                    return {
+                        'success': False,
+                        'error': 'INSUFFICIENT_FUNDS',
+                        'message': 'Insufficient funds in source wallet'
+                    }
+                
+                # 5. Precision Check (Monetary values must use Decimal)
+                # Assuming amount and transfer_amount are already Decimal
+                
+                # 6. Perform debit and credit
+                from_wallet.balance -= amount
+                from_wallet.available_balance -= amount
+                to_wallet.balance += transfer_amount
+                to_wallet.available_balance += transfer_amount
+                
+                from_wallet.updated_at = datetime.now(timezone.utc)
+                to_wallet.updated_at = datetime.now(timezone.utc)
+                
+                # 7. Create transactions and ledger entries
+                transfer_id = str(uuid.uuid4())
+                
+                # Debit Transaction (Source)
+                debit_transaction = Transaction(
+                    id=transfer_id,
+                    wallet_id=from_wallet_id,
+                    transaction_type='debit',
+                    amount=amount,
+                    currency=from_wallet.currency,
+                    description=f'Transfer to {to_wallet_id}: {description}',
+                    status='completed',
+                    reference_id=reference_id,
+                    created_at=datetime.now(timezone.utc)
+                )
+                
+                # Credit Transaction (Destination)
+                credit_transaction = Transaction(
+                    id=str(uuid.uuid4()),
+                    wallet_id=to_wallet_id,
+                    transaction_type='credit',
+                    amount=transfer_amount,
+                    currency=to_wallet.currency,
+                    description=f'Transfer from {from_wallet_id}: {description}',
+                    status='completed',
+                    reference_id=reference_id,
+                    created_at=datetime.now(timezone.utc)
+                )
+                
+                db.session.add_all([debit_transaction, credit_transaction])
+                
+                # Ledger Entries (Simplified for example, full double-entry would be more complex)
+                # Debit the source wallet asset account
+                debit_entry_source = LedgerEntry(
+                    id=str(uuid.uuid4()),
+                    transaction_id=transfer_id,
+                    account_type='asset',
+                    account_name=f'wallet_{from_wallet_id}',
+                    debit_amount=Decimal('0.00'),
+                    credit_amount=amount,
+                    currency=from_wallet.currency,
+                    description='Transfer out - credit source wallet asset',
+                    created_at=datetime.now(timezone.utc)
+                )
+                
+                # Credit the destination wallet asset account
+                credit_entry_dest = LedgerEntry(
+                    id=str(uuid.uuid4()),
+                    transaction_id=credit_transaction.id,
+                    account_type='asset',
+                    account_name=f'wallet_{to_wallet_id}',
+                    debit_amount=transfer_amount,
+                    credit_amount=Decimal('0.00'),
+                    currency=to_wallet.currency,
+                    description='Transfer in - debit destination wallet asset',
+                    created_at=datetime.now(timezone.utc)
+                )
+                
+                db.session.add_all([debit_entry_source, credit_entry_dest])
+                
+                # Commit the transaction
+                db.session.commit()
+            
+            # 8. Audit and Notify
+            log_audit_event(
+                user_id=from_wallet.user_id,
+                action='FUNDS_TRANSFERRED',
+                resource_type='transfer',
+                resource_id=transfer_id,
+                details={
+                    'from_wallet': from_wallet_id,
+                    'to_wallet': to_wallet_id,
+                    'amount': str(amount),
+                    'currency': from_wallet.currency
+                }
+            )
+            
+            send_notification(
+                user_id=from_wallet.user_id,
+                notification_type='funds_transferred_out',
+                message=f'Transferred {amount} {from_wallet.currency}',
+                metadata={'transfer_id': transfer_id, 'to_wallet_id': to_wallet_id}
+            )
+            
+            send_notification(
+                user_id=to_wallet.user_id,
+                notification_type='funds_transferred_in',
+                message=f'Received {transfer_amount} {to_wallet.currency}',
+                metadata={'transfer_id': transfer_id, 'from_wallet_id': from_wallet_id}
+            )
+            
+            return {
+                'success': True,
+                'transfer': {
+                    'transfer_id': transfer_id,
+                    'from_wallet_id': from_wallet_id,
+                    'to_wallet_id': to_wallet_id,
+                    'amount': str(amount),
+                    'currency': from_wallet.currency,
+                    'converted_amount': str(transfer_amount),
+                    'converted_currency': to_wallet.currency,
+                    'status': 'completed',
+                    'created_at': datetime.now(timezone.utc).isoformat() + 'Z'
+                }
+            }
+            
+        except IntegrityError as e:
+            db.session.rollback()
+            logger.error(f"Database integrity error during fund transfer: {str(e)}")
+            return {'success': False, 'error': 'DATABASE_ERROR', 'message': 'Failed to complete transfer due to database constraint'}
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error transferring funds: {str(e)}")
+            return {
+                'success': False,
+                'error': 'INTERNAL_ERROR',
+                'message': 'Failed to transfer funds'
+            }erence_id: str = None) -> Dict:
         """
         Transfer funds between wallets with comprehensive validation and audit trail
         

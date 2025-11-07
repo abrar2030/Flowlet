@@ -5,6 +5,9 @@ Implements security best practices and financial industry standards
 
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv() # Load environment variables from .env file
 
 class Config:
     """Base configuration class with security-focused defaults"""
