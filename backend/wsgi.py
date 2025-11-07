@@ -3,10 +3,10 @@
 WSGI Entry Point for Flowlet Application
 """
 
-from app import app
+from main import app
 
-if __name__ == "__main__":
-    app.run()
+# if __name__ == "__main__":
+    # app.run()
 
 
 

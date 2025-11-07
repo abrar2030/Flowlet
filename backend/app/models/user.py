@@ -7,7 +7,7 @@ import enum
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Column, String, Boolean, DateTime, Text, Enum
-from sqlalchemy.dialects.postgresql import UUID
+from .mixins import UUID
 from app import db
 
 class UserRole(enum.Enum):

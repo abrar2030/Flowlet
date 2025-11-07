@@ -7,7 +7,7 @@ import enum
 from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import Column, String, Boolean, DateTime, BigInteger, ForeignKey, Enum, Text
-from sqlalchemy.dialects.postgresql import UUID
+from .mixins import UUID
 from sqlalchemy.orm import relationship
 from app import db
 

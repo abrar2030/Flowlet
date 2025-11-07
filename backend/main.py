@@ -4,17 +4,15 @@ Production-ready Flask application with improved architecture
 """
 
 import os
-from app import create_app, db
+from app import create_app
 
 # Create Flask application
 app = create_app()
-
 @app.cli.command()
-def init_db():
+def init_db_cli():
     """Initialize the database"""
-    with app.app_context():
-        db.create_all()
-        print("Database initialized successfully")
+    init_db(app)
+    print("Database initialized successfully")
 
 @app.cli.command()
 def create_admin():
@@ -45,8 +43,7 @@ def create_admin():
 
 if __name__ == "__main__":
     # Run the application
-    # The database is initialized in app.py's init_db function, which is called
-    # if the app is run directly, or via the init_db CLI command.
+    # The database is initialized via the init_db_cli command or by running main.py directly.
     # The app.config.get('DEBUG', False) should be used, but we'll ensure it's set
     # based on an environment variable for consistency.
     debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
