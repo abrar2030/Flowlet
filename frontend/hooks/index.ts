@@ -68,8 +68,7 @@ export const useDebounce = <T>(value: T, delay: number): T => {
   }, [value, delay]);
 
   return debouncedValue;
-}};
-
+};
 export { useResponsive };
 
 export const useClickOutside = (

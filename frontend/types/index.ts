@@ -491,7 +491,7 @@ export interface SecurityEvent extends AppEvent {
 // Export all types
 // ============================================================================
 
-export * from './api';
-export * from './components';
-export * from './hooks';
+// export * from './api'; // Removed non-existent module export
+// export * from './components'; // Removed non-existent module export
+// export * from './hooks'; // Removed non-existent module export
 

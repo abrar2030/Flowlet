@@ -1,4 +1,4 @@
-# Flowlet Unified Frontend
+# Flowlet Frontend
 
 A comprehensive, production-ready frontend component library and utilities for financial applications, built with React, TypeScript, and modern web technologies.
 
@@ -37,13 +37,13 @@ This library is designed to meet strict financial industry requirements includin
 
 ```bash
 # Using npm
-npm install flowlet-unified-frontend
+npm install flowlet-frontend
 
 # Using pnpm
-pnpm add flowlet-unified-frontend
+pnpm add flowlet-frontend
 
 # Using yarn
-yarn add flowlet-unified-frontend
+yarn add flowlet-frontend
 ```
 
 ## 🛠️ Usage
@@ -52,7 +52,7 @@ yarn add flowlet-unified-frontend
 
 ```tsx
 import React from 'react';
-import { App, store } from 'flowlet-unified-frontend';
+import { App, store } from 'flowlet-frontend';
 import { Provider } from 'react-redux';
 
 function MyApp() {
@@ -74,7 +74,7 @@ import {
   TransactionHistory, 
   CardsScreen,
   SendMoney 
-} from 'flowlet-unified-frontend';
+} from 'flowlet-frontend';
 
 function Dashboard() {
   return (
@@ -90,7 +90,7 @@ function Dashboard() {
 ### Authentication
 
 ```tsx
-import { LoginScreen, useAuth } from 'flowlet-unified-frontend';
+import { LoginScreen, useAuth } from 'flowlet-frontend';
 
 function AuthenticatedApp() {
   const { isAuthenticated, user } = useAuth();
@@ -106,7 +106,7 @@ function AuthenticatedApp() {
 ### API Integration
 
 ```tsx
-import { api, TokenManager } from 'flowlet-unified-frontend';
+import { api, TokenManager } from 'flowlet-frontend';
 
 // Configure API base URL
 const apiClient = api;
@@ -127,7 +127,7 @@ async function getTransactions() {
 ### Directory Structure
 
 ```
-unified-frontend/
+frontend/
 ├── components/           # React components
 │   ├── auth/            # Authentication components
 │   ├── pages/           # Page-level components
@@ -225,7 +225,7 @@ npm run test:compliance
 ```bash
 # Clone the repository
 git clone https://github.com/abrar2030/Flowlet.git
-cd Flowlet/unified-frontend
+cd Flowlet/frontend
 
 # Install dependencies
 pnpm install
