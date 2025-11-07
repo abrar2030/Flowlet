@@ -762,15 +762,27 @@ class DataWarehouse:
     def _get_last_processed_timestamp(self, job_id: str) -> datetime:
         """Get the last processed timestamp for an ETL job."""
         
-        # This would typically be stored in a metadata table
-        # For now, return a default timestamp
+        # Query the metadata table for the last processed timestamp
+        query = text("SELECT last_processed FROM etl_job_status WHERE job_id = :job_id")
+        result = self.db.execute(query, {'job_id': job_id}).fetchone()
+        
+        if result:
+            return result.last_processed
+        
+        # Return a default timestamp if no record is found (e.g., first run)
         return datetime.utcnow() - timedelta(hours=1)
     
     def _update_last_processed_timestamp(self, job_id: str, timestamp: datetime):
         """Update the last processed timestamp for an ETL job."""
         
-        # This would update the metadata table
-        pass
+        # Insert or update the metadata table
+        query = text("""
+            INSERT INTO etl_job_status (job_id, last_processed)
+            VALUES (:job_id, :timestamp)
+            ON CONFLICT (job_id) DO UPDATE SET last_processed = :timestamp
+        """)
+        self.db.execute(query, {'job_id': job_id, 'timestamp': timestamp})
+        self.db.commit()
     
     def get_etl_job_status(self, job_id: str) -> Dict[str, Any]:
         """Get the status of an ETL job."""

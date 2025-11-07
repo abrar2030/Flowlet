@@ -7,7 +7,7 @@ class SecurityConfig:
     """Enhanced security configuration for financial industry standards"""
     
     # JWT Configuration
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', secrets.token_urlsafe(32))
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)  # Shorter expiry
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     JWT_ALGORITHM = 'HS256'
@@ -32,7 +32,7 @@ class SecurityConfig:
     PAYMENT_RATE_LIMIT = "100 per hour"
     
     # Encryption
-    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', secrets.token_bytes(32))
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
     FIELD_ENCRYPTION_ALGORITHM = 'AES-256-GCM'
     
     # Session Security
@@ -68,7 +68,7 @@ class SecurityConfig:
         """Validate security configuration"""
         errors = []
         
-        if len(cls.JWT_SECRET_KEY) < 32:
+        if not cls.JWT_SECRET_KEY or len(cls.JWT_SECRET_KEY) < 32:
             errors.append("JWT_SECRET_KEY must be at least 32 characters")
         
         if not cls.ENCRYPTION_KEY or len(cls.ENCRYPTION_KEY) < 32:

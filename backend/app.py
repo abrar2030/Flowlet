@@ -96,6 +96,18 @@ def create_app():
 
     # Register error handlers
     register_error_handlers(app)
+
+    # Global exception handler for unhandled exceptions (Security Vulnerability: Missing Global Error Handling)
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # Log the error internally with a traceback
+        app.logger.error(f"Unhandled Exception: {e}", exc_info=True)
+        # Return a generic error message to the client
+        response = {
+            "status": "error",
+            "message": "An internal server error occurred. Please try again later."
+        }
+        return jsonify(response), 500
     
     # Initialize database if it's a file-based SQLite database and the file doesn't exist
     db_path = app.config['SQLALCHEMY_DATABASE_URI']
