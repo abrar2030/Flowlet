@@ -18,7 +18,7 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authService.login(credentials);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
@@ -33,7 +33,7 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await authService.register(userData);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
@@ -48,7 +48,7 @@ export const logoutUser = createAsyncThunk(
     try {
       await authService.logout();
       return null;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(error.message);
     }
   }
@@ -64,7 +64,7 @@ export const validateToken = createAsyncThunk(
       
       const user = await authService.getCurrentUser();
       return { user, token: 'validated' }; // Token is managed by TokenManager
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
@@ -80,7 +80,7 @@ export const refreshToken = createAsyncThunk(
       const token = await authService.refreshToken();
       const user = authService.getCurrentUserFromStorage();
       return { user, token };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
