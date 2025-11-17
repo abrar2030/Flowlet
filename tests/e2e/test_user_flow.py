@@ -2,6 +2,7 @@ import unittest
 
 # Mocking a simplified UI interaction for E2E tests
 
+
 class MockUI:
     def __init__(self):
         self.users = {}
@@ -31,7 +32,9 @@ class MockUI:
         if not self.is_logged_in():
             return {"status": "failed", "message": "Not logged in"}
         wallet_id = f"wallet_{self.logged_in_user}_{currency}"
-        self.users[self.logged_in_user]["wallets"].append({"id": wallet_id, "currency": currency, "balance": 0})
+        self.users[self.logged_in_user]["wallets"].append(
+            {"id": wallet_id, "currency": currency, "balance": 0}
+        )
         return {"status": "success", "wallet_id": wallet_id}
 
     def deposit_ui(self, wallet_id, amount):
@@ -65,7 +68,9 @@ class MockUI:
         if not self.is_logged_in():
             return {"status": "failed", "message": "Not logged in"}
         card_id = f"card_{self.logged_in_user}_{card_type}"
-        self.users[self.logged_in_user]["cards"].append({"id": card_id, "type": card_type, "status": "active"})
+        self.users[self.logged_in_user]["cards"].append(
+            {"id": card_id, "type": card_type, "status": "active"}
+        )
         return {"status": "success", "card_id": card_id}
 
     def freeze_card_ui(self, card_id):
@@ -90,7 +95,10 @@ class MockUI:
         if not self.is_logged_in():
             return {"status": "failed", "message": "Not logged in"}
         # Simplified: In a real app, this would involve complex payment processing
-        return {"status": "success", "message": f"Payment of {amount} {currency} to {recipient} successful"}
+        return {
+            "status": "success",
+            "message": f"Payment of {amount} {currency} to {recipient} successful",
+        }
 
     def view_payment_status_ui(self, payment_id):
         if not self.is_logged_in():
@@ -189,7 +197,6 @@ class TestUserFlow(unittest.TestCase):
         self.assertEqual(status_result["status"], "success")
         self.assertEqual(status_result["status"], "completed")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-

@@ -3,21 +3,22 @@
 Flowlet Integrated Application - Production Deployment
 """
 
-from flask import Flask, send_from_directory, jsonify
-from datetime import datetime
-from decimal import Decimal
-from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import logging
 import os
 import secrets
-import logging
+from datetime import datetime
+from decimal import Decimal
 
+from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_migrate import Migrate
+from src.config.settings import config
 from src.models import db
 from src.routes import api_bp
-from src.config.settings import config
 from src.utils.error_handlers import register_error_handlers
+
 
 def create_app():
     # Initialize Flask app

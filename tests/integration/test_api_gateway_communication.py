@@ -3,17 +3,20 @@ from unittest.mock import MagicMock, patch
 
 # Mocking the services that the API Gateway communicates with
 
+
 class MockUserService:
     def get_user_data(self, user_id):
         if user_id == "user123":
             return {"status": "success", "data": {"id": user_id, "name": "John Doe"}}
         return {"status": "failed", "message": "User not found"}
 
+
 class MockPaymentService:
     def get_payment_details(self, payment_id):
         if payment_id == "pay123":
             return {"status": "success", "data": {"id": payment_id, "amount": 100}}
         return {"status": "failed", "message": "Payment not found"}
+
 
 class MockAPIGateway:
     def __init__(self, user_service, payment_service):
@@ -40,7 +43,7 @@ class APIGatewayCommunicationIntegrationTests(unittest.TestCase):
         self.mock_payment_service = MockPaymentService()
         self.api_gateway = MockAPIGateway(
             user_service=self.mock_user_service,
-            payment_service=self.mock_payment_service
+            payment_service=self.mock_payment_service,
         )
 
     def test_successful_routing_to_user_service(self):
@@ -71,7 +74,6 @@ class APIGatewayCommunicationIntegrationTests(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "Unknown path")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-

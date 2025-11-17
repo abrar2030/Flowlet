@@ -3,17 +3,20 @@ from unittest.mock import MagicMock, patch
 
 # Mocking the services that would interact in an onboarding flow
 
+
 class MockUserService:
     def create_user(self, username, password):
         if username == "existing_user":
             return {"status": "failed", "message": "User already exists"}
         return {"status": "success", "user_id": f"user_{username}"}
 
+
 class MockWalletService:
     def create_wallet(self, owner_id, type, currency):
         if owner_id == "user_fail_wallet":
             return {"status": "failed", "message": "Wallet creation failed"}
         return {"status": "success", "wallet_id": f"wallet_{owner_id}"}
+
 
 class MockKYCService:
     def submit_for_verification(self, user_id, name, dob, address, id_document):
@@ -52,15 +55,21 @@ class OnboardingFlowIntegrationTests(unittest.TestCase):
         user_id = user_creation_result["user_id"]
 
         # 2. Wallet creation
-        wallet_creation_result = self.wallet_service.create_wallet(user_id, "individual", "USD")
+        wallet_creation_result = self.wallet_service.create_wallet(
+            user_id, "individual", "USD"
+        )
         self.assertEqual(wallet_creation_result["status"], "success")
 
         # 3. KYC/AML verification process
-        kyc_submission_result = self.kyc_service.submit_for_verification(user_id, name, dob, address, id_document)
+        kyc_submission_result = self.kyc_service.submit_for_verification(
+            user_id, name, dob, address, id_document
+        )
         self.assertEqual(kyc_submission_result["status"], "success")
 
         # Simulate KYC approval
-        kyc_status_result = self.kyc_service.get_verification_status("user_kyc_approved")
+        kyc_status_result = self.kyc_service.get_verification_status(
+            "user_kyc_approved"
+        )
         self.assertEqual(kyc_status_result["status"], "success")
         self.assertEqual(kyc_status_result["status"], "approved")
 
@@ -83,7 +92,9 @@ class OnboardingFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(user_creation_result["status"], "success")
 
         # 2. Wallet creation (fails)
-        wallet_creation_result = self.wallet_service.create_wallet(user_id, "individual", "USD")
+        wallet_creation_result = self.wallet_service.create_wallet(
+            user_id, "individual", "USD"
+        )
         self.assertEqual(wallet_creation_result["status"], "failed")
         self.assertEqual(wallet_creation_result["message"], "Wallet creation failed")
 
@@ -101,11 +112,15 @@ class OnboardingFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(user_creation_result["status"], "success")
 
         # 2. Wallet creation
-        wallet_creation_result = self.wallet_service.create_wallet(user_id, "individual", "USD")
+        wallet_creation_result = self.wallet_service.create_wallet(
+            user_id, "individual", "USD"
+        )
         self.assertEqual(wallet_creation_result["status"], "success")
 
         # 3. KYC/AML verification process (submission fails)
-        kyc_submission_result = self.kyc_service.submit_for_verification(user_id, name, dob, address, id_document)
+        kyc_submission_result = self.kyc_service.submit_for_verification(
+            user_id, name, dob, address, id_document
+        )
         self.assertEqual(kyc_submission_result["status"], "failed")
         self.assertEqual(kyc_submission_result["message"], "KYC submission failed")
 
@@ -123,11 +138,15 @@ class OnboardingFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(user_creation_result["status"], "success")
 
         # 2. Wallet creation
-        wallet_creation_result = self.wallet_service.create_wallet(user_id, "individual", "USD")
+        wallet_creation_result = self.wallet_service.create_wallet(
+            user_id, "individual", "USD"
+        )
         self.assertEqual(wallet_creation_result["status"], "success")
 
         # 3. KYC/AML verification process
-        kyc_submission_result = self.kyc_service.submit_for_verification(user_id, name, dob, address, id_document)
+        kyc_submission_result = self.kyc_service.submit_for_verification(
+            user_id, name, dob, address, id_document
+        )
         self.assertEqual(kyc_submission_result["status"], "success")
 
         # Simulate KYC rejection
@@ -135,7 +154,6 @@ class OnboardingFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(kyc_status_result["status"], "success")
         self.assertEqual(kyc_status_result["status"], "rejected")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-

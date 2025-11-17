@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 # Mocking APIGateway related classes and functions
 # In a real scenario, these would be imported from the actual source code
 
+
 class APIGateway:
     def __init__(self, auth_service, rate_limiter, router):
         self.auth_service = auth_service
@@ -14,7 +15,9 @@ class APIGateway:
         # 1. Authentication and Authorization
         if not self.auth_service.authenticate(request.get("token")):
             return {"status": 401, "message": "Unauthorized"}
-        if not self.auth_service.authorize(request.get("token"), request.get("resource")):
+        if not self.auth_service.authorize(
+            request.get("token"), request.get("resource")
+        ):
             return {"status": 403, "message": "Forbidden"}
 
         # 2. Rate Limiting
@@ -30,6 +33,7 @@ class APIGateway:
         except Exception as e:
             return {"status": 500, "message": f"Internal Server Error: {str(e)}"}
 
+
 class AuthService:
     def authenticate(self, token):
         return token == "valid_token"
@@ -39,6 +43,7 @@ class AuthService:
             return True
         return False
 
+
 class RateLimiter:
     def __init__(self):
         self.requests = {}
@@ -47,6 +52,7 @@ class RateLimiter:
         # Simplified rate limiting: allow 3 requests per IP
         self.requests[client_ip] = self.requests.get(client_ip, 0) + 1
         return self.requests[client_ip] <= 3
+
 
 class Router:
     def route_request(self, request):
@@ -68,7 +74,7 @@ class TestAPIGateway(unittest.TestCase):
         self.api_gateway = APIGateway(
             auth_service=self.mock_auth_service,
             rate_limiter=self.mock_rate_limiter,
-            router=self.mock_router
+            router=self.mock_router,
         )
 
     def test_process_request_success(self):
@@ -77,7 +83,12 @@ class TestAPIGateway(unittest.TestCase):
         self.mock_rate_limiter.allow_request.return_value = True
         self.mock_router.route_request.return_value = {"data": "success"}
 
-        request = {"token": "valid_token", "resource": "/users", "client_ip": "192.168.1.1", "path": "/users"}
+        request = {
+            "token": "valid_token",
+            "resource": "/users",
+            "client_ip": "192.168.1.1",
+            "path": "/users",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 200)
         self.assertEqual(result["data"], {"data": "success"})
@@ -85,7 +96,12 @@ class TestAPIGateway(unittest.TestCase):
     def test_process_request_unauthorized(self):
         self.mock_auth_service.authenticate.return_value = False
 
-        request = {"token": "invalid_token", "resource": "/users", "client_ip": "192.168.1.1", "path": "/users"}
+        request = {
+            "token": "invalid_token",
+            "resource": "/users",
+            "client_ip": "192.168.1.1",
+            "path": "/users",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 401)
         self.assertEqual(result["message"], "Unauthorized")
@@ -94,7 +110,12 @@ class TestAPIGateway(unittest.TestCase):
         self.mock_auth_service.authenticate.return_value = True
         self.mock_auth_service.authorize.return_value = False
 
-        request = {"token": "valid_token", "resource": "/admin", "client_ip": "192.168.1.1", "path": "/admin"}
+        request = {
+            "token": "valid_token",
+            "resource": "/admin",
+            "client_ip": "192.168.1.1",
+            "path": "/admin",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 403)
         self.assertEqual(result["message"], "Forbidden")
@@ -104,7 +125,12 @@ class TestAPIGateway(unittest.TestCase):
         self.mock_auth_service.authorize.return_value = True
         self.mock_rate_limiter.allow_request.return_value = False
 
-        request = {"token": "valid_token", "resource": "/users", "client_ip": "192.168.1.1", "path": "/users"}
+        request = {
+            "token": "valid_token",
+            "resource": "/users",
+            "client_ip": "192.168.1.1",
+            "path": "/users",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 429)
         self.assertEqual(result["message"], "Too Many Requests")
@@ -115,7 +141,12 @@ class TestAPIGateway(unittest.TestCase):
         self.mock_rate_limiter.allow_request.return_value = True
         self.mock_router.route_request.side_effect = ValueError("Resource not found")
 
-        request = {"token": "valid_token", "resource": "/nonexistent", "client_ip": "192.168.1.1", "path": "/nonexistent"}
+        request = {
+            "token": "valid_token",
+            "resource": "/nonexistent",
+            "client_ip": "192.168.1.1",
+            "path": "/nonexistent",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 404)
         self.assertEqual(result["message"], "Resource not found")
@@ -126,7 +157,12 @@ class TestAPIGateway(unittest.TestCase):
         self.mock_rate_limiter.allow_request.return_value = True
         self.mock_router.route_request.side_effect = Exception("DB connection failed")
 
-        request = {"token": "valid_token", "resource": "/users", "client_ip": "192.168.1.1", "path": "/users"}
+        request = {
+            "token": "valid_token",
+            "resource": "/users",
+            "client_ip": "192.168.1.1",
+            "path": "/users",
+        }
         result = self.api_gateway.process_request(request)
         self.assertEqual(result["status"], 500)
         self.assertIn("Internal Server Error", result["message"])
@@ -160,7 +196,9 @@ class TestRateLimiter(unittest.TestCase):
         self.assertTrue(self.rate_limiter.allow_request(ip))
         self.assertTrue(self.rate_limiter.allow_request(ip))
         self.assertTrue(self.rate_limiter.allow_request(ip))
-        self.assertFalse(self.rate_limiter.allow_request(ip)) # Should be rate limited now
+        self.assertFalse(
+            self.rate_limiter.allow_request(ip)
+        )  # Should be rate limited now
 
     def test_allow_request_multiple_ips(self):
         ip1 = "1.1.1.1"
@@ -187,7 +225,6 @@ class TestRouter(unittest.TestCase):
             self.router.route_request({"path": "/nonexistent"})
         self.assertEqual(str(cm.exception), "Resource not found")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-

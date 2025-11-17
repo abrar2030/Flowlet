@@ -3,27 +3,30 @@ Enhanced Regulatory Compliance Module for Financial Industry Standards
 Implements comprehensive workflows for GDPR, PSD2, FinCEN, and other regulatory frameworks
 """
 
-import json
-import logging
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
 import asyncio
 import hashlib
+import json
+import logging
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import pandas as pd
+import redis
 import requests
 from cryptography.fernet import Fernet
-import redis
 
 # Configure logging for compliance events
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class ComplianceFramework(Enum):
     """Supported regulatory frameworks"""
+
     GDPR = "gdpr"
     PSD2 = "psd2"
     FINCEN = "fincen"
@@ -33,16 +36,20 @@ class ComplianceFramework(Enum):
     MLD5 = "mld5"
     BASEL_III = "basel_iii"
 
+
 class ComplianceStatus(Enum):
     """Compliance check status"""
+
     COMPLIANT = "compliant"
     NON_COMPLIANT = "non_compliant"
     PENDING_REVIEW = "pending_review"
     REQUIRES_ACTION = "requires_action"
     EXEMPTED = "exempted"
 
+
 class DataProcessingPurpose(Enum):
     """GDPR data processing purposes"""
+
     CONSENT = "consent"
     CONTRACT = "contract"
     LEGAL_OBLIGATION = "legal_obligation"
@@ -50,16 +57,20 @@ class DataProcessingPurpose(Enum):
     PUBLIC_TASK = "public_task"
     LEGITIMATE_INTERESTS = "legitimate_interests"
 
+
 class TransactionRiskLevel(Enum):
     """PSD2 transaction risk levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     EXEMPT = "exempt"
 
+
 @dataclass
 class ComplianceEvent:
     """Compliance event for audit trail"""
+
     event_id: str
     framework: ComplianceFramework
     event_type: str
@@ -72,9 +83,11 @@ class ComplianceEvent:
     reviewer_id: Optional[str] = None
     resolution_notes: Optional[str] = None
 
+
 @dataclass
 class GDPRDataSubject:
     """GDPR data subject information"""
+
     subject_id: str
     email: str
     consent_given: bool
@@ -86,9 +99,11 @@ class GDPRDataSubject:
     deletion_requested: bool = False
     deletion_timestamp: Optional[datetime] = None
 
+
 @dataclass
 class PSD2Transaction:
     """PSD2 transaction information"""
+
     transaction_id: str
     amount: float
     currency: str
@@ -100,9 +115,11 @@ class PSD2Transaction:
     sca_completed: bool
     exemption_reason: Optional[str] = None
 
+
 @dataclass
 class FinCENReport:
     """FinCEN suspicious activity report"""
+
     report_id: str
     filing_institution: str
     subject_name: str
@@ -115,36 +132,45 @@ class FinCENReport:
     narrative: str
     status: str
 
+
 class GDPRComplianceManager:
     """
     GDPR compliance management system
     """
-    
+
     def __init__(self, encryption_key: Optional[str] = None):
         self.encryption_key = encryption_key or Fernet.generate_key()
         self.fernet = Fernet(self.encryption_key)
-        self.redis_client = redis.Redis(host='localhost', port=6379, db=5)
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=5)
         self.data_subjects = {}
         self.consent_records = {}
-        
-    async def register_data_subject(self, subject_data: Dict[str, Any]) -> GDPRDataSubject:
+
+    async def register_data_subject(
+        self, subject_data: Dict[str, Any]
+    ) -> GDPRDataSubject:
         """Register a new data subject under GDPR"""
         try:
             subject = GDPRDataSubject(
                 subject_id=str(uuid.uuid4()),
-                email=subject_data['email'],
-                consent_given=subject_data.get('consent_given', False),
-                consent_timestamp=datetime.now(timezone.utc) if subject_data.get('consent_given') else None,
-                data_categories=subject_data.get('data_categories', []),
-                processing_purposes=subject_data.get('processing_purposes', []),
-                retention_period=subject_data.get('retention_period', 2555),  # 7 years default
-                last_activity=datetime.now(timezone.utc)
+                email=subject_data["email"],
+                consent_given=subject_data.get("consent_given", False),
+                consent_timestamp=(
+                    datetime.now(timezone.utc)
+                    if subject_data.get("consent_given")
+                    else None
+                ),
+                data_categories=subject_data.get("data_categories", []),
+                processing_purposes=subject_data.get("processing_purposes", []),
+                retention_period=subject_data.get(
+                    "retention_period", 2555
+                ),  # 7 years default
+                last_activity=datetime.now(timezone.utc),
             )
-            
+
             # Store encrypted data
             encrypted_data = self._encrypt_personal_data(asdict(subject))
             self.redis_client.set(f"gdpr_subject:{subject.subject_id}", encrypted_data)
-            
+
             # Log compliance event
             await self._log_compliance_event(
                 framework=ComplianceFramework.GDPR,
@@ -152,32 +178,34 @@ class GDPRComplianceManager:
                 entity_id=subject.subject_id,
                 entity_type="data_subject",
                 details={"email": subject.email, "consent": subject.consent_given},
-                status=ComplianceStatus.COMPLIANT
+                status=ComplianceStatus.COMPLIANT,
             )
-            
+
             return subject
-            
+
         except Exception as e:
             logger.error(f"Error registering data subject: {str(e)}")
             raise ComplianceException(f"Failed to register data subject: {str(e)}")
-    
-    async def process_consent_request(self, subject_id: str, purposes: List[DataProcessingPurpose]) -> bool:
+
+    async def process_consent_request(
+        self, subject_id: str, purposes: List[DataProcessingPurpose]
+    ) -> bool:
         """Process consent request for data processing"""
         try:
             # Retrieve subject data
             subject_data = self._get_subject_data(subject_id)
             if not subject_data:
                 raise ComplianceException("Data subject not found")
-            
+
             # Update consent
-            subject_data['consent_given'] = True
-            subject_data['consent_timestamp'] = datetime.now(timezone.utc).isoformat()
-            subject_data['processing_purposes'] = [p.value for p in purposes]
-            
+            subject_data["consent_given"] = True
+            subject_data["consent_timestamp"] = datetime.now(timezone.utc).isoformat()
+            subject_data["processing_purposes"] = [p.value for p in purposes]
+
             # Store updated data
             encrypted_data = self._encrypt_personal_data(subject_data)
             self.redis_client.set(f"gdpr_subject:{subject_id}", encrypted_data)
-            
+
             # Log consent event
             await self._log_compliance_event(
                 framework=ComplianceFramework.GDPR,
@@ -185,23 +213,25 @@ class GDPRComplianceManager:
                 entity_id=subject_id,
                 entity_type="data_subject",
                 details={"purposes": [p.value for p in purposes]},
-                status=ComplianceStatus.COMPLIANT
+                status=ComplianceStatus.COMPLIANT,
             )
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Error processing consent: {str(e)}")
             return False
-    
-    async def process_deletion_request(self, subject_id: str, requester_email: str) -> bool:
+
+    async def process_deletion_request(
+        self, subject_id: str, requester_email: str
+    ) -> bool:
         """Process GDPR right to be forgotten request"""
         try:
             # Verify requester
             subject_data = self._get_subject_data(subject_id)
-            if not subject_data or subject_data.get('email') != requester_email:
+            if not subject_data or subject_data.get("email") != requester_email:
                 raise ComplianceException("Unauthorized deletion request")
-            
+
             # Check if deletion is legally required
             if self._has_legal_retention_requirement(subject_id):
                 await self._log_compliance_event(
@@ -210,21 +240,21 @@ class GDPRComplianceManager:
                     entity_id=subject_id,
                     entity_type="data_subject",
                     details={"reason": "legal_retention_requirement"},
-                    status=ComplianceStatus.NON_COMPLIANT
+                    status=ComplianceStatus.NON_COMPLIANT,
                 )
                 return False
-            
+
             # Mark for deletion
-            subject_data['deletion_requested'] = True
-            subject_data['deletion_timestamp'] = datetime.now(timezone.utc).isoformat()
-            
+            subject_data["deletion_requested"] = True
+            subject_data["deletion_timestamp"] = datetime.now(timezone.utc).isoformat()
+
             # Store updated data
             encrypted_data = self._encrypt_personal_data(subject_data)
             self.redis_client.set(f"gdpr_subject:{subject_id}", encrypted_data)
-            
+
             # Schedule actual deletion
             await self._schedule_data_deletion(subject_id)
-            
+
             # Log deletion request
             await self._log_compliance_event(
                 framework=ComplianceFramework.GDPR,
@@ -232,148 +262,156 @@ class GDPRComplianceManager:
                 entity_id=subject_id,
                 entity_type="data_subject",
                 details={"requester": requester_email},
-                status=ComplianceStatus.PENDING_REVIEW
+                status=ComplianceStatus.PENDING_REVIEW,
             )
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Error processing deletion request: {str(e)}")
             return False
-    
-    async def generate_data_export(self, subject_id: str, requester_email: str) -> Dict[str, Any]:
+
+    async def generate_data_export(
+        self, subject_id: str, requester_email: str
+    ) -> Dict[str, Any]:
         """Generate GDPR data portability export"""
         try:
             # Verify requester
             subject_data = self._get_subject_data(subject_id)
-            if not subject_data or subject_data.get('email') != requester_email:
+            if not subject_data or subject_data.get("email") != requester_email:
                 raise ComplianceException("Unauthorized export request")
-            
+
             # Collect all personal data
             export_data = {
-                'subject_information': subject_data,
-                'transaction_history': await self._get_transaction_history(subject_id),
-                'wallet_data': await self._get_wallet_data(subject_id),
-                'kyc_data': await self._get_kyc_data(subject_id),
-                'consent_history': await self._get_consent_history(subject_id),
-                'export_timestamp': datetime.now(timezone.utc).isoformat(),
-                'export_format': 'JSON'
+                "subject_information": subject_data,
+                "transaction_history": await self._get_transaction_history(subject_id),
+                "wallet_data": await self._get_wallet_data(subject_id),
+                "kyc_data": await self._get_kyc_data(subject_id),
+                "consent_history": await self._get_consent_history(subject_id),
+                "export_timestamp": datetime.now(timezone.utc).isoformat(),
+                "export_format": "JSON",
             }
-            
+
             # Log export event
             await self._log_compliance_event(
                 framework=ComplianceFramework.GDPR,
                 event_type="data_export_generated",
                 entity_id=subject_id,
                 entity_type="data_subject",
-                details={"requester": requester_email, "data_categories": list(export_data.keys())},
-                status=ComplianceStatus.COMPLIANT
+                details={
+                    "requester": requester_email,
+                    "data_categories": list(export_data.keys()),
+                },
+                status=ComplianceStatus.COMPLIANT,
             )
-            
+
             return export_data
-            
+
         except Exception as e:
             logger.error(f"Error generating data export: {str(e)}")
             raise ComplianceException(f"Failed to generate data export: {str(e)}")
-    
+
     def _encrypt_personal_data(self, data: Dict[str, Any]) -> str:
         """Encrypt personal data for storage"""
         json_data = json.dumps(data, default=str)
         return self.fernet.encrypt(json_data.encode()).decode()
-    
+
     def _decrypt_personal_data(self, encrypted_data: str) -> Dict[str, Any]:
         """Decrypt personal data from storage"""
         decrypted_bytes = self.fernet.decrypt(encrypted_data.encode())
         return json.loads(decrypted_bytes.decode())
-    
+
     def _get_subject_data(self, subject_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve subject data from storage"""
         encrypted_data = self.redis_client.get(f"gdpr_subject:{subject_id}")
         if encrypted_data:
             return self._decrypt_personal_data(encrypted_data.decode())
         return None
-    
+
     def _has_legal_retention_requirement(self, subject_id: str) -> bool:
         """Check if data has legal retention requirements"""
         # Simplified implementation - would check against legal requirements
         return False
-    
+
     async def _schedule_data_deletion(self, subject_id: str):
         """Schedule actual data deletion"""
         # In production, this would schedule a background job
         logger.info(f"Scheduled data deletion for subject: {subject_id}")
-    
+
     async def _get_transaction_history(self, subject_id: str) -> List[Dict]:
         """Get transaction history for data subject"""
         # Placeholder implementation
         return []
-    
+
     async def _get_wallet_data(self, subject_id: str) -> Dict:
         """Get wallet data for data subject"""
         # Placeholder implementation
         return {}
-    
+
     async def _get_kyc_data(self, subject_id: str) -> Dict:
         """Get KYC data for data subject"""
         # Placeholder implementation
         return {}
-    
+
     async def _get_consent_history(self, subject_id: str) -> List[Dict]:
         """Get consent history for data subject"""
         # Placeholder implementation
         return []
 
+
 class PSD2ComplianceManager:
     """
     PSD2 compliance management system
     """
-    
+
     def __init__(self):
-        self.redis_client = redis.Redis(host='localhost', port=6379, db=6)
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=6)
         self.sca_exemptions = {
-            'low_value': 30.0,  # EUR
-            'recurring_payment': True,
-            'trusted_beneficiary': True,
-            'corporate_payment': True
+            "low_value": 30.0,  # EUR
+            "recurring_payment": True,
+            "trusted_beneficiary": True,
+            "corporate_payment": True,
         }
-    
-    async def assess_transaction_risk(self, transaction_data: Dict[str, Any]) -> PSD2Transaction:
+
+    async def assess_transaction_risk(
+        self, transaction_data: Dict[str, Any]
+    ) -> PSD2Transaction:
         """Assess PSD2 transaction risk and SCA requirements"""
         try:
             transaction = PSD2Transaction(
-                transaction_id=transaction_data['transaction_id'],
-                amount=transaction_data['amount'],
-                currency=transaction_data['currency'],
-                payer_account=transaction_data['payer_account'],
-                payee_account=transaction_data['payee_account'],
-                timestamp=datetime.fromisoformat(transaction_data['timestamp']),
+                transaction_id=transaction_data["transaction_id"],
+                amount=transaction_data["amount"],
+                currency=transaction_data["currency"],
+                payer_account=transaction_data["payer_account"],
+                payee_account=transaction_data["payee_account"],
+                timestamp=datetime.fromisoformat(transaction_data["timestamp"]),
                 risk_level=TransactionRiskLevel.MEDIUM,
-                sca_required=True
+                sca_required=True,
             )
-            
+
             # Assess risk level
             risk_score = await self._calculate_risk_score(transaction_data)
-            
+
             if risk_score < 0.3:
                 transaction.risk_level = TransactionRiskLevel.LOW
             elif risk_score > 0.7:
                 transaction.risk_level = TransactionRiskLevel.HIGH
-            
+
             # Check SCA exemptions
             exemption_reason = await self._check_sca_exemptions(transaction_data)
             if exemption_reason:
                 transaction.sca_required = False
                 transaction.exemption_reason = exemption_reason
                 transaction.risk_level = TransactionRiskLevel.EXEMPT
-            
+
             # Store transaction assessment
             transaction_key = f"psd2_transaction:{transaction.transaction_id}"
             self.redis_client.setex(
                 transaction_key,
                 86400,  # 24 hours
-                json.dumps(asdict(transaction), default=str)
+                json.dumps(asdict(transaction), default=str),
             )
-            
+
             # Log compliance event
             await self._log_compliance_event(
                 framework=ComplianceFramework.PSD2,
@@ -383,42 +421,42 @@ class PSD2ComplianceManager:
                 details={
                     "risk_level": transaction.risk_level.value,
                     "sca_required": transaction.sca_required,
-                    "exemption_reason": transaction.exemption_reason
+                    "exemption_reason": transaction.exemption_reason,
                 },
-                status=ComplianceStatus.COMPLIANT
+                status=ComplianceStatus.COMPLIANT,
             )
-            
+
             return transaction
-            
+
         except Exception as e:
             logger.error(f"Error assessing transaction risk: {str(e)}")
             raise ComplianceException(f"Failed to assess transaction risk: {str(e)}")
-    
-    async def validate_sca_completion(self, transaction_id: str, sca_data: Dict[str, Any]) -> bool:
+
+    async def validate_sca_completion(
+        self, transaction_id: str, sca_data: Dict[str, Any]
+    ) -> bool:
         """Validate Strong Customer Authentication completion"""
         try:
             # Retrieve transaction
             transaction_key = f"psd2_transaction:{transaction_id}"
             transaction_data = self.redis_client.get(transaction_key)
-            
+
             if not transaction_data:
                 raise ComplianceException("Transaction not found")
-            
+
             transaction = json.loads(transaction_data.decode())
-            
+
             # Validate SCA factors
             sca_valid = await self._validate_sca_factors(sca_data)
-            
+
             if sca_valid:
-                transaction['sca_completed'] = True
-                
+                transaction["sca_completed"] = True
+
                 # Update transaction
                 self.redis_client.setex(
-                    transaction_key,
-                    86400,
-                    json.dumps(transaction, default=str)
+                    transaction_key, 86400, json.dumps(transaction, default=str)
                 )
-                
+
                 # Log SCA completion
                 await self._log_compliance_event(
                     framework=ComplianceFramework.PSD2,
@@ -426,9 +464,9 @@ class PSD2ComplianceManager:
                     entity_id=transaction_id,
                     entity_type="transaction",
                     details={"sca_methods": list(sca_data.keys())},
-                    status=ComplianceStatus.COMPLIANT
+                    status=ComplianceStatus.COMPLIANT,
                 )
-                
+
                 return True
             else:
                 # Log SCA failure
@@ -438,30 +476,30 @@ class PSD2ComplianceManager:
                     entity_id=transaction_id,
                     entity_type="transaction",
                     details={"failure_reason": "invalid_sca_factors"},
-                    status=ComplianceStatus.NON_COMPLIANT
+                    status=ComplianceStatus.NON_COMPLIANT,
                 )
-                
+
                 return False
-                
+
         except Exception as e:
             logger.error(f"Error validating SCA: {str(e)}")
             return False
-    
+
     async def _calculate_risk_score(self, transaction_data: Dict[str, Any]) -> float:
         """Calculate transaction risk score"""
         risk_factors = []
-        
+
         # Amount-based risk
-        amount = transaction_data['amount']
+        amount = transaction_data["amount"]
         if amount > 1000:
             risk_factors.append(0.3)
         elif amount > 500:
             risk_factors.append(0.2)
         else:
             risk_factors.append(0.1)
-        
+
         # Frequency-based risk
-        payer_account = transaction_data['payer_account']
+        payer_account = transaction_data["payer_account"]
         recent_transactions = await self._get_recent_transactions(payer_account)
         if len(recent_transactions) > 10:
             risk_factors.append(0.4)
@@ -469,112 +507,133 @@ class PSD2ComplianceManager:
             risk_factors.append(0.2)
         else:
             risk_factors.append(0.1)
-        
+
         # Location-based risk (simplified)
         risk_factors.append(0.1)
-        
+
         return min(1.0, sum(risk_factors))
-    
-    async def _check_sca_exemptions(self, transaction_data: Dict[str, Any]) -> Optional[str]:
+
+    async def _check_sca_exemptions(
+        self, transaction_data: Dict[str, Any]
+    ) -> Optional[str]:
         """Check for SCA exemptions"""
-        amount = transaction_data['amount']
-        currency = transaction_data['currency']
-        
+        amount = transaction_data["amount"]
+        currency = transaction_data["currency"]
+
         # Low value exemption
-        if currency == 'EUR' and amount <= self.sca_exemptions['low_value']:
-            return 'low_value_exemption'
-        
+        if currency == "EUR" and amount <= self.sca_exemptions["low_value"]:
+            return "low_value_exemption"
+
         # Trusted beneficiary exemption
-        payee_account = transaction_data['payee_account']
-        if await self._is_trusted_beneficiary(transaction_data['payer_account'], payee_account):
-            return 'trusted_beneficiary_exemption'
-        
+        payee_account = transaction_data["payee_account"]
+        if await self._is_trusted_beneficiary(
+            transaction_data["payer_account"], payee_account
+        ):
+            return "trusted_beneficiary_exemption"
+
         # Corporate payment exemption
-        if transaction_data.get('corporate_payment', False):
-            return 'corporate_payment_exemption'
-        
+        if transaction_data.get("corporate_payment", False):
+            return "corporate_payment_exemption"
+
         return None
-    
+
     async def _validate_sca_factors(self, sca_data: Dict[str, Any]) -> bool:
         """Validate SCA authentication factors"""
         required_factors = 2
         valid_factors = 0
-        
+
         # Something you know (password, PIN)
-        if sca_data.get('knowledge_factor') and self._validate_knowledge_factor(sca_data['knowledge_factor']):
+        if sca_data.get("knowledge_factor") and self._validate_knowledge_factor(
+            sca_data["knowledge_factor"]
+        ):
             valid_factors += 1
-        
+
         # Something you have (device, token)
-        if sca_data.get('possession_factor') and self._validate_possession_factor(sca_data['possession_factor']):
+        if sca_data.get("possession_factor") and self._validate_possession_factor(
+            sca_data["possession_factor"]
+        ):
             valid_factors += 1
-        
+
         # Something you are (biometric)
-        if sca_data.get('inherence_factor') and self._validate_inherence_factor(sca_data['inherence_factor']):
+        if sca_data.get("inherence_factor") and self._validate_inherence_factor(
+            sca_data["inherence_factor"]
+        ):
             valid_factors += 1
-        
+
         return valid_factors >= required_factors
-    
+
     def _validate_knowledge_factor(self, factor_data: Dict[str, Any]) -> bool:
         """Validate knowledge factor (PIN, password)"""
         # Simplified validation
-        return factor_data.get('valid', False)
-    
+        return factor_data.get("valid", False)
+
     def _validate_possession_factor(self, factor_data: Dict[str, Any]) -> bool:
         """Validate possession factor (device, token)"""
         # Simplified validation
-        return factor_data.get('valid', False)
-    
+        return factor_data.get("valid", False)
+
     def _validate_inherence_factor(self, factor_data: Dict[str, Any]) -> bool:
         """Validate inherence factor (biometric)"""
         # Simplified validation
-        return factor_data.get('valid', False)
-    
+        return factor_data.get("valid", False)
+
     async def _get_recent_transactions(self, account: str) -> List[Dict]:
         """Get recent transactions for account"""
         # Placeholder implementation
         return []
-    
-    async def _is_trusted_beneficiary(self, payer_account: str, payee_account: str) -> bool:
+
+    async def _is_trusted_beneficiary(
+        self, payer_account: str, payee_account: str
+    ) -> bool:
         """Check if payee is a trusted beneficiary"""
         # Placeholder implementation
         return False
+
 
 class FinCENComplianceManager:
     """
     FinCEN compliance management system
     """
-    
+
     def __init__(self):
-        self.redis_client = redis.Redis(host='localhost', port=6379, db=7)
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=7)
         self.suspicious_activity_threshold = 10000.0  # USD
         self.currency_transaction_threshold = 10000.0  # USD
-    
-    async def monitor_suspicious_activity(self, transaction_data: Dict[str, Any]) -> Optional[FinCENReport]:
+
+    async def monitor_suspicious_activity(
+        self, transaction_data: Dict[str, Any]
+    ) -> Optional[FinCENReport]:
         """Monitor for suspicious activity requiring FinCEN reporting"""
         try:
             # Check for suspicious patterns
             is_suspicious = await self._detect_suspicious_patterns(transaction_data)
-            
+
             if is_suspicious:
                 # Generate SAR (Suspicious Activity Report)
                 report = FinCENReport(
                     report_id=str(uuid.uuid4()),
                     filing_institution="Flowlet Financial Services",
-                    subject_name=transaction_data.get('subject_name', 'Unknown'),
-                    subject_id=transaction_data.get('subject_id', 'Unknown'),
-                    suspicious_activity=await self._describe_suspicious_activity(transaction_data),
-                    amount=transaction_data['amount'],
-                    currency=transaction_data['currency'],
-                    transaction_date=datetime.fromisoformat(transaction_data['timestamp']),
+                    subject_name=transaction_data.get("subject_name", "Unknown"),
+                    subject_id=transaction_data.get("subject_id", "Unknown"),
+                    suspicious_activity=await self._describe_suspicious_activity(
+                        transaction_data
+                    ),
+                    amount=transaction_data["amount"],
+                    currency=transaction_data["currency"],
+                    transaction_date=datetime.fromisoformat(
+                        transaction_data["timestamp"]
+                    ),
                     report_date=datetime.now(timezone.utc),
                     narrative=await self._generate_narrative(transaction_data),
-                    status='pending_review'
+                    status="pending_review",
                 )
-                
+
                 # Store report
                 report_key = f"fincen_report:{report.report_id}"
-                self.redis_client.set(report_key, json.dumps(asdict(report), default=str))
-                
+                self.redis_client.set(
+                    report_key, json.dumps(asdict(report), default=str)
+                )
+
                 # Log compliance event
                 await self._log_compliance_event(
                     framework=ComplianceFramework.FINCEN,
@@ -584,45 +643,49 @@ class FinCENComplianceManager:
                     details={
                         "subject_id": report.subject_id,
                         "amount": report.amount,
-                        "activity_type": report.suspicious_activity
+                        "activity_type": report.suspicious_activity,
                     },
-                    status=ComplianceStatus.REQUIRES_ACTION
+                    status=ComplianceStatus.REQUIRES_ACTION,
                 )
-                
+
                 return report
-            
+
             return None
-            
+
         except Exception as e:
             logger.error(f"Error monitoring suspicious activity: {str(e)}")
             return None
-    
-    async def file_currency_transaction_report(self, transaction_data: Dict[str, Any]) -> Optional[str]:
+
+    async def file_currency_transaction_report(
+        self, transaction_data: Dict[str, Any]
+    ) -> Optional[str]:
         """File Currency Transaction Report (CTR) for large cash transactions"""
         try:
-            amount = transaction_data['amount']
-            currency = transaction_data['currency']
-            
+            amount = transaction_data["amount"]
+            currency = transaction_data["currency"]
+
             # Check if CTR filing is required
-            if currency == 'USD' and amount >= self.currency_transaction_threshold:
+            if currency == "USD" and amount >= self.currency_transaction_threshold:
                 ctr_id = str(uuid.uuid4())
-                
+
                 ctr_data = {
-                    'ctr_id': ctr_id,
-                    'filing_institution': 'Flowlet Financial Services',
-                    'transaction_date': transaction_data['timestamp'],
-                    'amount': amount,
-                    'currency': currency,
-                    'customer_info': transaction_data.get('customer_info', {}),
-                    'transaction_type': transaction_data.get('transaction_type', 'unknown'),
-                    'filing_date': datetime.now(timezone.utc).isoformat(),
-                    'status': 'filed'
+                    "ctr_id": ctr_id,
+                    "filing_institution": "Flowlet Financial Services",
+                    "transaction_date": transaction_data["timestamp"],
+                    "amount": amount,
+                    "currency": currency,
+                    "customer_info": transaction_data.get("customer_info", {}),
+                    "transaction_type": transaction_data.get(
+                        "transaction_type", "unknown"
+                    ),
+                    "filing_date": datetime.now(timezone.utc).isoformat(),
+                    "status": "filed",
                 }
-                
+
                 # Store CTR
                 ctr_key = f"fincen_ctr:{ctr_id}"
                 self.redis_client.set(ctr_key, json.dumps(ctr_data, default=str))
-                
+
                 # Log compliance event
                 await self._log_compliance_event(
                     framework=ComplianceFramework.FINCEN,
@@ -632,187 +695,218 @@ class FinCENComplianceManager:
                     details={
                         "amount": amount,
                         "currency": currency,
-                        "customer_id": transaction_data.get('customer_id')
+                        "customer_id": transaction_data.get("customer_id"),
                     },
-                    status=ComplianceStatus.COMPLIANT
+                    status=ComplianceStatus.COMPLIANT,
                 )
-                
+
                 return ctr_id
-            
+
             return None
-            
+
         except Exception as e:
             logger.error(f"Error filing CTR: {str(e)}")
             return None
-    
-    async def _detect_suspicious_patterns(self, transaction_data: Dict[str, Any]) -> bool:
+
+    async def _detect_suspicious_patterns(
+        self, transaction_data: Dict[str, Any]
+    ) -> bool:
         """Detect suspicious transaction patterns"""
         suspicious_indicators = []
-        
+
         # Large amount
-        if transaction_data['amount'] >= self.suspicious_activity_threshold:
-            suspicious_indicators.append('large_amount')
-        
+        if transaction_data["amount"] >= self.suspicious_activity_threshold:
+            suspicious_indicators.append("large_amount")
+
         # Unusual frequency
-        customer_id = transaction_data.get('customer_id')
+        customer_id = transaction_data.get("customer_id")
         if customer_id:
-            recent_transactions = await self._get_customer_recent_transactions(customer_id)
-            if len(recent_transactions) > 20:  # More than 20 transactions in recent period
-                suspicious_indicators.append('high_frequency')
-        
+            recent_transactions = await self._get_customer_recent_transactions(
+                customer_id
+            )
+            if (
+                len(recent_transactions) > 20
+            ):  # More than 20 transactions in recent period
+                suspicious_indicators.append("high_frequency")
+
         # Structuring (amounts just below reporting threshold)
-        if 9000 <= transaction_data['amount'] < 10000:
-            suspicious_indicators.append('potential_structuring')
-        
+        if 9000 <= transaction_data["amount"] < 10000:
+            suspicious_indicators.append("potential_structuring")
+
         # Unusual geographic patterns
         if await self._has_unusual_geographic_pattern(transaction_data):
-            suspicious_indicators.append('unusual_geography')
-        
+            suspicious_indicators.append("unusual_geography")
+
         return len(suspicious_indicators) >= 2
-    
-    async def _describe_suspicious_activity(self, transaction_data: Dict[str, Any]) -> str:
+
+    async def _describe_suspicious_activity(
+        self, transaction_data: Dict[str, Any]
+    ) -> str:
         """Describe the type of suspicious activity"""
         patterns = await self._detect_suspicious_patterns(transaction_data)
-        
-        if transaction_data['amount'] >= self.suspicious_activity_threshold:
+
+        if transaction_data["amount"] >= self.suspicious_activity_threshold:
             return "Large cash transaction"
-        elif 9000 <= transaction_data['amount'] < 10000:
+        elif 9000 <= transaction_data["amount"] < 10000:
             return "Potential structuring to avoid reporting requirements"
         else:
             return "Unusual transaction pattern"
-    
+
     async def _generate_narrative(self, transaction_data: Dict[str, Any]) -> str:
         """Generate narrative for suspicious activity report"""
-        return f"Transaction of {transaction_data['amount']} {transaction_data['currency']} " \
-               f"on {transaction_data['timestamp']} exhibits suspicious characteristics " \
-               f"requiring further investigation and reporting."
-    
+        return (
+            f"Transaction of {transaction_data['amount']} {transaction_data['currency']} "
+            f"on {transaction_data['timestamp']} exhibits suspicious characteristics "
+            f"requiring further investigation and reporting."
+        )
+
     async def _get_customer_recent_transactions(self, customer_id: str) -> List[Dict]:
         """Get recent transactions for customer"""
         # Placeholder implementation
         return []
-    
-    async def _has_unusual_geographic_pattern(self, transaction_data: Dict[str, Any]) -> bool:
+
+    async def _has_unusual_geographic_pattern(
+        self, transaction_data: Dict[str, Any]
+    ) -> bool:
         """Check for unusual geographic patterns"""
         # Placeholder implementation
         return False
+
 
 class ComplianceReportingEngine:
     """
     Automated compliance reporting engine
     """
-    
+
     def __init__(self):
-        self.redis_client = redis.Redis(host='localhost', port=6379, db=8)
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=8)
         self.gdpr_manager = GDPRComplianceManager()
         self.psd2_manager = PSD2ComplianceManager()
         self.fincen_manager = FinCENComplianceManager()
-    
-    async def generate_compliance_report(self, framework: ComplianceFramework, 
-                                       start_date: datetime, end_date: datetime) -> Dict[str, Any]:
+
+    async def generate_compliance_report(
+        self, framework: ComplianceFramework, start_date: datetime, end_date: datetime
+    ) -> Dict[str, Any]:
         """Generate comprehensive compliance report"""
         try:
             report_data = {
-                'framework': framework.value,
-                'report_period': {
-                    'start_date': start_date.isoformat(),
-                    'end_date': end_date.isoformat()
+                "framework": framework.value,
+                "report_period": {
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
                 },
-                'generated_at': datetime.now(timezone.utc).isoformat(),
-                'summary': {},
-                'details': {},
-                'recommendations': []
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "summary": {},
+                "details": {},
+                "recommendations": [],
             }
-            
+
             if framework == ComplianceFramework.GDPR:
-                report_data.update(await self._generate_gdpr_report(start_date, end_date))
+                report_data.update(
+                    await self._generate_gdpr_report(start_date, end_date)
+                )
             elif framework == ComplianceFramework.PSD2:
-                report_data.update(await self._generate_psd2_report(start_date, end_date))
+                report_data.update(
+                    await self._generate_psd2_report(start_date, end_date)
+                )
             elif framework == ComplianceFramework.FINCEN:
-                report_data.update(await self._generate_fincen_report(start_date, end_date))
-            
+                report_data.update(
+                    await self._generate_fincen_report(start_date, end_date)
+                )
+
             # Store report
             report_id = str(uuid.uuid4())
             report_key = f"compliance_report:{report_id}"
             self.redis_client.setex(
-                report_key,
-                86400 * 30,  # 30 days
-                json.dumps(report_data, default=str)
+                report_key, 86400 * 30, json.dumps(report_data, default=str)  # 30 days
             )
-            
+
             return report_data
-            
+
         except Exception as e:
             logger.error(f"Error generating compliance report: {str(e)}")
             raise ComplianceException(f"Failed to generate compliance report: {str(e)}")
-    
-    async def _generate_gdpr_report(self, start_date: datetime, end_date: datetime) -> Dict[str, Any]:
+
+    async def _generate_gdpr_report(
+        self, start_date: datetime, end_date: datetime
+    ) -> Dict[str, Any]:
         """Generate GDPR-specific compliance report"""
         return {
-            'summary': {
-                'data_subjects_registered': 0,
-                'consent_requests_processed': 0,
-                'deletion_requests_processed': 0,
-                'data_exports_generated': 0,
-                'compliance_violations': 0
+            "summary": {
+                "data_subjects_registered": 0,
+                "consent_requests_processed": 0,
+                "deletion_requests_processed": 0,
+                "data_exports_generated": 0,
+                "compliance_violations": 0,
             },
-            'details': {
-                'consent_management': {},
-                'data_retention': {},
-                'breach_incidents': []
+            "details": {
+                "consent_management": {},
+                "data_retention": {},
+                "breach_incidents": [],
             },
-            'recommendations': [
-                'Review data retention policies',
-                'Update privacy notices',
-                'Conduct privacy impact assessments'
-            ]
-        }
-    
-    async def _generate_psd2_report(self, start_date: datetime, end_date: datetime) -> Dict[str, Any]:
-        """Generate PSD2-specific compliance report"""
-        return {
-            'summary': {
-                'transactions_processed': 0,
-                'sca_exemptions_applied': 0,
-                'sca_failures': 0,
-                'risk_assessments_completed': 0
-            },
-            'details': {
-                'sca_performance': {},
-                'exemption_usage': {},
-                'risk_distribution': {}
-            },
-            'recommendations': [
-                'Review SCA exemption policies',
-                'Optimize authentication flows',
-                'Monitor fraud rates'
-            ]
-        }
-    
-    async def _generate_fincen_report(self, start_date: datetime, end_date: datetime) -> Dict[str, Any]:
-        """Generate FinCEN-specific compliance report"""
-        return {
-            'summary': {
-                'sars_filed': 0,
-                'ctrs_filed': 0,
-                'suspicious_activities_detected': 0,
-                'large_transactions_monitored': 0
-            },
-            'details': {
-                'sar_statistics': {},
-                'ctr_statistics': {},
-                'monitoring_effectiveness': {}
-            },
-            'recommendations': [
-                'Review transaction monitoring rules',
-                'Update suspicious activity indicators',
-                'Enhance customer due diligence'
-            ]
+            "recommendations": [
+                "Review data retention policies",
+                "Update privacy notices",
+                "Conduct privacy impact assessments",
+            ],
         }
 
-async def _log_compliance_event(framework: ComplianceFramework, event_type: str,
-                              entity_id: str, entity_type: str, details: Dict[str, Any],
-                              status: ComplianceStatus, automated: bool = True):
+    async def _generate_psd2_report(
+        self, start_date: datetime, end_date: datetime
+    ) -> Dict[str, Any]:
+        """Generate PSD2-specific compliance report"""
+        return {
+            "summary": {
+                "transactions_processed": 0,
+                "sca_exemptions_applied": 0,
+                "sca_failures": 0,
+                "risk_assessments_completed": 0,
+            },
+            "details": {
+                "sca_performance": {},
+                "exemption_usage": {},
+                "risk_distribution": {},
+            },
+            "recommendations": [
+                "Review SCA exemption policies",
+                "Optimize authentication flows",
+                "Monitor fraud rates",
+            ],
+        }
+
+    async def _generate_fincen_report(
+        self, start_date: datetime, end_date: datetime
+    ) -> Dict[str, Any]:
+        """Generate FinCEN-specific compliance report"""
+        return {
+            "summary": {
+                "sars_filed": 0,
+                "ctrs_filed": 0,
+                "suspicious_activities_detected": 0,
+                "large_transactions_monitored": 0,
+            },
+            "details": {
+                "sar_statistics": {},
+                "ctr_statistics": {},
+                "monitoring_effectiveness": {},
+            },
+            "recommendations": [
+                "Review transaction monitoring rules",
+                "Update suspicious activity indicators",
+                "Enhance customer due diligence",
+            ],
+        }
+
+
+async def _log_compliance_event(
+    framework: ComplianceFramework,
+    event_type: str,
+    entity_id: str,
+    entity_type: str,
+    details: Dict[str, Any],
+    status: ComplianceStatus,
+    automated: bool = True,
+):
     """Log compliance event for audit trail"""
     try:
         event = ComplianceEvent(
@@ -824,28 +918,30 @@ async def _log_compliance_event(framework: ComplianceFramework, event_type: str,
             timestamp=datetime.now(timezone.utc),
             details=details,
             status=status,
-            automated=automated
+            automated=automated,
         )
-        
+
         # Log to compliance audit trail
         logger.info(f"COMPLIANCE EVENT: {json.dumps(asdict(event), default=str)}")
-        
+
     except Exception as e:
         logger.error(f"Error logging compliance event: {str(e)}")
 
+
 class ComplianceException(Exception):
     """Custom exception for compliance-related errors"""
+
     pass
+
 
 # Export main classes
 __all__ = [
-    'GDPRComplianceManager',
-    'PSD2ComplianceManager',
-    'FinCENComplianceManager',
-    'ComplianceReportingEngine',
-    'ComplianceFramework',
-    'ComplianceStatus',
-    'ComplianceEvent',
-    'ComplianceException'
+    "GDPRComplianceManager",
+    "PSD2ComplianceManager",
+    "FinCENComplianceManager",
+    "ComplianceReportingEngine",
+    "ComplianceFramework",
+    "ComplianceStatus",
+    "ComplianceEvent",
+    "ComplianceException",
 ]
-

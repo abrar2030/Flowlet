@@ -3,19 +3,20 @@ Banking Integration Base Classes
 Provides abstract base classes for third-party banking integrations
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
-from enum import Enum
 import logging
-from datetime import datetime
 import uuid
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class TransactionType(Enum):
     """Transaction types for banking operations"""
+
     CREDIT = "credit"
     DEBIT = "debit"
     TRANSFER = "transfer"
@@ -25,6 +26,7 @@ class TransactionType(Enum):
 
 class TransactionStatus(Enum):
     """Transaction status enumeration"""
+
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -35,6 +37,7 @@ class TransactionStatus(Enum):
 @dataclass
 class BankAccount:
     """Bank account data structure"""
+
     account_id: str
     account_number: str
     routing_number: str
@@ -51,6 +54,7 @@ class BankAccount:
 @dataclass
 class Transaction:
     """Transaction data structure"""
+
     transaction_id: str
     account_id: str
     amount: float
@@ -70,6 +74,7 @@ class Transaction:
 @dataclass
 class PaymentRequest:
     """Payment request data structure"""
+
     amount: float
     currency: str
     from_account: str
@@ -82,26 +87,31 @@ class PaymentRequest:
 
 class BankingIntegrationError(Exception):
     """Base exception for banking integration errors"""
+
     pass
 
 
 class AuthenticationError(BankingIntegrationError):
     """Authentication related errors"""
+
     pass
 
 
 class InsufficientFundsError(BankingIntegrationError):
     """Insufficient funds error"""
+
     pass
 
 
 class InvalidAccountError(BankingIntegrationError):
     """Invalid account error"""
+
     pass
 
 
 class TransactionLimitError(BankingIntegrationError):
     """Transaction limit exceeded error"""
+
     pass
 
 
@@ -110,12 +120,12 @@ class BankingIntegrationBase(ABC):
     Abstract base class for banking integrations
     Defines the interface that all banking integrations must implement
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._authenticated = False
-        
+
     @abstractmethod
     async def authenticate(self) -> bool:
         """
@@ -123,14 +133,14 @@ class BankingIntegrationBase(ABC):
         Returns True if authentication successful
         """
         pass
-    
+
     @abstractmethod
     async def get_accounts(self, customer_id: str) -> List[BankAccount]:
         """
         Retrieve list of accounts for a customer
         """
         pass
-    
+
     @abstractmethod
     async def get_account_balance(self, account_id: str) -> Dict[str, float]:
         """
@@ -138,20 +148,20 @@ class BankingIntegrationBase(ABC):
         Returns dict with 'balance' and 'available_balance'
         """
         pass
-    
+
     @abstractmethod
     async def get_transactions(
-        self, 
-        account_id: str, 
+        self,
+        account_id: str,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[Transaction]:
         """
         Retrieve transaction history for an account
         """
         pass
-    
+
     @abstractmethod
     async def initiate_payment(self, payment_request: PaymentRequest) -> str:
         """
@@ -159,14 +169,14 @@ class BankingIntegrationBase(ABC):
         Returns transaction ID
         """
         pass
-    
+
     @abstractmethod
     async def get_payment_status(self, transaction_id: str) -> TransactionStatus:
         """
         Get status of a payment transaction
         """
         pass
-    
+
     @abstractmethod
     async def cancel_payment(self, transaction_id: str) -> bool:
         """
@@ -174,19 +184,19 @@ class BankingIntegrationBase(ABC):
         Returns True if cancellation successful
         """
         pass
-    
+
     def generate_reference_id(self) -> str:
         """Generate a unique reference ID for transactions"""
         return f"FLT-{uuid.uuid4().hex[:12].upper()}"
-    
+
     def validate_account_number(self, account_number: str) -> bool:
         """Basic account number validation"""
         return len(account_number) >= 8 and account_number.isdigit()
-    
+
     def validate_routing_number(self, routing_number: str) -> bool:
         """Basic routing number validation"""
         return len(routing_number) == 9 and routing_number.isdigit()
-    
+
     def format_amount(self, amount: float, currency: str = "USD") -> str:
         """Format amount for display"""
         return f"{amount:.2f} {currency}"
@@ -197,7 +207,7 @@ class PSD2ComplianceBase(ABC):
     Base class for PSD2 compliance features
     Implements Strong Customer Authentication (SCA) requirements
     """
-    
+
     @abstractmethod
     async def initiate_sca(self, customer_id: str, transaction_data: Dict) -> str:
         """
@@ -205,14 +215,14 @@ class PSD2ComplianceBase(ABC):
         Returns SCA session ID
         """
         pass
-    
+
     @abstractmethod
     async def verify_sca(self, sca_session_id: str, auth_code: str) -> bool:
         """
         Verify SCA authentication code
         """
         pass
-    
+
     @abstractmethod
     async def get_consent(self, customer_id: str, scope: List[str]) -> str:
         """
@@ -227,26 +237,21 @@ class OpenBankingBase(ABC):
     Base class for Open Banking implementations
     Supports Account Information Services (AIS) and Payment Initiation Services (PIS)
     """
-    
+
     @abstractmethod
     async def get_account_information(
-        self, 
-        consent_id: str, 
-        account_id: str
+        self, consent_id: str, account_id: str
     ) -> Dict[str, Any]:
         """
         Get account information using Open Banking AIS
         """
         pass
-    
+
     @abstractmethod
     async def initiate_payment_pis(
-        self, 
-        consent_id: str, 
-        payment_request: PaymentRequest
+        self, consent_id: str, payment_request: PaymentRequest
     ) -> str:
         """
         Initiate payment using Open Banking PIS
         """
         pass
-

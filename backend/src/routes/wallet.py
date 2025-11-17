@@ -1,21 +1,26 @@
-from flask import Blueprint, request, jsonify, g
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from sqlalchemy import and_, or_, func
-from sqlalchemy.exc import IntegrityError
-from decimal import Decimal, ROUND_HALF_UP
-import uuid
-from datetime import datetime, timezone, timedelta
 import json
 import logging
+import uuid
+from datetime import datetime, timedelta, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, List, Optional, Tuple
 
-from ..models.database import db, Wallet, Transaction, LedgerEntry, User, AuditLog
-from ..security.encryption import encrypt_sensitive_data, decrypt_sensitive_data
-from ..security.validation import validate_currency, validate_amount, validate_wallet_type
+from flask import Blueprint, g, jsonify, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from sqlalchemy import and_, func, or_
+from sqlalchemy.exc import IntegrityError
+from src.integrations.currency.exchange_rates import (convert_currency,
+                                                      get_exchange_rate)
+
+from ..models.database import (AuditLog, LedgerEntry, Transaction, User,
+                               Wallet, db)
+from ..security.encryption import (decrypt_sensitive_data,
+                                   encrypt_sensitive_data)
+from ..security.validation import (validate_amount, validate_currency,
+                                   validate_wallet_type)
 from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
-from src.integrations.currency.exchange_rates import get_exchange_rate, convert_currency
 
 # Create blueprint
 wallet_bp = Blueprint(\'wallet\', __name__, url_prefix=\'/api/v1/wallets\')

@@ -15,13 +15,12 @@ Features:
 - Data visualization
 """
 
-from .data_models import *
-from .reporting_engine import ReportingEngine
 from .dashboard_service import DashboardService
-from .metrics_calculator import MetricsCalculator
+from .data_models import *
 from .data_warehouse import DataWarehouse
+from .metrics_calculator import MetricsCalculator
 from .real_time_analytics import RealTimeAnalytics
+from .reporting_engine import ReportingEngine
 
 __version__ = "1.0.0"
 __author__ = "Flowlet Analytics Team"
-

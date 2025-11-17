@@ -1,19 +1,20 @@
 
-from flask import Blueprint, request, jsonify
-from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Dict, List, Any, Optional
+import hashlib
 import json
 import secrets
-import hashlib
-from sqlalchemy import and_, or_, func
-from src.models.database import Card, Wallet, Transaction
+from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
+
+from flask import Blueprint, jsonify, request
+from sqlalchemy import and_, func, or_
+from src.models.database import Card, Transaction, Wallet
 from src.security.audit_logger import AuditLogger
-from src.security.input_validator import InputValidator, ValidationError
-from src.security.rate_limiter import rate_limit
-from src.security.token_manager import token_required, require_permissions
 from src.security.encryption_manager import TokenizationManager
+from src.security.input_validator import InputValidator, ValidationError
 from src.security.password_security import PasswordSecurity
+from src.security.rate_limiter import rate_limit
+from src.security.token_manager import require_permissions, token_required
 
 cards_bp = Blueprint(\'cards\', __name__)
 
@@ -45,8 +46,8 @@ class CardManager:
         merchant_controls: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Create a new virtual card with security"""
-        from src.models.database import db, Wallet
-        
+        from src.models.database import Wallet, db
+
         # Verify wallet exists and is active
         wallet = db.session.query(Wallet).get(wallet_id)
         if not wallet or wallet.status != 'active':
@@ -589,8 +590,8 @@ def freeze_card(card_id):
         data = request.get_json()
         user_id = request.current_user['user_id']
         
-        from src.models.enhanced_database import db, Card, Wallet
-        
+        from src.models.enhanced_database import Card, Wallet, db
+
         # Get card and verify ownership
         card = db.session.query(Card)\
             .join(Card.wallet)\
@@ -635,8 +636,8 @@ def unfreeze_card(card_id):
     try:
         user_id = request.current_user['user_id']
         
-        from src.models.enhanced_database import db, Card, Wallet
-        
+        from src.models.enhanced_database import Card, Wallet, db
+
         # Get card and verify ownership
         card = db.session.query(Card)\
             .join(Card.wallet)\

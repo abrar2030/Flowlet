@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 # Mocking the services that would interact in a card transaction flow
 
+
 class MockCardService:
     def __init__(self):
         self.frozen_cards = set()
@@ -10,7 +11,7 @@ class MockCardService:
     def process_transaction(self, card_id, amount, merchant_id):
         if card_id in self.frozen_cards:
             return {"status": "declined", "message": "Card is frozen"}
-        if amount > 1000: # Simulate a spending limit
+        if amount > 1000:  # Simulate a spending limit
             return {"status": "declined", "message": "Spending limit exceeded"}
         return {"status": "approved", "transaction_id": f"card_txn_{card_id}_{amount}"}
 
@@ -24,6 +25,7 @@ class MockCardService:
             return {"status": "success", "message": "Card unfrozen"}
         return {"status": "failed", "message": "Card not frozen"}
 
+
 class MockWalletService:
     def withdraw(self, wallet_id, amount):
         if wallet_id == "wallet_insufficient_funds":
@@ -33,8 +35,11 @@ class MockWalletService:
     def deposit(self, wallet_id, amount):
         return {"status": "success", "wallet_id": wallet_id, "new_balance": 1000}
 
+
 class MockLedgerService:
-    def create_journal_entry(self, debit_account, credit_account, amount, description, transaction_id=None):
+    def create_journal_entry(
+        self, debit_account, credit_account, amount, description, transaction_id=None
+    ):
         return {"status": "success", "entry_id": "entry_mock_789"}
 
 
@@ -53,7 +58,9 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
         merchant_id = "merchant_abc"
 
         # 1. Card swipe/online transaction
-        transaction_result = self.card_service.process_transaction(card_id, amount, merchant_id)
+        transaction_result = self.card_service.process_transaction(
+            card_id, amount, merchant_id
+        )
         self.assertEqual(transaction_result["status"], "approved")
 
         # 2. Wallet balance updated (withdrawal from user, deposit to merchant)
@@ -69,7 +76,7 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
             credit_account=merchant_wallet_id,
             amount=amount,
             description="Card transaction from user to merchant",
-            transaction_id=transaction_result["transaction_id"]
+            transaction_id=transaction_result["transaction_id"],
         )
         self.assertEqual(ledger_entry_result["status"], "success")
 
@@ -82,7 +89,9 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
         self.card_service.freeze_card(card_id)
 
         # 1. Card swipe/online transaction with frozen card
-        transaction_result = self.card_service.process_transaction(card_id, amount, merchant_id)
+        transaction_result = self.card_service.process_transaction(
+            card_id, amount, merchant_id
+        )
         self.assertEqual(transaction_result["status"], "declined")
         self.assertEqual(transaction_result["message"], "Card is frozen")
 
@@ -90,10 +99,12 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
         card_id = "card_limit_1"
         user_wallet_id = "user_wallet_3"
         merchant_id = "merchant_pqr"
-        amount = 1500.00 # Exceeds simulated limit of 1000
+        amount = 1500.00  # Exceeds simulated limit of 1000
 
         # 1. Card swipe/online transaction exceeding limit
-        transaction_result = self.card_service.process_transaction(card_id, amount, merchant_id)
+        transaction_result = self.card_service.process_transaction(
+            card_id, amount, merchant_id
+        )
         self.assertEqual(transaction_result["status"], "declined")
         self.assertEqual(transaction_result["message"], "Spending limit exceeded")
 
@@ -105,7 +116,9 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
         merchant_id = "merchant_def"
 
         # 1. Card swipe/online transaction
-        transaction_result = self.card_service.process_transaction(card_id, amount, merchant_id)
+        transaction_result = self.card_service.process_transaction(
+            card_id, amount, merchant_id
+        )
         self.assertEqual(transaction_result["status"], "approved")
 
         # 2. Wallet withdrawal fails due to insufficient funds
@@ -113,7 +126,6 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
             self.wallet_service.withdraw(user_wallet_id, amount)
         self.assertIn("Insufficient funds", str(cm.exception))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-
