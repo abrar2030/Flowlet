@@ -1,284 +1,87 @@
 # Flowlet Frontend
 
-A comprehensive, production-ready frontend component library and utilities for financial applications, built with React, TypeScript, and modern web technologies.
+The Flowlet Frontend is a comprehensive, production-ready component library and application built for financial technology. It is developed using **React**, **TypeScript**, and modern tooling to ensure high performance, security, and maintainability.
 
-## 🏦 Financial Industry Standards
+## 1. Core Technologies and Dependencies
 
-This library is designed to meet strict financial industry requirements including:
+The frontend is built on a modern stack, leveraging key libraries for state management, UI components, and data handling.
 
-- **Security**: Bank-level security with proper token management, encryption, and secure storage
-- **Compliance**: GDPR, PCI DSS, and AML compliance components
-- **Audit Trail**: Comprehensive logging and audit capabilities
-- **Performance**: Optimized for high-performance financial applications
-- **Accessibility**: WCAG 2.1 AA compliant components
-- **Testing**: Extensive test coverage for critical financial operations
+| Category | Key Technologies | Purpose |
+| :--- | :--- | :--- |
+| **Core Framework** | `React 19`, `TypeScript`, `Vite` | Application foundation, type safety, and fast development environment. |
+| **State Management** | `@reduxjs/toolkit`, `react-redux` | Predictable and scalable state management for the application. |
+| **UI/Styling** | `Tailwind CSS`, `@radix-ui/*`, `class-variance-authority` | Utility-first styling, accessible UI primitives, and component variants. |
+| **Routing** | `react-router-dom` | Declarative routing for navigation within the single-page application. |
+| **Form Handling** | `react-hook-form`, `@hookform/resolvers`, `zod` | Performant form management, validation, and schema-based data parsing. |
+| **Data Fetching** | `axios` | Promise-based HTTP client for API communication. |
+| **Security/Auth** | `jose`, `crypto-js`, `helmet`, `js-cookie` | Token handling, encryption, security headers, and secure cookie management. |
+| **Testing** | `vitest`, `@testing-library/*`, `jsdom` | Unit and integration testing framework with DOM simulation. |
+| **Visualization** | `recharts` | Composable charting library for financial data visualization. |
 
-## 🚀 Features
+## 2. Directory Structure
 
-### Core Components
-- **Authentication**: Secure login, registration, MFA, and biometric authentication
-- **Wallet Management**: Balance display, transaction history, money transfers
-- **Card Management**: Virtual and physical card controls, spending limits
-- **Security**: Real-time fraud detection, security monitoring
-- **Compliance**: Built-in compliance tools and reporting
-- **Analytics**: Financial insights and spending analytics
+The application follows a modular and feature-driven architecture for clear separation of concerns.
 
-### Technical Features
-- **TypeScript**: Full type safety for financial data
-- **React 19**: Latest React features with concurrent rendering
-- **Tailwind CSS**: Utility-first styling with financial design tokens
-- **Redux Toolkit**: Predictable state management
-- **React Hook Form**: Performant form handling with validation
-- **Zod**: Runtime type validation for API responses
-- **Axios**: HTTP client with automatic token refresh
-- **Recharts**: Financial data visualization
+| Directory | Primary Function | Key Contents |
+| :--- | :--- | :--- |
+| **components/** | Reusable UI and feature-specific components. | Organized into sub-directories like `auth/`, `security/`, `compliance/`, and `ui/` (base components). |
+| **hooks/** | Custom React hooks for reusable logic. | Contains hooks like `useAuth`, `use-responsive`, and other utility hooks. |
+| **lib/** | Utility functions and service wrappers. | Includes API clients (`api.ts`), authentication services (`authService.ts`), and security utilities. |
+| **store/** | Redux store configuration and slices. | Contains state slices for features like `auth`, `wallet`, and `transactions`. |
+| **types/** | Global TypeScript type definitions. | Centralized location for application-wide interfaces and types. |
+| **assets/** | Static assets like images and fonts. | Visual resources used throughout the application. |
+| **__tests__/** | Test files for various components and utilities. | Houses unit and integration tests. |
+| `package.json` | Project manifest. | Defines dependencies, scripts, and project metadata. |
+| `vite.config.ts` | Build configuration. | Configuration for the Vite development and build tool. |
 
-## 📦 Installation
+## 3. Specialized Component and Logic Modules
 
-```bash
-# Using npm
-npm install flowlet-frontend
+The `components/` and `lib/` directories are further organized to handle specific financial and technical domains.
 
-# Using pnpm
-pnpm add flowlet-frontend
+| Module | Location | Primary Function | Examples |
+| :--- | :--- | :--- | :--- |
+| **Authentication** | `components/auth/` | User login, registration, and Multi-Factor Authentication (MFA) screens. | `LoginScreen`, `RegisterForm`, `MFAVerification`. |
+| **UI Primitives** | `components/ui/` | Reusable, styled, and accessible base components. | `Button`, `Input`, `Card`, `AlertDialog` (using Radix UI). |
+| **Data Protection** | `components/data-protection/` | Components related to data privacy and compliance. | `GDPRConsentBanner`, `DataEncryptionStatus`. |
+| **Security** | `components/security/` | Components for security monitoring and settings. | `SecurityDashboard`, `TokenManagement`. |
+| **Compliance** | `components/compliance/` | Components for regulatory adherence features. | `KYCForm`, `AMLMonitoring`. |
+| **Wallet/Transactions** | `components/wallet/` | Components for managing user accounts and transactions. | `WalletScreen`, `TransactionHistory`, `SendMoneyForm`. |
+| **API Services** | `lib/` | Wrappers for backend API calls and token management. | `api.ts`, `authService.ts`, `walletService.ts`. |
 
-# Using yarn
-yarn add flowlet-frontend
-```
+## 4. Development Scripts and Tooling
 
-## 🛠️ Usage
+The `package.json` defines a comprehensive set of scripts for development, testing, and quality assurance.
 
-### Basic Setup
+| Script | Command | Purpose |
+| :--- | :--- | :--- |
+| `dev` | `vite` | Starts the development server with hot module replacement. |
+| `build` | `tsc && vite build` | Compiles TypeScript and builds the production-ready bundle. |
+| `test` | `vitest` | Runs all unit and integration tests. |
+| `test:coverage` | `vitest --coverage` | Runs tests and generates a code coverage report. |
+| `test:security` | `vitest run src/tests/security` | Executes security-focused tests. |
+| `lint` | `eslint . --ext ts,tsx` | Runs ESLint for code quality and style checking. |
+| `lint:fix` | `eslint . --ext ts,tsx --fix` | Automatically fixes linting issues. |
+| `type-check` | `tsc --noEmit` | Performs a TypeScript type check without emitting files. |
+| `storybook` | `storybook dev -p 6006` | Starts the Storybook server for component documentation and isolation. |
+| `security-audit` | `npm audit && npm audit fix` | Runs a security audit on dependencies and attempts to fix vulnerabilities. |
 
-```tsx
-import React from 'react';
-import { App, store } from 'flowlet-frontend';
-import { Provider } from 'react-redux';
-
-function MyApp() {
-  return (
-    <Provider store={store}>
-      <App />
-    </Provider>
-  );
-}
-
-export default MyApp;
-```
-
-### Using Individual Components
-
-```tsx
-import { 
-  WalletScreen, 
-  TransactionHistory, 
-  CardsScreen,
-  SendMoney 
-} from 'flowlet-frontend';
-
-function Dashboard() {
-  return (
-    <div>
-      <WalletScreen />
-      <TransactionHistory />
-      <CardsScreen />
-    </div>
-  );
-}
-```
-
-### Authentication
-
-```tsx
-import { LoginScreen, useAuth } from 'flowlet-frontend';
-
-function AuthenticatedApp() {
-  const { isAuthenticated, user } = useAuth();
-
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
-
-  return <Dashboard user={user} />;
-}
-```
-
-### API Integration
-
-```tsx
-import { api, TokenManager } from 'flowlet-frontend';
-
-// Configure API base URL
-const apiClient = api;
-
-// Make authenticated requests
-async function getTransactions() {
-  try {
-    const transactions = await api.get('/api/v1/transactions');
-    return transactions;
-  } catch (error) {
-    console.error('Failed to fetch transactions:', error);
-  }
-}
-```
-
-## 🏗️ Architecture
-
-### Directory Structure
-
-```
-frontend/
-├── components/           # React components
-│   ├── auth/            # Authentication components
-│   ├── pages/           # Page-level components
-│   │   ├── wallet/      # Wallet-related pages
-│   │   ├── transactions/ # Transaction pages
-│   │   └── cards/       # Card management pages
-│   ├── security/        # Security components
-│   ├── compliance/      # Compliance components
-│   └── ui/             # Base UI components
-├── hooks/              # Custom React hooks
-├── lib/                # Utilities and services
-│   └── security/       # Security utilities
-├── store/              # Redux store and slices
-├── types/              # TypeScript type definitions
-└── __tests__/          # Test files
-```
-
-### Component Organization
-
-Components are organized by feature and responsibility:
-
-- **Pages**: Complete page components for specific features
-- **Auth**: Authentication and authorization components
-- **Security**: Security-focused components and utilities
-- **Compliance**: Regulatory compliance components
-- **UI**: Reusable base components (buttons, forms, etc.)
-
-## 🔐 Security Features
-
-### Token Management
-- Secure token storage with automatic refresh
-- JWT validation and expiry checking
-- Secure logout and session management
-
-### Input Validation
-- Client-side validation with Zod schemas
-- Sanitization of user inputs
-- Protection against XSS and injection attacks
-
-### Error Handling
-- Comprehensive error logging
-- Secure error messages (no sensitive data exposure)
-- Global error boundaries
-
-### Compliance
-- GDPR consent management
-- PCI DSS compliance utilities
-- Audit trail logging
-- Data classification and protection
-
-## 📊 Performance
-
-### Optimizations
-- Code splitting and lazy loading
-- Memoized components and hooks
-- Optimized bundle size
-- Performance monitoring
-
-### Metrics
-- First Contentful Paint (FCP) < 1.5s
-- Largest Contentful Paint (LCP) < 2.5s
-- Cumulative Layout Shift (CLS) < 0.1
-- First Input Delay (FID) < 100ms
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run security tests
-npm run test:security
-
-# Run compliance tests
-npm run test:compliance
-```
-
-### Test Coverage
-- Unit tests for all components
-- Integration tests for critical flows
-- Security tests for authentication and authorization
-- Compliance tests for regulatory requirements
-
-## 🚀 Development
+## 5. Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm 8+ or pnpm 8+
+- Node.js (version 18.0.0 or higher)
+- pnpm (version 8.0.0 or higher)
 
-### Setup
+### Setup and Run
 
 ```bash
-# Clone the repository
-git clone https://github.com/abrar2030/Flowlet.git
+# Navigate to the frontend directory
 cd Flowlet/frontend
 
-# Install dependencies
+# Install dependencies using pnpm
 pnpm install
 
-# Start development server
+# Start the development server
 pnpm dev
-
-# Build for production
-pnpm build
-
-# Run linting
-pnpm lint
-
-# Run type checking
-pnpm type-check
 ```
 
-### Scripts
-
-- `dev`: Start development server
-- `build`: Build for production
-- `test`: Run tests
-- `lint`: Run ESLint
-- `type-check`: Run TypeScript type checking
-- `security-audit`: Run security audit
-
-## 📚 Documentation
-
-### Storybook
-View component documentation and examples:
-
-```bash
-npm run storybook
-```
-
-### API Documentation
-API documentation is available in the `/docs` directory.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-### Code Standards
-- TypeScript for all new code
-- ESLint and Prettier for code formatting
-- Comprehensive test coverage
-- Security-first development practices
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The application will typically be available at `http://localhost:5173` (or another port specified by Vite).
