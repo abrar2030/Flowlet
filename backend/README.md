@@ -1,4 +1,4 @@
-# Flowlet Backend - Refined Documentation
+# Flowlet Backend
 
 ## Overview
 
