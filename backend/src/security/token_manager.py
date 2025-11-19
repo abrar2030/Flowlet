@@ -1,286 +1,210 @@
-# JWT Token Management
-import json
-import secrets
-from datetime import datetime, timedelta
-from functools import wraps
-from typing import Any, Dict, Optional
-
+"""
+JWT Token Management for Financial-Grade Security
+"""
 import jwt
 import redis
-from flask import current_app, jsonify, request
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Optional, Any, Tuple
+from flask import current_app
+import secrets
+import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 class TokenManager:
     """JWT token management for financial industry standards"""
+    
+    # Define token expiry times (should be loaded from config)
+    ACCESS_TOKEN_EXPIRY = timedelta(minutes=15)
+    REFRESH_TOKEN_EXPIRY = timedelta(days=7)
+    RESET_TOKEN_EXPIRY = timedelta(hours=1)
+    VERIFICATION_TOKEN_EXPIRY = timedelta(hours=24)
+    
+    ACCESS_TOKEN_EXPIRY_SECONDS = int(ACCESS_TOKEN_EXPIRY.total_seconds())
+    
+    def __init__(self, app=None):
+        self.app = app
+        self._redis_client = None
+    
+    @property
+    def redis_client(self):
+        """Lazy load and configure Redis client within app context"""
+        if self._redis_client is None and self.app:
+            with self.app.app_context():
+                redis_url = current_app.config.get('REDIS_URL', 'redis://localhost:6379/0')
+                self._redis_client = redis.Redis.from_url(
+                    redis_url,
+                    decode_responses=True
+                )
+        return self._redis_client
 
-    def __init__(self, redis_client=None):
-        self.redis_client = redis_client or redis.Redis.from_url(
-            current_app.config.get("REDIS_URL", "redis://localhost:6379"),
-            decode_responses=True,
-        )
+    def _get_config(self, key, default=None):
+        """Helper to get config values safely"""
+        if self.app:
+            with self.app.app_context():
+                return current_app.config.get(key, default)
+        return default
 
-    def generate_tokens(
-        self, user_id: str, user_data: Dict[str, Any]
-    ) -> Dict[str, str]:
-        """Generate access and refresh tokens"""
-        now = datetime.utcnow()
+    def init_app(self, app):
+        """Initialize the TokenManager with the Flask application"""
+        self.app = app
+        # Force initialization of Redis client
+        _ = self.redis_client
 
-        # Access token payload
-        access_payload = {
-            "user_id": user_id,
-            "email": user_data.get("email"),
-            "role": user_data.get("role", "user"),
-            "permissions": user_data.get("permissions", []),
-            "iat": now,
-            "exp": now + current_app.config["JWT_ACCESS_TOKEN_EXPIRES"],
-            "type": "access",
-            "jti": secrets.token_urlsafe(16),  # JWT ID for tracking
+    def generate_token(self, user_id: str, token_type: str, expiry: timedelta, purpose: Optional[str] = None) -> str:
+        """Internal function to generate a generic JWT token"""
+        now = datetime.now(timezone.utc)
+        
+        payload = {
+            'user_id': user_id,
+            'iat': now.timestamp(),
+            'exp': (now + expiry).timestamp(),
+            'type': token_type,
+            'jti': secrets.token_urlsafe(16)
         }
+        
+        if purpose:
+            payload['purpose'] = purpose
+        
+        secret_key = self._get_config('JWT_SECRET_KEY')
+        algorithm = self._get_config('JWT_ALGORITHM', 'HS256')
+        
+        if not secret_key:
+            raise RuntimeError("JWT_SECRET_KEY not configured")
+        
+        return jwt.encode(payload, secret_key, algorithm=algorithm)
 
-        # Refresh token payload
-        refresh_payload = {
-            "user_id": user_id,
-            "iat": now,
-            "exp": now + current_app.config["JWT_REFRESH_TOKEN_EXPIRES"],
-            "type": "refresh",
-            "jti": secrets.token_urlsafe(16),
-        }
+    def validate_token(self, token: str, token_type: str) -> Dict[str, Any]:
+        """Internal function to validate and decode a generic JWT token"""
+        secret_key = self._get_config('JWT_SECRET_KEY')
+        algorithm = self._get_config('JWT_ALGORITHM', 'HS256')
+        
+        if not secret_key:
+            raise RuntimeError("JWT_SECRET_KEY not configured")
+            
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        
+        if payload.get('type') != token_type:
+            raise jwt.InvalidTokenError("Invalid token type")
+        
+        # Check if token is blacklisted (only for refresh tokens for now)
+        if token_type == 'refresh' and self.is_token_blacklisted(payload.get('jti')):
+            raise jwt.InvalidTokenError("Token is blacklisted")
+            
+        return payload
 
-        # Generate tokens
-        access_token = jwt.encode(
-            access_payload,
-            current_app.config["JWT_SECRET_KEY"],
-            algorithm=current_app.config["JWT_ALGORITHM"],
-        )
+    # --- Public Token Generation Methods ---
 
-        refresh_token = jwt.encode(
-            refresh_payload,
-            current_app.config["JWT_SECRET_KEY"],
-            algorithm=current_app.config["JWT_ALGORITHM"],
-        )
+    def generate_access_token(self, user_id: str) -> str:
+        """Generate a standard access token"""
+        return self.generate_token(user_id, 'access', self.ACCESS_TOKEN_EXPIRY)
 
-        # Store refresh token in Redis for tracking
-        self.redis_client.setex(
-            f"refresh_token:{refresh_payload['jti']}",
-            int(current_app.config["JWT_REFRESH_TOKEN_EXPIRES"].total_seconds()),
-            json.dumps(
-                {
-                    "user_id": user_id,
-                    "created_at": now.isoformat(),
-                    "last_used": now.isoformat(),
-                }
-            ),
-        )
-
-        return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "expires_in": int(
-                current_app.config["JWT_ACCESS_TOKEN_EXPIRES"].total_seconds()
-            ),
-            "token_type": "Bearer",
-        }
-
-    def verify_token(
-        self, token: str, token_type: str = "access"
-    ) -> Optional[Dict[str, Any]]:
-        """Verify and decode JWT token"""
-        try:
-            payload = jwt.decode(
-                token,
-                current_app.config["JWT_SECRET_KEY"],
-                algorithms=[current_app.config["JWT_ALGORITHM"]],
+    def generate_refresh_token(self, user_id: str) -> str:
+        """Generate a refresh token and store its JTI in Redis"""
+        refresh_token = self.generate_token(user_id, 'refresh', self.REFRESH_TOKEN_EXPIRY)
+        
+        # Decode to get JTI
+        payload = jwt.decode(refresh_token, self._get_config('JWT_SECRET_KEY'), algorithms=[self._get_config('JWT_ALGORITHM', 'HS256')], options={"verify_signature": False})
+        jti = payload['jti']
+        
+        # Store JTI in Redis for blacklisting/revocation
+        if self.redis_client:
+            self.redis_client.setex(
+                f"refresh_jti:{jti}",
+                int(self.REFRESH_TOKEN_EXPIRY.total_seconds()),
+                user_id
             )
+        
+        return refresh_token
 
-            # Check token type
-            if payload.get("type") != token_type:
-                return None
+    def generate_temp_token(self, user_id: str, purpose: str) -> str:
+        """Generate a short-lived temporary token for multi-step processes (e.g., 2FA)"""
+        return self.generate_token(user_id, 'temp', timedelta(minutes=5), purpose)
 
-            # Check if token is blacklisted
-            if self.is_token_blacklisted(payload.get("jti")):
-                return None
+    def generate_reset_token(self, user_id: str) -> str:
+        """Generate a password reset token"""
+        return self.generate_token(user_id, 'reset', self.RESET_TOKEN_EXPIRY, 'password_reset')
 
-            # Update last used time for refresh tokens
-            if token_type == "refresh":
-                self._update_refresh_token_usage(payload.get("jti"))
+    def generate_verification_token(self, user_id: str, purpose: str) -> str:
+        """Generate an email/phone verification token"""
+        return self.generate_token(user_id, 'verify', self.VERIFICATION_TOKEN_EXPIRY, f'{purpose}_verification')
 
-            return payload
+    # --- Public Token Validation Methods ---
 
-        except jwt.ExpiredSignatureError:
-            return None
-        except jwt.InvalidTokenError:
-            return None
+    def validate_access_token(self, token: str) -> Dict[str, Any]:
+        """Validate an access token"""
+        return self.validate_token(token, 'access')
 
-    def refresh_access_token(self, refresh_token: str) -> Optional[Dict[str, str]]:
-        """Generate new access token using refresh token"""
-        payload = self.verify_token(refresh_token, "refresh")
-        if not payload:
-            return None
+    def validate_refresh_token(self, token: str) -> Dict[str, Any]:
+        """Validate a refresh token"""
+        return self.validate_token(token, 'refresh')
 
-        user_id = payload["user_id"]
+    def validate_temp_token(self, token: str) -> Dict[str, Any]:
+        """Validate a temporary token"""
+        return self.validate_token(token, 'temp')
 
-        # Get user data (you would fetch this from database)
-        # For now, we'll use minimal data
-        user_data = {
-            "email": f"user_{user_id}@example.com",  # This should come from DB
-            "role": "user",
-            "permissions": [],
-        }
+    def validate_reset_token(self, token: str) -> Dict[str, Any]:
+        """Validate a password reset token"""
+        payload = self.validate_token(token, 'reset')
+        if payload.get('purpose') != 'password_reset':
+            raise jwt.InvalidTokenError("Invalid token purpose")
+        return payload
 
-        # Generate new access token only
-        now = datetime.utcnow()
-        access_payload = {
-            "user_id": user_id,
-            "email": user_data.get("email"),
-            "role": user_data.get("role", "user"),
-            "permissions": user_data.get("permissions", []),
-            "iat": now,
-            "exp": now + current_app.config["JWT_ACCESS_TOKEN_EXPIRES"],
-            "type": "access",
-            "jti": secrets.token_urlsafe(16),
-        }
+    def validate_verification_token(self, token: str) -> Dict[str, Any]:
+        """Validate a verification token"""
+        payload = self.validate_token(token, 'verify')
+        if not payload.get('purpose', '').endswith('_verification'):
+            raise jwt.InvalidTokenError("Invalid token purpose")
+        return payload
 
-        access_token = jwt.encode(
-            access_payload,
-            current_app.config["JWT_SECRET_KEY"],
-            algorithm=current_app.config["JWT_ALGORITHM"],
-        )
+    # --- Token Management Methods ---
 
-        return {
-            "access_token": access_token,
-            "expires_in": int(
-                current_app.config["JWT_ACCESS_TOKEN_EXPIRES"].total_seconds()
-            ),
-            "token_type": "Bearer",
-        }
+    def refresh_tokens(self, refresh_token: str) -> Tuple[str, str, str]:
+        """Generate new access and refresh tokens from a valid refresh token"""
+        payload = self.validate_refresh_token(refresh_token)
+        user_id = payload['user_id']
+        jti = payload['jti']
+        
+        # Blacklist the old refresh token immediately
+        self.blacklist_token(jti)
+        
+        # Generate new tokens
+        new_access_token = self.generate_access_token(user_id)
+        new_refresh_token = self.generate_refresh_token(user_id)
+        
+        return new_access_token, new_refresh_token, user_id
 
-    def blacklist_token(self, jti: str, expires_in: int = None):
-        """Add token to blacklist"""
-        if expires_in is None:
-            expires_in = int(
-                current_app.config["JWT_REFRESH_TOKEN_EXPIRES"].total_seconds()
+    def blacklist_token(self, jti: str):
+        """Add token JTI to blacklist"""
+        if self.redis_client:
+            # Check if it's a refresh token JTI and get its expiry
+            expiry = self.REFRESH_TOKEN_EXPIRY
+            
+            # Remove from active refresh JTI set
+            self.redis_client.delete(f"refresh_jti:{jti}")
+            
+            # Add to blacklist set
+            self.redis_client.setex(
+                f"blacklist:{jti}",
+                int(expiry.total_seconds()),
+                datetime.now(timezone.utc).isoformat()
             )
-
-        self.redis_client.setex(
-            f"blacklist:{jti}", expires_in, datetime.utcnow().isoformat()
-        )
 
     def is_token_blacklisted(self, jti: str) -> bool:
-        """Check if token is blacklisted"""
-        return self.redis_client.exists(f"blacklist:{jti}")
+        """Check if token JTI is blacklisted"""
+        if self.redis_client:
+            return self.redis_client.exists(f"blacklist:{jti}")
+        return False
 
     def revoke_all_user_tokens(self, user_id: str):
-        """Revoke all tokens for a user"""
-        # Get all refresh tokens for user
-        pattern = "refresh_token:*"
-        for key in self.redis_client.scan_iter(match=pattern):
-            token_data = self.redis_client.get(key)
-            if token_data:
-                data = json.loads(token_data)
-                if data.get("user_id") == user_id:
-                    # Extract JTI from key and blacklist
-                    jti = key.split(":")[1]
+        """Revoke all refresh tokens for a user"""
+        if self.redis_client:
+            # Find all refresh JTIs associated with the user
+            for key in self.redis_client.scan_iter(match="refresh_jti:*"):
+                if self.redis_client.get(key) == user_id:
+                    jti = key.split(':')[1]
                     self.blacklist_token(jti)
-                    # Delete refresh token
-                    self.redis_client.delete(key)
 
-    def _update_refresh_token_usage(self, jti: str):
-        """Update last used time for refresh token"""
-        key = f"refresh_token:{jti}"
-        token_data = self.redis_client.get(key)
-        if token_data:
-            data = json.loads(token_data)
-            data["last_used"] = datetime.utcnow().isoformat()
-            ttl = self.redis_client.ttl(key)
-            if ttl > 0:
-                self.redis_client.setex(key, ttl, json.dumps(data))
-
-
-def token_required(f):
-    """Decorator for token authentication with detailed logging"""
-
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        auth_header = request.headers.get("Authorization")
-
-        if auth_header:
-            try:
-                token = auth_header.split(" ")[1]  # Bearer <token>
-            except IndexError:
-                return (
-                    jsonify(
-                        {
-                            "error": "Invalid authorization header format",
-                            "code": "INVALID_AUTH_HEADER",
-                        }
-                    ),
-                    401,
-                )
-
-        if not token:
-            return (
-                jsonify({"error": "Access token is missing", "code": "MISSING_TOKEN"}),
-                401,
-            )
-
-        token_manager = TokenManager()
-        payload = token_manager.verify_token(token, "access")
-
-        if not payload:
-            return (
-                jsonify({"error": "Invalid or expired token", "code": "INVALID_TOKEN"}),
-                401,
-            )
-
-        # Add user context to Flask global context
-        g.current_user = payload
-
-        # Log token usage for audit
-        # # # from src.security.audit_logger import AuditLogger # Circular import fix
-        # pass # AuditLogger.log_event(...)   )
-
-        return f(*args, **kwargs)
-
-    return decorated
-
-
-def require_permissions(required_permissions):
-    """Decorator to require specific permissions"""
-
-    def decorator(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            if not hasattr(g, "current_user"):
-                return (
-                    jsonify(
-                        {"error": "Authentication required", "code": "AUTH_REQUIRED"}
-                    ),
-                    401,
-                )
-
-            user_permissions = g.current_user.get("permissions", [])
-            user_role = g.current_user.get("role", "user")
-
-            # Admin role has all permissions
-            if user_role == "admin":
-                return f(*args, **kwargs)
-
-            # Check if user has required permissions
-            if not all(perm in user_permissions for perm in required_permissions):
-                return (
-                    jsonify(
-                        {
-                            "error": "Insufficient permissions",
-                            "code": "INSUFFICIENT_PERMISSIONS",
-                            "required_permissions": required_permissions,
-                        }
-                    ),
-                    403,
-                )
-
-            return f(*args, **kwargs)
-
-        return decorated
-
-    return decorator
+# Global instance of the TokenManager (to be initialized with app later)
+token_manager = TokenManager()

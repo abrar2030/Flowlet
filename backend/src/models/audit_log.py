@@ -1,17 +1,17 @@
 """
 Audit log model for comprehensive activity tracking and compliance
 """
-
+import uuid
 import json
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import datetime, timezone, timedelta
+from enum import Enum as PyEnum
+from sqlalchemy import Column, String, DateTime, Text, Boolean, Integer, Index, ForeignKey
+from sqlalchemy.orm import relationship
 
-from src.models.database import TimestampMixin, UUIDMixin, db
+from .database import Base, db # Import Base and db from the local database setup
 
-
-class AuditEventType(Enum):
+class AuditEventType(PyEnum):
     """Types of audit events"""
-
     USER_LOGIN = "user_login"
     USER_LOGOUT = "user_logout"
     USER_REGISTRATION = "user_registration"
@@ -32,81 +32,77 @@ class AuditEventType(Enum):
     API_REQUEST = "api_request"
     ADMIN_ACTION = "admin_action"
 
-
-class AuditSeverity(Enum):
+class AuditSeverity(PyEnum):
     """Severity levels for audit events"""
-
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
-
-class AuditLog(db.Model, TimestampMixin, UUIDMixin):
+class AuditLog(Base):
     """Comprehensive audit logging for compliance and security monitoring"""
-
-    __tablename__ = "audit_logs"
-
+    
+    __tablename__ = 'audit_logs'
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    
     # Event identification
-    event_type = db.Column(db.Enum(AuditEventType), nullable=False, index=True)
-    severity = db.Column(
-        db.Enum(AuditSeverity), default=AuditSeverity.LOW, nullable=False
-    )
-
+    event_type = Column(db.Enum(AuditEventType), nullable=False, index=True)
+    severity = Column(db.Enum(AuditSeverity), default=AuditSeverity.LOW, nullable=False)
+    
     # Event details
-    description = db.Column(db.String(500), nullable=False)
-    details = db.Column(db.Text)  # JSON string with additional details
-
+    description = Column(String(500), nullable=False)
+    details = Column(Text)  # JSON string with additional details
+    
     # User and session information
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), nullable=True)
-    session_id = db.Column(db.String(255))
-
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=True)
+    session_id = Column(String(255))
+    
     # Request information
-    endpoint = db.Column(db.String(200))
-    method = db.Column(db.String(10))
-    ip_address = db.Column(db.String(45))  # IPv6 compatible
-    user_agent = db.Column(db.String(500))
-
+    endpoint = Column(String(200))
+    method = Column(String(10))
+    ip_address = Column(String(45))  # IPv6 compatible
+    user_agent = Column(String(500))
+    
     # Resource information
-    resource_type = db.Column(db.String(100))  # account, transaction, card, etc.
-    resource_id = db.Column(db.String(100))
-
+    resource_type = Column(String(100))  # account, transaction, card, etc.
+    resource_id = Column(String(100))
+    
     # Status and outcome
-    status_code = db.Column(db.Integer)
-    success = db.Column(db.Boolean, default=True)
-    error_message = db.Column(db.String(500))
-
+    status_code = Column(Integer)
+    success = Column(Boolean, default=True)
+    error_message = Column(String(500))
+    
     # Compliance and retention
-    retention_period_days = db.Column(db.Integer, default=2555)  # 7 years default
-    is_pii_related = db.Column(db.Boolean, default=False)
-    is_financial_data = db.Column(db.Boolean, default=False)
-
+    retention_period_days = Column(Integer, default=2555)  # 7 years default
+    is_pii_related = Column(Boolean, default=False)
+    is_financial_data = Column(Boolean, default=False)
+    
     # Geolocation (if available)
-    country_code = db.Column(db.String(2))
-    region = db.Column(db.String(100))
-    city = db.Column(db.String(100))
-
-    def __init__(self, **kwargs):
-        super(AuditLog, self).__init__(**kwargs)
-
-        # Set retention period based on event type
-        if self.event_type in [
-            AuditEventType.TRANSACTION_CREATED,
-            AuditEventType.TRANSACTION_MODIFIED,
-        ]:
-            self.retention_period_days = 2555  # 7 years for financial records
-            self.is_financial_data = True
-        elif self.event_type in [
-            AuditEventType.USER_REGISTRATION,
-            AuditEventType.DATA_ACCESS,
-        ]:
-            self.is_pii_related = True
+    country_code = Column(String(2))
+    region = Column(String(100))
+    city = Column(String(100))
+    
+    # Audit fields
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_audit_event_type', 'event_type'),
+        Index('idx_audit_user_id', 'user_id'),
+        Index('idx_audit_resource', 'resource_type', 'resource_id'),
+        Index('idx_audit_created_at', 'created_at'),
+    )
 
     def set_details(self, details_dict):
         """Set details as JSON string"""
         if details_dict:
             self.details = json.dumps(details_dict, default=str)
-
+    
     def get_details(self):
         """Get details as dictionary"""
         if self.details:
@@ -115,131 +111,31 @@ class AuditLog(db.Model, TimestampMixin, UUIDMixin):
             except json.JSONDecodeError:
                 return {}
         return {}
-
+    
     def is_expired(self):
         """Check if audit log has exceeded retention period"""
-        from datetime import timedelta
-
         expiry_date = self.created_at + timedelta(days=self.retention_period_days)
         return datetime.now(timezone.utc) > expiry_date
-
-    @staticmethod
-    def log_event(
-        event_type,
-        description,
-        user_id=None,
-        details=None,
-        severity=AuditSeverity.LOW,
-        **kwargs,
-    ):
-        """Create a new audit log entry"""
-        audit_log = AuditLog(
-            event_type=event_type,
-            description=description,
-            user_id=user_id,
-            severity=severity,
-            **kwargs,
-        )
-
-        if details:
-            audit_log.set_details(details)
-
-        db.session.add(audit_log)
-        db.session.commit()
-
-        return audit_log
-
-    @staticmethod
-    def log_user_action(
-        user_id, action, resource_type=None, resource_id=None, details=None
-    ):
-        """Log a user action"""
-        return AuditLog.log_event(
-            event_type=AuditEventType.DATA_ACCESS,
-            description=f"User performed action: {action}",
-            user_id=user_id,
-            resource_type=resource_type,
-            resource_id=resource_id,
-            details=details,
-            severity=AuditSeverity.LOW,
-        )
-
-    @staticmethod
-    def log_security_event(
-        description, user_id=None, severity=AuditSeverity.HIGH, details=None
-    ):
-        """Log a security-related event"""
-        return AuditLog.log_event(
-            event_type=AuditEventType.SECURITY_ALERT,
-            description=description,
-            user_id=user_id,
-            severity=severity,
-            details=details,
-        )
-
-    @staticmethod
-    def log_transaction_event(transaction_id, action, user_id=None, details=None):
-        """Log a transaction-related event"""
-        return AuditLog.log_event(
-            event_type=(
-                AuditEventType.TRANSACTION_CREATED
-                if action == "created"
-                else AuditEventType.TRANSACTION_MODIFIED
-            ),
-            description=f"Transaction {action}",
-            user_id=user_id,
-            resource_type="transaction",
-            resource_id=str(transaction_id),
-            details=details,
-            severity=AuditSeverity.MEDIUM,
-        )
-
-    @staticmethod
-    def log_api_request(
-        endpoint,
-        method,
-        user_id=None,
-        ip_address=None,
-        user_agent=None,
-        status_code=None,
-        success=True,
-    ):
-        """Log an API request"""
-        return AuditLog.log_event(
-            event_type=AuditEventType.API_REQUEST,
-            description=f"{method} {endpoint}",
-            user_id=user_id,
-            endpoint=endpoint,
-            method=method,
-            ip_address=ip_address,
-            user_agent=user_agent,
-            status_code=status_code,
-            success=success,
-            severity=AuditSeverity.LOW,
-        )
-
+    
     def to_dict(self):
         """Convert audit log to dictionary for API responses"""
         return {
-            "id": str(self.id),
-            "event_type": self.event_type.value,
-            "severity": self.severity.value,
-            "description": self.description,
-            "details": self.get_details(),
-            "user_id": str(self.user_id) if self.user_id else None,
-            "endpoint": self.endpoint,
-            "method": self.method,
-            "ip_address": self.ip_address,
-            "resource_type": self.resource_type,
-            "resource_id": self.resource_id,
-            "status_code": self.status_code,
-            "success": self.success,
-            "error_message": self.error_message,
-            "created_at": self.created_at.isoformat(),
-            "country_code": self.country_code,
-            "region": self.region,
-            "city": self.city,
+            'id': self.id,
+            'event_type': self.event_type.value,
+            'severity': self.severity.value,
+            'description': self.description,
+            'details': self.get_details(),
+            'user_id': self.user_id,
+            'endpoint': self.endpoint,
+            'method': self.method,
+            'ip_address': self.ip_address,
+            'resource_type': self.resource_type,
+            'resource_id': self.resource_id,
+            'status_code': self.status_code,
+            'success': self.success,
+            'error_message': self.error_message,
+            'created_at': self.created_at.isoformat(),
         }
-
+    
     def __repr__(self):
-        return f"<AuditLog {self.event_type.value}: {self.description}>"
+        return f'<AuditLog {self.event_type.value}: {self.description}>'
