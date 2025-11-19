@@ -7,14 +7,8 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
-from . import (
-    BankAccount,
-    BankingIntegrationBase,
-    BankingIntegrationError,
-    PaymentRequest,
-    Transaction,
-    TransactionStatus,
-)
+from . import (BankAccount, BankingIntegrationBase, BankingIntegrationError,
+               PaymentRequest, Transaction, TransactionStatus)
 from .fdx_integration import FDXIntegration
 from .open_banking_integration import OpenBankingIntegration
 from .plaid_integration import PlaidIntegration

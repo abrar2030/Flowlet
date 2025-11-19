@@ -21,7 +21,8 @@ from .aml_engine import AMLEngine, AMLResult
 from .audit_service import ComplianceAuditService
 from .data_protection import DataProtectionService
 from .kyc_service import KYCResult, KYCService
-from .regulatory_framework import ComplianceRule, Jurisdiction, RegulatoryFramework
+from .regulatory_framework import (ComplianceRule, Jurisdiction,
+                                   RegulatoryFramework)
 from .reporting_service import ComplianceReportingService
 
 

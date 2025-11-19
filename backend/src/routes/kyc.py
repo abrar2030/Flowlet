@@ -15,8 +15,10 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from ..models.database import AuditLog, KYCRecord, User, db
-from ..security.encryption import decrypt_sensitive_data, encrypt_sensitive_data
-from ..security.validation import validate_email, validate_phone_number, validate_ssn
+from ..security.encryption import (decrypt_sensitive_data,
+                                   encrypt_sensitive_data)
+from ..security.validation import (validate_email, validate_phone_number,
+                                   validate_ssn)
 from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
 

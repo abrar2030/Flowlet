@@ -2,19 +2,21 @@
 Financial Analytics Routes
 """
 
-from flask import Blueprint, request, jsonify, g
-from sqlalchemy import select, func, and_, or_
-from datetime import datetime, timezone, timedelta
-from decimal import Decimal
 import logging
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 
+from flask import Blueprint, g, jsonify, request
+from sqlalchemy import and_, func, or_, select
+
+from ..models.account import Account
+from ..models.card import Card
 # Import refactored modules
 from ..models.database import db
-from ..models.user import User
-from ..models.account import Account
 from ..models.transaction import Transaction, TransactionType
-from ..models.card import Card
-from .auth import token_required  # Assuming decorators are defined here for now
+from ..models.user import User
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/api/v1/analytics")

@@ -1,8 +1,9 @@
 # Integration Tests for API Endpoints
-import pytest
 import json
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+import pytest
 
 
 class TestAuthenticationAPI:

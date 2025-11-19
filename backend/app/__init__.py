@@ -2,18 +2,19 @@
 Flowlet Financial Backend Application Factory
 """
 
-import os
 import logging
+import os
+
+import redis
+import structlog
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail
-import redis
-import structlog
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -127,13 +128,13 @@ def configure_logging(app):
 
 def register_blueprints(app):
     """Register application blueprints"""
-    from app.api.auth import auth_bp
     from app.api.accounts import accounts_bp
-    from app.api.transactions import transactions_bp
+    from app.api.auth import auth_bp
     from app.api.cards import cards_bp
-    from app.api.users import users_bp
     from app.api.compliance import compliance_bp
     from app.api.security import security_bp
+    from app.api.transactions import transactions_bp
+    from app.api.users import users_bp
 
     # API v1 blueprints
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
@@ -152,7 +153,8 @@ def register_blueprints(app):
 
 def register_error_handlers(app):
     """Register error handlers"""
-    from app.utils.error_handlers import register_error_handlers as reg_handlers
+    from app.utils.error_handlers import \
+        register_error_handlers as reg_handlers
 
     reg_handlers(app)
 

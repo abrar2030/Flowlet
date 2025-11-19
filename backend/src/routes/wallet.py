@@ -2,28 +2,26 @@
 Enhanced Account/Wallet Management System with Financial-Grade Features
 """
 
-from flask import Blueprint, request, jsonify, g
-from sqlalchemy import select, func, and_
-from sqlalchemy.exc import IntegrityError
-from decimal import Decimal
+import logging
 import uuid
 from datetime import datetime, timezone
-import logging
+from decimal import Decimal
 
+from flask import Blueprint, g, jsonify, request
+from sqlalchemy import and_, func, select
+from sqlalchemy.exc import IntegrityError
+
+from ..models.account import Account, AccountStatus, AccountType
+from ..models.audit_log import AuditEventType, AuditSeverity
 # Import refactored modules
 from ..models.database import db
+from ..models.transaction import (Transaction, TransactionCategory,
+                                  TransactionStatus, TransactionType)
 from ..models.user import User
-from ..models.account import Account, AccountType, AccountStatus
-from ..models.transaction import (
-    Transaction,
-    TransactionType,
-    TransactionStatus,
-    TransactionCategory,
-)
 from ..security.audit_logger import audit_logger
-from ..models.audit_log import AuditEventType, AuditSeverity
 from ..utils.validators import InputValidator
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
 account_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")

@@ -10,22 +10,12 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
-from . import (
-    FraudAlert,
-    FraudDetectionError,
-    FraudModelBase,
-    FraudType,
-    ModelNotTrainedError,
-    ModelType,
-    RiskLevel,
-)
-from .anomaly_models import AutoencoderModel, IsolationForestModel, OneClassSVMModel
-from .supervised_models import (
-    LightGBMFraudModel,
-    NeuralNetworkFraudModel,
-    RandomForestFraudModel,
-    XGBoostFraudModel,
-)
+from . import (FraudAlert, FraudDetectionError, FraudModelBase, FraudType,
+               ModelNotTrainedError, ModelType, RiskLevel)
+from .anomaly_models import (AutoencoderModel, IsolationForestModel,
+                             OneClassSVMModel)
+from .supervised_models import (LightGBMFraudModel, NeuralNetworkFraudModel,
+                                RandomForestFraudModel, XGBoostFraudModel)
 
 logger = logging.getLogger(__name__)
 

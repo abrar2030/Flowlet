@@ -7,12 +7,13 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from sqlalchemy.exc import SQLAlchemyError
 
+from ..models.audit_log import AuditEventType, AuditLog, AuditSeverity
 # Import the model and database instance
 from ..models.database import db
-from ..models.audit_log import AuditLog, AuditEventType, AuditSeverity
 
 # Configure logging
 logger = logging.getLogger(__name__)

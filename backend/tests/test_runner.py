@@ -1,6 +1,6 @@
 # Simple test runner that doesn't require database
-import sys
 import os
+import sys
 
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -19,8 +19,9 @@ def test_security_modules():
     print("✓ Password security tests passed")
 
     # Test input validation
-    from src.security.input_validator import InputValidator, ValidationError
     from decimal import Decimal
+
+    from src.security.input_validator import InputValidator, ValidationError
 
     # Test valid inputs
     result = InputValidator.validate_string(
@@ -57,7 +58,7 @@ def test_financial_calculations():
     """Test financial calculation accuracy"""
     print("Testing financial calculations...")
 
-    from decimal import Decimal, ROUND_HALF_UP
+    from decimal import ROUND_HALF_UP, Decimal
 
     # Test precise decimal calculations
     amount1 = Decimal("100.50")

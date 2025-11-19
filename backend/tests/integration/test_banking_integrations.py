@@ -2,28 +2,25 @@
 Comprehensive Test Suite for Banking Integrations
 """
 
-import pytest
 import asyncio
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
 import json
+from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
 
+import numpy as np
+import pandas as pd
+import pytest
 # Banking Integration Tests
-from src.integrations.banking import (
-    BankingIntegrationBase,
-    BankAccount,
-    Transaction,
-    PaymentRequest,
-    TransactionType,
-    TransactionStatus,
-    BankingIntegrationError,
-)
-from src.integrations.banking.manager import BankingIntegrationManager, IntegrationType
-from src.integrations.banking.plaid_integration import PlaidIntegration
-from src.integrations.banking.open_banking_integration import OpenBankingIntegration
+from src.integrations.banking import (BankAccount, BankingIntegrationBase,
+                                      BankingIntegrationError, PaymentRequest,
+                                      Transaction, TransactionStatus,
+                                      TransactionType)
 from src.integrations.banking.fdx_integration import FDXIntegration
+from src.integrations.banking.manager import (BankingIntegrationManager,
+                                              IntegrationType)
+from src.integrations.banking.open_banking_integration import \
+    OpenBankingIntegration
+from src.integrations.banking.plaid_integration import PlaidIntegration
 
 
 class TestBankingIntegrations:

@@ -2,31 +2,22 @@
 Card model for secure card management
 """
 
-import uuid
+import hashlib
 import secrets
 import string
-import hashlib
-from datetime import datetime, timezone, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
-from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Text,
-    Boolean,
-    Integer,
-    Index,
-    ForeignKey,
-    Numeric,
-)
+
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Index, Integer,
+                        Numeric, String, Text)
 from sqlalchemy.orm import relationship
 
-from .database import Base, db  # Import Base and db from the local database setup
-from ..security.password_security import (
-    hash_password,
-    check_password,
-)  # Use internal security module
+from ..security.password_security import (  # Use internal security module
+    check_password, hash_password)
+from .database import (  # Import Base and db from the local database setup
+    Base, db)
 
 
 class CardType(PyEnum):

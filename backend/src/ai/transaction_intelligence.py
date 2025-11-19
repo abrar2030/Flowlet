@@ -2,18 +2,18 @@
 AI-Powered Transaction Categorization and Intelligence System
 """
 
-import re
+import hashlib
 import json
 import logging
-from typing import Dict, List, Optional, Tuple, Any
-from datetime import datetime, timezone, timedelta
-from enum import Enum
-from dataclasses import dataclass
-from decimal import Decimal
-import statistics
 import math
-from collections import defaultdict, Counter
-import hashlib
+import re
+import statistics
+from collections import Counter, defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

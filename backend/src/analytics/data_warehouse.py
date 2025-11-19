@@ -20,13 +20,9 @@ from sqlalchemy import and_, create_engine, func, or_, text
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import QueuePool
 
-from .data_models import (
-    BusinessMetrics,
-    CustomerAnalytics,
-    PerformanceMetrics,
-    RegulatoryReport,
-    TransactionAnalytics,
-)
+from .data_models import (BusinessMetrics, CustomerAnalytics,
+                          PerformanceMetrics, RegulatoryReport,
+                          TransactionAnalytics)
 
 
 class DataSourceType(Enum):

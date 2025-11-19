@@ -2,12 +2,15 @@
 Security Event model for tracking security-related events
 """
 
-import uuid
 import enum
+import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Text, Enum, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+
 from app import db
+from sqlalchemy import (Column, DateTime, Enum, ForeignKey, Integer, String,
+                        Text)
+from sqlalchemy.orm import relationship
+
 from .mixins import UUID
 
 

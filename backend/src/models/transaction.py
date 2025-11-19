@@ -2,27 +2,19 @@
 Transaction model for financial transaction management
 """
 
-import uuid
 import random
 import string
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
-from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Text,
-    Boolean,
-    Integer,
-    Index,
-    ForeignKey,
-    Numeric,
-    Date,
-)
+
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Index,
+                        Integer, Numeric, String, Text)
 from sqlalchemy.orm import relationship
 
-from .database import Base, db  # Import Base and db from the local database setup
+from .database import (  # Import Base and db from the local database setup
+    Base, db)
 
 
 class TransactionType(PyEnum):

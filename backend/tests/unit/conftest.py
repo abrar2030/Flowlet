@@ -2,9 +2,10 @@
 Test configuration for the enhanced Flowlet backend
 """
 
-import pytest
 import os
 import tempfile
+
+import pytest
 from src.main import create_app
 from src.models.database import db
 

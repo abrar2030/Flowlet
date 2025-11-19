@@ -5,7 +5,9 @@ Implements security best practices and financial industry standards
 
 import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
+
 from .security import SecurityConfig  # Import SecurityConfig for consistency
 
 # Load environment variables from .env file (handled in main.py/wsgi.py, but safe to keep here)

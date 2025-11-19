@@ -2,11 +2,12 @@
 Security utility functions
 """
 
-from app.models.security import SecurityEvent, SecurityEventType
-from app import db
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
-import uuid
+
+from app import db
+from app.models.security import SecurityEvent, SecurityEventType
 
 
 def log_security_event(

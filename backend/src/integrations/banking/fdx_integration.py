@@ -14,17 +14,9 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import jwt
 
-from . import (
-    AuthenticationError,
-    BankAccount,
-    BankingIntegrationBase,
-    BankingIntegrationError,
-    InvalidAccountError,
-    PaymentRequest,
-    Transaction,
-    TransactionStatus,
-    TransactionType,
-)
+from . import (AuthenticationError, BankAccount, BankingIntegrationBase,
+               BankingIntegrationError, InvalidAccountError, PaymentRequest,
+               Transaction, TransactionStatus, TransactionType)
 
 logger = logging.getLogger(__name__)
 

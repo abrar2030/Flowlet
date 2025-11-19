@@ -2,21 +2,15 @@
 Audit Log model for tracking system and user actions
 """
 
-import uuid
 import enum
+import uuid
 from datetime import datetime, timezone
-from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Text,
-    Enum,
-    Integer,
-    ForeignKey,
-    Boolean,
-)
-from sqlalchemy.orm import relationship
+
 from app import db
+from sqlalchemy import (Boolean, Column, DateTime, Enum, ForeignKey, Integer,
+                        String, Text)
+from sqlalchemy.orm import relationship
+
 from .mixins import UUID
 
 

@@ -6,20 +6,22 @@ Provides multi-channel notifications with compliance and audit trails
 import json
 import logging
 import os
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-from enum import Enum as PyEnum
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import requests
 import uuid
+from datetime import datetime, timezone
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from enum import Enum as PyEnum
+from typing import Any, Dict, List, Optional
 
+import requests
+
+from ..models.audit_log import AuditEventType, AuditSeverity
+from ..models.database import db
+from ..models.user import \
+    User  # Assuming User model is needed to get contact info
 # Import the audit logger and models
 from ..security.audit_logger import audit_logger
-from ..models.audit_log import AuditEventType, AuditSeverity
-from ..models.user import User  # Assuming User model is needed to get contact info
-from ..models.database import db
 
 logger = logging.getLogger(__name__)
 

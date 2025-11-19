@@ -1,20 +1,21 @@
+import asyncio
+import hashlib
+import json
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
+import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, roc_auc_score
-import joblib
-import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional
-import json
 import redis
-from dataclasses import dataclass
-from enum import Enum
-import hashlib
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from sklearn.ensemble import IsolationForest, RandomForestClassifier
+from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # Configure logging for audit trail
 logging.basicConfig(

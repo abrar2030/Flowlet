@@ -2,34 +2,34 @@
 Enhanced Authentication System with Financial-Grade Security
 """
 
-from flask import Blueprint, request, jsonify, g, current_app
-from sqlalchemy.exc import IntegrityError
-from datetime import datetime, timezone, timedelta
-import uuid
-import re
+import base64
+import io
 import logging
-from functools import wraps
-import jwt
+import re
 import secrets
+import uuid
+from datetime import datetime, timedelta, timezone
+from functools import wraps
+
+import jwt
 import pyotp
 import qrcode
-import io
-import base64
+from flask import Blueprint, current_app, g, jsonify, request
+from sqlalchemy.exc import IntegrityError
 
+from ..models.account import Account, AccountStatus, AccountType
+from ..models.audit_log import AuditEventType, AuditSeverity
 # Import refactored modules
 from ..models.database import db
 from ..models.user import User
-from ..models.account import Account, AccountType, AccountStatus
-from ..security.password_security import (
-    hash_password,
-    check_password,
-    validate_password_strength,
-)
-from ..security.token_manager import TokenManager  # Assuming this will be created/fixed
 from ..security.audit_logger import audit_logger
-from ..models.audit_log import AuditEventType, AuditSeverity
+from ..security.password_security import (check_password, hash_password,
+                                          validate_password_strength)
+from ..security.token_manager import \
+    TokenManager  # Assuming this will be created/fixed
+from ..utils.rate_limiter import \
+    RateLimiter  # Assuming this will be created/fixed
 from ..utils.validators import InputValidator
-from ..utils.rate_limiter import RateLimiter  # Assuming this will be created/fixed
 
 # Create blueprint
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")

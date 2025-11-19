@@ -18,13 +18,9 @@ import pandas as pd
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
-from .data_models import (
-    AlertConfiguration,
-    BusinessMetrics,
-    CustomerAnalytics,
-    PerformanceMetrics,
-    TransactionAnalytics,
-)
+from .data_models import (AlertConfiguration, BusinessMetrics,
+                          CustomerAnalytics, PerformanceMetrics,
+                          TransactionAnalytics)
 from .reporting_engine import ReportingEngine, ReportParameters, ReportType
 
 

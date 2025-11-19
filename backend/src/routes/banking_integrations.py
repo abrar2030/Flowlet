@@ -2,12 +2,14 @@
 Banking Integrations Routes (Placeholder for External Banking APIs)
 """
 
-from flask import Blueprint, request, jsonify
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
+
+from flask import Blueprint, jsonify, request
 
 # Import refactored modules
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
 banking_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")

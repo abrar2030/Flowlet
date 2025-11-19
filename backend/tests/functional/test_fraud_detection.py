@@ -2,30 +2,23 @@
 Comprehensive Test Suite for Fraud Detection
 """
 
-import pytest
 import asyncio
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
 import json
+from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
 
+import numpy as np
+import pandas as pd
+import pytest
 # Fraud Detection Tests
-from src.ml.fraud_detection import (
-    FraudAlert,
-    RiskLevel,
-    FraudType,
-    TransactionFeatures,
-    FeatureEngineer,
-    FraudExplainer,
-)
+from src.ml.fraud_detection import (FeatureEngineer, FraudAlert,
+                                    FraudExplainer, FraudType, RiskLevel,
+                                    TransactionFeatures)
 from src.ml.fraud_detection.anomaly_models import IsolationForestModel
-from src.ml.fraud_detection.supervised_models import XGBoostFraudModel
-from src.ml.fraud_detection.ensemble_model import (
-    EnsembleFraudModel,
-    RealTimeFraudDetector,
-)
+from src.ml.fraud_detection.ensemble_model import (EnsembleFraudModel,
+                                                   RealTimeFraudDetector)
 from src.ml.fraud_detection.service import FraudDetectionService
+from src.ml.fraud_detection.supervised_models import XGBoostFraudModel
 
 
 class TestFraudDetection:

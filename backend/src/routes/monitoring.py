@@ -2,13 +2,15 @@
 System Monitoring and Health Check Routes
 """
 
-from flask import Blueprint, request, jsonify
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
+
+from flask import Blueprint, jsonify, request
 
 # Import refactored modules
 from ..models.database import db
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
 monitoring_bp = Blueprint("monitoring", __name__, url_prefix="/api/v1/monitoring")

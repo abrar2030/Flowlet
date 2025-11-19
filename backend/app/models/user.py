@@ -2,13 +2,15 @@
 User model with improved security and compliance features
 """
 
-import uuid
 import enum
+import uuid
 from datetime import datetime, timezone
-from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import Column, String, Boolean, DateTime, Text, Enum
-from .mixins import UUID
+
 from app import db
+from sqlalchemy import Boolean, Column, DateTime, Enum, String, Text
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from .mixins import UUID
 
 
 class UserRole(enum.Enum):

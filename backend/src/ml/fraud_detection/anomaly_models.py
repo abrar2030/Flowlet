@@ -16,7 +16,8 @@ from sklearn.svm import OneClassSVM
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from . import FraudDetectionError, FraudModelBase, ModelNotTrainedError, ModelType
+from . import (FraudDetectionError, FraudModelBase, ModelNotTrainedError,
+               ModelType)
 
 logger = logging.getLogger(__name__)
 

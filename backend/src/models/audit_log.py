@@ -2,23 +2,17 @@
 Audit log model for comprehensive activity tracking and compliance
 """
 
-import uuid
 import json
-from datetime import datetime, timezone, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 from enum import Enum as PyEnum
-from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Text,
-    Boolean,
-    Integer,
-    Index,
-    ForeignKey,
-)
+
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Index, Integer,
+                        String, Text)
 from sqlalchemy.orm import relationship
 
-from .database import Base, db  # Import Base and db from the local database setup
+from .database import (  # Import Base and db from the local database setup
+    Base, db)
 
 
 class AuditEventType(PyEnum):

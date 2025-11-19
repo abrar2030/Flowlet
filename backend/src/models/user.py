@@ -4,11 +4,14 @@ User Model for Flowlet Financial Backend
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Text, Boolean, Integer, Index
-from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
-from .database import Base, db  # Import Base and db from the local database setup
-from ..security.password_security import hash_password, check_password
+
+from sqlalchemy import Boolean, Column, DateTime, Index, Integer, String, Text
+from sqlalchemy.orm import relationship
+
+from ..security.password_security import check_password, hash_password
+from .database import (  # Import Base and db from the local database setup
+    Base, db)
 
 
 class UserRole(PyEnum):

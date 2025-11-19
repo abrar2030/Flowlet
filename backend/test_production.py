@@ -4,13 +4,14 @@ Comprehensive Production Test Suite for Flowlet Financial Backend
 Tests all implemented features with enterprise-grade validation
 """
 
-import requests
 import json
+import sys
 import time
 import uuid
-import sys
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:5001"

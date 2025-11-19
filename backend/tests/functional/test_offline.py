@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -24,17 +24,10 @@ def test_database_models():
             print("✓ Database models created successfully")
 
             # Test importing all models
-            from src.models.database import (
-                User,
-                Wallet,
-                Transaction,
-                Card,
-                KYCRecord,
-                LedgerEntry,
-                FraudAlert,
-                APIKey,
-                AuditLog,
-            )
+            from src.models.database import (APIKey, AuditLog, Card,
+                                             FraudAlert, KYCRecord,
+                                             LedgerEntry, Transaction, User,
+                                             Wallet)
 
             print("✓ All database models imported successfully")
 
@@ -47,14 +40,14 @@ def test_database_models():
 def test_route_imports():
     """Test that all route blueprints can be imported"""
     try:
-        from src.routes.wallet import wallet_bp
-        from src.routes.payment import payment_bp
+        from src.routes.ai_service import ai_bp
+        from src.routes.api_gateway import api_gateway_bp
         from src.routes.card import card_bp
         from src.routes.kyc_aml import kyc_aml_bp
         from src.routes.ledger import ledger_bp
-        from src.routes.ai_service import ai_bp
+        from src.routes.payment import payment_bp
         from src.routes.security import security_bp
-        from src.routes.api_gateway import api_gateway_bp
+        from src.routes.wallet import wallet_bp
 
         print("✓ All route blueprints imported successfully")
         return True
@@ -68,10 +61,10 @@ def test_service_functionality():
     try:
         with app.app_context():
             # Test user creation
-            from src.models.database import User, Wallet, db
-
             # Create a test user with unique email
             import uuid
+
+            from src.models.database import User, Wallet, db
 
             unique_email = f"test_{str(uuid.uuid4())[:8]}@example.com"
             user = User(

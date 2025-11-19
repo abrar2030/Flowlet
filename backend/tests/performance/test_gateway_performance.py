@@ -1,20 +1,22 @@
 # Performance Optimization Tests for API Gateway
 
-import pytest
-import time
-import threading
 import json
-import statistics
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import requests
-import sys
 import os
+import statistics
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import pytest
+import requests
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+from src.gateway.optimized_gateway import (CacheManager, CircuitBreaker,
+                                           RequestBatcher)
 from src.main_optimized import create_app
-from src.gateway.optimized_gateway import CacheManager, CircuitBreaker, RequestBatcher
 
 
 class TestGatewayOptimizations:

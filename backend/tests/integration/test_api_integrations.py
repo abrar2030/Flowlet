@@ -1,21 +1,24 @@
 # API Integration Tests for External Services
 
-import pytest
-import requests
 import json
-import time
-from unittest.mock import Mock, patch
 import os
 import sys
+import time
+from unittest.mock import Mock, patch
+
+import pytest
+import requests
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from src.integrations.banking.plaid_integration import PlaidIntegration
-from src.integrations.banking.open_banking_integration import OpenBankingIntegration
 from src.integrations.banking.fdx_integration import FDXIntegration
+from src.integrations.banking.open_banking_integration import \
+    OpenBankingIntegration
+from src.integrations.banking.plaid_integration import PlaidIntegration
 from src.ml.fraud_detection.service import FraudDetectionService
-from src.services.compliance.sanctions_screening import SanctionsScreeningService
+from src.services.compliance.sanctions_screening import \
+    SanctionsScreeningService
 
 
 class TestExternalAPIIntegrations:
@@ -281,7 +284,8 @@ class TestPaymentProcessorIntegration:
         mock_payment_intent.currency = "usd"
         mock_stripe_create.return_value = mock_payment_intent
 
-        from src.integrations.payments.stripe_integration import StripeIntegration
+        from src.integrations.payments.stripe_integration import \
+            StripeIntegration
 
         stripe_integration = StripeIntegration()
 
@@ -382,8 +386,8 @@ class TestDatabaseIntegration:
 
     def test_database_connection_pool(self):
         """Test database connection pooling"""
-        from src.models.database import db
         from sqlalchemy import text
+        from src.models.database import db
 
         # Test multiple concurrent connections
         connections = []
@@ -479,6 +483,7 @@ class TestMonitoringIntegration:
     def test_error_logging_integration(self):
         """Test error logging integration"""
         import logging
+
         from src.services.monitoring.error_tracking import ErrorTracker
 
         error_tracker = ErrorTracker()

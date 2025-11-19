@@ -2,14 +2,16 @@
 Transaction model for financial transaction management
 """
 
-from app import db
-from .mixins import TimestampMixin, UUIDMixin, UUID
-from decimal import Decimal
-from datetime import datetime, timezone
-from enum import Enum
-import uuid
 import random
 import string
+import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
+from enum import Enum
+
+from app import db
+
+from .mixins import UUID, TimestampMixin, UUIDMixin
 
 
 class TransactionType(Enum):

@@ -2,23 +2,17 @@
 Account model with improved financial data handling
 """
 
-import uuid
 import enum
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-from sqlalchemy import (
-    Column,
-    String,
-    Boolean,
-    DateTime,
-    BigInteger,
-    ForeignKey,
-    Enum,
-    Text,
-)
-from .mixins import UUID
-from sqlalchemy.orm import relationship
+
 from app import db
+from sqlalchemy import (BigInteger, Boolean, Column, DateTime, Enum,
+                        ForeignKey, String, Text)
+from sqlalchemy.orm import relationship
+
+from .mixins import UUID
 
 
 class AccountType(enum.Enum):

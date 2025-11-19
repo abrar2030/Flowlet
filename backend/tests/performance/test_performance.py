@@ -1,15 +1,16 @@
 # Performance and Load Testing Suite
 
-import pytest
-import time
-import threading
-import requests
 import json
-import statistics
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import psutil
 import os
+import statistics
 import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import psutil
+import pytest
+import requests
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -130,9 +131,9 @@ class TestDatabasePerformance:
     def test_database_query_performance(self, app_with_db):
         """Test database query performance"""
         with app_with_db.app_context():
+            from sqlalchemy import text
             from src.models.database import db
             from src.models.user import User
-            from sqlalchemy import text
 
             # Create test data
             users = []
@@ -157,8 +158,8 @@ class TestDatabasePerformance:
     def test_database_connection_pool_performance(self, app_with_db):
         """Test database connection pool performance"""
         with app_with_db.app_context():
-            from src.models.database import db
             from sqlalchemy import text
+            from src.models.database import db
 
             def execute_query():
                 start_time = time.time()

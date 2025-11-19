@@ -2,11 +2,12 @@
 Basic validation tests for banking integrations and fraud detection modules
 """
 
-import pytest
+import importlib.util
 import os
 import sys
-import importlib.util
 from pathlib import Path
+
+import pytest
 
 # Add the src directory to Python path
 backend_dir = Path(__file__).parent.parent

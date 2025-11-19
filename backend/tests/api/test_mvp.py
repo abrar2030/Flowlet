@@ -2,10 +2,11 @@
 Simple test script for MVP functionality
 """
 
-import requests
 import json
 import uuid
 from datetime import datetime
+
+import requests
 
 # Base URL for the API
 BASE_URL = "http://localhost:5001"

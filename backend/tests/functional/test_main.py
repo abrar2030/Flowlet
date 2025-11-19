@@ -2,8 +2,9 @@
 Test the enhanced main application
 """
 
-import pytest
 import json
+
+import pytest
 from src.main import create_app
 
 

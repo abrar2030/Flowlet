@@ -9,17 +9,8 @@ Designed for high-performance querying and regulatory compliance.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Decimal,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import (Boolean, Column, DateTime, Decimal, ForeignKey, Index,
+                        Integer, String, Text)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
