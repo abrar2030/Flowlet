@@ -14,205 +14,290 @@ from ..models.database import db
 from ..models.account import Account
 from ..models.transaction import Transaction
 from ..security.audit_logger import audit_logger
-from .auth import token_required # Assuming decorators are defined here for now
+from .auth import token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
-multicurrency_bp = Blueprint('multicurrency', __name__, url_prefix='/api/v1/currency')
+multicurrency_bp = Blueprint("multicurrency", __name__, url_prefix="/api/v1/currency")
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
+
 # --- Simplified Exchange Rate Manager (Stub) ---
 class ExchangeRateManager:
-    SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CAD']
-    
+    SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD"]
+
     @staticmethod
     def get_exchange_rate(from_currency: str, to_currency: str) -> Decimal:
         """Simulate getting a real-time exchange rate."""
         if from_currency == to_currency:
-            return Decimal('1.0')
-        
+            return Decimal("1.0")
+
         # Mock rates (USD as base)
         rates = {
-            'USD': {'EUR': Decimal('0.92'), 'GBP': Decimal('0.79'), 'JPY': Decimal('155.00'), 'CAD': Decimal('1.37')},
-            'EUR': {'USD': Decimal('1.08'), 'GBP': Decimal('0.86'), 'JPY': Decimal('168.00'), 'CAD': Decimal('1.49')},
+            "USD": {
+                "EUR": Decimal("0.92"),
+                "GBP": Decimal("0.79"),
+                "JPY": Decimal("155.00"),
+                "CAD": Decimal("1.37"),
+            },
+            "EUR": {
+                "USD": Decimal("1.08"),
+                "GBP": Decimal("0.86"),
+                "JPY": Decimal("168.00"),
+                "CAD": Decimal("1.49"),
+            },
             # ... other inverse rates would be calculated
         }
-        
+
         if from_currency in rates and to_currency in rates[from_currency]:
             return rates[from_currency][to_currency]
-        
+
         # Fallback: calculate via USD if possible
-        if from_currency != 'USD' and to_currency != 'USD':
-            rate_from_usd = Decimal('1.0') / ExchangeRateManager.get_exchange_rate('USD', from_currency)
-            rate_to_usd = ExchangeRateManager.get_exchange_rate('USD', to_currency)
+        if from_currency != "USD" and to_currency != "USD":
+            rate_from_usd = Decimal("1.0") / ExchangeRateManager.get_exchange_rate(
+                "USD", from_currency
+            )
+            rate_to_usd = ExchangeRateManager.get_exchange_rate("USD", to_currency)
             return rate_from_usd * rate_to_usd
-            
+
         # Default fallback rate
-        return Decimal('1.0')
-    
+        return Decimal("1.0")
+
     @staticmethod
-    def convert_amount(amount: Decimal, from_currency: str, to_currency: str) -> Dict[str, Any]:
+    def convert_amount(
+        amount: Decimal, from_currency: str, to_currency: str
+    ) -> Dict[str, Any]:
         """Convert amount between currencies with a simulated fee."""
         rate = ExchangeRateManager.get_exchange_rate(from_currency, to_currency)
-        
+
         # 0.5% conversion fee
-        conversion_fee_rate = Decimal('0.005')
+        conversion_fee_rate = Decimal("0.005")
         fee_in_from_currency = amount * conversion_fee_rate
-        
+
         # Net amount to convert
         net_amount_to_convert = amount - fee_in_from_currency
-        
+
         # Converted amount
         converted_amount = net_amount_to_convert * rate
-        
+
         # Rounding
-        converted_amount = converted_amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        
+        converted_amount = converted_amount.quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+
         return {
-            'original_amount': float(amount),
-            'original_currency': from_currency,
-            'converted_amount': float(converted_amount),
-            'converted_currency': to_currency,
-            'exchange_rate': float(rate),
-            'conversion_fee': float(fee_in_from_currency.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)),
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            "original_amount": float(amount),
+            "original_currency": from_currency,
+            "converted_amount": float(converted_amount),
+            "converted_currency": to_currency,
+            "exchange_rate": float(rate),
+            "conversion_fee": float(
+                fee_in_from_currency.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            ),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
 
 # --- Routes ---
 
-@multicurrency_bp.route('/rate', methods=['GET'])
+
+@multicurrency_bp.route("/rate", methods=["GET"])
 @token_required
 def get_rate():
     """Get the exchange rate between two currencies."""
     try:
-        from_currency = request.args.get('from', 'USD').upper()
-        to_currency = request.args.get('to', 'EUR').upper()
-        
-        if from_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES or \
-           to_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES:
-            return jsonify({'error': 'Unsupported currency', 'code': 'UNSUPPORTED_CURRENCY'}), 400
-            
+        from_currency = request.args.get("from", "USD").upper()
+        to_currency = request.args.get("to", "EUR").upper()
+
+        if (
+            from_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES
+            or to_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES
+        ):
+            return (
+                jsonify(
+                    {"error": "Unsupported currency", "code": "UNSUPPORTED_CURRENCY"}
+                ),
+                400,
+            )
+
         rate = ExchangeRateManager.get_exchange_rate(from_currency, to_currency)
-        
-        return jsonify({
-            'success': True,
-            'from_currency': from_currency,
-            'to_currency': to_currency,
-            'rate': float(rate),
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }), 200
-        
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "from_currency": from_currency,
+                    "to_currency": to_currency,
+                    "rate": float(rate),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+            ),
+            200,
+        )
+
     except Exception as e:
         logger.error(f"Error getting exchange rate: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error', 'code': 'INTERNAL_ERROR'}), 500
+        return (
+            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
+            500,
+        )
 
-@multicurrency_bp.route('/convert', methods=['POST'])
+
+@multicurrency_bp.route("/convert", methods=["POST"])
 @token_required
 def convert_funds():
     """Convert funds between two currencies."""
     try:
         data = request.get_json()
-        required_fields = ['amount', 'from_currency', 'to_currency', 'from_account_id']
+        required_fields = ["amount", "from_currency", "to_currency", "from_account_id"]
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
-            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}', 'code': 'MISSING_FIELDS'}), 400
-        
-        amount = Decimal(str(data['amount']))
-        from_currency = data['from_currency'].upper()
-        to_currency = data['to_currency'].upper()
-        from_account_id = data['from_account_id']
-        
+            return (
+                jsonify(
+                    {
+                        "error": f'Missing required fields: {", ".join(missing_fields)}',
+                        "code": "MISSING_FIELDS",
+                    }
+                ),
+                400,
+            )
+
+        amount = Decimal(str(data["amount"]))
+        from_currency = data["from_currency"].upper()
+        to_currency = data["to_currency"].upper()
+        from_account_id = data["from_account_id"]
+
         if amount <= 0:
-            return jsonify({'error': 'Amount must be positive', 'code': 'INVALID_AMOUNT'}), 400
-        
+            return (
+                jsonify({"error": "Amount must be positive", "code": "INVALID_AMOUNT"}),
+                400,
+            )
+
         # 1. Check source account and balance
         from_account = db.session.get(Account, from_account_id)
         if not from_account or from_account.user_id != g.current_user.id:
-            return jsonify({'error': 'Source account not found or access denied', 'code': 'ACCESS_DENIED'}), 403
-        
+            return (
+                jsonify(
+                    {
+                        "error": "Source account not found or access denied",
+                        "code": "ACCESS_DENIED",
+                    }
+                ),
+                403,
+            )
+
         if from_account.currency != from_currency:
-            return jsonify({'error': 'Currency mismatch for source account', 'code': 'CURRENCY_MISMATCH'}), 400
-            
+            return (
+                jsonify(
+                    {
+                        "error": "Currency mismatch for source account",
+                        "code": "CURRENCY_MISMATCH",
+                    }
+                ),
+                400,
+            )
+
         if from_account.balance < amount:
-            return jsonify({'error': 'Insufficient balance', 'code': 'INSUFFICIENT_FUNDS'}), 400
-            
+            return (
+                jsonify(
+                    {"error": "Insufficient balance", "code": "INSUFFICIENT_FUNDS"}
+                ),
+                400,
+            )
+
         # 2. Perform conversion
-        conversion_result = ExchangeRateManager.convert_amount(amount, from_currency, to_currency)
-        converted_amount = Decimal(str(conversion_result['converted_amount']))
-        fee = Decimal(str(conversion_result['conversion_fee']))
-        
+        conversion_result = ExchangeRateManager.convert_amount(
+            amount, from_currency, to_currency
+        )
+        converted_amount = Decimal(str(conversion_result["converted_amount"]))
+        fee = Decimal(str(conversion_result["conversion_fee"]))
+
         # 3. Find or create destination account
-        to_account_stmt = select(Account).filter_by(user_id=g.current_user.id, currency=to_currency)
+        to_account_stmt = select(Account).filter_by(
+            user_id=g.current_user.id, currency=to_currency
+        )
         to_account = db.session.execute(to_account_stmt).scalar_one_or_none()
-        
+
         if not to_account:
             # Create new account for the target currency
             to_account = Account(
                 user_id=g.current_user.id,
-                account_type='currency_exchange',
+                account_type="currency_exchange",
                 currency=to_currency,
-                balance=Decimal('0.00'),
-                available_balance=Decimal('0.00')
+                balance=Decimal("0.00"),
+                available_balance=Decimal("0.00"),
             )
             db.session.add(to_account)
             db.session.flush()
-        
+
         # 4. Update balances and create transactions (Simplified)
-        
+
         # Debit source account (amount + fee)
         from_account.balance -= amount
         from_account.available_balance -= amount
-        
+
         # Credit destination account (converted_amount)
         to_account.balance += converted_amount
         to_account.available_balance += converted_amount
-        
+
         # Create transactions
         # Debit Transaction
-        db.session.add(Transaction(
-            account_id=from_account.id,
-            user_id=g.current_user.id,
-            amount=amount,
-            currency=from_currency,
-            transaction_type='DEBIT',
-            status='COMPLETED',
-            description=f"Currency conversion: {from_currency} to {to_currency}",
-            fees=fee
-        ))
-        
+        db.session.add(
+            Transaction(
+                account_id=from_account.id,
+                user_id=g.current_user.id,
+                amount=amount,
+                currency=from_currency,
+                transaction_type="DEBIT",
+                status="COMPLETED",
+                description=f"Currency conversion: {from_currency} to {to_currency}",
+                fees=fee,
+            )
+        )
+
         # Credit Transaction
-        db.session.add(Transaction(
-            account_id=to_account.id,
-            user_id=g.current_user.id,
-            amount=converted_amount,
-            currency=to_currency,
-            transaction_type='CREDIT',
-            status='COMPLETED',
-            description=f"Currency conversion: {from_currency} to {to_currency}",
-            fees=Decimal('0.00')
-        ))
-        
+        db.session.add(
+            Transaction(
+                account_id=to_account.id,
+                user_id=g.current_user.id,
+                amount=converted_amount,
+                currency=to_currency,
+                transaction_type="CREDIT",
+                status="COMPLETED",
+                description=f"Currency conversion: {from_currency} to {to_currency}",
+                fees=Decimal("0.00"),
+            )
+        )
+
         db.session.commit()
-        
+
         audit_logger.log_event(
             event_type=AuditEventType.FINANCIAL_TRANSACTION,
             description=f"Currency conversion from {from_currency} to {to_currency} for user {g.current_user.id}",
             user_id=g.current_user.id,
             severity=AuditSeverity.MEDIUM,
-            resource_type='account',
-            resource_id=from_account.id
+            resource_type="account",
+            resource_id=from_account.id,
         )
-        
-        return jsonify({
-            'success': True,
-            'message': 'Currency conversion successful',
-            'from_account_id': from_account.id,
-            'to_account_id': to_account.id,
-            'conversion_details': conversion_result
-        }), 200
-        
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Currency conversion successful",
+                    "from_account_id": from_account.id,
+                    "to_account_id": to_account.id,
+                    "conversion_details": conversion_result,
+                }
+            ),
+            200,
+        )
+
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error converting funds: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error', 'code': 'INTERNAL_ERROR'}), 500
+        return (
+            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
+            500,
+        )

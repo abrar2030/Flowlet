@@ -19,9 +19,13 @@ import pandas as pd
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session
 
-from .data_models import (BusinessMetrics, CustomerAnalytics,
-                          PerformanceMetrics, RegulatoryReport,
-                          TransactionAnalytics)
+from .data_models import (
+    BusinessMetrics,
+    CustomerAnalytics,
+    PerformanceMetrics,
+    RegulatoryReport,
+    TransactionAnalytics,
+)
 
 
 class ReportType(Enum):

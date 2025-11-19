@@ -12,15 +12,13 @@ import pandas as pd
 import tensorflow as tf
 import xgboost as xgb
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.metrics import (classification_report, precision_recall_curve,
-                             roc_auc_score)
+from sklearn.metrics import classification_report, precision_recall_curve, roc_auc_score
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from . import (FraudDetectionError, FraudModelBase, ModelNotTrainedError,
-               ModelType)
+from . import FraudDetectionError, FraudModelBase, ModelNotTrainedError, ModelType
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 # The main API blueprint for version 1
-api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
+api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
 # Import all sub-blueprints
 from .user import user_bp

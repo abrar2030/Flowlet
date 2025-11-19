@@ -7,40 +7,51 @@ from datetime import datetime, timezone
 import logging
 
 # Import refactored modules
-from .auth import token_required # Assuming decorators are defined here for now
+from .auth import token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
-banking_bp = Blueprint('banking', __name__, url_prefix='/api/v1/banking')
+banking_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-@banking_bp.route('/health', methods=['GET'])
+
+@banking_bp.route("/health", methods=["GET"])
 def health_check():
     """Health check endpoint for banking integrations"""
     try:
         # Since the actual banking integration logic is complex and requires external APIs,
         # this endpoint serves as a placeholder for the health of the integration layer.
-        
+
         # In a real application, this would check connectivity to Plaid, Yodlee, or similar services.
-        
+
         status = {
-            'plaid_integration': 'unconfigured',
-            'swift_api': 'unconfigured',
-            'overall_status': 'placeholder_active'
+            "plaid_integration": "unconfigured",
+            "swift_api": "unconfigured",
+            "overall_status": "placeholder_active",
         }
-        
-        return jsonify({
-            'success': True,
-            'message': 'Banking integration layer is active but unconfigured.',
-            'integrations_status': status,
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }), 200
-        
+
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Banking integration layer is active but unconfigured.",
+                    "integrations_status": status,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+            ),
+            200,
+        )
+
     except Exception as e:
         logger.error(f"Banking health check failed: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': 'Internal server error during health check',
-            'code': 'INTERNAL_ERROR'
-        }), 500
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Internal server error during health check",
+                    "code": "INTERNAL_ERROR",
+                }
+            ),
+            500,
+        )

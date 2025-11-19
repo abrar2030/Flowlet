@@ -13,10 +13,9 @@ from .authentication import AdvancedAuthenticationService
 from .encryption_service import EncryptionService
 
 __all__ = [
-    'FraudDetectionEngine',
-    'ThreatPreventionService', 
-    'SecurityMonitoringService',
-    'AdvancedAuthenticationService',
-    'EncryptionService'
+    "FraudDetectionEngine",
+    "ThreatPreventionService",
+    "SecurityMonitoringService",
+    "AdvancedAuthenticationService",
+    "EncryptionService",
 ]
-
