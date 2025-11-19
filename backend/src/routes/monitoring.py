@@ -4,8 +4,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, jsonify
 
 from ..models.database import db
-from .auth import \
-    token_required  # Assuming decorators are defined here for now
+from .auth import token_required  # Assuming decorators are defined here for now
 
 """
 System Monitoring and Health Check Routes

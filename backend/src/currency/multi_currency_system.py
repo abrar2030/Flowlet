@@ -9,8 +9,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import redis
-from sqlalchemy import (Boolean, Column, DateTime, Numeric, String,
-                        create_engine)
+from sqlalchemy import Boolean, Column, DateTime, Numeric, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
