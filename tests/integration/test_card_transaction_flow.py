@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock, patch
 
 # Mocking the services that would interact in a card transaction flow
 
@@ -82,7 +81,6 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
 
     def test_card_transaction_frozen_card(self):
         card_id = "card_frozen_1"
-        user_wallet_id = "user_wallet_2"
         merchant_id = "merchant_xyz"
         amount = 25.00
 
@@ -97,7 +95,6 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
 
     def test_card_transaction_spending_limit_exceeded(self):
         card_id = "card_limit_1"
-        user_wallet_id = "user_wallet_3"
         merchant_id = "merchant_pqr"
         amount = 1500.00  # Exceeds simulated limit of 1000
 
@@ -111,7 +108,6 @@ class CardTransactionFlowIntegrationTests(unittest.TestCase):
     def test_card_transaction_insufficient_funds(self):
         card_id = "card_funds_1"
         user_wallet_id = "wallet_insufficient_funds"
-        merchant_wallet_id = "merchant_wallet_4"
         amount = 100.00
         merchant_id = "merchant_def"
 

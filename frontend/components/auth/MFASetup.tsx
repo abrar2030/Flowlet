@@ -137,9 +137,9 @@ export function MFASetup({
         }
       }
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        error: `Failed to ${method.enabled ? 'disable' : 'enable'} ${method.name}` 
+      setState(prev => ({
+        ...prev,
+        error: `Failed to ${method.enabled ? 'disable' : 'enable'} ${method.name}`
       }));
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
@@ -158,8 +158,8 @@ export function MFASetup({
       if (onMethodVerify) {
         const success = await onMethodVerify(methodId, state.verificationCode);
         if (success) {
-          setState(prev => ({ 
-            ...prev, 
+          setState(prev => ({
+            ...prev,
             success: 'Method verified successfully',
             verificationCode: ''
           }));
@@ -180,8 +180,8 @@ export function MFASetup({
     try {
       if (onGenerateBackupCodes) {
         const codes = await onGenerateBackupCodes();
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           backupCodes: codes,
           success: 'Backup codes generated successfully'
         }));
@@ -262,9 +262,9 @@ export function MFASetup({
               </div>
               <Progress value={state.setupProgress} className="h-2" />
             </div>
-            
+
             <p className="text-sm text-gray-600">
-              Multi-factor authentication adds an extra layer of security to your account. 
+              Multi-factor authentication adds an extra layer of security to your account.
               {requireMultipleMethods && ' We recommend enabling at least two methods.'}
             </p>
           </div>
@@ -358,7 +358,7 @@ export function MFASetup({
                       <p className="text-xs text-center mt-2">QR Code Placeholder</p>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label>Manual Entry Key</Label>
                     <div className="flex space-x-2 mt-1">
@@ -522,7 +522,7 @@ export function MFASetup({
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-600">
-                Backup codes can be used when your other MFA methods are unavailable. 
+                Backup codes can be used when your other MFA methods are unavailable.
                 Each code can only be used once.
               </p>
 
@@ -535,7 +535,7 @@ export function MFASetup({
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="flex space-x-2">
                     <Button
                       onClick={handleDownloadBackupCodes}
@@ -581,4 +581,3 @@ export function MFASetup({
 }
 
 export default MFASetup;
-

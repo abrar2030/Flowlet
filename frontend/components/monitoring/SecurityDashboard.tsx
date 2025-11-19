@@ -223,25 +223,25 @@ export function SecurityDashboard({
 
     // Filter events by time range
     const recentEvents = events.filter(event => new Date(event.timestamp) > cutoffTime);
-    
+
     const totalEvents = recentEvents.length;
     const criticalEvents = recentEvents.filter(e => e.severity === 'critical').length;
     const highSeverityEvents = recentEvents.filter(e => e.severity === 'high').length;
     const newEvents = recentEvents.filter(e => e.status === 'new').length;
-    
+
     const activeThreats = threats.filter(t => t.isActive).length;
     const criticalThreats = threats.filter(t => t.severity === 'critical' && t.isActive).length;
-    
+
     const healthyComponents = systemHealth.filter(s => s.status === 'healthy').length;
     const degradedComponents = systemHealth.filter(s => s.status === 'degraded').length;
     const downComponents = systemHealth.filter(s => s.status === 'down').length;
-    
-    const averageUptime = systemHealth.length > 0 
-      ? systemHealth.reduce((sum, s) => sum + s.uptime, 0) / systemHealth.length 
+
+    const averageUptime = systemHealth.length > 0
+      ? systemHealth.reduce((sum, s) => sum + s.uptime, 0) / systemHealth.length
       : 100;
-    
-    const averageResponseTime = systemHealth.length > 0 
-      ? systemHealth.reduce((sum, s) => sum + s.responseTime, 0) / systemHealth.length 
+
+    const averageResponseTime = systemHealth.length > 0
+      ? systemHealth.reduce((sum, s) => sum + s.responseTime, 0) / systemHealth.length
       : 0;
 
     const eventsByType = recentEvents.reduce((acc, event) => {
@@ -259,8 +259,8 @@ export function SecurityDashboard({
       return acc;
     }, {} as Record<string, number>);
 
-    const complianceOverall = complianceStatus.length > 0 
-      ? complianceStatus.reduce((sum, c) => sum + c.score, 0) / complianceStatus.length 
+    const complianceOverall = complianceStatus.length > 0
+      ? complianceStatus.reduce((sum, c) => sum + c.score, 0) / complianceStatus.length
       : 100;
 
     return {
@@ -289,7 +289,7 @@ export function SecurityDashboard({
       const matchesSearch = event.type.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            event.source.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            (event.userName && event.userName.toLowerCase().includes(state.searchTerm.toLowerCase()));
-      
+
       const matchesSeverity = state.filterSeverity === 'all' || event.severity === state.filterSeverity;
       const matchesType = state.filterType === 'all' || event.type === state.filterType;
       const matchesStatus = state.filterStatus === 'all' || event.status === state.filterStatus;
@@ -338,8 +338,8 @@ export function SecurityDashboard({
       if (onMetricRefresh && metricId) {
         await onMetricRefresh(metricId);
       }
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         success: 'Metrics refreshed successfully',
         lastRefresh: new Date().toISOString()
       }));
@@ -363,7 +363,7 @@ export function SecurityDashboard({
           status: state.filterStatus,
           search: state.searchTerm
         };
-        
+
         const blob = await onExportReport(type, filters);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -373,7 +373,7 @@ export function SecurityDashboard({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Report exported successfully' }));
       }
     } catch (error) {
@@ -924,7 +924,7 @@ export function SecurityDashboard({
         <TabsContent value="systems">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">System Health Monitoring</h3>
-            
+
             <div className="grid gap-4">
               {systemHealth.map(system => (
                 <Card key={system.id}>
@@ -1044,7 +1044,7 @@ export function SecurityDashboard({
         <TabsContent value="metrics">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Security Metrics</h3>
-            
+
             <div className="grid gap-4">
               {metrics.map(metric => (
                 <Card key={metric.id}>
@@ -1208,4 +1208,3 @@ export function SecurityDashboard({
 }
 
 export default SecurityDashboard;
-

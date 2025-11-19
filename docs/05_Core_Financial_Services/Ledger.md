@@ -273,5 +273,3 @@ Generates a cash flow statement for a specified period. This report provides a d
   }
   ```
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

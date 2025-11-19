@@ -4,14 +4,14 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription } from '../ui/alert';
-import { 
-  Eye, 
-  EyeOff, 
-  Shield, 
-  Lock, 
-  Unlock, 
-  Copy, 
-  CheckCircle, 
+import {
+  Eye,
+  EyeOff,
+  Shield,
+  Lock,
+  Unlock,
+  Copy,
+  CheckCircle,
   AlertTriangle,
   Clock,
   Key
@@ -70,8 +70,8 @@ export function EncryptedDisplay({
   });
 
   // Parse encrypted data
-  const encryptedData: EncryptedData = typeof data === 'string' 
-    ? JSON.parse(data) 
+  const encryptedData: EncryptedData = typeof data === 'string'
+    ? JSON.parse(data)
     : data;
 
   // Clear auto-hide timer on unmount
@@ -90,20 +90,20 @@ export function EncryptedDisplay({
 
     try {
       const decrypted = EncryptionService.decrypt(encryptedData);
-      
-      setState(prev => ({ 
-        ...prev, 
-        isDecrypted: true, 
+
+      setState(prev => ({
+        ...prev,
+        isDecrypted: true,
         decryptedData: decrypted,
-        isDecrypting: false 
+        isDecrypting: false
       }));
 
       // Set auto-hide timer
       if (autoHideDelay > 0) {
         const timer = setTimeout(() => {
-          setState(prev => ({ 
-            ...prev, 
-            isDecrypted: false, 
+          setState(prev => ({
+            ...prev,
+            isDecrypted: false,
             decryptedData: null,
             autoHideTimer: null
           }));
@@ -116,10 +116,10 @@ export function EncryptedDisplay({
         onDecrypt(decrypted);
       }
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         error: 'Failed to decrypt data',
-        isDecrypting: false 
+        isDecrypting: false
       }));
     }
   }, [encryptedData, allowDecryption, autoHideDelay, onDecrypt]);
@@ -128,10 +128,10 @@ export function EncryptedDisplay({
     if (state.autoHideTimer) {
       clearTimeout(state.autoHideTimer);
     }
-    
-    setState(prev => ({ 
-      ...prev, 
-      isDecrypted: false, 
+
+    setState(prev => ({
+      ...prev,
+      isDecrypted: false,
       decryptedData: null,
       autoHideTimer: null
     }));
@@ -141,7 +141,7 @@ export function EncryptedDisplay({
     try {
       await navigator.clipboard.writeText(dataToCopy);
       setState(prev => ({ ...prev, showCopied: true }));
-      
+
       setTimeout(() => {
         setState(prev => ({ ...prev, showCopied: false }));
       }, 2000);
@@ -161,36 +161,36 @@ export function EncryptedDisplay({
       case 'email':
         const [localPart, domain] = decryptedData.split('@');
         if (localPart && domain) {
-          const maskedLocal = localPart.length > 2 
+          const maskedLocal = localPart.length > 2
             ? localPart[0] + '*'.repeat(localPart.length - 2) + localPart.slice(-1)
             : '*'.repeat(localPart.length);
           return `${maskedLocal}@${domain}`;
         }
         return decryptedData;
-      
+
       case 'phone':
         const digits = decryptedData.replace(/\D/g, '');
         if (digits.length === 10) {
           return `(***) ***-${digits.slice(-4)}`;
         }
         return `***-***-${digits.slice(-4)}`;
-      
+
       case 'ssn':
         const ssnDigits = decryptedData.replace(/\D/g, '');
         return `***-**-${ssnDigits.slice(-4)}`;
-      
+
       case 'card':
         const cardDigits = decryptedData.replace(/\D/g, '');
         return `**** **** **** ${cardDigits.slice(-4)}`;
-      
+
       case 'custom':
         if (maskPattern) {
           return maskPattern.replace(/\*/g, () => '*');
         }
         return '*'.repeat(Math.max(4, decryptedData.length - 4)) + decryptedData.slice(-4);
-      
+
       default:
-        return decryptedData.length > 8 
+        return decryptedData.length > 8
           ? '*'.repeat(decryptedData.length - 4) + decryptedData.slice(-4)
           : '*'.repeat(decryptedData.length);
     }
@@ -226,7 +226,7 @@ export function EncryptedDisplay({
           </Badge>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {state.error && (
           <Alert className="border-red-200 bg-red-50">
@@ -251,7 +251,7 @@ export function EncryptedDisplay({
                 </Badge>
               )}
             </div>
-            
+
             <div className="font-mono text-sm break-all">
               {state.isDecrypted && state.decryptedData ? (
                 <div className="space-y-2">
@@ -346,7 +346,7 @@ export function EncryptedDisplay({
                   )}
                 </div>
               </div>
-              
+
               {encryptedData.metadata && (
                 <div className="border-t pt-2">
                   <span className="font-medium">Metadata:</span>
@@ -375,4 +375,3 @@ export function EncryptedDisplay({
 }
 
 export default EncryptedDisplay;
-

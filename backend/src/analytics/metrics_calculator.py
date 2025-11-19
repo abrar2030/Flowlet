@@ -1,25 +1,20 @@
-"""
-Metrics Calculator
-=================
-
-Advanced metrics calculation engine for financial analytics.
-Provides real-time and batch calculation of business metrics, KPIs, and performance indicators.
-"""
-
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
-import pandas as pd
-from sqlalchemy import and_, func, or_, text
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (BusinessMetrics, CustomerAnalytics,
-                          PerformanceMetrics, TransactionAnalytics)
+from .data_models import (Advanced, Calculator, CustomerAnalytics, KPIs,
+                          Metrics, PerformanceMetrics, Provides,
+                          TransactionAnalytics, """, =================,
+                          analytics., and, batch, business, calculation,
+                          engine, financial, for, indicators., metrics, of,
+                          performance, real-time)
 
 
 class MetricType(Enum):

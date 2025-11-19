@@ -1,12 +1,5 @@
-"""
-Enhanced Card Management System with Financial-Grade Security
-"""
-
 import json
 import logging
-import random
-import string
-import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from functools import wraps
@@ -14,14 +7,17 @@ from functools import wraps
 from flask import Blueprint, g, jsonify, request
 from src.models.account import Account, AccountStatus
 from src.models.card import Card, CardStatus, CardTransaction, CardType
-from src.models.database import User, db
-from src.models.transaction import (Transaction, TransactionCategory,
-                                    TransactionStatus, TransactionType)
+from src.models.database import db
 from src.routes.auth import token_required
 from src.security.audit_logger import AuditLogger
 from src.security.encryption import CardTokenizer, PINManager
 from src.security.fraud_detection import FraudDetector
 from src.security.input_validator import InputValidator
+
+"""
+Enhanced Card Management System with Financial-Grade Security
+"""
+
 
 # Create blueprint
 card_bp = Blueprint("card", __name__, url_prefix="/api/v1/cards")
@@ -336,7 +332,7 @@ def get_card(card_id):
         card = g.card
 
         # Calculate current spending
-        today = datetime.now(timezone.utc).date()
+        datetime.now(timezone.utc).date()
         current_month = datetime.now(timezone.utc).replace(
             day=1, hour=0, minute=0, second=0, microsecond=0
         )

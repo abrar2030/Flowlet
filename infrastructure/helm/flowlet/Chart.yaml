@@ -31,4 +31,3 @@ dependencies:
     condition: ingress.enabled
 annotations:
   category: Financial Services
-

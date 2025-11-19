@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Clock, 
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Clock,
   AlertTriangle,
   CheckCircle2,
   DollarSign,
@@ -77,7 +77,7 @@ const WorkflowAnalytics: React.FC = () => {
             Monitor performance and optimize your automation workflows
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[140px]">
@@ -90,7 +90,7 @@ const WorkflowAnalytics: React.FC = () => {
               <SelectItem value="90d">Last 90 days</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export Report
@@ -252,11 +252,11 @@ const WorkflowAnalytics: React.FC = () => {
                           <span className="text-xs text-muted-foreground">executions</span>
                         </div>
                         <div className="flex gap-1">
-                          <div 
+                          <div
                             className="h-2 bg-green-500 rounded-sm"
                             style={{ width: `${(day.success / day.executions) * 100}%` }}
                           />
-                          <div 
+                          <div
                             className="h-2 bg-red-500 rounded-sm"
                             style={{ width: `${(day.failed / day.executions) * 100}%` }}
                           />
@@ -345,4 +345,3 @@ const WorkflowAnalytics: React.FC = () => {
 };
 
 export default WorkflowAnalytics;
-

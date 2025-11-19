@@ -21,7 +21,7 @@ Flowlet's backend is structured around several microservices, each exposed via a
 Manages digital wallets, balances, and account operations.
 
 - **`POST /`**: Create a new wallet.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "userId": "string",
@@ -43,7 +43,7 @@ Manages digital wallets, balances, and account operations.
 Handles payment processing, transfers, and settlement.
 
 - **`POST /`**: Create a new payment.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "fromWalletId": "string",
@@ -64,7 +64,7 @@ Handles payment processing, transfers, and settlement.
 Manages card issuance, controls, and transaction processing.
 
 - **`POST /`**: Issue a new card.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "walletId": "string",
@@ -77,7 +77,7 @@ Manages card issuance, controls, and transaction processing.
     ```
   - **Response**: Card object.
 - **`PUT /{cardId}/controls`**: Update card controls.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "enabled": "boolean",
@@ -94,7 +94,7 @@ Manages card issuance, controls, and transaction processing.
 Handles identity verification and compliance workflows.
 
 - **`POST /verify`**: Submit a KYC/AML verification request.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "userId": "string",
@@ -113,7 +113,7 @@ Handles identity verification and compliance workflows.
 Maintains double-entry accounting and financial records.
 
 - **`POST /transaction`**: Record a new ledger transaction.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "debitAccountId": "string",
@@ -134,7 +134,7 @@ Maintains double-entry accounting and financial records.
 Provides AI-powered fraud detection and chatbot functionalities.
 
 - **`POST /fraud-detection`**: Submit a transaction for fraud detection.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "transactionId": "string",
@@ -144,7 +144,7 @@ Provides AI-powered fraud detection and chatbot functionalities.
     ```
   - **Response**: Fraud detection result object.
 - **`POST /chatbot`**: Interact with the AI chatbot.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "message": "string",
@@ -160,7 +160,7 @@ Provides AI-powered fraud detection and chatbot functionalities.
 Manages user authentication, authorization, and session handling.
 
 - **`POST /login`**: Authenticate a user and obtain a token.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "email": "string",
@@ -169,7 +169,7 @@ Manages user authentication, authorization, and session handling.
     ```
   - **Response**: Authentication token object.
 - **`POST /register`**: Register a new user.
-  - **Request Body**: 
+  - **Request Body**:
     ```json
     {
       "email": "string",
@@ -208,5 +208,3 @@ Common error codes include:
 - `403 Forbidden`: Insufficient permissions to access the resource.
 - `404 Not Found`: The requested resource does not exist.
 - `500 Internal Server Error`: An unexpected error occurred on the server.
-
-

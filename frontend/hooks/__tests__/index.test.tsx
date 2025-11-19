@@ -24,7 +24,7 @@ describe('useOnlineStatus', () => {
     });
 
     const { result } = renderHook(() => useOnlineStatus());
-    
+
     act(() => {
       Object.defineProperty(navigator, 'onLine', {
         writable: true,
@@ -50,7 +50,7 @@ describe('useResponsive', () => {
     });
 
     const { result } = renderHook(() => useResponsive());
-    
+
     expect(result.current.isMobile).toBe(true);
     expect(result.current.isTablet).toBe(false);
     expect(result.current.isDesktop).toBe(false);
@@ -64,7 +64,7 @@ describe('useResponsive', () => {
     });
 
     const { result } = renderHook(() => useResponsive());
-    
+
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(true);
     expect(result.current.isDesktop).toBe(false);
@@ -78,7 +78,7 @@ describe('useResponsive', () => {
     });
 
     const { result } = renderHook(() => useResponsive());
-    
+
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(false);
     expect(result.current.isDesktop).toBe(true);
@@ -93,36 +93,36 @@ describe('useLocalStorage', () => {
 
   it('returns initial value when no stored value exists', () => {
     const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
-    
+
     expect(result.current[0]).toBe('initial-value');
   });
 
   it('returns stored value when it exists', () => {
     localStorage.setItem('test-key', JSON.stringify('stored-value'));
-    
+
     const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
-    
+
     expect(result.current[0]).toBe('stored-value');
   });
 
   it('updates localStorage when value is set', () => {
     const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
-    
+
     act(() => {
       result.current[1]('new-value');
     });
-    
+
     expect(result.current[0]).toBe('new-value');
     expect(localStorage.getItem('test-key')).toBe(JSON.stringify('new-value'));
   });
 
   it('handles function updates', () => {
     const { result } = renderHook(() => useLocalStorage('test-key', 0));
-    
+
     act(() => {
       result.current[1]((prev: number) => prev + 1);
     });
-    
+
     expect(result.current[0]).toBe(1);
   });
 });
@@ -138,7 +138,7 @@ describe('useDebounce', () => {
 
   it('returns initial value immediately', () => {
     const { result } = renderHook(() => useDebounce('initial', 500));
-    
+
     expect(result.current).toBe('initial');
   });
 
@@ -147,16 +147,16 @@ describe('useDebounce', () => {
       ({ value, delay }) => useDebounce(value, delay),
       { initialProps: { value: 'initial', delay: 500 } }
     );
-    
+
     expect(result.current).toBe('initial');
-    
+
     rerender({ value: 'updated', delay: 500 });
     expect(result.current).toBe('initial'); // Still old value
-    
+
     act(() => {
       vi.advanceTimersByTime(500);
     });
-    
+
     expect(result.current).toBe('updated'); // Now updated
   });
 
@@ -165,20 +165,19 @@ describe('useDebounce', () => {
       ({ value, delay }) => useDebounce(value, delay),
       { initialProps: { value: 'initial', delay: 500 } }
     );
-    
+
     rerender({ value: 'first-update', delay: 500 });
-    
+
     act(() => {
       vi.advanceTimersByTime(250);
     });
-    
+
     rerender({ value: 'second-update', delay: 500 });
-    
+
     act(() => {
       vi.advanceTimersByTime(500);
     });
-    
+
     expect(result.current).toBe('second-update');
   });
 });
-

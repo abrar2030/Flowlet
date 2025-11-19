@@ -28,7 +28,7 @@ describe('RegisterScreen', () => {
 
   it('renders registration form correctly', () => {
     render(<RegisterScreen />);
-    
+
     expect(screen.getByText('Create Account')).toBeInTheDocument();
     expect(screen.getByText('Join Flowlet and start managing your finances')).toBeInTheDocument();
     expect(screen.getByLabelText('Full Name')).toBeInTheDocument();
@@ -40,10 +40,10 @@ describe('RegisterScreen', () => {
 
   it('shows validation errors for empty required fields', async () => {
     render(<RegisterScreen />);
-    
+
     const submitButton = screen.getByRole('button', { name: /create account/i });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Name must be at least 2 characters')).toBeInTheDocument();
       expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
@@ -53,15 +53,15 @@ describe('RegisterScreen', () => {
 
   it('validates password confirmation', async () => {
     render(<RegisterScreen />);
-    
+
     const passwordInput = screen.getByLabelText('Password');
     const confirmPasswordInput = screen.getByLabelText('Confirm Password');
     const submitButton = screen.getByRole('button', { name: /create account/i });
-    
+
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.change(confirmPasswordInput, { target: { value: 'different123' } });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText("Passwords don't match")).toBeInTheDocument();
     });
@@ -69,19 +69,19 @@ describe('RegisterScreen', () => {
 
   it('requires terms acceptance', async () => {
     render(<RegisterScreen />);
-    
+
     const nameInput = screen.getByLabelText('Full Name');
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Password');
     const confirmPasswordInput = screen.getByLabelText('Confirm Password');
     const submitButton = screen.getByRole('button', { name: /create account/i });
-    
+
     fireEvent.change(nameInput, { target: { value: 'John Doe' } });
     fireEvent.change(emailInput, { target: { value: 'john@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('You must accept the terms and conditions')).toBeInTheDocument();
     });
@@ -89,18 +89,18 @@ describe('RegisterScreen', () => {
 
   it('toggles password visibility for both password fields', () => {
     render(<RegisterScreen />);
-    
+
     const passwordInput = screen.getByLabelText('Password');
     const confirmPasswordInput = screen.getByLabelText('Confirm Password');
     const toggleButtons = screen.getAllByRole('button', { name: '' }); // Eye icon buttons
-    
+
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(confirmPasswordInput).toHaveAttribute('type', 'password');
-    
+
     // Toggle first password field
     fireEvent.click(toggleButtons[0]);
     expect(passwordInput).toHaveAttribute('type', 'text');
-    
+
     // Toggle second password field
     fireEvent.click(toggleButtons[1]);
     expect(confirmPasswordInput).toHaveAttribute('type', 'text');
@@ -108,15 +108,14 @@ describe('RegisterScreen', () => {
 
   it('has links to terms and privacy policy', () => {
     render(<RegisterScreen />);
-    
+
     expect(screen.getByText('Terms of Service')).toBeInTheDocument();
     expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
   });
 
   it('has link to sign in page', () => {
     render(<RegisterScreen />);
-    
+
     expect(screen.getByText('Sign in')).toBeInTheDocument();
   });
 });
-

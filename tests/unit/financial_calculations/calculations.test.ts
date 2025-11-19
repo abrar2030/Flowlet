@@ -81,5 +81,3 @@ describe("Financial Calculations", () => {
     });
   });
 });
-
-

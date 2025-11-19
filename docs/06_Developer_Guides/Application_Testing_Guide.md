@@ -221,5 +221,3 @@ This will start the Locust web UI, usually accessible at `http://localhost:8089`
 ## Automated Testing
 
 It is recommended to integrate these tests into a Continuous Integration (CI) pipeline to ensure that all changes are automatically tested before deployment. Refer to the [Infrastructure Testing Guide](../infrastructure/docs/testing-guide.md) for an example of a CI workflow.
-
-

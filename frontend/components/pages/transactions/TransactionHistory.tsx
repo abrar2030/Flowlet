@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { Search, Filter, Download, Calendar } from 'lucide-react';
 
@@ -29,48 +29,48 @@ interface TransactionHistoryProps {
 
 const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   transactions = [
-    { 
-      id: '1', 
-      date: '2025-01-14', 
-      description: 'Coffee Shop', 
-      amount: -4.50, 
-      type: 'debit', 
+    {
+      id: '1',
+      date: '2025-01-14',
+      description: 'Coffee Shop',
+      amount: -4.50,
+      type: 'debit',
       status: 'completed',
       category: 'Food & Dining'
     },
-    { 
-      id: '2', 
-      date: '2025-01-13', 
-      description: 'Salary Deposit', 
-      amount: 2000.00, 
-      type: 'credit', 
+    {
+      id: '2',
+      date: '2025-01-13',
+      description: 'Salary Deposit',
+      amount: 2000.00,
+      type: 'credit',
       status: 'completed',
       category: 'Income'
     },
-    { 
-      id: '3', 
-      date: '2025-01-12', 
-      description: 'Online Purchase', 
-      amount: -75.00, 
-      type: 'debit', 
+    {
+      id: '3',
+      date: '2025-01-12',
+      description: 'Online Purchase',
+      amount: -75.00,
+      type: 'debit',
       status: 'completed',
       category: 'Shopping'
     },
-    { 
-      id: '4', 
-      date: '2025-01-11', 
-      description: 'Restaurant Bill', 
-      amount: -30.00, 
-      type: 'debit', 
+    {
+      id: '4',
+      date: '2025-01-11',
+      description: 'Restaurant Bill',
+      amount: -30.00,
+      type: 'debit',
       status: 'completed',
       category: 'Food & Dining'
     },
-    { 
-      id: '5', 
-      date: '2025-01-10', 
-      description: 'Gas Station', 
-      amount: -45.20, 
-      type: 'debit', 
+    {
+      id: '5',
+      date: '2025-01-10',
+      description: 'Gas Station',
+      amount: -45.20,
+      type: 'debit',
       status: 'pending',
       category: 'Transportation'
     },
@@ -244,4 +244,3 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
 };
 
 export default TransactionHistory;
-

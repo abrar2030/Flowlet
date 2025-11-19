@@ -111,4 +111,3 @@ spec:
     targetPort: 3010
     name: websocket
   type: ClusterIP
-

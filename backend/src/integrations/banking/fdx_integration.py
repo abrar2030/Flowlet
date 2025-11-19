@@ -1,22 +1,28 @@
-"""
-FDX (Financial Data Exchange) Integration
-Implements FDX API standards for North American financial data sharing
-"""
-
 import asyncio
-import json
 import logging
 import uuid
-from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
-import jwt
 
-from . import (AuthenticationError, BankAccount, BankingIntegrationBase,
-               BankingIntegrationError, InvalidAccountError, PaymentRequest,
-               Transaction, TransactionStatus, TransactionType)
+from . import (API, FDX, American, Data, Exchange, Financial, Implements,
+               Integration, North, """, data, financial, for, sharing,
+               standards)
+
+"""
+
+
+
+    AuthenticationError,
+    BankAccount,
+    BankingIntegrationBase,
+    BankingIntegrationError,
+    PaymentRequest,
+    Transaction,
+    TransactionStatus,
+    TransactionType,
+)
 
 logger = logging.getLogger(__name__)
 

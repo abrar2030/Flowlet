@@ -200,4 +200,3 @@ src/components/workflow/
 The Visual Workflow Designer provides a comprehensive solution for non-technical users to create and manage automated financial workflows. The implementation follows modern React best practices, maintains consistency with the existing Flowlet design system, and provides a scalable foundation for future enhancements.
 
 The modular architecture allows for easy extension and customization, while the intuitive user interface ensures accessibility for users of all technical skill levels. The integration with the existing Flowlet platform is seamless, providing a unified experience for financial automation and management.
-

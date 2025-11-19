@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock, patch
 
 # Mocking the services that the API Gateway communicates with
 

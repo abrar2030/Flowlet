@@ -70,8 +70,8 @@ const WalletScreen: React.FC<WalletScreenProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-full ${
-                    transaction.type === 'credit' 
-                      ? 'bg-green-100 text-green-600' 
+                    transaction.type === 'credit'
+                      ? 'bg-green-100 text-green-600'
                       : 'bg-red-100 text-red-600'
                   }`}>
                     {transaction.type === 'credit' ? (
@@ -116,4 +116,3 @@ const WalletScreen: React.FC<WalletScreenProps> = ({
 };
 
 export default WalletScreen;
-

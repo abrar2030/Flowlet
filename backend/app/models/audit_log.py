@@ -1,17 +1,12 @@
-"""
-Audit Log model for tracking system and user actions
-"""
-
 import enum
 import uuid
 from datetime import datetime, timezone
 
 from app import db
-from sqlalchemy import (Boolean, Column, DateTime, Enum, ForeignKey, Integer,
-                        String, Text)
-from sqlalchemy.orm import relationship
-
-from .mixins import UUID
+from sqlalchemy import (UUID, Audit, Boolean, Column, DateTime, Enum,
+                        ForeignKey, Integer, Log, String, Text, """, .mixins,
+                        actions, and, for, from, import, model, relationship,
+                        sqlalchemy.orm, system, tracking, user)
 
 
 class AuditAction(enum.Enum):

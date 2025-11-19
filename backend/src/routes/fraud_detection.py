@@ -1,19 +1,19 @@
+import asyncio
+import logging
+from datetime import datetime
+
+import pandas as pd
+from flask import Blueprint, jsonify, request
+from flask_cors import cross_origin
+
+from ..ml.fraud_detection import FraudDetectionError, RiskLevel
+from ..ml.fraud_detection.service import get_fraud_service
+
 """
 Flask Routes for Fraud Detection
 Provides REST API endpoints for fraud detection functionality
 """
 
-import asyncio
-import logging
-from datetime import datetime
-from typing import Any, Dict, List
-
-import pandas as pd
-from flask import Blueprint, current_app, jsonify, request
-from flask_cors import cross_origin
-
-from ..ml.fraud_detection import FraudDetectionError, FraudType, RiskLevel
-from ..ml.fraud_detection.service import get_fraud_service
 
 logger = logging.getLogger(__name__)
 

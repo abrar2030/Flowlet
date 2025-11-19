@@ -21,5 +21,3 @@ jobs:
     - name: Build
       run: npm run build
       working-directory: Flowlet/frontend/web-frontend
-
-

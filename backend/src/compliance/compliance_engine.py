@@ -1,3 +1,19 @@
+import logging
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
+from .aml_engine import AMLEngine, AMLResult
+from .audit_service import ComplianceAuditService
+from .data_protection import DataProtectionService
+from .kyc_service import KYCService
+from .regulatory_framework import (ComplianceRule, Jurisdiction,
+                                   RegulatoryFramework)
+from .reporting_service import ComplianceReportingService
+
 """
 Compliance Engine
 ================
@@ -5,25 +21,6 @@ Compliance Engine
 Central compliance engine for multi-jurisdiction regulatory compliance.
 Orchestrates all compliance activities including AML, KYC, data protection, and reporting.
 """
-
-import asyncio
-import json
-import logging
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
-
-from .aml_engine import AMLEngine, AMLResult
-from .audit_service import ComplianceAuditService
-from .data_protection import DataProtectionService
-from .kyc_service import KYCResult, KYCService
-from .regulatory_framework import (ComplianceRule, Jurisdiction,
-                                   RegulatoryFramework)
-from .reporting_service import ComplianceReportingService
 
 
 class ComplianceStatus(Enum):
@@ -720,7 +717,7 @@ class ComplianceEngine:
         """Get current compliance status for an entity."""
 
         # Check for existing assessment
-        cache_key = f"{entity_type}_{entity_id}"
+        f"{entity_type}_{entity_id}"
 
         for assessment in self._active_assessments.values():
             if (

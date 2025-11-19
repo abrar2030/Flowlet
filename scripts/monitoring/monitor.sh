@@ -10,5 +10,3 @@ kubectl get svc -l app=flowlet
 
 echo "Getting ingress status..."
 kubectl get ingress flowlet-ingress
-
-

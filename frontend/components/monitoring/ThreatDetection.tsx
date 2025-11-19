@@ -373,12 +373,12 @@ export function ThreatDetection({
       return acc;
     }, {} as Record<string, number>);
 
-    const averageRiskScore = recentDetections.length > 0 
-      ? recentDetections.reduce((sum, d) => sum + d.riskScore, 0) / recentDetections.length 
+    const averageRiskScore = recentDetections.length > 0
+      ? recentDetections.reduce((sum, d) => sum + d.riskScore, 0) / recentDetections.length
       : 0;
 
-    const averageConfidence = recentDetections.length > 0 
-      ? recentDetections.reduce((sum, d) => sum + d.confidence, 0) / recentDetections.length 
+    const averageConfidence = recentDetections.length > 0
+      ? recentDetections.reduce((sum, d) => sum + d.confidence, 0) / recentDetections.length
       : 0;
 
     const containmentRate = totalDetections > 0 ? (containedDetections / totalDetections) * 100 : 0;
@@ -403,11 +403,11 @@ export function ThreatDetection({
   const filteredDetections = useMemo(() => {
     return detections.filter(detection => {
       const signature = signatures.find(s => s.id === detection.signatureId);
-      
+
       const matchesSearch = detection.signatureName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            detection.source.identifier.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            detection.target.identifier.toLowerCase().includes(state.searchTerm.toLowerCase());
-      
+
       const matchesSeverity = state.filterSeverity === 'all' || detection.severity === state.filterSeverity;
       const matchesStatus = state.filterStatus === 'all' || detection.status === state.filterStatus;
       const matchesCategory = state.filterCategory === 'all' || (signature && signature.category === state.filterCategory);
@@ -428,8 +428,8 @@ export function ThreatDetection({
     try {
       if (onSignatureCreate) {
         await onSignatureCreate(state.newSignature as Omit<ThreatSignature, 'id' | 'createdAt' | 'detectionCount'>);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Threat signature created successfully',
           showSignatureEditor: false,
           newSignature: {
@@ -485,8 +485,8 @@ export function ThreatDetection({
     try {
       if (onDetectionRespond) {
         await onDetectionRespond(detectionId, state.responseActions);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Threat response initiated successfully',
           showResponseDialog: false,
           responseActions: []
@@ -511,8 +511,8 @@ export function ThreatDetection({
     try {
       if (onHuntCreate) {
         await onHuntCreate(state.newHunt as Omit<ThreatHunt, 'id' | 'createdAt' | 'progress'>);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Threat hunt created successfully',
           showHuntEditor: false
         }));
@@ -537,7 +537,7 @@ export function ThreatDetection({
           category: state.filterCategory,
           search: state.searchTerm
         };
-        
+
         const blob = await onExportReport(type, filters);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -547,7 +547,7 @@ export function ThreatDetection({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Report exported successfully' }));
       }
     } catch (error) {
@@ -986,10 +986,10 @@ export function ThreatDetection({
                               Investigate
                             </Button>
                             <Button
-                              onClick={() => setState(prev => ({ 
-                                ...prev, 
-                                selectedDetection: detection, 
-                                showResponseDialog: true 
+                              onClick={() => setState(prev => ({
+                                ...prev,
+                                selectedDetection: detection,
+                                showResponseDialog: true
                               }))}
                               size="sm"
                             >
@@ -1301,8 +1301,8 @@ export function ThreatDetection({
                   {state.isResponding ? 'Executing...' : 'Execute Response'}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
+                  onClick={() => setState(prev => ({
+                    ...prev,
                     showResponseDialog: false,
                     responseActions: []
                   }))}
@@ -1320,4 +1320,3 @@ export function ThreatDetection({
 }
 
 export default ThreatDetection;
-

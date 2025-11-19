@@ -137,7 +137,7 @@ export function BiometricAuth({
 
           // Update fingerprint availability (most common platform authenticator)
           capabilities[0].available = true;
-          
+
           setState(prev => ({
             ...prev,
             isSupported: true,
@@ -176,7 +176,7 @@ export function BiometricAuth({
           const devices = await navigator.mediaDevices.enumerateDevices();
           const hasCamera = devices.some(device => device.kind === 'videoinput');
           const hasMicrophone = devices.some(device => device.kind === 'audioinput');
-          
+
           if (hasCamera) capabilities[1].available = true; // Face recognition
           if (hasMicrophone) capabilities[2].available = true; // Voice recognition
         } catch (error) {
@@ -247,14 +247,14 @@ export function BiometricAuth({
           authAttempts: 0,
           lockoutEndTime: null
         }));
-        
+
         if (onAuthenticate) {
           onAuthenticate(result);
         }
       } else {
         const newAttempts = state.authAttempts + 1;
         const shouldLock = newAttempts >= state.maxAttempts;
-        
+
         setState(prev => ({
           ...prev,
           authAttempts: newAttempts,
@@ -265,7 +265,7 @@ export function BiometricAuth({
     } catch (error) {
       const newAttempts = state.authAttempts + 1;
       const shouldLock = newAttempts >= state.maxAttempts;
-      
+
       setState(prev => ({
         ...prev,
         authAttempts: newAttempts,
@@ -307,7 +307,7 @@ export function BiometricAuth({
         };
       }
     }
-    
+
     throw new Error('WebAuthn not supported');
   };
 
@@ -379,8 +379,8 @@ export function BiometricAuth({
         setState(prev => ({ ...prev, enrollmentProgress: 0 }));
       }, 1000);
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         error: `Failed to enroll ${type}`,
         enrollmentProgress: 0
       }));
@@ -406,7 +406,7 @@ export function BiometricAuth({
     }
   }, [onUnenroll]);
 
-  const remainingLockoutTime = state.lockoutEndTime 
+  const remainingLockoutTime = state.lockoutEndTime
     ? Math.ceil((state.lockoutEndTime - Date.now()) / 1000)
     : 0;
 
@@ -525,12 +525,12 @@ export function BiometricAuth({
                     <p className="text-sm text-gray-600">{capability.description}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Badge className={capability.enrolled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
                     {capability.enrolled ? 'Enrolled' : 'Not Enrolled'}
                   </Badge>
-                  
+
                   <div className="flex space-x-2">
                     {capability.enrolled ? (
                       <>
@@ -624,4 +624,3 @@ export function BiometricAuth({
 }
 
 export default BiometricAuth;
-

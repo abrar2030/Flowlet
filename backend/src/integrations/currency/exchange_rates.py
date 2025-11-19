@@ -2,13 +2,12 @@ import json
 import logging
 import os
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import redis
 import requests
-from flask import current_app
 
 logger = logging.getLogger(__name__)
 

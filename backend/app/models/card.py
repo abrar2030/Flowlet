@@ -1,18 +1,12 @@
-"""
-Card model for managing user cards
-"""
-
 import enum
 import uuid
 from datetime import datetime, timezone
-from decimal import Decimal
 
 from app import db
-from sqlalchemy import (BigInteger, Boolean, Column, DateTime, Enum,
-                        ForeignKey, Integer, String, Text)
-from sqlalchemy.orm import relationship
-
-from .mixins import UUID
+from sqlalchemy import (UUID, BigInteger, Boolean, Card, Column, DateTime,
+                        Enum, ForeignKey, Integer, String, Text, """, .mixins,
+                        cards, for, from, import, managing, model,
+                        relationship, sqlalchemy.orm, user)
 
 
 class CardType(enum.Enum):

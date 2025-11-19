@@ -1,13 +1,14 @@
-"""
-Flowlet Financial Backend - Main Application Entry Point
-Production-ready Flask application with improved architecture
-"""
-
 import os
 
 from dotenv import load_dotenv
 from src.app import create_app
 from src.models.database import db, init_db
+
+"""
+Flowlet Financial Backend - Main Application Entry Point
+Production-ready Flask application with improved architecture
+"""
+
 
 # Load environment variables from .env file
 load_dotenv()

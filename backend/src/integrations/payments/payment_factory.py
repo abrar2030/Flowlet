@@ -1,9 +1,9 @@
+from .stripe_integration import PaymentProcessor
+
 """
 Payment Processor Factory
 Provides a way to get the correct payment processor implementation based on type.
 """
-
-from .stripe_integration import PaymentProcessor, StripePaymentProcessor
 
 
 class PaymentProcessorFactory:

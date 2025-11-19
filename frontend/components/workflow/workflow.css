@@ -1,5 +1,5 @@
 .bg-grid-pattern {
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -7,7 +7,7 @@
 
 /* Dark mode grid pattern */
 .dark .bg-grid-pattern {
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
 }
@@ -150,18 +150,18 @@
   .workflow-designer {
     flex-direction: column;
   }
-  
+
   .node-palette {
     width: 100%;
     height: 200px;
     order: 2;
   }
-  
+
   .workflow-canvas {
     order: 1;
     height: calc(100vh - 300px);
   }
-  
+
   .properties-panel {
     position: fixed;
     top: 0;
@@ -241,13 +241,13 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .bg-grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0, 0, 0, 0.3) 1px, transparent 1px);
   }
-  
+
   .dark .bg-grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
   }
@@ -260,11 +260,10 @@
   .properties-panel {
     transition: none;
   }
-  
+
   .workflow-node.running,
   .status-indicator.running::after,
   .execution-path {
     animation: none;
   }
 }
-

@@ -1,19 +1,14 @@
-"""
-Analytics Data Models
-====================
-
-Comprehensive data models for financial analytics and business intelligence.
-Designed for high-performance querying and regulatory compliance.
-"""
-
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Decimal, ForeignKey, Index,
-                        Integer, String, Text)
-from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import (JSONB, UUID, Analytics, Boolean, Column, Comprehensive,
+                        Data, DateTime, Decimal, Designed, ForeignKey, Index,
+                        Integer, Models, String, Text, """,
+                        ====================, analytics, and, business,
+                        compliance., data, declarative_base, financial, for,
+                        from, high-performance, import, intelligence., models,
+                        querying, regulatory, sqlalchemy.dialects.postgresql,
+                        sqlalchemy.ext.declarative)
 
 Base = declarative_base()
 

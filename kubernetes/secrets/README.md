@@ -23,4 +23,3 @@ These solutions offer advanced features such as:
 To integrate an external secrets manager, you would typically use a Kubernetes operator (e.g., External Secrets Operator) that synchronizes secrets from the external system into Kubernetes Secrets, or directly consume secrets from your application using the external secret manager's SDK.
 
 **Note:** The `flowlet-secrets.yaml` file is provided as an example for basic Kubernetes Secret usage. For production financial environments, migrate these secrets to an external solution.
-

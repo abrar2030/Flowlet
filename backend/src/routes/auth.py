@@ -1,14 +1,7 @@
-"""
-Enhanced Authentication System with Financial-Grade Security
-"""
-
 import base64
 import io
 import logging
-import re
-import secrets
-import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import wraps
 
 import jwt
@@ -19,17 +12,14 @@ from sqlalchemy.exc import IntegrityError
 
 from ..models.account import Account, AccountStatus, AccountType
 from ..models.audit_log import AuditEventType, AuditSeverity
-# Import refactored modules
 from ..models.database import db
 from ..models.user import User
 from ..security.audit_logger import audit_logger
-from ..security.password_security import (check_password, hash_password,
-                                          validate_password_strength)
-from ..security.token_manager import \
-    TokenManager  # Assuming this will be created/fixed
-from ..utils.rate_limiter import \
-    RateLimiter  # Assuming this will be created/fixed
-from ..utils.validators import InputValidator
+from ..security.password_security import (  # Assuming this will be created/fixed; Import refactored modules
+    Authentication, Enhanced, Financial-Grade, InputValidator, RateLimiter,
+    Security, System, TokenManager, """, ..security.token_manager,
+    ..utils.rate_limiter, ..utils.validators, check_password, from,
+    hash_password, import, with)
 
 # Create blueprint
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")

@@ -23,4 +23,3 @@ This directory contains configurations for monitoring, logging, and distributed 
 *   **Jaeger:** For distributed tracing to monitor request flows across microservices.
 
 By combining these tools with robust security practices, you can achieve comprehensive observability while maintaining the high security and compliance standards required for financial applications.
-

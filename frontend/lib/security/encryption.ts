@@ -39,7 +39,7 @@ export class EncryptionService {
     try {
       const encryptionKey = key || this.generateKey();
       const iv = this.generateIV();
-      
+
       const encrypted = CryptoJS.AES.encrypt(data, encryptionKey, {
         iv: CryptoJS.enc.Hex.parse(iv),
         mode: CryptoJS.mode.GCM,
@@ -70,7 +70,7 @@ export class EncryptionService {
   }): string {
     try {
       const { encrypted, iv, key, tag } = encryptedData;
-      
+
       const decrypted = CryptoJS.AES.decrypt(
         {
           ciphertext: CryptoJS.enc.Hex.parse(encrypted),
@@ -132,18 +132,18 @@ export class EncryptionService {
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
     const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    
+
     let charset = lowercase + uppercase + numbers;
     if (includeSymbols) {
       charset += symbols;
     }
-    
+
     let password = '';
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
-    
+
     return password;
   }
 
@@ -164,7 +164,7 @@ export class EncryptionService {
       keySize: this.KEY_SIZE / 32,
       iterations
     }).toString();
-    
+
     return { key, salt: derivedSalt };
   }
 }
@@ -174,7 +174,7 @@ export class EncryptionService {
  */
 export class SecureStorage {
   private static readonly STORAGE_PREFIX = 'secure_';
-  
+
   /**
    * Store encrypted data in localStorage
    * @param key - Storage key
@@ -200,7 +200,7 @@ export class SecureStorage {
     try {
       const encryptedData = localStorage.getItem(this.STORAGE_PREFIX + key);
       if (!encryptedData) return null;
-      
+
       const encrypted = JSON.parse(encryptedData);
       const decrypted = EncryptionService.decrypt(encrypted);
       return JSON.parse(decrypted);
@@ -232,4 +232,3 @@ export class SecureStorage {
 }
 
 export default EncryptionService;
-

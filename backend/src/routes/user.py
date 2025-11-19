@@ -1,7 +1,3 @@
-"""
-Enhanced User Management System with Financial-Grade Features
-"""
-
 import logging
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -10,17 +6,16 @@ from flask import Blueprint, g, jsonify, request
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from ..models.account import Account, AccountStatus, AccountType
+from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
-# Import refactored modules
 from ..models.database import db
-from ..models.transaction import (Transaction, TransactionStatus,
-                                  TransactionType)
+from ..models.transaction import Transaction, TransactionStatus
 from ..models.user import User
 from ..security.audit_logger import audit_logger
 from ..utils.validators import InputValidator
-from .auth import (  # Assuming decorators are defined here for now
-    admin_required, token_required)
+from .auth import (  # Assuming decorators are defined here for now; Import refactored modules
+    Enhanced, Features, Financial-Grade, Management, System, User, """,
+    admin_required, token_required, with)
 
 # Create blueprint
 user_bp = Blueprint("user", __name__, url_prefix="/api/v1/users")

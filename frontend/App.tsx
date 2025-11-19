@@ -67,32 +67,32 @@ function App() {
           <Router>
             {/* Offline Indicator */}
             {!isOnline && <OfflineIndicator />}
-            
+
             <Routes>
               {/* Public Routes */}
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
                   <PublicRoute>
                     <LoginScreen />
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/register" 
+              <Route
+                path="/register"
                 element={
                   <PublicRoute>
                     <RegisterScreen />
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/onboarding" 
+              <Route
+                path="/onboarding"
                 element={
                   <PublicRoute>
                     <OnboardingFlow />
                   </PublicRoute>
-                } 
+                }
               />
 
               {/* Public web pages */}
@@ -102,8 +102,8 @@ function App() {
               <Route path="/developer" element={<DeveloperPortalPage />} />
 
               {/* Protected Routes */}
-              <Route 
-                path="/" 
+              <Route
+                path="/"
                 element={
                   <ProtectedRoute>
                     <Layout isMobile={isMobile} />
@@ -113,30 +113,30 @@ function App() {
                 {/* Dashboard */}
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
-                
+
                 {/* Wallet Routes */}
                 <Route path="wallet" element={<WalletScreen />} />
                 <Route path="wallet/transactions" element={<TransactionHistory />} />
                 <Route path="wallet/send" element={<SendMoney />} />
                 <Route path="wallet/receive" element={<ReceiveMoney />} />
-                
+
                 {/* Card Routes */}
                 <Route path="cards" element={<CardsScreen />} />
                 <Route path="cards/:cardId" element={<CardDetails />} />
                 <Route path="cards/issue" element={<IssueCard />} />
-                
+
                 {/* Analytics */}
                 <Route path="analytics" element={<AnalyticsScreen />} />
-                
+
                 {/* Financial Planning */}
                 <Route path="financial-planning" element={<AdvancedBudgetingScreen />} />
                 <Route path="budgeting" element={<AdvancedBudgetingScreen />} />
-                
+
                 {/* AI Features */}
                 <Route path="chat" element={<ChatbotScreen />} />
                 <Route path="alerts" element={<FraudAlerts />} />
                 <Route path="fraud-detection" element={<AIFraudDetectionScreen />} />
-                
+
                 {/* Security & Settings */}
                 <Route path="security" element={<SecurityScreen />} />
                 <Route path="security/advanced" element={<EnhancedSecurityScreen />} />
@@ -144,18 +144,18 @@ function App() {
               </Route>
 
               {/* Catch all route */}
-              <Route 
-                path="*" 
+              <Route
+                path="*"
                 element={
-                  isAuthenticated ? 
-                    <Navigate to="/dashboard" replace /> : 
+                  isAuthenticated ?
+                    <Navigate to="/dashboard" replace /> :
                     <Navigate to="/home" replace />
-                } 
+                }
               />
             </Routes>
-            
-            <Toaster 
-              position="top-right" 
+
+            <Toaster
+              position="top-right"
               toastOptions={{
                 duration: 4000,
                 style: {
@@ -173,4 +173,3 @@ function App() {
 }
 
 export default App;
-

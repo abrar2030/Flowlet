@@ -198,6 +198,3 @@ else
     echo -e "${RED}❌ Some critical tests failed. Please review and fix before deployment.${NC}"
     exit 1
 fi
-
-
-

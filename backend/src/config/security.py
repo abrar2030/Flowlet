@@ -1,6 +1,7 @@
-# Enhanced Security Configuration
 import os
 from datetime import timedelta
+
+# Enhanced Security Configuration
 
 
 class SecurityConfig:

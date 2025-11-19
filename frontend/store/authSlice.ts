@@ -61,7 +61,7 @@ export const validateToken = createAsyncThunk(
       if (!authService.isAuthenticated()) {
         throw new Error('No valid token found');
       }
-      
+
       const user = await authService.getCurrentUser();
       return { user, token: 'validated' }; // Token is managed by TokenManager
     } catch (error: unknown) {
@@ -208,4 +208,3 @@ const authSlice = createSlice({
 
 export const { clearError, updateUser, setLoading } = authSlice.actions;
 export default authSlice.reducer;
-

@@ -91,7 +91,7 @@ export function SecurityMonitor({
 
   const handleRefresh = useCallback(async () => {
     if (!onRefresh) return;
-    
+
     setIsRefreshing(true);
     try {
       await onRefresh();
@@ -130,7 +130,7 @@ export function SecurityMonitor({
     }
   };
 
-  const filteredEvents = events.filter(event => 
+  const filteredEvents = events.filter(event =>
     filter === 'all' || event.severity === filter
   );
 
@@ -141,10 +141,10 @@ export function SecurityMonitor({
   const calculateThreatScore = () => {
     if (threatLevel) return threatLevel.score;
     if (!metrics) return 0;
-    
+
     const { criticalEvents, highEvents, mediumEvents, totalEvents } = metrics;
     if (totalEvents === 0) return 0;
-    
+
     const score = ((criticalEvents * 4 + highEvents * 3 + mediumEvents * 2) / totalEvents) * 25;
     return Math.min(100, Math.round(score));
   };
@@ -203,14 +203,14 @@ export function SecurityMonitor({
                 <span className="ml-1 capitalize">{currentThreatLevel}</span>
               </Badge>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Threat Score</span>
                 <span>{currentThreatScore}/100</span>
               </div>
-              <Progress 
-                value={currentThreatScore} 
+              <Progress
+                value={currentThreatScore}
                 className="h-2"
                 style={{
                   background: `linear-gradient(to right, ${getThreatLevelColor(currentThreatLevel)} 0%, ${getThreatLevelColor(currentThreatLevel)} ${currentThreatScore}%, #e5e7eb ${currentThreatScore}%, #e5e7eb 100%)`
@@ -454,4 +454,3 @@ export function SecurityMonitor({
 }
 
 export default SecurityMonitor;
-

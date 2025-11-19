@@ -1,18 +1,15 @@
-"""
-Authentication API endpoints with improved security
-"""
-
 import structlog
 from app import db, limiter
 from app.models.audit_log import AuditAction, AuditLog
 from app.models.user import User, UserStatus
 from app.utils.security import log_security_event
 from app.utils.validators import validate_password_strength
-from flask import Blueprint, current_app, jsonify, request
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt, get_jwt_identity, jwt_required)
-from marshmallow import Schema, ValidationError, fields
-from werkzeug.security import check_password_hash
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import (API, Authentication, Schema, ValidationError,
+                                """, create_access_token, create_refresh_token,
+                                endpoints, fields, from, get_jwt,
+                                get_jwt_identity, import, improved,
+                                jwt_required, marshmallow, security, with)
 
 logger = structlog.get_logger()
 

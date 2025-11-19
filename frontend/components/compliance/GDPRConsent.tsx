@@ -145,9 +145,9 @@ export function GDPRConsent({
     try {
       if (onConsentUpdate) {
         await onConsentUpdate(categoryId, granted);
-        setState(prev => ({ 
-          ...prev, 
-          success: `Consent ${granted ? 'granted' : 'withdrawn'} successfully` 
+        setState(prev => ({
+          ...prev,
+          success: `Consent ${granted ? 'granted' : 'withdrawn'} successfully`
         }));
       }
     } catch (error) {
@@ -164,8 +164,8 @@ export function GDPRConsent({
     try {
       if (onConsentWithdraw) {
         await onConsentWithdraw(categoryId, state.withdrawalReason);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Consent withdrawn successfully',
           showWithdrawalDialog: null,
           withdrawalReason: ''
@@ -194,8 +194,8 @@ export function GDPRConsent({
           type: state.newRequestType as any,
           description: state.newRequestDescription
         });
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Data subject request submitted successfully',
           newRequestDescription: ''
         }));
@@ -222,7 +222,7 @@ export function GDPRConsent({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Data export completed successfully' }));
       }
     } catch (error) {
@@ -319,10 +319,10 @@ export function GDPRConsent({
                   <h3 className="font-medium">Cookie and Privacy Preferences</h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">
-                  We use cookies and similar technologies to provide, protect, and improve our services. 
+                  We use cookies and similar technologies to provide, protect, and improve our services.
                   You can choose which categories of data processing you consent to.
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                   {categories.map(category => (
                     <div key={category.id} className="flex items-center space-x-2">
@@ -352,7 +352,7 @@ export function GDPRConsent({
                   ))}
                 </div>
               </div>
-              
+
               <div className="flex space-x-2">
                 <Button onClick={handleBannerReject} variant="outline" size="sm">
                   Reject All
@@ -629,10 +629,10 @@ export function GDPRConsent({
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  Under GDPR, you have several rights regarding your personal data. 
+                  Under GDPR, you have several rights regarding your personal data.
                   You can exercise these rights by submitting a request below.
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-4">
                     <div className="p-4 border rounded-lg">
@@ -772,7 +772,7 @@ export function GDPRConsent({
         <TabsContent value="requests">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Your Data Subject Requests</h3>
-            
+
             {dataSubjectRequests.length === 0 ? (
               <Card>
                 <CardContent className="p-6 text-center">
@@ -856,8 +856,8 @@ export function GDPRConsent({
                   Withdraw Consent
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
+                  onClick={() => setState(prev => ({
+                    ...prev,
                     showWithdrawalDialog: null,
                     withdrawalReason: ''
                   }))}
@@ -875,4 +875,3 @@ export function GDPRConsent({
 }
 
 export default GDPRConsent;
-

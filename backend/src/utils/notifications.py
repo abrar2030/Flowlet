@@ -1,27 +1,24 @@
-"""
-Enhanced Notification Service implementing financial industry standards
-Provides multi-channel notifications with compliance and audit trails
-"""
-
-import json
 import logging
 import os
 import smtplib
-import uuid
-from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from enum import Enum as PyEnum
-from typing import Any, Dict, List, Optional
-
-import requests
+from typing import Dict, List, Optional
 
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 from ..models.user import \
     User  # Assuming User model is needed to get contact info
-# Import the audit logger and models
 from ..security.audit_logger import audit_logger
+
+"""
+Enhanced Notification Service implementing financial industry standards
+Provides multi-channel notifications with compliance and audit trails
+"""
+
+
+# Import the audit logger and models
 
 logger = logging.getLogger(__name__)
 

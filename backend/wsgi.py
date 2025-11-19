@@ -1,11 +1,10 @@
+from dotenv import load_dotenv
+from src.app import create_app
+
 """
 WSGI Entry Point for Flowlet Application
 """
 
-import os
-
-from dotenv import load_dotenv
-from src.app import create_app
 
 # Load environment variables from .env file for configuration
 load_dotenv()

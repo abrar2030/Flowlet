@@ -9,5 +9,3 @@ This directory contains architectural documentation for the Flowlet platform.
 - Technical decisions are documented with context and rationale
 - Non-functional requirements are clearly specified
 - Integration points are thoroughly documented
-
-

@@ -1,18 +1,19 @@
-"""
-Fraud Detection ML Models Base Classes
-Provides abstract base classes and common utilities for fraud detection
-"""
-
 import logging
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
+
+"""
+Fraud Detection ML Models Base Classes
+Provides abstract base classes and common utilities for fraud detection
+"""
+
 
 logger = logging.getLogger(__name__)
 
@@ -113,19 +114,13 @@ class TransactionFeatures:
 class FraudDetectionError(Exception):
     """Base exception for fraud detection errors"""
 
-    pass
-
 
 class ModelNotTrainedError(FraudDetectionError):
     """Model not trained error"""
 
-    pass
-
 
 class FeatureExtractionError(FraudDetectionError):
     """Feature extraction error"""
-
-    pass
 
 
 class FraudModelBase(ABC):
@@ -153,7 +148,6 @@ class FraudModelBase(ABC):
             training_data: Training dataset
             labels: Labels for supervised learning (None for unsupervised)
         """
-        pass
 
     @abstractmethod
     def predict(self, features: pd.DataFrame) -> np.ndarray:
@@ -166,7 +160,6 @@ class FraudModelBase(ABC):
         Returns:
             np.ndarray: Fraud scores/probabilities
         """
-        pass
 
     @abstractmethod
     def get_feature_importance(self) -> Dict[str, float]:
@@ -176,7 +169,6 @@ class FraudModelBase(ABC):
         Returns:
             Dict[str, float]: Feature importance mapping
         """
-        pass
 
     def preprocess_features(self, features: pd.DataFrame) -> pd.DataFrame:
         """

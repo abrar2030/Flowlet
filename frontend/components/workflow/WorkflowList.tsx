@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Play, 
-  Pause, 
-  Edit, 
-  Copy, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Play,
+  Pause,
+  Edit,
+  Copy,
+  Trash2,
   Archive,
   Eye,
   Calendar,
@@ -26,19 +26,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -153,7 +153,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                          workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || workflow.category === categoryFilter;
-    
+
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -209,7 +209,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             <div className="text-2xl font-bold mt-1">{workflows.length}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -233,7 +233,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             className="pl-10"
           />
         </div>
-        
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
@@ -271,7 +271,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
-        
+
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by category" />
@@ -305,7 +305,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                       {workflow.description}
                     </p>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
@@ -333,10 +333,10 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                
+
                 <div className="flex items-center gap-2 mt-3">
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`${getStatusColor(workflow.status)} text-white`}
                   >
                     {getStatusIcon(workflow.status)}
@@ -345,7 +345,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   <Badge variant="outline">{workflow.category}</Badge>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -358,7 +358,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                     <div className="font-medium">{workflow.executionCount.toLocaleString()}</div>
                   </div>
                 </div>
-                
+
                 {/* Success Rate */}
                 <div>
                   <div className="flex justify-between text-sm mb-1">
@@ -367,7 +367,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   </div>
                   <Progress value={workflow.successRate} className="h-2" />
                 </div>
-                
+
                 {/* Creator and Dates */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
@@ -381,27 +381,27 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     <span>
-                      {workflow.lastRun ? 
-                        `Last run ${workflow.lastRun.toLocaleDateString()}` : 
+                      {workflow.lastRun ?
+                        `Last run ${workflow.lastRun.toLocaleDateString()}` :
                         'Never run'
                       }
                     </span>
                   </div>
                 </div>
-                
+
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => onEditWorkflow(workflow.id)}
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
                   </Button>
-                  <Button 
-                    variant={workflow.status === 'active' ? 'destructive' : 'default'} 
+                  <Button
+                    variant={workflow.status === 'active' ? 'destructive' : 'default'}
                     size="sm"
                     className="flex-1"
                   >
@@ -430,7 +430,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
           <Zap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No workflows found</h3>
           <p className="text-muted-foreground mb-4">
-            {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all' 
+            {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all'
               ? 'Try adjusting your filters or search terms'
               : 'Create your first workflow to get started'
             }
@@ -448,4 +448,3 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
 };
 
 export default WorkflowList;
-

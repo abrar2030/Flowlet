@@ -168,5 +168,3 @@ Retrieves the historical balance trend for a user over a specified period. Note:
   ```
 - `404 Not Found`: User not found.
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

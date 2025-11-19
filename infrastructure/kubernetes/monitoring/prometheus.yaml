@@ -8,10 +8,10 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
-    
+
     rule_files:
       - "flowlet_rules.yml"
-    
+
     scrape_configs:
       - job_name: 'kubernetes-apiservers'
         kubernetes_sd_configs:
@@ -24,7 +24,7 @@ data:
         - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
           action: keep
           regex: default;kubernetes;https
-      
+
       - job_name: 'kubernetes-nodes'
         kubernetes_sd_configs:
         - role: node
@@ -41,7 +41,7 @@ data:
           regex: (.+)
           target_label: __metrics_path__
           replacement: /api/v1/nodes/${1}/proxy/metrics
-      
+
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
         - role: pod
@@ -66,7 +66,7 @@ data:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: kubernetes_pod_name
-      
+
       - job_name: 'flowlet-services'
         kubernetes_sd_configs:
         - role: endpoints
@@ -111,7 +111,7 @@ data:
         annotations:
           summary: "Flowlet service {{ $labels.kubernetes_name }} is down"
           description: "{{ $labels.kubernetes_name }} in namespace {{ $labels.kubernetes_namespace }} has been down for more than 1 minute."
-      
+
       - alert: FlowletHighErrorRate
         expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
         for: 5m
@@ -120,7 +120,7 @@ data:
         annotations:
           summary: "High error rate on {{ $labels.kubernetes_name }}"
           description: "{{ $labels.kubernetes_name }} has error rate above 10% for more than 5 minutes."
-      
+
       - alert: FlowletHighLatency
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
         for: 5m
@@ -129,7 +129,7 @@ data:
         annotations:
           summary: "High latency on {{ $labels.kubernetes_name }}"
           description: "{{ $labels.kubernetes_name }} 95th percentile latency is above 1 second for more than 5 minutes."
-      
+
       - alert: FlowletDatabaseConnectionFailure
         expr: database_connections_failed_total > 0
         for: 1m
@@ -251,4 +251,3 @@ subjects:
 - kind: ServiceAccount
   name: prometheus
   namespace: flowlet-monitoring
-

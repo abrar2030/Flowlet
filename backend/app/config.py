@@ -1,11 +1,10 @@
+import os
+from datetime import timedelta
+
 """
 Configuration settings for Flowlet Financial Backend
 Implements security best practices and financial industry standards
 """
-
-import os
-from datetime import timedelta
-from typing import List
 
 
 class Config:

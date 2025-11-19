@@ -33,5 +33,3 @@ spec:
         image: flowlet/backend:latest # Use your application image with migration capabilities
         command: ["/bin/sh", "-c", "echo 'Running post-upgrade database migrations...' && sleep 10"]
         # Replace with actual migration command, e.g., python manage.py migrate
-
-

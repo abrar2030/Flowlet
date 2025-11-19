@@ -49,7 +49,7 @@ const RegisterScreen: React.FC = () => {
     try {
       // Remove confirmPassword and acceptTerms from the data sent to the API
       const { confirmPassword, acceptTerms, ...registerData } = data;
-      
+
       await dispatch(registerUser(registerData)).unwrap();
       toast.success('Account created successfully!');
       navigate('/onboarding');
@@ -214,4 +214,3 @@ const RegisterScreen: React.FC = () => {
 };
 
 export default RegisterScreen;
-

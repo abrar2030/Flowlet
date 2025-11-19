@@ -1,27 +1,20 @@
-"""
-Advanced Reporting Engine
-========================
-
-Enterprise-grade reporting engine for financial analytics and business intelligence.
-Supports real-time and batch reporting with multiple output formats.
-"""
-
-import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from decimal import Decimal
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
-import numpy as np
 import pandas as pd
-from sqlalchemy import and_, func, or_, text
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (BusinessMetrics, CustomerAnalytics,
-                          PerformanceMetrics, RegulatoryReport,
-                          TransactionAnalytics)
+from .data_models import (Advanced, CustomerAnalytics, Engine,
+                          Enterprise-grade, PerformanceMetrics, Reporting,
+                          Supports, TransactionAnalytics, """,
+                          ========================, analytics, and, batch,
+                          business, engine, financial, for, formats.,
+                          intelligence., multiple, output, real-time,
+                          reporting, with)
 
 
 class ReportType(Enum):

@@ -88,4 +88,3 @@ export const useClickOutside = (
     };
   }, [ref, handler]);
 };
-

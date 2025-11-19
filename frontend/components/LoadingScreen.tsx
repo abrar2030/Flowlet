@@ -5,8 +5,8 @@ interface LoadingScreenProps {
   message?: string;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
-  message = 'Loading...' 
+const LoadingScreen: React.FC<LoadingScreenProps> = ({
+  message = 'Loading...'
 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -21,4 +21,3 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
 };
 
 export default LoadingScreen;
-

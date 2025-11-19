@@ -1,17 +1,13 @@
-"""
-Banking Integration Manager
-Centralized manager for all banking integrations
-"""
-
 import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
-from . import (BankAccount, BankingIntegrationBase, BankingIntegrationError,
-               PaymentRequest, Transaction, TransactionStatus)
-from .fdx_integration import FDXIntegration
-from .open_banking_integration import OpenBankingIntegration
-from .plaid_integration import PlaidIntegration
+from . import (BankAccount, Banking, BankingIntegrationBase,
+               BankingIntegrationError, Centralized, FDXIntegration,
+               Integration, Manager, OpenBankingIntegration, PaymentRequest,
+               PlaidIntegration, Transaction, TransactionStatus, """,
+               .fdx_integration, .open_banking_integration, .plaid_integration,
+               all, banking, for, from, import, integrations, manager)
 
 logger = logging.getLogger(__name__)
 

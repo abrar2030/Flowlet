@@ -142,7 +142,7 @@ kubectl describe nodes
 ```bash
 # PostgreSQL performance test
 kubectl exec -n flowlet-data postgresql-0 -- psql -U flowlet -d flowlet -c "
-SELECT 
+SELECT
     schemaname,
     tablename,
     attname,
@@ -439,7 +439,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Validate Infrastructure
         run: ./scripts/validate.sh
-      
+
   deploy-test:
     runs-on: ubuntu-latest
     needs: validate
@@ -456,4 +456,3 @@ jobs:
 ```
 
 This comprehensive testing guide ensures that the Flowlet infrastructure is thoroughly validated before production deployment and provides ongoing monitoring and testing procedures for operational excellence.
-

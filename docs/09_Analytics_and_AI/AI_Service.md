@@ -177,5 +177,3 @@ Provides an interface for the AI-powered support chatbot, allowing users and dev
   ```
 - `400 Bad Request`: Missing required fields.
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

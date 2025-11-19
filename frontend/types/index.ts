@@ -159,7 +159,7 @@ export type TransactionType = 'debit' | 'credit' | 'transfer' | 'payment' | 'ref
 
 export type TransactionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'reversed';
 
-export type TransactionCategory = 
+export type TransactionCategory =
   | 'food_dining'
   | 'transportation'
   | 'shopping'
@@ -258,7 +258,7 @@ export interface SecurityEvent extends BaseEntity {
   resolvedBy?: string;
 }
 
-export type SecurityEventType = 
+export type SecurityEventType =
   | 'login_attempt'
   | 'login_success'
   | 'login_failure'
@@ -494,4 +494,3 @@ export interface SecurityEvent extends AppEvent {
 // export * from './api'; // Removed non-existent module export
 // export * from './components'; // Removed non-existent module export
 // export * from './hooks'; // Removed non-existent module export
-

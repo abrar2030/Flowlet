@@ -1,17 +1,19 @@
-"""
-Enhanced error handlers for financial applications
-"""
-
 import logging
 import traceback
 from datetime import datetime, timezone
 
-from flask import current_app, jsonify, request
+from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from ..models.audit_log import AuditSeverity
-# Import the audit logger and severity enum
 from ..security.audit_logger import audit_logger
+
+"""
+Enhanced error handlers for financial applications
+"""
+
+
+# Import the audit logger and severity enum
 
 logger = logging.getLogger(__name__)
 

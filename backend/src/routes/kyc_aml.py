@@ -1,29 +1,21 @@
-"""
-Enhanced KYC/AML Compliance System Routes
-"""
-
 import json
 import logging
-import uuid
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal
-from functools import wraps
+from datetime import datetime, timezone
 
 from flask import Blueprint, g, jsonify, request
-from sqlalchemy import and_, func, or_, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
-from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
-# Import refactored modules
 from ..models.database import db
-from ..models.kyc import (DocumentType, KYCRecord, KYCStatus, RiskLevel,
-                          VerificationLevel)
-from ..models.user import User
-from ..security.audit_logger import audit_logger
-from ..utils.validators import InputValidator
-from .auth import (  # Assuming decorators are defined here for now
-    admin_required, token_required)
+from ..models.kyc import .auth  # Assuming decorators are defined here for now
+from ..models.kyc import (KYC/AML, Compliance,  # Import refactored modules
+                          Enhanced, KYCRecord, KYCStatus, Routes, System, User,
+                          VerificationLevel, """, ..models.user,
+                          ..security.audit_logger, audit_logger, from, import)
+
+    admin_required,
+    token_required,
+)
 
 # Create blueprint
 kyc_aml_bp = Blueprint("kyc_aml", __name__, url_prefix="/api/v1/kyc")

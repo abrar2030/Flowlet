@@ -1,22 +1,24 @@
-"""
-Multi-Currency and Exchange Rate Routes
-"""
-
 import logging
 from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import select
 
 from ..models.account import Account
-# Import refactored modules
 from ..models.database import db
 from ..models.transaction import Transaction
 from ..security.audit_logger import audit_logger
 from .auth import \
     token_required  # Assuming decorators are defined here for now
+
+"""
+Multi-Currency and Exchange Rate Routes
+"""
+
+
+# Import refactored modules
 
 # Create blueprint
 multicurrency_bp = Blueprint("multicurrency", __name__, url_prefix="/api/v1/currency")

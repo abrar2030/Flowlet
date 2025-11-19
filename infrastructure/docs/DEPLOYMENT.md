@@ -429,9 +429,9 @@ kubectl get hpa --all-namespaces
 
 # Check database performance
 kubectl exec -n flowlet-data postgresql-0 -- psql -U flowlet -d flowlet -c "
-SELECT query, calls, total_time, mean_time 
-FROM pg_stat_statements 
-ORDER BY total_time DESC 
+SELECT query, calls, total_time, mean_time
+FROM pg_stat_statements
+ORDER BY total_time DESC
 LIMIT 10;"
 ```
 
@@ -510,4 +510,3 @@ chmod +x health-check.sh
 ---
 
 **Congratulations!** You have successfully deployed the Flowlet embedded finance platform infrastructure. The platform is now ready for application deployment and integration.
-

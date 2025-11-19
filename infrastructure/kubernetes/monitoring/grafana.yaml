@@ -7,38 +7,38 @@ data:
   grafana.ini: |
     [analytics]
     check_for_updates = false
-    
+
     [grafana_net]
     url = https://grafana.net
-    
+
     [log]
     mode = console
     level = info
-    
+
     [paths]
     data = /var/lib/grafana/data
     logs = /var/log/grafana
     plugins = /var/lib/grafana/plugins
     provisioning = /etc/grafana/provisioning
-    
+
     [server]
     root_url = %(protocol)s://%(domain)s:%(http_port)s/grafana/
     serve_from_sub_path = true
-    
+
     [security]
     # Admin password should be managed via Kubernetes secrets or external secret management
     # admin_user = admin
     # admin_password = admin123
     allow_embedding = false
     cookie_samesite = lax
-    
+
     [users]
     allow_sign_up = false
     allow_org_create = false
-    
+
     [auth.anonymous]
     enabled = false
-    
+
     [auth.basic]
     enabled = true
 
@@ -411,5 +411,3 @@ spec:
             name: grafana
             port:
               number: 3000
-
-

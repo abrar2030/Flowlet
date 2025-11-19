@@ -9,5 +9,3 @@ echo "Deploying Helm chart..."
 helm upgrade --install flowlet ../kubernetes/helm/flowlet-chart
 
 echo "Deployment complete."
-
-

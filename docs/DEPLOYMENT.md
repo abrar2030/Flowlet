@@ -156,14 +156,14 @@ server {
 
     ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-    
+
     # SSL Security Headers
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
-    
+
     # Security Headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -178,18 +178,18 @@ server {
 
     location / {
         limit_req zone=api burst=20 nodelay;
-        
+
         proxy_pass http://127.0.0.1:5001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        
+
         # Buffer settings
         proxy_buffering on;
         proxy_buffer_size 128k;
@@ -199,7 +199,7 @@ server {
 
     location /api/v1/auth {
         limit_req zone=auth burst=10 nodelay;
-        
+
         proxy_pass http://127.0.0.1:5001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -617,4 +617,3 @@ command=/home/flowlet/Flowlet/backend/venv/bin/gunicorn \
 - **Incident Reports**: Post-incident analysis and improvements
 
 This deployment guide ensures a production-ready, secure, and compliant financial backend system that meets enterprise standards and regulatory requirements.
-

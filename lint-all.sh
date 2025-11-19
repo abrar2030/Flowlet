@@ -51,5 +51,3 @@ prettier --check Flowlet/frontend/web-frontend/src || log_error "Prettier format
 log_success "Prettier formatting check completed."
 
 echo "Linting process completed successfully."
-
-

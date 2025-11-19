@@ -1,13 +1,13 @@
-"""
-Test configuration for the enhanced Flowlet backend
-"""
-
 import os
 import tempfile
 
 import pytest
 from src.main import create_app
 from src.models.database import db
+
+"""
+Test configuration for the enhanced Flowlet backend
+"""
 
 
 @pytest.fixture

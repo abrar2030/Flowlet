@@ -69,4 +69,3 @@ global.fetch = vi.fn(() =>
     json: () => Promise.resolve({}),
   })
 ) as any;
-

@@ -23,23 +23,23 @@ import{r as a,a as En,R as Sn,b as de,c as oo}from"./router-C2VCO5Bu.js";var pt=
     margin-right: `).concat(c,"px ").concat(r,`;
     `),n==="padding"&&"padding-right: ".concat(c,"px ").concat(r,";")].filter(Boolean).join(""),`
   }
-  
+
   .`).concat(Je,` {
     right: `).concat(c,"px ").concat(r,`;
   }
-  
+
   .`).concat(Qe,` {
     margin-right: `).concat(c,"px ").concat(r,`;
   }
-  
+
   .`).concat(Je," .").concat(Je,` {
     right: 0 `).concat(r,`;
   }
-  
+
   .`).concat(Qe," .").concat(Qe,` {
     margin-right: 0 `).concat(r,`;
   }
-  
+
   body[`).concat(ye,`] {
     `).concat(vs,": ").concat(c,`px;
   }

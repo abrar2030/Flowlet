@@ -290,10 +290,10 @@ export function KeyManagement({
       const matchesSearch = key.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            key.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            key.metadata.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()));
-      
+
       const matchesStatus = state.filterStatus === 'all' || key.status === state.filterStatus;
       const matchesType = state.filterType === 'all' || key.type === state.filterType;
-      
+
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [keys, state.searchTerm, state.filterStatus, state.filterType]);
@@ -310,8 +310,8 @@ export function KeyManagement({
     try {
       if (onKeyGenerate) {
         await onKeyGenerate(state.newKey);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Key generated successfully',
           showKeyGenerator: false,
           newKey: {
@@ -371,8 +371,8 @@ export function KeyManagement({
     try {
       if (onKeyRevoke) {
         await onKeyRevoke(keyId, state.revocationReason);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Key revoked successfully',
           showRevocationDialog: null,
           revocationReason: ''
@@ -400,7 +400,7 @@ export function KeyManagement({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Key exported successfully' }));
       }
     } catch (error) {
@@ -429,8 +429,8 @@ export function KeyManagement({
             description: state.importData.description
           }
         );
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Key imported successfully',
           showImportDialog: false,
           importData: {
@@ -460,8 +460,8 @@ export function KeyManagement({
     try {
       if (onPolicyCreate) {
         await onPolicyCreate(state.newPolicy as Omit<KeyPolicy, 'id' | 'createdAt'>);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Policy created successfully',
           showPolicyEditor: false
         }));
@@ -675,7 +675,7 @@ export function KeyManagement({
               {filteredKeys.map(key => {
                 const daysUntilExpiry = getDaysUntilExpiry(key.expiresAt);
                 const isNearExpiry = daysUntilExpiry !== null && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
-                
+
                 return (
                   <Card key={key.id} className={`hover:shadow-md transition-shadow ${isNearExpiry ? 'border-yellow-300' : ''}`}>
                     <CardContent className="p-4">
@@ -777,7 +777,7 @@ export function KeyManagement({
         <TabsContent value="vaults">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Key Vaults</h3>
-            
+
             <div className="grid gap-4">
               {vaults.map(vault => (
                 <Card key={vault.id}>
@@ -1193,8 +1193,8 @@ export function KeyManagement({
                   {state.isRotating ? 'Revoking...' : 'Revoke Key'}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
+                  onClick={() => setState(prev => ({
+                    ...prev,
                     showRevocationDialog: null,
                     revocationReason: ''
                   }))}
@@ -1212,4 +1212,3 @@ export function KeyManagement({
 }
 
 export default KeyManagement;
-

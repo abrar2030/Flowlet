@@ -508,5 +508,3 @@ GET /api/v1/kyc/aml/screen/aml_screen_abc
     "error": "AML screening record not found"
 }
 ```
-
-

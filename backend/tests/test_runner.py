@@ -1,6 +1,7 @@
-# Simple test runner that doesn't require database
 import os
 import sys
+
+# Simple test runner that doesn't require database
 
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))

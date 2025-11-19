@@ -42,7 +42,7 @@ describe('useAuth', () => {
 
   it('returns initial unauthenticated state', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.token).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
@@ -81,10 +81,10 @@ describe('useAuth', () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useAuth(), { 
-      wrapper: ({ children }) => wrapper({ children, store }) 
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: ({ children }) => wrapper({ children, store })
     });
-    
+
     expect(result.current.user).toEqual(mockUser);
     expect(result.current.token).toBe('test-token');
     expect(result.current.isAuthenticated).toBe(true);
@@ -92,17 +92,16 @@ describe('useAuth', () => {
 
   it('shows loading state initially', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     expect(result.current.isLoading).toBe(true);
   });
 
   it('handles token validation on initialization', async () => {
     localStorage.setItem('authToken', 'stored-token');
-    
+
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     // Initially loading should be true
     expect(result.current.isLoading).toBe(true);
   });
 });
-

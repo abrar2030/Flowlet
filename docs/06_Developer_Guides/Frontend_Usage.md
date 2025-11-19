@@ -80,11 +80,10 @@ Manage your account settings and preferences. This may include:
 ## Troubleshooting
 
 - **Page Not Loading**: Check your internet connection. If the issue persists, try clearing your browser cache and cookies.
-- **Login Issues**: Double-check your credentials. If you forgot your password, use the 
+- **Login Issues**: Double-check your credentials. If you forgot your password, use the
 
 
  'Forgot Password' option.
 - **Transaction Errors**: If a transaction fails, check the error message provided. This may indicate insufficient funds, incorrect details, or a system issue. Contact support if the problem persists.
 
 For further assistance, please refer to the [Flowlet Backend API Documentation](backend-api.md) or the [Troubleshooting](#troubleshooting) section in the main infrastructure guide.
-

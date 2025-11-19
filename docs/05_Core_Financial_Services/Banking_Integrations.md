@@ -292,5 +292,3 @@ Provides a health check endpoint for all banking integrations, indicating their 
   }
   ```
 - `500 Internal Server Error`: An unexpected error occurred during the health check.
-
-

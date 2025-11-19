@@ -17,5 +17,3 @@ spec:
       - hosts:
           - jaeger.example.com
         secretName: jaeger-tls-secret
-
-

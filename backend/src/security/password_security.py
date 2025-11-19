@@ -1,15 +1,16 @@
-"""
-Password Security Module - Provides secure hashing, verification, and strength validation.
-"""
-
 import math
 import re
 import secrets
 import string
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List
 
 import bcrypt
+
+"""
+Password Security Module - Provides secure hashing, verification, and strength validation.
+"""
+
 
 # --- Core Hashing Functions ---
 

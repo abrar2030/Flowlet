@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, 
-  Save, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Settings, 
-  Trash2, 
+import {
+  Plus,
+  Save,
+  Play,
+  Pause,
+  RotateCcw,
+  Settings,
+  Trash2,
   Copy,
   Download,
   Upload,
@@ -247,7 +247,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
     if (!currentWorkflow || isRunning) return;
 
     setIsRunning(true);
-    
+
     // Simulate workflow execution
     for (const node of currentWorkflow.nodes) {
       updateNode(node.id, { data: { ...node.data, status: 'running' } });
@@ -292,7 +292,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={createNewWorkflow}>
               <Plus className="h-4 w-4 mr-2" />
@@ -302,9 +302,9 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
               <Save className="h-4 w-4 mr-2" />
               Save
             </Button>
-            <Button 
-              variant={isRunning ? "destructive" : "default"} 
-              size="sm" 
+            <Button
+              variant={isRunning ? "destructive" : "default"}
+              size="sm"
               onClick={runWorkflow}
               disabled={!currentWorkflow || currentWorkflow.nodes.length === 0}
             >
@@ -330,7 +330,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
           <ScrollArea className="h-full">
             <div className="p-4">
               <h3 className="font-semibold mb-4">Node Library</h3>
-              
+
               {Object.entries(NODE_TYPES).map(([categoryKey, category]) => (
                 <div key={categoryKey} className="mb-6">
                   <h4 className="text-sm font-medium text-muted-foreground mb-3">
@@ -393,11 +393,11 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
                 const nodeInfo = Object.values(NODE_TYPES)
                   .flatMap(category => category.items)
                   .find(item => item.type === node.type);
-                
+
                 if (!nodeInfo) return null;
-                
+
                 const Icon = nodeInfo.icon;
-                
+
                 return (
                   <motion.div
                     key={node.id}
@@ -439,7 +439,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Connection handles */}
                     <div className="absolute -right-2 top-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background cursor-crosshair" />
                     <div className="absolute -left-2 top-1/2 w-4 h-4 bg-secondary rounded-full border-2 border-background cursor-crosshair" />
@@ -482,7 +482,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
                   </Button>
                 </div>
               </div>
-              
+
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
                   <div>
@@ -495,7 +495,7 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
                       })}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="node-description">Description</Label>
                     <Textarea
@@ -512,8 +512,8 @@ const WorkflowDesigner: React.FC<WorkflowDesignerProps> = ({ workflowId }) => {
                   {/* Node-specific configuration */}
                   <div>
                     <h4 className="font-medium mb-3">Configuration</h4>
-                    <NodeConfiguration 
-                      node={selectedNode} 
+                    <NodeConfiguration
+                      node={selectedNode}
                       onUpdate={(config) => updateNode(selectedNode.id, {
                         data: { ...selectedNode.data, config }
                       })}
@@ -666,4 +666,3 @@ const NodeConfiguration: React.FC<{
 };
 
 export default WorkflowDesigner;
-

@@ -147,5 +147,3 @@ This script installs Kubernetes prerequisites on a machine, such as `kubectl`, `
 - **Logging**: Implement logging to provide clear output and aid in debugging.
 - **Modularity**: Break down complex tasks into smaller, reusable functions or scripts.
 - **Documentation**: Keep script comments and external documentation up-to-date.
-
-

@@ -1,27 +1,19 @@
-"""
-Dashboard Service
-================
-
-Real-time dashboard service for financial analytics and business intelligence.
-Provides interactive dashboards with live data updates and customizable widgets.
-"""
-
-import asyncio
-import json
 import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-import pandas as pd
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (AlertConfiguration, BusinessMetrics,
-                          CustomerAnalytics, PerformanceMetrics,
-                          TransactionAnalytics)
-from .reporting_engine import ReportingEngine, ReportParameters, ReportType
+from .data_models import (AlertConfiguration, CustomerAnalytics, Dashboard,
+                          PerformanceMetrics, Provides, Real-time,
+                          ReportingEngine, Service, TransactionAnalytics, """,
+                          .reporting_engine, ================, analytics, and,
+                          business, customizable, dashboard, dashboards, data,
+                          financial, for, from, import, intelligence.,
+                          interactive, live, service, updates, widgets., with)
 
 
 class WidgetType(Enum):

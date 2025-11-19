@@ -173,8 +173,8 @@ export function PCIDSSCompliance({
 
   // Handle requirement update
   const handleRequirementUpdate = useCallback(async (
-    requirementId: string, 
-    status: string, 
+    requirementId: string,
+    status: string,
     evidence?: string[]
   ) => {
     setState(prev => ({ ...prev, isUpdating: true, error: null }));
@@ -209,8 +209,8 @@ export function PCIDSSCompliance({
 
   // Handle vulnerability update
   const handleVulnerabilityUpdate = useCallback(async (
-    vulnerabilityId: string, 
-    status: string, 
+    vulnerabilityId: string,
+    status: string,
     notes?: string
   ) => {
     setState(prev => ({ ...prev, isUpdating: true, error: null }));
@@ -287,8 +287,8 @@ export function PCIDSSCompliance({
               PCI DSS Compliance Dashboard
             </div>
             <div className="flex items-center space-x-2">
-              <Badge className={overallComplianceScore >= 90 ? 'bg-green-100 text-green-600' : 
-                              overallComplianceScore >= 70 ? 'bg-yellow-100 text-yellow-600' : 
+              <Badge className={overallComplianceScore >= 90 ? 'bg-green-100 text-green-600' :
+                              overallComplianceScore >= 70 ? 'bg-yellow-100 text-yellow-600' :
                               'bg-red-100 text-red-600'}>
                 <Shield className="w-3 h-3 mr-1" />
                 {overallComplianceScore.toFixed(1)}% Compliant
@@ -423,7 +423,7 @@ export function PCIDSSCompliance({
                   const categoryReqs = requirements.filter(r => r.category === category);
                   const categoryCompliant = categoryReqs.filter(r => r.status === 'compliant').length;
                   const categoryRate = categoryReqs.length > 0 ? (categoryCompliant / categoryReqs.length) * 100 : 0;
-                  
+
                   return (
                     <div key={category} className="p-4 border rounded-lg">
                       <div className="flex items-center space-x-2 mb-2">
@@ -586,7 +586,7 @@ export function PCIDSSCompliance({
         <TabsContent value="controls">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Security Controls</h3>
-            
+
             <div className="grid gap-4">
               {securityControls.map(control => (
                 <Card key={control.id}>
@@ -645,7 +645,7 @@ export function PCIDSSCompliance({
         <TabsContent value="vulnerabilities">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Vulnerability Management</h3>
-            
+
             <div className="grid gap-4">
               {vulnerabilities.map(vulnerability => (
                 <Card key={vulnerability.id}>
@@ -657,8 +657,8 @@ export function PCIDSSCompliance({
                           <Badge className={getSeverityColor(vulnerability.severity)}>
                             {vulnerability.severity}
                           </Badge>
-                          <Badge className={vulnerability.status === 'open' ? 'bg-red-100 text-red-600' : 
-                                          vulnerability.status === 'resolved' ? 'bg-green-100 text-green-600' : 
+                          <Badge className={vulnerability.status === 'open' ? 'bg-red-100 text-red-600' :
+                                          vulnerability.status === 'resolved' ? 'bg-green-100 text-green-600' :
                                           'bg-yellow-100 text-yellow-600'}>
                             {vulnerability.status.replace('_', ' ')}
                           </Badge>
@@ -739,8 +739,8 @@ export function PCIDSSCompliance({
                       <div>
                         <div className="flex items-center space-x-2 mb-2">
                           <h4 className="font-medium capitalize">{report.type.replace('_', ' ')}</h4>
-                          <Badge className={report.status === 'final' ? 'bg-green-100 text-green-600' : 
-                                          report.status === 'submitted' ? 'bg-blue-100 text-blue-600' : 
+                          <Badge className={report.status === 'final' ? 'bg-green-100 text-green-600' :
+                                          report.status === 'submitted' ? 'bg-blue-100 text-blue-600' :
                                           'bg-yellow-100 text-yellow-600'}>
                             {report.status}
                           </Badge>
@@ -780,4 +780,3 @@ export function PCIDSSCompliance({
 }
 
 export default PCIDSSCompliance;
-

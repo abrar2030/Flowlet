@@ -103,7 +103,7 @@ const OnboardingFlow: React.FC = () => {
                 </Button>
               )}
             </div>
-            
+
             <div className="flex space-x-2">
               <Button variant="ghost" onClick={handleSkip}>
                 Skip
@@ -121,4 +121,3 @@ const OnboardingFlow: React.FC = () => {
 };
 
 export default OnboardingFlow;
-

@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  QrCode, 
-  Copy, 
-  Share, 
-  Download, 
-  CreditCard, 
-  Building, 
+import {
+  QrCode,
+  Copy,
+  Share,
+  Download,
+  CreditCard,
+  Building,
   Globe,
   CheckCircle
 } from 'lucide-react';
@@ -106,14 +106,14 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
           <CardContent className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
-                <img 
-                  src={qrCodeUrl} 
-                  alt="Payment QR Code" 
+                <img
+                  src={qrCodeUrl}
+                  alt="Payment QR Code"
                   className="w-48 h-48 object-contain"
                 />
               </div>
             </div>
-            
+
             <p className="text-gray-600">
               Share this QR code with anyone who wants to send you money
             </p>
@@ -130,7 +130,7 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   onChange={(e) => setCustomAmount(e.target.value)}
                   className="flex-1"
                 />
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => copyToClipboard(generatePaymentLink(), 'paymentLink')}
                 >
@@ -237,8 +237,8 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
             </div>
 
             {/* Copy All Button */}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => {
                 const allDetails = `Bank: ${accountDetails.bankName}\nAccount: ${accountDetails.accountNumber}\nName: ${accountDetails.accountName}\nRouting: ${accountDetails.routingNumber}\nSWIFT: ${accountDetails.swiftCode}`;
@@ -266,7 +266,7 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
         <CardContent className="pt-6">
           <Alert>
             <AlertDescription>
-              <strong>Security Notice:</strong> Only share your account details with trusted parties. 
+              <strong>Security Notice:</strong> Only share your account details with trusted parties.
               Never share your login credentials, PIN, or passwords with anyone.
             </AlertDescription>
           </Alert>
@@ -277,4 +277,3 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
 };
 
 export default ReceiveMoney;
-

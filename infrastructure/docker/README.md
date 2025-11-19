@@ -85,4 +85,3 @@ docker push your-registry.com/flowlet/wallet-service:latest
 ## Environment Variables
 
 Each service requires specific environment variables. See individual Kubernetes manifests for complete configuration.
-

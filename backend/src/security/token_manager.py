@@ -1,8 +1,3 @@
-"""
-JWT Token Management for Financial-Grade Security
-"""
-
-import json
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -11,6 +6,11 @@ from typing import Any, Dict, Optional, Tuple
 import jwt
 import redis
 from flask import current_app
+
+"""
+JWT Token Management for Financial-Grade Security
+"""
+
 
 logger = logging.getLogger(__name__)
 

@@ -69,27 +69,27 @@ export function validatePassword(password: string): {
   errors: string[]
 } {
   const errors: string[] = []
-  
+
   if (password.length < 8) {
     errors.push('Password must be at least 8 characters long')
   }
-  
+
   if (!/[A-Z]/.test(password)) {
     errors.push('Password must contain at least one uppercase letter')
   }
-  
+
   if (!/[a-z]/.test(password)) {
     errors.push('Password must contain at least one lowercase letter')
   }
-  
+
   if (!/\d/.test(password)) {
     errors.push('Password must contain at least one number')
   }
-  
+
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     errors.push('Password must contain at least one special character')
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors
@@ -108,7 +108,7 @@ export function maskSensitiveData(data: string, visibleChars: number = 4): strin
   if (data.length <= visibleChars) {
     return '*'.repeat(data.length)
   }
-  
+
   const masked = '*'.repeat(data.length - visibleChars)
   return masked + data.slice(-visibleChars)
 }
@@ -121,13 +121,13 @@ export function calculateRiskScore(factors: Record<string, number>): number {
     deviceAnomaly: 0.15,
     behaviorAnomaly: 0.1
   }
-  
+
   let score = 0
   for (const [factor, value] of Object.entries(factors)) {
     const weight = weights[factor as keyof typeof weights] || 0.1
     score += value * weight
   }
-  
+
   return Math.min(Math.max(score, 0), 100)
 }
 
@@ -173,7 +173,7 @@ export function detectAnomalies(data: number[], threshold: number = 2): number[]
   const mean = data.reduce((sum, val) => sum + val, 0) / data.length
   const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / data.length
   const stdDev = Math.sqrt(variance)
-  
+
   return data.map((value, index) => {
     const zScore = Math.abs((value - mean) / stdDev)
     return zScore > threshold ? index : -1
@@ -205,4 +205,3 @@ export function isTokenExpired(token: string): boolean {
   if (!payload || !payload.exp) return true
   return Date.now() >= payload.exp * 1000
 }
-

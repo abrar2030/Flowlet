@@ -1,10 +1,5 @@
-"""
-Transaction model for financial transaction management
-"""
-
 import random
 import string
-import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
@@ -12,6 +7,10 @@ from enum import Enum
 from app import db
 
 from .mixins import UUID, TimestampMixin, UUIDMixin
+
+"""
+Transaction model for financial transaction management
+"""
 
 
 class TransactionType(Enum):

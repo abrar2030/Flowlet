@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Wallet, 
-  CreditCard, 
-  BarChart3, 
-  MessageSquare, 
-  Shield, 
+import {
+  Home,
+  Wallet,
+  CreditCard,
+  BarChart3,
+  MessageSquare,
+  Shield,
   Settings,
   PiggyBank,
   AlertTriangle,
@@ -42,12 +42,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, onClose }) => {
       <>
         {/* Mobile overlay */}
         {isOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={onClose}
           />
         )}
-        
+
         {/* Mobile sidebar */}
         <div className={cn(
           "fixed top-0 left-0 h-full w-64 bg-card border-r z-50 transform transition-transform duration-300 lg:hidden",
@@ -87,7 +87,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({ location, onItemClick }
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
-          
+
           return (
             <Link
               key={item.path}
@@ -95,8 +95,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({ location, onItemClick }
               onClick={onItemClick}
               className={cn(
                 "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-primary-foreground" 
+                isActive
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -111,4 +111,3 @@ const SidebarContent: React.FC<SidebarContentProps> = ({ location, onItemClick }
 };
 
 export default Sidebar;
-

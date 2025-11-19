@@ -1,15 +1,15 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from './index';
-import { 
-  User, 
-  Wallet, 
-  Transaction, 
-  Card, 
-  AnalyticsData, 
-  ApiResponse, 
+import {
+  User,
+  Wallet,
+  Transaction,
+  Card,
+  AnalyticsData,
+  ApiResponse,
   PaginatedResponse,
   LoginCredentials,
-  RegisterData 
+  RegisterData
 } from '@/types';
 
 const baseQuery = fetchBaseQuery({
@@ -38,7 +38,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['User'],
     }),
-    
+
     register: builder.mutation<ApiResponse<{ user: User; token: string }>, RegisterData>({
       query: (userData) => ({
         url: '/auth/register',
@@ -47,7 +47,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['User'],
     }),
-    
+
     logout: builder.mutation<ApiResponse, void>({
       query: () => ({
         url: '/auth/logout',
@@ -55,7 +55,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['User', 'Wallet', 'Transaction', 'Card'],
     }),
-    
+
     validateToken: builder.query<ApiResponse<{ user: User; token: string }>, string>({
       query: (token) => ({
         url: '/auth/validate',
@@ -63,7 +63,7 @@ export const api = createApi({
       }),
       providesTags: ['User'],
     }),
-    
+
     refreshToken: builder.mutation<ApiResponse<{ user: User; token: string }>, void>({
       query: () => ({
         url: '/auth/refresh',
@@ -77,7 +77,7 @@ export const api = createApi({
       query: () => '/user/profile',
       providesTags: ['User'],
     }),
-    
+
     updateProfile: builder.mutation<ApiResponse<User>, Partial<User>>({
       query: (updates) => ({
         url: '/user/profile',
@@ -92,12 +92,12 @@ export const api = createApi({
       query: () => '/wallets',
       providesTags: ['Wallet'],
     }),
-    
+
     getWallet: builder.query<ApiResponse<Wallet>, string>({
       query: (id) => `/wallets/${id}`,
       providesTags: (result, error, id) => [{ type: 'Wallet', id }],
     }),
-    
+
     createWallet: builder.mutation<ApiResponse<Wallet>, Partial<Wallet>>({
       query: (wallet) => ({
         url: '/wallets',
@@ -106,7 +106,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['Wallet'],
     }),
-    
+
     updateWallet: builder.mutation<ApiResponse<Wallet>, { id: string; updates: Partial<Wallet> }>({
       query: ({ id, updates }) => ({
         url: `/wallets/${id}`,
@@ -131,12 +131,12 @@ export const api = createApi({
       }),
       providesTags: ['Transaction'],
     }),
-    
+
     getTransaction: builder.query<ApiResponse<Transaction>, string>({
       query: (id) => `/transactions/${id}`,
       providesTags: (result, error, id) => [{ type: 'Transaction', id }],
     }),
-    
+
     createTransaction: builder.mutation<ApiResponse<Transaction>, Partial<Transaction>>({
       query: (transaction) => ({
         url: '/transactions',
@@ -145,7 +145,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['Transaction', 'Wallet', 'Analytics'],
     }),
-    
+
     updateTransaction: builder.mutation<ApiResponse<Transaction>, { id: string; updates: Partial<Transaction> }>({
       query: ({ id, updates }) => ({
         url: `/transactions/${id}`,
@@ -160,12 +160,12 @@ export const api = createApi({
       query: () => '/cards',
       providesTags: ['Card'],
     }),
-    
+
     getCard: builder.query<ApiResponse<Card>, string>({
       query: (id) => `/cards/${id}`,
       providesTags: (result, error, id) => [{ type: 'Card', id }],
     }),
-    
+
     createCard: builder.mutation<ApiResponse<Card>, Partial<Card>>({
       query: (card) => ({
         url: '/cards',
@@ -174,7 +174,7 @@ export const api = createApi({
       }),
       invalidatesTags: ['Card'],
     }),
-    
+
     updateCard: builder.mutation<ApiResponse<Card>, { id: string; updates: Partial<Card> }>({
       query: ({ id, updates }) => ({
         url: `/cards/${id}`,
@@ -183,7 +183,7 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'Card', id }],
     }),
-    
+
     blockCard: builder.mutation<ApiResponse<Card>, string>({
       query: (id) => ({
         url: `/cards/${id}/block`,
@@ -191,7 +191,7 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Card', id }],
     }),
-    
+
     unblockCard: builder.mutation<ApiResponse<Card>, string>({
       query: (id) => ({
         url: `/cards/${id}/unblock`,
@@ -211,7 +211,7 @@ export const api = createApi({
       }),
       providesTags: ['Analytics'],
     }),
-    
+
     getSpendingAnalytics: builder.query<ApiResponse<any>, {
       period?: 'week' | 'month' | 'quarter' | 'year';
       category?: string;
@@ -222,7 +222,7 @@ export const api = createApi({
       }),
       providesTags: ['Analytics'],
     }),
-    
+
     getIncomeAnalytics: builder.query<ApiResponse<any>, {
       period?: 'week' | 'month' | 'quarter' | 'year';
     }>({
@@ -242,23 +242,23 @@ export const {
   useLogoutMutation,
   useValidateTokenQuery,
   useRefreshTokenMutation,
-  
+
   // User hooks
   useGetProfileQuery,
   useUpdateProfileMutation,
-  
+
   // Wallet hooks
   useGetWalletsQuery,
   useGetWalletQuery,
   useCreateWalletMutation,
   useUpdateWalletMutation,
-  
+
   // Transaction hooks
   useGetTransactionsQuery,
   useGetTransactionQuery,
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
-  
+
   // Card hooks
   useGetCardsQuery,
   useGetCardQuery,
@@ -266,10 +266,9 @@ export const {
   useUpdateCardMutation,
   useBlockCardMutation,
   useUnblockCardMutation,
-  
+
   // Analytics hooks
   useGetAnalyticsQuery,
   useGetSpendingAnalyticsQuery,
   useGetIncomeAnalyticsQuery,
 } = api;
-

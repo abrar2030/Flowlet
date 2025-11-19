@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock, patch
 
 # Mocking the services that would interact in a payment flow
 # In a real scenario, these would be actual imports from your application
@@ -72,8 +71,6 @@ class PaymentFlowIntegrationTests(unittest.TestCase):
         self.assertEqual(ledger_entry_result["status"], "success")
 
     def test_failed_payment_flow_processor_declined(self):
-        user_wallet_id = "user_wallet_2"
-        merchant_wallet_id = "merchant_wallet_2"
         amount = 999.00  # This amount triggers a simulated processor decline
         currency = "USD"
         card_details = {"number": "123", "expiry": "12/25", "cvv": "123"}
@@ -92,7 +89,6 @@ class PaymentFlowIntegrationTests(unittest.TestCase):
 
     def test_failed_payment_flow_wallet_withdrawal_failure(self):
         user_wallet_id = "wallet_fail_withdraw"
-        merchant_wallet_id = "merchant_wallet_3"
         amount = 50.00
         currency = "USD"
         card_details = {"number": "123", "expiry": "12/25", "cvv": "123"}

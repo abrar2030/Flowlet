@@ -16,4 +16,3 @@ For continuous security and compliance, it is crucial to implement automated sec
 **Integration:**
 
 These tools should be integrated into the CI/CD pipeline to ensure that no vulnerable images or misconfigured Kubernetes resources are deployed to production environments. Regular scans of the running cluster are also recommended.
-

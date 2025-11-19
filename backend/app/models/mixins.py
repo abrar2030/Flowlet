@@ -1,12 +1,12 @@
-"""
-Database mixins for common model fields
-"""
-
 import uuid
 
 from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.types import CHAR, TypeDecorator
+
+"""
+Database mixins for common model fields
+"""
 
 
 # Define a custom UUID type for SQLAlchemy

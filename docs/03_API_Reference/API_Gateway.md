@@ -224,5 +224,3 @@ GET /api/v1/gateway/documentation
     "error": "Failed to generate documentation"
 }
 ```
-
-

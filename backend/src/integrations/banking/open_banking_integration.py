@@ -1,23 +1,16 @@
-"""
-Open Banking Integration
-Implements PSD2-compliant Open Banking APIs for European banks
-"""
-
 import asyncio
-import json
 import logging
 import uuid
-from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
-import jwt
 
-from . import (AuthenticationError, BankAccount, BankingIntegrationBase,
-               BankingIntegrationError, InvalidAccountError, OpenBankingBase,
-               PaymentRequest, PSD2ComplianceBase, Transaction,
-               TransactionStatus, TransactionType)
+from . import (APIs, AuthenticationError, BankAccount, Banking,
+               BankingIntegrationBase, BankingIntegrationError, European,
+               Implements, Integration, Open, OpenBankingBase, PaymentRequest,
+               PSD2-compliant, PSD2ComplianceBase, Transaction,
+               TransactionStatus, TransactionType, """, banks, for)
 
 logger = logging.getLogger(__name__)
 

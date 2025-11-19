@@ -1,11 +1,10 @@
+import json
+
+from src.main import create_app
+
 """
 Test the enhanced main application
 """
-
-import json
-
-import pytest
-from src.main import create_app
 
 
 def test_app_creation():

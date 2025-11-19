@@ -25,5 +25,3 @@ jobs:
         pip install pytest
         pytest Flowlet/backend/test_api.py
         pytest Flowlet/backend/test_offline.py
-
-

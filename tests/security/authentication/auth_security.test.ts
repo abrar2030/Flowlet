@@ -98,5 +98,3 @@ describe("Authentication Security Tests", () => {
     await expect(loginUser("existing@example.com", "any_password")).rejects.toThrow("Invalid credentials");
   });
 });
-
-

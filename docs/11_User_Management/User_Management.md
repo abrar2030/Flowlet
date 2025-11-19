@@ -540,5 +540,3 @@ Allows a user to request a KYC verification. This will typically redirect to or 
   ```
 - `400 Bad Request`: Invalid JSON, missing fields, or invalid verification level.
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

@@ -56,7 +56,7 @@ describe('App Integration Tests', () => {
     });
 
     render(<App />);
-    
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe('App Integration Tests', () => {
         <App />
       </BrowserRouter>
     );
-    
+
     // Should redirect to home page for unauthenticated users
     expect(window.location.pathname).toBe('/');
   });
@@ -118,7 +118,7 @@ describe('App Integration Tests', () => {
         <App />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText(/Layout:/)).toBeInTheDocument();
   });
 
@@ -136,7 +136,7 @@ describe('App Integration Tests', () => {
     });
 
     render(<App />);
-    
+
     expect(screen.getByText('Offline')).toBeInTheDocument();
   });
 
@@ -153,11 +153,10 @@ describe('App Integration Tests', () => {
     });
 
     render(<App />);
-    
+
     // Should show error boundary UI
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    
+
     consoleSpy.mockRestore();
   });
 });
-

@@ -31,4 +31,3 @@ spec:
           averageUtilization: {{ .Values.backend.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}
-

@@ -106,7 +106,7 @@ data:
       "lockoutDuration": 1800,
       "disallowedCommonPasswords": true
     }
-  
+
   rate-limiting.json: |
     {
       "global": {
@@ -138,7 +138,7 @@ data:
         }
       }
     }
-  
+
   encryption-config.json: |
     {
       "algorithms": {
@@ -288,5 +288,3 @@ roleRef:
   kind: ClusterRole
   name: flowlet-security-auditor
   apiGroup: rbac.authorization.k8s.io
-
-

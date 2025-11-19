@@ -1,13 +1,3 @@
-"""
-Threat Prevention Service
-========================
-
-Advanced threat prevention and cybersecurity service for financial applications.
-Provides real-time threat detection, prevention, and response capabilities.
-"""
-
-import asyncio
-import hashlib
 import json
 import logging
 import re
@@ -16,10 +6,17 @@ from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List
 
-from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
+
+"""
+Threat Prevention Service
+========================
+
+Advanced threat prevention and cybersecurity service for financial applications.
+Provides real-time threat detection, prevention, and response capabilities.
+"""
 
 
 class ThreatType(Enum):

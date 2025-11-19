@@ -102,5 +102,3 @@ The `kubernetes/config/` directory can hold various configuration files related 
 Note that there is also a `Flowlet/infrastructure/kubernetes/` directory which contains more detailed and extensive Kubernetes configurations for various infrastructure components like databases, messaging systems, monitoring, and security. This guide focuses on the application-level Kubernetes configurations within `Flowlet/kubernetes/`.
 
 For detailed infrastructure-level Kubernetes configurations, refer to the [Infrastructure Guide](infrastructure/docs/infrastructure-guide.md).
-
-

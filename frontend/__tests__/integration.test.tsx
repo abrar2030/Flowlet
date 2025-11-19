@@ -15,7 +15,7 @@ describe('User Authentication Flow', () => {
     // This would be a more complex integration test
     // that tests the entire login flow from form submission
     // to successful authentication and dashboard display
-    
+
     // Mock successful API response
     mockApiCall.mockResolvedValue({
       success: true,
@@ -121,4 +121,3 @@ describe('Offline Functionality Flow', () => {
     expect(true).toBe(true); // Placeholder
   });
 });
-

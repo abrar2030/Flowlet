@@ -1,20 +1,15 @@
-"""
-Plaid Banking Integration
-Implements Plaid API for account aggregation and transaction data
-"""
-
 import asyncio
-import json
 import logging
-from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
 
-from . import (AuthenticationError, BankAccount, BankingIntegrationBase,
-               BankingIntegrationError, InvalidAccountError, PaymentRequest,
-               Transaction, TransactionStatus, TransactionType)
+from . import (API, AuthenticationError, BankAccount, Banking,
+               BankingIntegrationBase, BankingIntegrationError, Implements,
+               Integration, InvalidAccountError, PaymentRequest, Plaid,
+               Transaction, TransactionStatus, TransactionType, """, account,
+               aggregation, and, data, for, transaction)
 
 logger = logging.getLogger(__name__)
 

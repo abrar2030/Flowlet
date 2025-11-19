@@ -248,46 +248,46 @@ export function PerformanceMonitor({
     const systemHealthScore = totalResources > 0 ? (healthyResources / totalResources) * 100 : 100;
 
     // Average metrics
-    const avgCpuUsage = resources.length > 0 
-      ? resources.reduce((sum, r) => sum + r.metrics.cpu.usage, 0) / resources.length 
+    const avgCpuUsage = resources.length > 0
+      ? resources.reduce((sum, r) => sum + r.metrics.cpu.usage, 0) / resources.length
       : 0;
 
-    const avgMemoryUsage = resources.length > 0 
-      ? resources.reduce((sum, r) => sum + r.metrics.memory.percentage, 0) / resources.length 
+    const avgMemoryUsage = resources.length > 0
+      ? resources.reduce((sum, r) => sum + r.metrics.memory.percentage, 0) / resources.length
       : 0;
 
-    const avgDiskUsage = resources.length > 0 
-      ? resources.reduce((sum, r) => sum + r.metrics.disk.percentage, 0) / resources.length 
+    const avgDiskUsage = resources.length > 0
+      ? resources.reduce((sum, r) => sum + r.metrics.disk.percentage, 0) / resources.length
       : 0;
 
-    const avgResponseTime = resources.length > 0 
-      ? resources.reduce((sum, r) => sum + r.responseTime, 0) / resources.length 
+    const avgResponseTime = resources.length > 0
+      ? resources.reduce((sum, r) => sum + r.responseTime, 0) / resources.length
       : 0;
 
     // User experience metrics
-    const avgLoadTime = recentUX.length > 0 
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.loadTime, 0) / recentUX.length 
+    const avgLoadTime = recentUX.length > 0
+      ? recentUX.reduce((sum, ux) => sum + ux.metrics.loadTime, 0) / recentUX.length
       : 0;
 
-    const avgFCP = recentUX.length > 0 
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.firstContentfulPaint, 0) / recentUX.length 
+    const avgFCP = recentUX.length > 0
+      ? recentUX.reduce((sum, ux) => sum + ux.metrics.firstContentfulPaint, 0) / recentUX.length
       : 0;
 
-    const avgLCP = recentUX.length > 0 
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.largestContentfulPaint, 0) / recentUX.length 
+    const avgLCP = recentUX.length > 0
+      ? recentUX.reduce((sum, ux) => sum + ux.metrics.largestContentfulPaint, 0) / recentUX.length
       : 0;
 
-    const avgCLS = recentUX.length > 0 
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.cumulativeLayoutShift, 0) / recentUX.length 
+    const avgCLS = recentUX.length > 0
+      ? recentUX.reduce((sum, ux) => sum + ux.metrics.cumulativeLayoutShift, 0) / recentUX.length
       : 0;
 
     // API performance
-    const avgAPIResponseTime = recentAPI.length > 0 
-      ? recentAPI.reduce((sum, api) => sum + api.responseTime, 0) / recentAPI.length 
+    const avgAPIResponseTime = recentAPI.length > 0
+      ? recentAPI.reduce((sum, api) => sum + api.responseTime, 0) / recentAPI.length
       : 0;
 
-    const apiErrorRate = recentAPI.length > 0 
-      ? (recentAPI.filter(api => api.statusCode >= 400).length / recentAPI.length) * 100 
+    const apiErrorRate = recentAPI.length > 0
+      ? (recentAPI.filter(api => api.statusCode >= 400).length / recentAPI.length) * 100
       : 0;
 
     const totalAPIRequests = recentAPI.length;
@@ -347,7 +347,7 @@ export function PerformanceMonitor({
     return resources.filter(resource => {
       const matchesSearch = resource.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            resource.location.toLowerCase().includes(state.searchTerm.toLowerCase());
-      
+
       const matchesStatus = state.filterStatus === 'all' || resource.status === state.filterStatus;
       const matchesEnvironment = state.filterEnvironment === 'all' || resource.environment === state.filterEnvironment;
 
@@ -363,8 +363,8 @@ export function PerformanceMonitor({
       if (onMetricRefresh) {
         await onMetricRefresh(metricId);
       }
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         success: 'Metrics refreshed successfully',
         lastRefresh: new Date().toISOString()
       }));
@@ -416,7 +416,7 @@ export function PerformanceMonitor({
           environment: state.filterEnvironment,
           search: state.searchTerm
         };
-        
+
         const blob = await onExportReport(type, filters);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -426,7 +426,7 @@ export function PerformanceMonitor({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Report exported successfully' }));
       }
     } catch (error) {
@@ -1086,7 +1086,7 @@ export function PerformanceMonitor({
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-600">Cache Hit Rate</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {apiPerformance.length > 0 
+                      {apiPerformance.length > 0
                         ? ((apiPerformance.filter(api => api.cached).length / apiPerformance.length) * 100).toFixed(1)
                         : 0}%
                     </p>
@@ -1161,7 +1161,7 @@ export function PerformanceMonitor({
             </div>
 
             <div className="grid gap-4">
-              {resources.flatMap(resource => 
+              {resources.flatMap(resource =>
                 resource.alerts.map(alert => (
                   <Card key={alert.id}>
                     <CardContent className="p-4">
@@ -1236,4 +1236,3 @@ export function PerformanceMonitor({
 }
 
 export default PerformanceMonitor;
-

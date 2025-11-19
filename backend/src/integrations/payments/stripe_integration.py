@@ -1,11 +1,7 @@
-import hashlib
-import hmac
-import json
 import logging
 import os
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Dict, List, Optional
 
@@ -22,17 +18,14 @@ class PaymentProcessor(ABC):
         self, amount: Decimal, currency: str, payment_details: Dict
     ) -> Dict:
         """Process a payment"""
-        pass
 
     @abstractmethod
     def refund_payment(self, payment_id: str, amount: Optional[Decimal] = None) -> Dict:
         """Refund a payment"""
-        pass
 
     @abstractmethod
     def get_payment_status(self, payment_id: str) -> Dict:
         """Get payment status"""
-        pass
 
 
 class StripePaymentProcessor(PaymentProcessor):

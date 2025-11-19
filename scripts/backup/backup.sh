@@ -10,5 +10,3 @@ echo "Performing Flowlet data backup..."
 # pg_dump -h <DB_HOST> -U <DB_USER> -d <DB_NAME> > /tmp/flowlet_backup_$(date +%Y%m%d%H%M%S).sql
 
 echo "Backup complete."
-
-

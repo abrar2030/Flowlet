@@ -89,5 +89,3 @@ groups:
       annotations:
         summary: "Unauthorized access attempt to {{ $labels.resource }} by user {{ $labels.user }}"
         description: "User {{ $labels.user }} attempted to access {{ $labels.resource }} without authorization."
-
-

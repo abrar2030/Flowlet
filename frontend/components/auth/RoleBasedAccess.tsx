@@ -153,14 +153,14 @@ export function RoleBasedAccess({
                            permission.description.toLowerCase().includes(state.searchTerm.toLowerCase());
       const matchesCategory = state.filterCategory === 'all' || permission.category === state.filterCategory;
       const matchesLevel = state.filterLevel === 'all' || permission.level === state.filterLevel;
-      
+
       return matchesSearch && matchesCategory && matchesLevel;
     });
   }, [permissions, state.searchTerm, state.filterCategory, state.filterLevel]);
 
   // Filtered roles
   const filteredRoles = useMemo(() => {
-    return roles.filter(role => 
+    return roles.filter(role =>
       role.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(state.searchTerm.toLowerCase())
     );
@@ -168,7 +168,7 @@ export function RoleBasedAccess({
 
   // Filtered users
   const filteredUsers = useMemo(() => {
-    return users.filter(user => 
+    return users.filter(user =>
       user.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
       (user.department && user.department.toLowerCase().includes(state.searchTerm.toLowerCase()))
@@ -188,10 +188,10 @@ export function RoleBasedAccess({
   // Get effective permissions for a role (including inherited)
   const getEffectivePermissions = useCallback((role: Role): Permission[] => {
     const allPermissions = new Set<string>();
-    
+
     // Add direct permissions
     role.permissions.forEach(permId => allPermissions.add(permId));
-    
+
     // Add inherited permissions
     if (role.inheritsFrom) {
       role.inheritsFrom.forEach(parentRoleId => {
@@ -202,7 +202,7 @@ export function RoleBasedAccess({
         }
       });
     }
-    
+
     return Array.from(allPermissions)
       .map(permId => getPermission(permId))
       .filter(Boolean) as Permission[];
@@ -213,11 +213,11 @@ export function RoleBasedAccess({
     if (onPermissionCheck) {
       return await onPermissionCheck(userId, permissionId, resource);
     }
-    
+
     // Fallback local check
     const user = users.find(u => u.id === userId);
     if (!user) return false;
-    
+
     for (const roleId of user.roles) {
       const role = getRole(roleId);
       if (role && role.isActive) {
@@ -227,7 +227,7 @@ export function RoleBasedAccess({
         }
       }
     }
-    
+
     return false;
   }, [onPermissionCheck, users, getRole, getEffectivePermissions]);
 
@@ -250,7 +250,7 @@ export function RoleBasedAccess({
           isSystem: state.newRole.isSystem || false,
           isActive: state.newRole.isActive !== false
         });
-        
+
         setState(prev => ({
           ...prev,
           success: 'Role created successfully',
@@ -317,8 +317,8 @@ export function RoleBasedAccess({
 
   // Handle access request review
   const handleAccessRequestReview = useCallback(async (
-    requestId: string, 
-    status: 'approved' | 'rejected', 
+    requestId: string,
+    status: 'approved' | 'rejected',
     notes?: string
   ) => {
     setState(prev => ({ ...prev, error: null }));
@@ -326,9 +326,9 @@ export function RoleBasedAccess({
     try {
       if (onAccessRequestReview) {
         await onAccessRequestReview(requestId, status, notes);
-        setState(prev => ({ 
-          ...prev, 
-          success: `Access request ${status} successfully` 
+        setState(prev => ({
+          ...prev,
+          success: `Access request ${status} successfully`
         }));
       }
     } catch (error) {
@@ -647,7 +647,7 @@ export function RoleBasedAccess({
         <TabsContent value="users">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Users Management</h3>
-            
+
             <div className="grid gap-4">
               {filteredUsers.map(user => (
                 <Card key={user.id}>
@@ -708,7 +708,7 @@ export function RoleBasedAccess({
         <TabsContent value="permissions">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Permissions Overview</h3>
-            
+
             <div className="grid gap-4">
               {filteredPermissions.map(permission => (
                 <Card key={permission.id}>
@@ -741,7 +741,7 @@ export function RoleBasedAccess({
         <TabsContent value="requests">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Access Requests</h3>
-            
+
             <div className="grid gap-4">
               {accessRequests.map(request => (
                 <Card key={request.id}>
@@ -802,4 +802,3 @@ export function RoleBasedAccess({
 }
 
 export default RoleBasedAccess;
-

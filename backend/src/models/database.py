@@ -1,12 +1,13 @@
+import os
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declarative_base
+
 """
 Database initialization and configuration for Flowlet.
 This file defines the SQLAlchemy instance and the init_db function.
 """
 
-import os
-
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.declarative import declarative_base
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()

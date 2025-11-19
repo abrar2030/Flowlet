@@ -1,14 +1,5 @@
-"""
-Advanced Authentication Service
-===============================
-
-Multi-factor authentication and advanced security features for financial applications.
-"""
-
-import asyncio
 import base64
 import hashlib
-import json
 import logging
 import secrets
 import uuid
@@ -16,11 +7,18 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import pyotp
 import qrcode
 from sqlalchemy.orm import Session
+
+"""
+Advanced Authentication Service
+===============================
+
+Multi-factor authentication and advanced security features for financial applications.
+"""
 
 
 class AuthenticationMethod(Enum):

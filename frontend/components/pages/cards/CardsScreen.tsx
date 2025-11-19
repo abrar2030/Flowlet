@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CreditCard, 
-  Plus, 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Unlock, 
+import {
+  CreditCard,
+  Plus,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
   Settings,
   Smartphone,
   Globe
@@ -192,7 +192,7 @@ const CardsScreen: React.FC<CardsScreenProps> = ({
                   </Badge>
                 </div>
               )}
-              
+
               <div className="flex justify-between items-start mb-8">
                 <div className="text-lg font-bold capitalize">
                   {card.cardBrand}
@@ -281,7 +281,7 @@ const CardsScreen: React.FC<CardsScreenProps> = ({
                   <Settings className="h-4 w-4 mr-1" />
                   Manage
                 </Button>
-                
+
                 {card.status === 'active' ? (
                   <Button
                     variant="outline"
@@ -334,7 +334,7 @@ const CardsScreen: React.FC<CardsScreenProps> = ({
       <Alert>
         <Lock className="h-4 w-4" />
         <AlertDescription>
-          <strong>Security Tip:</strong> Never share your card details, PIN, or CVV with anyone. 
+          <strong>Security Tip:</strong> Never share your card details, PIN, or CVV with anyone.
           If you suspect unauthorized use, block your card immediately using the controls above.
         </AlertDescription>
       </Alert>
@@ -343,4 +343,3 @@ const CardsScreen: React.FC<CardsScreenProps> = ({
 };
 
 export default CardsScreen;
-

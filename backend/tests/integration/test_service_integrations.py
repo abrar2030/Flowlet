@@ -1,24 +1,17 @@
-# Comprehensive Test Suite for Flowlet Backend Services
-
 import json
 import os
-import sqlite3
 import sys
-import tempfile
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
+from src.main import create_app
+from src.models.database import db
+
+# Comprehensive Test Suite for Flowlet Backend Services
+
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from src.main import create_app
-from src.models.card import Card
-from src.models.database import db
-from src.models.transaction import Transaction
-from src.models.user import User
-from src.models.wallet import Wallet
 
 
 class TestConfig:
@@ -651,7 +644,6 @@ class TestPerformanceIntegration:
     def test_concurrent_requests_handling(self, client):
         """Test handling of concurrent requests"""
         import threading
-        import time
 
         results = []
 

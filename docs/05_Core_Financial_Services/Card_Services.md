@@ -604,5 +604,3 @@ GET /api/v1/card/card_xyz/spending-analysis?period=monthly
     "error": "Card not found"
 }
 ```
-
-

@@ -113,11 +113,11 @@ class TokenManager {
   static isTokenExpired(token: string): boolean {
     try {
       if (!token) return true;
-      
+
       const payload = JSON.parse(safeB64Decode(token.split('.')[1]));
       const currentTime = Date.now();
       const expiryTime = (payload.exp * 1000) - this.TOKEN_EXPIRY_BUFFER;
-      
+
       return currentTime >= expiryTime;
     } catch (error) {
       console.error('Failed to parse token:', error);
@@ -148,7 +148,7 @@ apiClient.interceptors.request.use(
     // Add security headers
     config.headers['X-Requested-With'] = 'XMLHttpRequest';
     config.headers['X-Client-Version'] = import.meta.env.VITE_APP_VERSION || '1.0.0';
-    
+
     // Add CSRF token if available
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     if (csrfToken) {
@@ -182,7 +182,7 @@ apiClient.interceptors.response.use(
 
           const { access_token, refresh_token: newRefreshToken } = response.data.data;
           TokenManager.setAccessToken(access_token);
-          
+
           if (newRefreshToken) {
             TokenManager.setRefreshToken(newRefreshToken);
           }
@@ -192,18 +192,18 @@ apiClient.interceptors.response.use(
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
           TokenManager.clearTokens();
-          
+
           // Dispatch custom event for auth failure
-          window.dispatchEvent(new CustomEvent('auth:logout', { 
-            detail: { reason: 'token_refresh_failed' } 
+          window.dispatchEvent(new CustomEvent('auth:logout', {
+            detail: { reason: 'token_refresh_failed' }
           }));
-          
+
           return Promise.reject(refreshError);
         }
       } else {
         TokenManager.clearTokens();
-        window.dispatchEvent(new CustomEvent('auth:logout', { 
-          detail: { reason: 'no_valid_refresh_token' } 
+        window.dispatchEvent(new CustomEvent('auth:logout', {
+          detail: { reason: 'no_valid_refresh_token' }
         }));
       }
     }
@@ -214,7 +214,7 @@ apiClient.interceptors.response.use(
       if (retryAfter && !originalRequest._retryCount) {
         originalRequest._retryCount = 1;
         const delay = parseInt(retryAfter) * 1000;
-        
+
         return new Promise((resolve) => {
           setTimeout(() => resolve(apiClient(originalRequest)), delay);
         });
@@ -423,4 +423,3 @@ export const healthCheck = async (): Promise<boolean> => {
 export const api = new ApiService();
 export { TokenManager };
 export default apiClient;
-

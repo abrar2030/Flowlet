@@ -118,4 +118,3 @@ health:
 	@echo "Checking application health..."
 	curl -f http://localhost:5000/health || echo "Backend not running"
 	curl -f http://localhost:5173 || echo "Frontend not running"
-

@@ -189,7 +189,7 @@ export function DataClassification({
     const total = dataAssets.length;
     const classified = dataAssets.filter(asset => asset.classification).length;
     const unclassified = total - classified;
-    
+
     const byClassification = dataAssets.reduce((acc, asset) => {
       if (asset.classification) {
         acc[asset.classification] = (acc[asset.classification] || 0) + 1;
@@ -231,13 +231,13 @@ export function DataClassification({
       const matchesSearch = asset.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            asset.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            asset.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()));
-      
-      const matchesClassification = state.filterClassification === 'all' || 
+
+      const matchesClassification = state.filterClassification === 'all' ||
                                    asset.classification === state.filterClassification;
-      
-      const matchesSensitivity = state.filterSensitivity === 'all' || 
+
+      const matchesSensitivity = state.filterSensitivity === 'all' ||
                                 asset.sensitivity === state.filterSensitivity;
-      
+
       const matchesType = state.filterType === 'all' || asset.type === state.filterType;
 
       return matchesSearch && matchesClassification && matchesSensitivity && matchesType;
@@ -246,9 +246,9 @@ export function DataClassification({
 
   // Handle asset classification
   const handleAssetClassify = useCallback(async (
-    assetId: string, 
-    classification: string, 
-    sensitivity: string, 
+    assetId: string,
+    classification: string,
+    sensitivity: string,
     tags: string[]
   ) => {
     setState(prev => ({ ...prev, isClassifying: true, error: null }));
@@ -277,8 +277,8 @@ export function DataClassification({
     try {
       if (onBulkClassify) {
         await onBulkClassify(state.selectedAssets, state.bulkClassification);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: `${state.selectedAssets.length} assets classified successfully`,
           selectedAssets: [],
           showBulkActions: false
@@ -303,8 +303,8 @@ export function DataClassification({
     try {
       if (onRuleCreate) {
         await onRuleCreate(state.newRule as Omit<ClassificationRule, 'id' | 'createdAt' | 'triggerCount'>);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Classification rule created successfully',
           showRuleEditor: false,
           newRule: {
@@ -357,7 +357,7 @@ export function DataClassification({
           type: state.filterType,
           search: state.searchTerm
         };
-        
+
         const blob = await onExportReport(filters);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -367,7 +367,7 @@ export function DataClassification({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Report exported successfully' }));
       }
     } catch (error) {
@@ -863,7 +863,7 @@ export function DataClassification({
         <TabsContent value="levels">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Classification Levels</h3>
-            
+
             <div className="grid gap-4">
               {classificationLevels.map(level => (
                 <Card key={level.id}>
@@ -877,7 +877,7 @@ export function DataClassification({
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{level.description}</p>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">Requirements</h5>
@@ -894,7 +894,7 @@ export function DataClassification({
                               ))}
                             </div>
                           </div>
-                          
+
                           <div>
                             <h5 className="font-medium text-sm mb-2">Details</h5>
                             <div className="space-y-1 text-xs text-gray-600">
@@ -904,7 +904,7 @@ export function DataClassification({
                             </div>
                           </div>
                         </div>
-                        
+
                         {level.handlingInstructions.length > 0 && (
                           <div className="mt-3">
                             <h5 className="font-medium text-sm mb-2">Handling Instructions</h5>
@@ -1126,4 +1126,3 @@ export function DataClassification({
 }
 
 export default DataClassification;
-

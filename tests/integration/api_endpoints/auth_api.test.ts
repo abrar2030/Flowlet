@@ -69,5 +69,3 @@ describe("Authentication API Integration", () => {
     await expect(loginUser("test@example.com", "wrong_password")).rejects.toThrow("Invalid credentials");
   });
 });
-
-

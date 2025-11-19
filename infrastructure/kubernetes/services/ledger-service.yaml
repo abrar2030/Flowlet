@@ -92,4 +92,3 @@ spec:
   - port: 80
     targetPort: 3004
   type: ClusterIP
-

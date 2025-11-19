@@ -1,3 +1,14 @@
+import asyncio
+import logging
+import uuid
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
 """
 Workflow Builder
 ===============
@@ -5,18 +16,6 @@ Workflow Builder
 Visual workflow builder for financial processes.
 Allows business users to create and manage complex workflows without coding.
 """
-
-import asyncio
-import json
-import logging
-import uuid
-from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
-
-from sqlalchemy.orm import Session
 
 
 class NodeType(Enum):
@@ -594,7 +593,6 @@ class WorkflowBuilder:
 
         # In a real implementation, this would start background tasks
         # for processing workflow executions
-        pass
 
     def create_workflow(
         self,
@@ -958,7 +956,7 @@ class WorkflowBuilder:
         """Handle webhook node execution."""
 
         webhook_url = node.config.get("webhook_url", "")
-        payload = node.config.get("payload", {})
+        node.config.get("payload", {})
 
         # In real implementation, would make HTTP request
         return {"status": "completed", "webhook_called": webhook_url}
@@ -968,7 +966,7 @@ class WorkflowBuilder:
     ) -> Dict[str, Any]:
         """Handle email node execution."""
 
-        template = node.config.get("template", "")
+        node.config.get("template", "")
         recipients = node.config.get("recipients", [])
 
         # In real implementation, would send email
@@ -980,7 +978,7 @@ class WorkflowBuilder:
         """Handle approval node execution."""
 
         approvers = node.config.get("approvers", [])
-        timeout_hours = node.config.get("timeout_hours", 24)
+        node.config.get("timeout_hours", 24)
 
         # In real implementation, would create approval request
         return {"status": "pending_approval", "approvers": approvers}
@@ -991,7 +989,7 @@ class WorkflowBuilder:
         """Handle API call node execution."""
 
         api_url = node.config.get("api_url", "")
-        method = node.config.get("method", "GET")
+        node.config.get("method", "GET")
 
         # In real implementation, would make API call
         return {"status": "completed", "api_called": api_url}
@@ -1015,7 +1013,7 @@ class WorkflowBuilder:
     ) -> Dict[str, Any]:
         """Execute API call task."""
 
-        api_config = node.config.get("api_config", {})
+        node.config.get("api_config", {})
 
         # Make API call (simplified)
         return {"status": "completed", "api_response": "success"}

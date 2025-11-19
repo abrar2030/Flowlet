@@ -175,4 +175,3 @@ subjects:
 - kind: ServiceAccount
   name: rabbitmq
   namespace: flowlet-messaging
-

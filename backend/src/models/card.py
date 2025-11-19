@@ -1,7 +1,3 @@
-"""
-Card model for secure card management
-"""
-
 import hashlib
 import secrets
 import string
@@ -10,14 +6,15 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Index, Integer,
-                        Numeric, String, Text)
-from sqlalchemy.orm import relationship
+from sqlalchemy import password_security  # Use internal security module
+from sqlalchemy import (  # Import Base and db from the local database setup
+    Base, Boolean, Card, Column, DateTime, ForeignKey, Index, Integer, Numeric,
+    String, Text, """, ..security., .database, card, db, for, from, import,
+    management, model, relationship, secure, sqlalchemy.orm)
 
-from ..security.password_security import (  # Use internal security module
-    check_password, hash_password)
-from .database import (  # Import Base and db from the local database setup
-    Base, db)
+    check_password,
+    hash_password,
+)
 
 
 class CardType(PyEnum):

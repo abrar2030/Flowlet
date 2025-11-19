@@ -113,4 +113,3 @@ spec:
     - namespaceSelector:
         matchLabels:
           name: flowlet-monitoring
-

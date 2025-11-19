@@ -1,3 +1,14 @@
+import logging
+import re
+import uuid
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
 """
 Rule Engine
 ===========
@@ -5,18 +16,6 @@ Rule Engine
 Business rule engine for financial applications.
 Allows business users to define and manage complex business rules without coding.
 """
-
-import json
-import logging
-import re
-import uuid
-from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
-
-from sqlalchemy.orm import Session
 
 
 class RuleType(Enum):
@@ -780,7 +779,7 @@ class RuleEngine:
 
         task_type = action.parameters.get("task_type", "")
         assignee = action.parameters.get("assignee", "")
-        description = action.parameters.get("description", "")
+        action.parameters.get("description", "")
 
         # In production, would integrate with task management system
         self.logger.info(f"Creating task: {task_type} for {assignee}")
@@ -808,7 +807,7 @@ class RuleEngine:
         """Handle block transaction action."""
 
         reason = action.parameters.get("reason", "Transaction blocked by rule")
-        notify_customer = action.parameters.get("notify_customer", False)
+        action.parameters.get("notify_customer", False)
 
         data["transaction_blocked"] = True
         data["block_reason"] = reason

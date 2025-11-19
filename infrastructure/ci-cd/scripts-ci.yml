@@ -26,5 +26,3 @@ jobs:
 
     - name: Run ShellCheck on scripts
       run: find scripts/ -type f -name "*.sh" -exec shellcheck {} \;
-
-

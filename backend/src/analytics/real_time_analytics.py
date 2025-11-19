@@ -1,3 +1,13 @@
+import asyncio
+import logging
+from collections import defaultdict, deque
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
 """
 Real-Time Analytics
 ==================
@@ -5,22 +15,6 @@ Real-Time Analytics
 Real-time analytics engine for financial data processing and monitoring.
 Provides streaming analytics, real-time alerts, and live dashboards.
 """
-
-import asyncio
-import json
-import logging
-import threading
-import time
-from collections import defaultdict, deque
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
-
-import numpy as np
-import pandas as pd
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Session
 
 
 class StreamEventType(Enum):
@@ -388,11 +382,10 @@ class RealTimeAnalytics:
 
         # Track user behavior patterns
         user_data = event.data
-        action_type = user_data.get("action_type")
+        user_data.get("action_type")
 
         # Update user activity metrics
         # This could include login patterns, feature usage, etc.
-        pass
 
     async def _calculate_metrics(self):
         """Calculate real-time metrics from sliding windows."""

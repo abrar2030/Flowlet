@@ -31,7 +31,7 @@ apply_manifest() {
     local file=$1
     local retries=5
     local count=0
-    
+
     while [ $count -lt $retries ]; do
         if kubectl apply -f "$file"; then
             echo "✅ Applied $file"
@@ -44,7 +44,7 @@ apply_manifest() {
             fi
         fi
     done
-    
+
     echo "❌ Failed to apply $file after $retries attempts"
     return 1
 }
@@ -191,5 +191,3 @@ echo ""
 echo "📝 Next Steps:"
 echo "  1. Configure external DNS for ingress domains"
 echo "  2. Ensure Vault is properly configured and accessible for External Secrets"
-
-

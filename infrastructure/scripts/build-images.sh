@@ -30,7 +30,7 @@ build_service() {
     local service=$1
     local dockerfile_path="docker/$service/Dockerfile"
     local image_name="$REGISTRY/$service:$TAG"
-    
+
     if [ -f "$dockerfile_path" ]; then
         echo "🔨 Building $service..."
         docker build -t "$image_name" -f "$dockerfile_path" "docker/$service/"
@@ -58,4 +58,3 @@ echo "  docker push $REGISTRY/SERVICE_NAME:$TAG"
 echo ""
 echo "🔧 To use with different registry:"
 echo "  REGISTRY=your-registry.com ./scripts/build-images.sh"
-

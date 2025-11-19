@@ -1,23 +1,19 @@
+import json
+import logging
+import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+import redis
+from cryptography.fernet import Fernet
+
 """
 Enhanced Regulatory Compliance Module for Financial Industry Standards
 Implements comprehensive workflows for GDPR, PSD2, FinCEN, and other regulatory frameworks
 """
 
-import asyncio
-import hashlib
-import json
-import logging
-import uuid
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
-from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-import pandas as pd
-import redis
-import requests
-from cryptography.fernet import Fernet
 
 # Configure logging for compliance events
 logging.basicConfig(level=logging.INFO)
@@ -743,7 +739,7 @@ class FinCENComplianceManager:
         self, transaction_data: Dict[str, Any]
     ) -> str:
         """Describe the type of suspicious activity"""
-        patterns = await self._detect_suspicious_patterns(transaction_data)
+        await self._detect_suspicious_patterns(transaction_data)
 
         if transaction_data["amount"] >= self.suspicious_activity_threshold:
             return "Large cash transaction"
@@ -930,8 +926,6 @@ async def _log_compliance_event(
 
 class ComplianceException(Exception):
     """Custom exception for compliance-related errors"""
-
-    pass
 
 
 # Export main classes

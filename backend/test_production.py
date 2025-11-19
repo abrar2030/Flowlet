@@ -1,17 +1,16 @@
+import sys
+import time
+import uuid
+from datetime import datetime
+
+import requests
+
 #!/usr/bin/env python3.11
 """
 Comprehensive Production Test Suite for Flowlet Financial Backend
 Tests all implemented features with enterprise-grade validation
 """
 
-import json
-import sys
-import time
-import uuid
-from datetime import datetime
-from decimal import Decimal
-
-import requests
 
 # Configuration
 BASE_URL = "http://localhost:5001"
@@ -68,7 +67,7 @@ class FlowletProductionTester:
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
             return response
-        except Exception as e:
+        except Exception:
             return None
 
     def test_health_and_info(self):

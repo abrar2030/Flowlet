@@ -31,5 +31,3 @@ rules:
   # Log all other requests at the Metadata level.
   - level: Metadata
     omitStages: ["RequestReceived"]
-
-

@@ -218,7 +218,7 @@ export function SecureForm<T extends FieldValues>({
 
     } catch (error) {
       console.error('Form submission error:', error);
-      
+
       const newAttempts = formState.submitAttempts + 1;
       const shouldLock = newAttempts >= maxAttempts;
 
@@ -248,7 +248,7 @@ export function SecureForm<T extends FieldValues>({
           {field.required && <span className="text-red-500 ml-1">*</span>}
           {field.sensitive && <Shield className="inline w-3 h-3 ml-1 text-amber-500" />}
         </Label>
-        
+
         <div className="relative">
           <Controller
             name={field.name as Path<T>}
@@ -277,7 +277,7 @@ export function SecureForm<T extends FieldValues>({
               />
             )}
           />
-          
+
           {isPassword && (
             <button
               type="button"
@@ -289,7 +289,7 @@ export function SecureForm<T extends FieldValues>({
             </button>
           )}
         </div>
-        
+
         {fieldError && (
           <p id={`${field.name}-error`} className="text-sm text-red-600 flex items-center">
             <AlertTriangle className="w-3 h-3 mr-1" />
@@ -401,4 +401,3 @@ export function SecureForm<T extends FieldValues>({
 }
 
 export default SecureForm;
-

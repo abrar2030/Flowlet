@@ -1,3 +1,12 @@
+import logging
+import re
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List
+
+from sqlalchemy.orm import Session
+
 """
 AML Engine
 ==========
@@ -5,18 +14,6 @@ AML Engine
 Advanced Anti-Money Laundering engine for financial compliance.
 Provides comprehensive AML screening, monitoring, and reporting capabilities.
 """
-
-import asyncio
-import json
-import logging
-import re
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
 
 
 class AMLStatus(Enum):
@@ -1000,7 +997,7 @@ class AMLEngine:
         """Get recent transactions for a user."""
 
         # Mock implementation - would query actual transaction database
-        cutoff_time = datetime.utcnow() - time_window
+        datetime.utcnow() - time_window
 
         return [
             {

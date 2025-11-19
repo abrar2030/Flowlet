@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
-
-import json
 import sys
 
 import requests
+
+#!/usr/bin/env python3
+
 
 # Test configuration
 BASE_URL = "http://localhost:5000"

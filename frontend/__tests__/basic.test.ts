@@ -27,4 +27,3 @@ describe('Basic Test Suite', () => {
     expect(result).toBe('success');
   });
 });
-

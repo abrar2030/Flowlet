@@ -313,5 +313,3 @@ Initiates a security scan on a specified target (e.g., user account, transaction
   ```
 - `400 Bad Request`: Missing required fields.
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

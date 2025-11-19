@@ -303,8 +303,8 @@ export function DataLossPrevention({
       return acc;
     }, {} as Record<string, number>);
 
-    const averageRiskScore = incidents.length > 0 
-      ? incidents.reduce((sum, i) => sum + i.riskScore, 0) / incidents.length 
+    const averageRiskScore = incidents.length > 0
+      ? incidents.reduce((sum, i) => sum + i.riskScore, 0) / incidents.length
       : 0;
 
     const recentIncidents = incidents.filter(i => {
@@ -335,11 +335,11 @@ export function DataLossPrevention({
       const matchesSearch = incident.ruleName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            incident.userName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
                            incident.dataType.toLowerCase().includes(state.searchTerm.toLowerCase());
-      
+
       const matchesSeverity = state.filterSeverity === 'all' || incident.severity === state.filterSeverity;
       const matchesStatus = state.filterStatus === 'all' || incident.status === state.filterStatus;
       const matchesChannel = state.filterChannel === 'all' || incident.channel === state.filterChannel;
-      
+
       const rule = rules.find(r => r.id === incident.ruleId);
       const matchesCategory = state.filterCategory === 'all' || (rule && rule.category === state.filterCategory);
 
@@ -359,8 +359,8 @@ export function DataLossPrevention({
     try {
       if (onRuleCreate) {
         await onRuleCreate(state.newRule as Omit<DLPRule, 'id' | 'createdAt' | 'triggerCount' | 'falsePositiveCount'>);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'DLP rule created successfully',
           showRuleEditor: false,
           newRule: {
@@ -427,8 +427,8 @@ export function DataLossPrevention({
     try {
       if (onScanStart) {
         await onScanStart(state.scanConfig);
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           success: 'Data scan started successfully',
           showScanConfig: false
         }));
@@ -469,7 +469,7 @@ export function DataLossPrevention({
           channel: state.filterChannel,
           search: state.searchTerm
         };
-        
+
         const blob = await onExportReport(filters);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -479,7 +479,7 @@ export function DataLossPrevention({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Report exported successfully' }));
       }
     } catch (error) {
@@ -1148,7 +1148,7 @@ export function DataLossPrevention({
                   rows={6}
                 />
               </div>
-              
+
               {state.testResults && (
                 <div className="p-4 bg-gray-50 rounded">
                   <h4 className="font-medium mb-2">Test Results</h4>
@@ -1179,8 +1179,8 @@ export function DataLossPrevention({
                   {state.isTesting ? 'Testing...' : 'Test Rule'}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
+                  onClick={() => setState(prev => ({
+                    ...prev,
                     showTestDialog: false,
                     selectedRule: null,
                     testData: '',
@@ -1274,4 +1274,3 @@ export function DataLossPrevention({
 }
 
 export default DataLossPrevention;
-

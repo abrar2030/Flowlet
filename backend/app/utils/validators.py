@@ -1,10 +1,11 @@
+import re
+import uuid
+from decimal import Decimal
+from typing import Optional
+
 """
 Utility functions for data validation and sanitization
 """
-
-import re
-from decimal import Decimal
-from typing import Optional
 
 
 def is_valid_email(email: str) -> bool:
@@ -77,7 +78,7 @@ def is_valid_amount(amount: Decimal) -> bool:
     if not isinstance(amount, Decimal):
         try:
             amount = Decimal(str(amount))
-        except:
+        except Exception:
             return False
 
     return amount > Decimal("0.00") and amount.as_tuple().exponent >= -2
@@ -103,4 +104,3 @@ def is_valid_ip_address(ip_address: str) -> bool:
 
 
 # Need to import uuid for is_valid_uuid
-import uuid

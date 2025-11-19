@@ -242,5 +242,3 @@ Analyzes a user's transaction patterns over a specified period to identify poten
   ```
 - `404 Not Found`: User not found.
 - `500 Internal Server Error`: An unexpected error occurred.
-
-

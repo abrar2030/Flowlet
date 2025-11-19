@@ -39,4 +39,3 @@ This directory outlines the strategy for backing up Kubernetes cluster configura
 *   **Git:** For version controlling all Kubernetes configurations (GitOps).
 
 This strategy ensures that the Flowlet application can quickly recover from a disaster with minimal data loss, meeting the stringent requirements of financial standards.
-

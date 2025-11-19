@@ -145,7 +145,7 @@ export function SessionManager({
       const now = Date.now();
       const expiresAt = new Date(currentSession.expiresAt).getTime();
       const remaining = Math.max(0, expiresAt - now);
-      
+
       setState(prev => ({
         ...prev,
         timeRemaining: remaining,
@@ -239,7 +239,7 @@ export function SessionManager({
     try {
       await onSessionExtend(currentSession.id);
       setState(prev => ({ ...prev, success: 'Session extended successfully' }));
-      
+
       if (onActivityLog) {
         onActivityLog({
           type: 'security_event',
@@ -262,7 +262,7 @@ export function SessionManager({
     try {
       await onSessionTerminate(sessionId);
       setState(prev => ({ ...prev, success: 'Session terminated successfully' }));
-      
+
       if (onActivityLog) {
         onActivityLog({
           type: 'logout',
@@ -286,7 +286,7 @@ export function SessionManager({
     try {
       await onSessionTerminateAll();
       setState(prev => ({ ...prev, success: 'All sessions terminated successfully' }));
-      
+
       if (onActivityLog) {
         onActivityLog({
           type: 'security_event',
@@ -304,7 +304,7 @@ export function SessionManager({
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -403,7 +403,7 @@ export function SessionManager({
         <Alert className="border-yellow-200 bg-yellow-50">
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You have been idle for {formatIdleTime(state.idleTime)}. 
+            You have been idle for {formatIdleTime(state.idleTime)}.
             Your session may be terminated for security.
           </AlertDescription>
         </Alert>
@@ -543,8 +543,8 @@ export function SessionManager({
                       {formatTimeRemaining(state.timeRemaining)}
                     </span>
                   </div>
-                  <Progress 
-                    value={(state.timeRemaining / (sessionConfig.sessionTimeout * 60 * 1000)) * 100} 
+                  <Progress
+                    value={(state.timeRemaining / (sessionConfig.sessionTimeout * 60 * 1000)) * 100}
                     className="h-2"
                   />
                 </div>
@@ -651,10 +651,10 @@ export function SessionManager({
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({ 
-                            ...prev, 
+                          onClick={() => setState(prev => ({
+                            ...prev,
                             selectedSession: session,
-                            showSessionDetails: true 
+                            showSessionDetails: true
                           }))}
                           size="sm"
                           variant="outline"
@@ -810,4 +810,3 @@ export function SessionManager({
 }
 
 export default SessionManager;
-

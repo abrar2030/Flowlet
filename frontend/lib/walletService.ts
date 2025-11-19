@@ -194,7 +194,7 @@ class WalletService {
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -316,7 +316,7 @@ class WalletService {
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -402,7 +402,7 @@ class WalletService {
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams({ search: query });
-      
+
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null && key !== 'search') {
@@ -427,7 +427,7 @@ class WalletService {
   ): Promise<Blob> {
     try {
       const params = new URLSearchParams({ format });
-      
+
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -451,4 +451,3 @@ class WalletService {
 // Export singleton instance
 export const walletService = new WalletService();
 export default walletService;
-

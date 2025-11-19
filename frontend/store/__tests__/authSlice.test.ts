@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer, { 
-  loginUser, 
-  registerUser, 
-  logoutUser, 
+import authReducer, {
+  loginUser,
+  registerUser,
+  logoutUser,
   validateToken,
   clearError,
-  updateUser 
+  updateUser
 } from '@/store/authSlice';
 import { authApi } from '@/lib/api';
 
@@ -246,4 +246,3 @@ describe('authSlice', () => {
     });
   });
 });
-

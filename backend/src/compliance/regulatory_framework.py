@@ -1,3 +1,8 @@
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
 """
 Regulatory Framework
 ===================
@@ -5,12 +10,6 @@ Regulatory Framework
 Multi-jurisdiction regulatory framework for financial compliance.
 Defines compliance rules, requirements, and mappings for different jurisdictions.
 """
-
-import json
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional
 
 
 class Jurisdiction(Enum):

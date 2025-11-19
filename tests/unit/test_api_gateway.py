@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # Mocking APIGateway related classes and functions
 # In a real scenario, these would be imported from the actual source code

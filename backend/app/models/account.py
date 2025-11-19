@@ -1,18 +1,13 @@
-"""
-Account model with improved financial data handling
-"""
-
 import enum
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
 from app import db
-from sqlalchemy import (BigInteger, Boolean, Column, DateTime, Enum,
-                        ForeignKey, String, Text)
-from sqlalchemy.orm import relationship
-
-from .mixins import UUID
+from sqlalchemy import (UUID, Account, BigInteger, Boolean, Column, DateTime,
+                        Enum, ForeignKey, String, """, .mixins, data,
+                        financial, from, handling, import, improved, model,
+                        relationship, sqlalchemy.orm, with)
 
 
 class AccountType(enum.Enum):

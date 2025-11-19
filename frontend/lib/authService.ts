@@ -51,12 +51,12 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
-      
+
       // Store tokens and user data
       TokenManager.setAccessToken(response.access_token);
       TokenManager.setRefreshToken(response.refresh_token);
       TokenManager.setUser(response.user);
-      
+
       return response;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -72,12 +72,12 @@ class AuthService {
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
       const response = await api.post<AuthResponse>('/api/v1/auth/register', userData);
-      
+
       // Store tokens and user data
       TokenManager.setAccessToken(response.access_token);
       TokenManager.setRefreshToken(response.refresh_token);
       TokenManager.setUser(response.user);
-      
+
       return response;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -108,7 +108,7 @@ class AuthService {
    */
   async refreshToken(): Promise<string> {
     const refreshToken = TokenManager.getRefreshToken();
-    
+
     if (!refreshToken) {
       throw new ApiError('No refresh token available', 401);
     }
@@ -117,7 +117,7 @@ class AuthService {
       const response = await api.post<{ access_token: string }>('/api/v1/auth/refresh', {
         refresh_token: refreshToken,
       });
-      
+
       TokenManager.setAccessToken(response.access_token);
       return response.access_token;
     } catch (error) {
@@ -219,7 +219,7 @@ class AuthService {
   isAuthenticated(): boolean {
     const token = TokenManager.getAccessToken();
     const user = TokenManager.getUser();
-    
+
     return !!(token && user && !TokenManager.isTokenExpired(token));
   }
 
@@ -300,4 +300,3 @@ class AuthService {
 // Export singleton instance
 export const authService = new AuthService();
 export default authService;
-

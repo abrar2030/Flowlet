@@ -10,5 +10,3 @@ describe("Transaction Load Testing", () => {
     expect(true).toBe(true); // Placeholder assertion
   });
 });
-
-

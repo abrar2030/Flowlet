@@ -1,28 +1,19 @@
-"""
-AI-Powered Services: Fraud Detection and Chatbot
-"""
-
 import logging
-import os
-import random
-import string
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
-from flask import Blueprint, current_app, g, jsonify, request
-# Third-party library for Chatbot
+from flask import Blueprint, g, jsonify, request
 from openai import OpenAI
-from sqlalchemy import and_, func, or_, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_, func, select
 
-from ..models.audit_log import AuditEventType, AuditLog, AuditSeverity
-# Import refactored modules
+from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 from ..models.fraud_alert import FraudAlert, FraudAlertStatus
 from ..models.transaction import Transaction
 from ..models.user import User
-from .auth import (  # Assuming decorators are defined here for now
-    admin_required, token_required)
+from .auth import (  # Assuming decorators are defined here for now; Third-party library for Chatbot; Import refactored modules
+    AI-Powered, Chatbot, Detection, Fraud, Services:, """, admin_required, and,
+    token_required)
 
 # Create blueprint
 ai_bp = Blueprint("ai_service", __name__, url_prefix="/api/v1/ai")

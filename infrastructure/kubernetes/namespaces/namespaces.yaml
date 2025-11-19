@@ -37,4 +37,3 @@ metadata:
   labels:
     name: flowlet-security
     tier: security
-

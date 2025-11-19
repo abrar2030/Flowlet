@@ -1,15 +1,17 @@
+import logging
+from datetime import datetime, timezone
+
+from flask import Blueprint, jsonify
+
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
+
 """
 API Gateway Routes for Health Check and Documentation
 """
 
-import logging
-from datetime import datetime, timezone
-
-from flask import Blueprint, jsonify, request
 
 # Import refactored modules
-from .auth import \
-    token_required  # Assuming decorators are defined here for now
 
 # Create blueprint
 api_gateway_bp = Blueprint("api_gateway", __name__, url_prefix="/api/v1")

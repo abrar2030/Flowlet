@@ -53,5 +53,3 @@ jobs:
 
     - name: Run Conftest (Policy Enforcement - Placeholder)
       run: echo "Conftest placeholder: Install conftest and run conftest test kubernetes/manifests/"
-
-

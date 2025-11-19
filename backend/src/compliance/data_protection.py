@@ -1,3 +1,14 @@
+import logging
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
+from .regulatory_framework import Jurisdiction
+
 """
 Data Protection Service
 ======================
@@ -5,21 +16,6 @@ Data Protection Service
 Comprehensive data protection and privacy compliance service.
 Supports GDPR, CCPA, PDPA, and other privacy regulations across multiple jurisdictions.
 """
-
-import asyncio
-import hashlib
-import json
-import logging
-import uuid
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
-
-from .regulatory_framework import Jurisdiction
 
 
 class DataCategory(Enum):

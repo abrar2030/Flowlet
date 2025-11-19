@@ -1,16 +1,6 @@
-"""
-Encryption Service
-==================
-
-Advanced encryption and cryptographic services for financial applications.
-Provides data encryption, key management, and cryptographic operations.
-"""
-
 import base64
 import hashlib
-import json
 import logging
-import os
 import secrets
 import uuid
 from dataclasses import dataclass
@@ -23,6 +13,14 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+"""
+Encryption Service
+==================
+
+Advanced encryption and cryptographic services for financial applications.
+Provides data encryption, key management, and cryptographic operations.
+"""
 
 
 class EncryptionAlgorithm(Enum):

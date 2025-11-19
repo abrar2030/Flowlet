@@ -1,8 +1,5 @@
 from flask import Blueprint
 
-# The main API blueprint for version 1
-api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
-
 from .ai_service import ai_service_bp
 from .analytics import analytics_bp
 from .api_gateway import api_gateway_bp
@@ -18,9 +15,14 @@ from .monitoring import monitoring_bp
 from .multicurrency import multicurrency_bp
 from .payment import payment_bp
 from .security import security_bp
-# Import all sub-blueprints
 from .user import user_bp
 from .wallet import wallet_bp
+
+# The main API blueprint for version 1
+api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
+
+
+# Import all sub-blueprints
 
 # Register all sub-blueprints with the main API blueprint
 api_bp.register_blueprint(user_bp)

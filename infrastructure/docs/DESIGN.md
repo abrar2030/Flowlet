@@ -312,6 +312,3 @@ Beyond deployment, automation will extend to operational tasks and incident resp
 [18] OWASP Top 10 - A06:2021-Vulnerable and Outdated Components. Available at: https://owasp.org/www-project-top-10/2021/A06_2021-Vulnerable_and_Outdated_Components.html
 
 [19] Martin Fowler - BlueGreenDeployment. Available at: https://martinfowler.com/bliki/BlueGreenDeployment.html
-
-
-

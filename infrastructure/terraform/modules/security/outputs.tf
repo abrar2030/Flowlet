@@ -32,4 +32,3 @@ output "private_network_acl_id" {
   description = "ID of the private network ACL"
   value       = aws_network_acl.private.id
 }
-

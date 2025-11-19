@@ -34,12 +34,12 @@ const WorkflowMain: React.FC = () => {
     switch (currentView) {
       case 'list':
         return (
-          <WorkflowList 
+          <WorkflowList
             onCreateNew={handleCreateNew}
             onEditWorkflow={handleEditWorkflow}
           />
         );
-      
+
       case 'designer':
         return (
           <div className="h-full flex flex-col">
@@ -71,17 +71,17 @@ const WorkflowMain: React.FC = () => {
             </div>
           </div>
         );
-      
+
       case 'analytics':
         return <WorkflowAnalytics />;
-      
+
       case 'templates':
         return (
-          <WorkflowTemplates 
+          <WorkflowTemplates
             onUseTemplate={handleCreateNew}
           />
         );
-      
+
       default:
         return null;
     }
@@ -103,7 +103,7 @@ const WorkflowMain: React.FC = () => {
           </Tabs>
         </div>
       )}
-      
+
       <div className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
@@ -123,4 +123,3 @@ const WorkflowMain: React.FC = () => {
 };
 
 export default WorkflowMain;
-

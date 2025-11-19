@@ -1,11 +1,3 @@
-"""
-Security Monitoring Service
-===========================
-
-Comprehensive security monitoring and incident response system.
-Provides real-time security event monitoring, alerting, and forensic capabilities.
-"""
-
 import asyncio
 import json
 import logging
@@ -14,7 +6,15 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
+
+"""
+Security Monitoring Service
+===========================
+
+Comprehensive security monitoring and incident response system.
+Provides real-time security event monitoring, alerting, and forensic capabilities.
+"""
 
 
 class EventSeverity(Enum):
@@ -771,13 +771,11 @@ class SecurityMonitoringService:
         """Handle logout events."""
 
         # Track session duration
-        pass
 
     async def _handle_access_denied(self, event: SecurityEvent):
         """Handle access denied events."""
 
         # Track unauthorized access attempts
-        pass
 
     async def _handle_privilege_escalation(self, event: SecurityEvent):
         """Handle privilege escalation events."""
@@ -799,25 +797,21 @@ class SecurityMonitoringService:
         """Handle sensitive data access events."""
 
         # Track data access patterns
-        pass
 
     async def _handle_data_export(self, event: SecurityEvent):
         """Handle data export events."""
 
         # Monitor for potential data exfiltration
-        pass
 
     async def _handle_system_error(self, event: SecurityEvent):
         """Handle system error events."""
 
         # Track system health and potential attacks
-        pass
 
     async def _handle_configuration_change(self, event: SecurityEvent):
         """Handle configuration change events."""
 
         # Track configuration changes for compliance
-        pass
 
     def get_recent_events(
         self,

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  Filter, 
-  Star, 
-  Download, 
-  Eye, 
+import {
+  Search,
+  Filter,
+  Star,
+  Download,
+  Eye,
   Play,
   DollarSign,
   Shield,
@@ -204,7 +204,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                          template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter;
     const matchesDifficulty = difficultyFilter === 'all' || template.difficulty === difficultyFilter;
-    
+
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
 
@@ -245,7 +245,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
             className="pl-10"
           />
         </div>
-        
+
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by category" />
@@ -258,7 +258,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
             ))}
           </SelectContent>
         </Select>
-        
+
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by difficulty" />
@@ -300,7 +300,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                       </div>
                       <Star className="h-4 w-4 text-yellow-500 fill-current" />
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mt-3">
                       <Badge variant="outline">{template.category}</Badge>
                       <Badge className={getDifficultyColor(template.difficulty)}>
@@ -308,7 +308,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                       </Badge>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-4">
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4 text-sm">
@@ -325,7 +325,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                         <div className="font-medium">{template.rating}</div>
                       </div>
                     </div>
-                    
+
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1">
                       {template.tags.slice(0, 3).map(tag => (
@@ -339,7 +339,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                         </Badge>
                       )}
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       <Dialog>
@@ -361,7 +361,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                           <TemplatePreview template={template} onUse={() => onUseTemplate(template.id)} />
                         </DialogContent>
                       </Dialog>
-                      
+
                       <Button size="sm" className="flex-1" onClick={() => onUseTemplate(template.id)}>
                         <Play className="h-3 w-3 mr-1" />
                         Use Template
@@ -402,7 +402,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant="outline" className="text-xs">{template.category}</Badge>
                       <Badge className={`text-xs ${getDifficultyColor(template.difficulty)}`}>
@@ -410,7 +410,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                       </Badge>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
@@ -422,7 +422,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                         <div className="font-medium">{template.author}</div>
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -443,7 +443,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
                           <TemplatePreview template={template} onUse={() => onUseTemplate(template.id)} />
                         </DialogContent>
                       </Dialog>
-                      
+
                       <Button size="sm" className="flex-1" onClick={() => onUseTemplate(template.id)}>
                         <Play className="h-3 w-3 mr-1" />
                         Use
@@ -474,7 +474,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onUseTemplate }) 
 // Template Preview Component
 const TemplatePreview: React.FC<{ template: WorkflowTemplate; onUse: () => void }> = ({ template, onUse }) => {
   const Icon = template.icon;
-  
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -491,7 +491,7 @@ const TemplatePreview: React.FC<{ template: WorkflowTemplate; onUse: () => void 
             ))}
           </div>
         </div>
-        
+
         <div>
           <h3 className="font-semibold mb-3">Key Features</h3>
           <div className="space-y-2">
@@ -504,14 +504,14 @@ const TemplatePreview: React.FC<{ template: WorkflowTemplate; onUse: () => void 
           </div>
         </div>
       </div>
-      
+
       <div className="flex items-center justify-between pt-4 border-t">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span>{template.nodeCount} nodes</span>
           <span>{template.estimatedTime} setup</span>
           <span>{template.downloads} downloads</span>
         </div>
-        
+
         <Button onClick={onUse}>
           <Play className="h-4 w-4 mr-2" />
           Use This Template
@@ -522,4 +522,3 @@ const TemplatePreview: React.FC<{ template: WorkflowTemplate; onUse: () => void 
 };
 
 export default WorkflowTemplates;
-

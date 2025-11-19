@@ -98,4 +98,3 @@ This directory contains Kubernetes Job and CronJob definitions for various opera
     ```
 
 These examples demonstrate how CronJobs can be used to automate critical maintenance tasks, contributing to the overall robustness and compliance of the Kubernetes environment. Remember to replace placeholder values with your actual configurations and images.
-

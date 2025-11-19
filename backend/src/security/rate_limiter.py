@@ -1,14 +1,13 @@
+import hashlib
+import time
+from datetime import datetime
+from functools import wraps
+
+from flask import current_app, jsonify, request
+
 """
 Advanced rate limiter for financial applications
 """
-
-import hashlib
-import time
-from datetime import datetime, timedelta
-from functools import wraps
-
-import redis
-from flask import current_app, jsonify, request
 
 
 class RateLimiter:

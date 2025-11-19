@@ -88,4 +88,3 @@ When contributing to the web frontend, please follow these guidelines:
 - Adhere to the existing code style.
 
 For more general contribution guidelines, refer to the main [Contributing Guide](CONTRIBUTING.md) of the Flowlet project.
-

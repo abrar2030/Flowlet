@@ -1,24 +1,12 @@
-import base64
 import json
-import logging
 import uuid
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
-import requests
-from flask import Blueprint, g, jsonify, request
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from sqlalchemy import and_, func, or_
-from sqlalchemy.exc import IntegrityError
+from flask import Blueprint, jsonify, request
 
-from ..models.database import AuditLog, KYCRecord, User, db
-from ..security.encryption import (decrypt_sensitive_data,
-                                   encrypt_sensitive_data)
-from ..security.validation import (validate_email, validate_phone_number,
-                                   validate_ssn)
+from ..models.database import KYCRecord, User, db
 from ..utils.audit import log_audit_event
 from ..utils.notifications import send_notification
 

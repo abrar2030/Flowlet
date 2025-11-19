@@ -11,5 +11,3 @@ describe("Penetration Testing Simulations", () => {
     expect(true).toBe(true); // Placeholder assertion
   });
 });
-
-

@@ -38,35 +38,35 @@ describe('uiSlice', () => {
   it('should handle setTheme', () => {
     const action = setTheme('dark');
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.theme).toBe('dark');
   });
 
   it('should handle toggleSidebar', () => {
     const action = toggleSidebar();
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.sidebarOpen).toBe(false);
   });
 
   it('should handle setSidebarOpen', () => {
     const action = setSidebarOpen(false);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.sidebarOpen).toBe(false);
   });
 
   it('should handle toggleMobileMenu', () => {
     const action = toggleMobileMenu();
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.mobileMenuOpen).toBe(true);
   });
 
   it('should handle setMobileMenuOpen', () => {
     const action = setMobileMenuOpen(true);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.mobileMenuOpen).toBe(true);
   });
 
@@ -82,7 +82,7 @@ describe('uiSlice', () => {
 
     const action = addNotification(notification);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.notifications).toHaveLength(1);
     expect(newState.notifications[0]).toEqual(notification);
     expect(newState.unreadNotifications).toBe(1);
@@ -104,7 +104,7 @@ describe('uiSlice', () => {
 
     const action = markNotificationAsRead('1');
     const newState = uiReducer(stateWithNotification, action);
-    
+
     expect(newState.notifications[0].read).toBe(true);
     expect(newState.unreadNotifications).toBe(0);
   });
@@ -135,7 +135,7 @@ describe('uiSlice', () => {
 
     const action = markAllNotificationsAsRead();
     const newState = uiReducer(stateWithNotifications, action);
-    
+
     expect(newState.notifications.every(n => n.read)).toBe(true);
     expect(newState.unreadNotifications).toBe(0);
   });
@@ -156,7 +156,7 @@ describe('uiSlice', () => {
 
     const action = removeNotification('1');
     const newState = uiReducer(stateWithNotification, action);
-    
+
     expect(newState.notifications).toHaveLength(0);
     expect(newState.unreadNotifications).toBe(0);
   });
@@ -164,28 +164,28 @@ describe('uiSlice', () => {
   it('should handle setOnlineStatus', () => {
     const action = setOnlineStatus(false);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.isOnline).toBe(false);
   });
 
   it('should handle setGlobalLoading', () => {
     const action = setGlobalLoading(true);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.loading.global).toBe(true);
   });
 
   it('should handle setComponentLoading', () => {
     const action = setComponentLoading({ component: 'dashboard', loading: true });
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.loading.components.dashboard).toBe(true);
   });
 
   it('should handle openModal', () => {
     const action = openModal('testModal');
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.modals.testModal).toBe(true);
   });
 
@@ -197,7 +197,7 @@ describe('uiSlice', () => {
 
     const action = closeModal('testModal');
     const newState = uiReducer(stateWithModal, action);
-    
+
     expect(newState.modals.testModal).toBe(false);
   });
 
@@ -210,7 +210,7 @@ describe('uiSlice', () => {
 
     const action = addToast(toast);
     const newState = uiReducer(initialState, action);
-    
+
     expect(newState.toasts).toHaveLength(1);
     expect(newState.toasts[0]).toMatchObject(toast);
     expect(newState.toasts[0].id).toBeDefined();
@@ -229,7 +229,7 @@ describe('uiSlice', () => {
 
     const action = removeToast('1');
     const newState = uiReducer(stateWithToast, action);
-    
+
     expect(newState.toasts).toHaveLength(0);
   });
 
@@ -254,8 +254,7 @@ describe('uiSlice', () => {
 
     const action = clearToasts();
     const newState = uiReducer(stateWithToasts, action);
-    
+
     expect(newState.toasts).toHaveLength(0);
   });
 });
-

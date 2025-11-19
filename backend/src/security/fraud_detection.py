@@ -1,3 +1,14 @@
+import logging
+import uuid
+from collections import defaultdict, deque
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List
+
+import numpy as np
+from sqlalchemy.orm import Session
+
 """
 Fraud Detection Engine
 =====================
@@ -5,21 +16,6 @@ Fraud Detection Engine
 Advanced fraud detection and prevention system for financial transactions.
 Uses machine learning, rule-based detection, and behavioral analysis.
 """
-
-import asyncio
-import hashlib
-import json
-import logging
-import uuid
-from collections import defaultdict, deque
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-import numpy as np
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
 
 
 class FraudRiskLevel(Enum):
@@ -168,7 +164,6 @@ class BehavioralProfile:
     def _cleanup_old_patterns(self, cutoff: datetime):
         """Remove patterns older than cutoff date."""
         # Implementation would remove old entries based on timestamps
-        pass
 
     def get_transaction_anomaly_score(
         self, amount: float, merchant: str, category: str, timestamp: datetime
@@ -670,7 +665,7 @@ class FraudDetectionEngine:
         signals = []
         amount = transaction_data.get("amount", 0)
         user_id = transaction_data.get("user_id")
-        merchant = transaction_data.get("merchant", "")
+        transaction_data.get("merchant", "")
 
         # Large transaction rule
         large_threshold = self._fraud_rules["transaction_amount"][
@@ -1183,7 +1178,7 @@ class FraudDetectionEngine:
         """Get recent transactions for a user."""
 
         # Mock implementation - would query actual transaction database
-        cutoff_time = datetime.utcnow() - time_window
+        datetime.utcnow() - time_window
 
         return [
             {

@@ -1,28 +1,17 @@
-"""
-Data Warehouse
-=============
-
-Enterprise data warehouse implementation for financial analytics.
-Provides ETL processes, data modeling, and optimized querying for business intelligence.
-"""
-
-import asyncio
-import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-import numpy as np
-import pandas as pd
-from sqlalchemy import and_, create_engine, func, or_, text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import QueuePool
 
-from .data_models import (BusinessMetrics, CustomerAnalytics,
-                          PerformanceMetrics, RegulatoryReport,
-                          TransactionAnalytics)
+from .data_models import (ETL, CustomerAnalytics, Data, Enterprise, Provides,
+                          TransactionAnalytics, Warehouse, """, =============,
+                          analytics., and, business, data, financial, for,
+                          implementation, intelligence., modeling, optimized,
+                          processes, querying, warehouse)
 
 
 class DataSourceType(Enum):
@@ -326,7 +315,7 @@ class DataWarehouse:
         # Query source transactions
         query = text(
             """
-            SELECT 
+            SELECT
                 t.id as transaction_id,
                 t.user_id,
                 t.amount,
@@ -409,7 +398,7 @@ class DataWarehouse:
         # Query source users
         query = text(
             """
-            SELECT 
+            SELECT
                 u.id as user_id,
                 u.created_at,
                 u.updated_at,

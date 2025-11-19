@@ -239,4 +239,3 @@ print_status "INFO" "  1. Ensure you have a Kubernetes cluster ready"
 print_status "INFO" "  2. Run: ./scripts/deploy.sh"
 print_status "INFO" "  3. Monitor deployment: kubectl get pods --all-namespaces"
 print_status "INFO" "  4. Access services: kubectl get svc --all-namespaces"
-

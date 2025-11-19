@@ -1,19 +1,17 @@
-"""
-AI-Powered Transaction Categorization and Intelligence System
-"""
-
-import hashlib
-import json
 import logging
-import math
 import re
 import statistics
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
+
+"""
+AI-Powered Transaction Categorization and Intelligence System
+"""
+
 
 logger = logging.getLogger(__name__)
 
@@ -513,7 +511,7 @@ class AITransactionCategorizer:
         insights = []
 
         amount = Decimal(str(transaction_data.get("amount", 0)))
-        merchant_name = transaction_data.get("merchant_name", "")
+        transaction_data.get("merchant_name", "")
 
         # Recurring transaction insights
         if is_recurring:

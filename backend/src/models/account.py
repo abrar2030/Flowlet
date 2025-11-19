@@ -1,20 +1,13 @@
-"""
-Account Model for Flowlet Financial Backend
-"""
-
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import (BigInteger, Boolean, Column, DateTime, ForeignKey,
-                        Index, Integer, Numeric, String, Text)
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-
-from .database import (  # Import Base and db from the local database setup
-    Base, db)
+from sqlalchemy import (  # Import Base and db from the local database setup
+    Account, Backend, Base, Column, DateTime, Financial, Flowlet, ForeignKey,
+    Index, Integer, Model, Numeric, String, """, .database, db, for, from,
+    import, relationship, sqlalchemy.orm)
 
 
 class AccountType(PyEnum):

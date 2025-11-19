@@ -1,3 +1,14 @@
+import copy
+import logging
+import uuid
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
+
+from sqlalchemy.orm import Session
+
 """
 Configuration Engine
 ===================
@@ -5,18 +16,6 @@ Configuration Engine
 Visual configuration system for financial applications.
 Allows business users to configure complex settings without coding.
 """
-
-import copy
-import json
-import logging
-import uuid
-from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
-
-from sqlalchemy.orm import Session
 
 
 class ConfigType(Enum):

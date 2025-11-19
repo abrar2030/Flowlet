@@ -1,7 +1,3 @@
-"""
-User Model for Flowlet Financial Backend
-"""
-
 import uuid
 from datetime import datetime
 from enum import Enum as PyEnum
@@ -12,6 +8,10 @@ from sqlalchemy.orm import relationship
 from ..security.password_security import check_password, hash_password
 from .database import (  # Import Base and db from the local database setup
     Base, db)
+
+"""
+User Model for Flowlet Financial Backend
+"""
 
 
 class UserRole(PyEnum):

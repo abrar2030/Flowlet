@@ -1,20 +1,17 @@
+import hashlib
+import logging
+import math
+import statistics
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from decimal import Decimal
+from enum import Enum
+from typing import Any, Dict, List
+
 """
 AI-Powered Risk Assessment and Predictive Analytics System
 """
 
-import hashlib
-import json
-import logging
-import math
-import statistics
-from collections import defaultdict, deque
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal
-from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

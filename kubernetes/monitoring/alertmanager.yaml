@@ -85,5 +85,3 @@ data:
     #         severity: warning
     #       annotations:
     #         summary: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is crashlooping
-
-

@@ -23,19 +23,19 @@ const Layout: React.FC<LayoutProps> = ({ isMobile }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
+      <Header
         onMenuClick={handleSidebarToggle}
         isMobile={isMobile}
       />
-      
+
       <div className="flex">
-        <Sidebar 
+        <Sidebar
           isOpen={isMobile ? mobileMenuOpen : sidebarOpen}
           isMobile={isMobile}
           onClose={() => dispatch(setMobileMenuOpen(false))}
         />
-        
-        <main 
+
+        <main
           className={`flex-1 transition-all duration-300 ${
             !isMobile && sidebarOpen ? 'ml-64' : 'ml-0'
           }`}
@@ -50,4 +50,3 @@ const Layout: React.FC<LayoutProps> = ({ isMobile }) => {
 };
 
 export default Layout;
-

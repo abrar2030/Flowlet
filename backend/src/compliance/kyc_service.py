@@ -1,3 +1,11 @@
+import logging
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
 """
 KYC Service
 ===========
@@ -5,19 +13,6 @@ KYC Service
 Know Your Customer (KYC) service for identity verification and customer onboarding.
 Provides comprehensive identity verification, document validation, and risk assessment.
 """
-
-import asyncio
-import base64
-import hashlib
-import json
-import logging
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
 
 
 class KYCStatus(Enum):
@@ -731,7 +726,7 @@ class KYCService:
             "verification_id", f"bio_{int(datetime.utcnow().timestamp())}"
         )
         biometric_type = biometric.get("biometric_type", "face")
-        biometric_data = biometric.get("data", "")
+        biometric.get("data", "")
 
         # Mock biometric verification
         # In practice, this would use actual biometric verification services

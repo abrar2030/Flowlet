@@ -1,7 +1,3 @@
-"""
-Flowlet Financial Backend Application Factory
-"""
-
 import logging
 import os
 
@@ -15,6 +11,11 @@ from flask_limiter.util import get_remote_address
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
+"""
+Flowlet Financial Backend Application Factory
+"""
+
 
 # Initialize extensions
 db = SQLAlchemy()

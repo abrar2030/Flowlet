@@ -13,5 +13,3 @@ spec:
       name: http
   selector:
     {{- include "flowlet-chart.selectorLabels" . | nindent 4 }}
-
-

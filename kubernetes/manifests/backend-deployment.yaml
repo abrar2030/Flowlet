@@ -66,5 +66,3 @@ spec:
             type: RuntimeDefault
       imagePullSecrets:
       - name: regcred
-
-

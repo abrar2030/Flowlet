@@ -56,7 +56,7 @@ describe('LoginScreen', () => {
 
   it('renders login form correctly', () => {
     renderWithProviders(<LoginScreen />);
-    
+
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
     expect(screen.getByText('Sign in to your Flowlet account to continue')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
@@ -66,17 +66,17 @@ describe('LoginScreen', () => {
 
   it('has demo credentials pre-filled', () => {
     renderWithProviders(<LoginScreen />);
-    
+
     const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
     const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
-    
+
     expect(emailInput.value).toBe('demo@flowlet.com');
     expect(passwordInput.value).toBe('demo123');
   });
 
   it('displays demo credentials information', () => {
     renderWithProviders(<LoginScreen />);
-    
+
     expect(screen.getByText('Demo Credentials:')).toBeInTheDocument();
     expect(screen.getByText('Email: demo@flowlet.com')).toBeInTheDocument();
     expect(screen.getByText('Password: demo123')).toBeInTheDocument();
@@ -84,9 +84,8 @@ describe('LoginScreen', () => {
 
   it('has links to register and forgot password', () => {
     renderWithProviders(<LoginScreen />);
-    
+
     expect(screen.getByText('Sign up')).toBeInTheDocument();
     expect(screen.getByText('Forgot password?')).toBeInTheDocument();
   });
 });
-

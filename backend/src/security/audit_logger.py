@@ -1,19 +1,18 @@
-"""
-Audit Logging Service for Flowlet Financial Backend
-This service provides functions to log events to the database using the AuditLog model.
-"""
-
-import json
 import logging
-import os
-from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..models.audit_log import AuditEventType, AuditLog, AuditSeverity
-# Import the model and database instance
 from ..models.database import db
+
+"""
+Audit Logging Service for Flowlet Financial Backend
+This service provides functions to log events to the database using the AuditLog model.
+"""
+
+
+# Import the model and database instance
 
 # Configure logging
 logger = logging.getLogger(__name__)

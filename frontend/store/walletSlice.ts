@@ -285,7 +285,7 @@ const walletSlice = createSlice({
       .addCase(fetchAccountDetails.fulfilled, (state, action) => {
         state.isLoading = false;
         state.currentAccount = action.payload;
-        
+
         // Update account in accounts array
         const index = state.accounts.findIndex(acc => acc.id === action.payload.id);
         if (index !== -1) {
@@ -339,13 +339,13 @@ const walletSlice = createSlice({
       .addCase(depositFunds.fulfilled, (state, action) => {
         state.isLoading = false;
         state.transactions = [action.payload, ...state.transactions];
-        
+
         // Update account balance
         if (state.currentAccount && state.currentAccount.id === action.payload.account_id) {
           state.currentAccount.balance += action.payload.amount;
           state.currentAccount.available_balance += action.payload.amount;
         }
-        
+
         const accountIndex = state.accounts.findIndex(acc => acc.id === action.payload.account_id);
         if (accountIndex !== -1) {
           state.accounts[accountIndex].balance += action.payload.amount;
@@ -366,13 +366,13 @@ const walletSlice = createSlice({
       .addCase(withdrawFunds.fulfilled, (state, action) => {
         state.isLoading = false;
         state.transactions = [action.payload, ...state.transactions];
-        
+
         // Update account balance
         if (state.currentAccount && state.currentAccount.id === action.payload.account_id) {
           state.currentAccount.balance -= action.payload.amount;
           state.currentAccount.available_balance -= action.payload.amount;
         }
-        
+
         const accountIndex = state.accounts.findIndex(acc => acc.id === action.payload.account_id);
         if (accountIndex !== -1) {
           state.accounts[accountIndex].balance -= action.payload.amount;
@@ -393,20 +393,20 @@ const walletSlice = createSlice({
       .addCase(transferFunds.fulfilled, (state, action) => {
         state.isLoading = false;
         state.transactions = [action.payload, ...state.transactions];
-        
+
         // Update account balances
         const fromAccountIndex = state.accounts.findIndex(acc => acc.id === action.payload.from_account_id);
         if (fromAccountIndex !== -1) {
           state.accounts[fromAccountIndex].balance -= action.payload.amount;
           state.accounts[fromAccountIndex].available_balance -= action.payload.amount;
         }
-        
+
         const toAccountIndex = state.accounts.findIndex(acc => acc.id === action.payload.to_account_id);
         if (toAccountIndex !== -1) {
           state.accounts[toAccountIndex].balance += action.payload.amount;
           state.accounts[toAccountIndex].available_balance += action.payload.amount;
         }
-        
+
         if (state.currentAccount) {
           if (state.currentAccount.id === action.payload.from_account_id) {
             state.currentAccount.balance -= action.payload.amount;
@@ -449,7 +449,7 @@ const walletSlice = createSlice({
       .addCase(fetchCardDetails.fulfilled, (state, action) => {
         state.isLoading = false;
         state.currentCard = action.payload;
-        
+
         // Update card in cards array
         const index = state.cards.findIndex(card => card.id === action.payload.id);
         if (index !== -1) {
@@ -487,13 +487,13 @@ const walletSlice = createSlice({
       })
       .addCase(activateCard.fulfilled, (state, action) => {
         state.isLoading = false;
-        
+
         // Update card status
         const cardIndex = state.cards.findIndex(card => card.id === action.payload);
         if (cardIndex !== -1) {
           state.cards[cardIndex].status = 'active';
         }
-        
+
         if (state.currentCard && state.currentCard.id === action.payload) {
           state.currentCard.status = 'active';
         }
@@ -511,16 +511,16 @@ const walletSlice = createSlice({
       })
       .addCase(toggleCardStatus.fulfilled, (state, action) => {
         state.isLoading = false;
-        
+
         // Update card status
         const { cardId, action: cardAction } = action.payload;
         const newStatus = cardAction === 'block' ? 'blocked' : 'active';
-        
+
         const cardIndex = state.cards.findIndex(card => card.id === cardId);
         if (cardIndex !== -1) {
           state.cards[cardIndex].status = newStatus;
         }
-        
+
         if (state.currentCard && state.currentCard.id === cardId) {
           state.currentCard.status = newStatus;
         }
@@ -564,4 +564,3 @@ const walletSlice = createSlice({
 
 export const { clearError, setCurrentAccount, setCurrentCard, clearWalletState } = walletSlice.actions;
 export default walletSlice.reducer;
-

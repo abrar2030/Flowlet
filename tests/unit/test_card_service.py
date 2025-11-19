@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # Assuming a simplified CardService module structure
 # In a real scenario, you would import the actual classes/functions

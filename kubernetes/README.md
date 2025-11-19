@@ -61,7 +61,7 @@ This structured approach ensures clear separation of concerns, enhances maintain
 
 *   **Standardized Deployments:** Helm charts enforce standardized deployment practices, ensuring that all components of the Flowlet application are deployed consistently and correctly, which is crucial for regulatory compliance and operational stability.
 *   **Versioned Releases:** Helm allows for versioning of application releases, enabling easy rollbacks to previous stable versions in case of issues. This is a critical capability for maintaining business continuity in financial services.
-*   **Configuration as Code:** Helm charts promote 
+*   **Configuration as Code:** Helm charts promote
 
 
  configuration as code, making deployment configurations auditable, repeatable, and manageable through version control.
@@ -165,5 +165,3 @@ This structured approach ensures clear separation of concerns, enhances maintain
 
 The Kubernetes configurations within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.
 ---
-
-

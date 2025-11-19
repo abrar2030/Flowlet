@@ -79,7 +79,7 @@ jobs:
 
           </details>
 
-          *Pushed by: @${{ github.actor }}, Action: 
+          *Pushed by: @${{ github.actor }}, Action:
           `
           github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -87,5 +87,3 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
-
-

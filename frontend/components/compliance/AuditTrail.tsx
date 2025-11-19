@@ -176,7 +176,7 @@ export function AuditTrail({
     const criticalEvents = events.filter(e => e.riskLevel === 'critical').length;
     const failedEvents = events.filter(e => e.outcome === 'failure').length;
     const complianceEvents = events.filter(e => e.complianceRelevant).length;
-    
+
     const eventsByType = events.reduce((acc, event) => {
       acc[event.eventType] = (acc[event.eventType] || 0) + 1;
       return acc;
@@ -301,7 +301,7 @@ export function AuditTrail({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         setState(prev => ({ ...prev, success: 'Export completed successfully' }));
       }
     } catch (error) {
@@ -331,9 +331,9 @@ export function AuditTrail({
             end: state.filters.dateRange.end?.toISOString() || ''
           }
         });
-        
-        setState(prev => ({ 
-          ...prev, 
+
+        setState(prev => ({
+          ...prev,
           success: 'Report generation started',
           showReportConfig: false,
           newReportName: '',
@@ -836,8 +836,8 @@ export function AuditTrail({
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={report.status === 'completed' ? 'bg-green-100 text-green-600' : 
-                                        report.status === 'generating' ? 'bg-yellow-100 text-yellow-600' : 
+                        <Badge className={report.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                        report.status === 'generating' ? 'bg-yellow-100 text-yellow-600' :
                                         'bg-red-100 text-red-600'}>
                           {report.status}
                         </Badge>
@@ -1044,8 +1044,8 @@ export function AuditTrail({
                   {state.isGenerating ? 'Generating...' : 'Generate Report'}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
+                  onClick={() => setState(prev => ({
+                    ...prev,
                     showReportConfig: false,
                     newReportName: '',
                     newReportDescription: ''
@@ -1064,4 +1064,3 @@ export function AuditTrail({
 }
 
 export default AuditTrail;
-

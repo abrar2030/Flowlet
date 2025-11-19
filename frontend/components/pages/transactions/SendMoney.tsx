@@ -118,15 +118,15 @@ const SendMoney: React.FC<SendMoneyProps> = ({
             </div>
 
             <div className="flex gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleCancel}
                 className="flex-1"
                 disabled={isLoading}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleSubmit(onSubmit)}
                 className="flex-1"
                 disabled={isLoading}
@@ -206,8 +206,8 @@ const SendMoney: React.FC<SendMoneyProps> = ({
             {/* Currency */}
             <div className="space-y-2">
               <Label htmlFor="currency">Currency</Label>
-              <Select 
-                value={watchedCurrency} 
+              <Select
+                value={watchedCurrency}
                 onValueChange={(value) => setValue('currency', value)}
               >
                 <SelectTrigger>
@@ -248,8 +248,8 @@ const SendMoney: React.FC<SendMoneyProps> = ({
             </Alert>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full"
               disabled={!isValid || (watchedAmount > availableBalance) || isLoading}
             >
@@ -264,4 +264,3 @@ const SendMoney: React.FC<SendMoneyProps> = ({
 };
 
 export default SendMoney;
-

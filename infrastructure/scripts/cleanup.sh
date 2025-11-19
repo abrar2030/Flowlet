@@ -91,5 +91,3 @@ echo ""
 echo "⚠️  Note: Persistent volumes and associated data may still exist and need manual cleanup."
 echo "   Run: kubectl get pv to check for remaining persistent volumes"
 echo "   If you used Helm for any deployments, ensure to run 'helm uninstall <release-name> -n <namespace>' for each release."
-
-

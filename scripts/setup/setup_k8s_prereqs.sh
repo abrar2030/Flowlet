@@ -11,5 +11,3 @@ then
 fi
 
 echo "Kubectl is installed. You are ready to deploy Flowlet."
-
-

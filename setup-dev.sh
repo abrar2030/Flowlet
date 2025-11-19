@@ -38,25 +38,25 @@ command_exists() {
 # Function to install Python dependencies
 install_python_deps() {
     echo -e "${BLUE}Installing Python dependencies...${NC}"
-    
+
     if [ -f "backend/requirements.txt" ]; then
         pip install -r backend/requirements.txt
     fi
-    
+
     if [ -f "backend/requirements_updated.txt" ]; then
         pip install -r backend/requirements_updated.txt
     fi
-    
+
     # Install development dependencies
     pip install pytest pytest-cov pytest-html pytest-mock bandit flake8 black isort
-    
+
     echo -e "${GREEN}✓ Python dependencies installed${NC}"
 }
 
 # Function to install Node.js dependencies
 install_node_deps() {
     echo -e "${BLUE}Installing Node.js dependencies...${NC}"
-    
+
     # Install unified frontend dependencies
     if [ -d "unified-frontend" ]; then
         cd unified-frontend
@@ -76,12 +76,12 @@ install_node_deps() {
 # Function to setup database
 setup_database() {
     echo -e "${BLUE}Setting up database...${NC}"
-    
+
     cd backend
-    
+
     # Create database directory if it doesn't exist
     mkdir -p data
-    
+
     # Initialize database
     python -c "
 from src.main import create_app
@@ -92,7 +92,7 @@ with app.app_context():
     db.create_all()
     print('Database initialized successfully')
 "
-    
+
     cd ..
     echo -e "${GREEN}✓ Database setup completed${NC}"
 }
@@ -100,7 +100,7 @@ with app.app_context():
 # Function to setup environment files
 setup_env_files() {
     echo -e "${BLUE}Setting up environment files...${NC}"
-    
+
     # Backend environment file
     if [ ! -f "backend/.env" ]; then
         cat > backend/.env << EOF
@@ -133,7 +133,7 @@ EOF
     else
         echo -e "${YELLOW}⚠ Backend .env file already exists${NC}"
     fi
-    
+
     # Frontend environment file
     if [ ! -f "unified-frontend/.env" ]; then
         cat > unified-frontend/.env << EOF
@@ -160,7 +160,7 @@ EOF
 # Function to create development scripts
 create_dev_scripts() {
     echo -e "${BLUE}Creating development scripts...${NC}"
-    
+
     # Backend development script
     cat > backend/dev.sh << 'EOF'
 #!/bin/bash
@@ -181,7 +181,7 @@ mkdir -p logs
 python src/main.py
 EOF
     chmod +x backend/dev.sh
-    
+
     # Frontend development script
     cat > unified-frontend/dev.sh << 'EOF'
 #!/bin/bash
@@ -195,7 +195,7 @@ else
 fi
 EOF
     chmod +x unified-frontend/dev.sh
-    
+
     # Combined development script
     cat > dev-start.sh << 'EOF'
 #!/bin/bash
@@ -243,14 +243,14 @@ echo -e "==========================================${NC}"
 wait
 EOF
     chmod +x dev-start.sh
-    
+
     echo -e "${GREEN}✓ Development scripts created${NC}"
 }
 
 # Function to create Docker configuration
 create_docker_config() {
     echo -e "${BLUE}Creating Docker configuration...${NC}"
-    
+
     # Backend Dockerfile
     cat > backend/Dockerfile << 'EOF'
 FROM python:3.11-slim
@@ -282,7 +282,7 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Run the application
 CMD ["python", "src/main.py"]
 EOF
-    
+
     # Frontend Dockerfile
     cat > unified-frontend/Dockerfile << 'EOF'
 FROM node:20-alpine as builder
@@ -319,7 +319,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 CMD ["nginx", "-g", "daemon off;"]
 EOF
-    
+
     # Nginx configuration for frontend
     cat > unified-frontend/nginx.conf << 'EOF'
 server {
@@ -353,7 +353,7 @@ server {
     }
 }
 EOF
-    
+
     # Docker Compose configuration
     cat > docker-compose.yml << 'EOF'
 version: '3.8'
@@ -418,7 +418,7 @@ volumes:
   postgres_data:
   redis_data:
 EOF
-    
+
     # Development Docker Compose
     cat > docker-compose.dev.yml << 'EOF'
 version: '3.8'
@@ -463,16 +463,16 @@ volumes:
   postgres_dev_data:
   redis_dev_data:
 EOF
-    
+
     echo -e "${GREEN}✓ Docker configuration created${NC}"
 }
 
 # Function to create CI/CD configuration
 create_cicd_config() {
     echo -e "${BLUE}Creating CI/CD configuration...${NC}"
-    
+
     mkdir -p .github/workflows
-    
+
     # GitHub Actions workflow
     cat > .github/workflows/ci-cd.yml << 'EOF'
 name: Flowlet CI/CD Pipeline
@@ -486,7 +486,7 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -500,7 +500,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7
         options: >-
@@ -513,12 +513,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -526,23 +526,23 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements*.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    
+
     - name: Install dependencies
       run: |
         cd backend
         pip install -r requirements_updated.txt
         pip install pytest pytest-cov pytest-html bandit flake8
-    
+
     - name: Run security scan
       run: |
         cd backend
         bandit -r src/ -f json -o security-report.json || true
-    
+
     - name: Run code quality checks
       run: |
         cd backend
         flake8 src/ --max-line-length=100 --ignore=E203,W503
-    
+
     - name: Run tests with coverage
       run: |
         cd backend
@@ -550,7 +550,7 @@ jobs:
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/flowlet_test
         REDIS_URL: redis://localhost:6379/1
-    
+
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
@@ -560,32 +560,32 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: unified-frontend/package-lock.json
-    
+
     - name: Install dependencies
       run: |
         cd unified-frontend
         npm ci
-    
+
     - name: Run linting
       run: |
         cd unified-frontend
         npm run lint
-    
+
     - name: Build application
       run: |
         cd unified-frontend
         npm run build
-    
+
     - name: Run tests
       run: |
         cd unified-frontend
@@ -597,20 +597,20 @@ jobs:
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
+
     - name: Login to Container Registry
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Build and push backend image
       uses: docker/build-push-action@v5
       with:
@@ -619,7 +619,7 @@ jobs:
         tags: ghcr.io/${{ github.repository }}/backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
+
     - name: Build and push frontend image
       uses: docker/build-push-action@v5
       with:
@@ -629,14 +629,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 EOF
-    
+
     echo -e "${GREEN}✓ CI/CD configuration created${NC}"
 }
 
 # Function to create development documentation
 create_dev_docs() {
     echo -e "${BLUE}Creating development documentation...${NC}"
-    
+
     cat > DEVELOPMENT.md << 'EOF'
 # Flowlet Development Guide
 
@@ -843,7 +843,7 @@ docker-compose up -d
 - Review test results in `backend/test_results/`
 - Open an issue on GitHub
 EOF
-    
+
     echo -e "${GREEN}✓ Development documentation created${NC}"
 }
 
@@ -901,4 +901,3 @@ echo -e ""
 echo -e "🐳 Use Docker:"
 echo -e "   docker-compose -f docker-compose.dev.yml up"
 echo -e "==========================================${NC}"
-

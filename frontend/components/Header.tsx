@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isMobile }) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
+
           <div className="flex items-center space-x-2">
             <h1 className="text-xl font-bold text-primary">Flowlet</h1>
             {isMobile && (
@@ -73,8 +73,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isMobile }) => {
           <Button variant="ghost" size="sm" className="relative">
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0"
               >
                 {unreadNotifications > 9 ? '9+' : unreadNotifications}
@@ -104,12 +104,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isMobile }) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
+
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              
+
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   {getThemeIcon()}
@@ -130,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isMobile }) => {
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-              
+
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
@@ -145,4 +145,3 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isMobile }) => {
 };
 
 export default Header;
-

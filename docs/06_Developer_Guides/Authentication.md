@@ -19,5 +19,3 @@ The Authentication API provides endpoints for user registration, login, profile 
 - **Data Privacy**: User data is handled in accordance with privacy regulations (e.g., GDPR). Sensitive personal information is protected, and users have control over their data.
 
 ## Endpoints
-
-

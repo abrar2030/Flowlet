@@ -29,7 +29,7 @@ export interface CSPDirectives {
  * CSP Configuration Service
  */
 export class CSPService {
-  
+
   /**
    * Generate strict CSP for financial applications
    * @param options - Custom CSP options
@@ -98,10 +98,10 @@ export class CSPService {
 
     // Merge with custom options
     const mergedDirectives = { ...defaultDirectives, ...options };
-    
+
     // Convert to CSP string
     const cspParts: string[] = [];
-    
+
     Object.entries(mergedDirectives).forEach(([directive, value]) => {
       if (typeof value === 'boolean') {
         if (value) {
@@ -111,7 +111,7 @@ export class CSPService {
         cspParts.push(`${directive} ${value.join(' ')}`);
       }
     });
-    
+
     return cspParts.join('; ');
   }
 
@@ -198,7 +198,7 @@ export class CSPService {
         return false;
       }
       if (source.startsWith('https://')) {
-        return resourceUrl.startsWith(source) || 
+        return resourceUrl.startsWith(source) ||
                new URL(resourceUrl).hostname === new URL(source).hostname;
       }
       return false;
@@ -211,7 +211,7 @@ export class CSPService {
    */
   static reportViolation(violationReport: any): void {
     console.error('CSP Violation:', violationReport);
-    
+
     // Send to monitoring service in production
     if (process.env.NODE_ENV === 'production') {
       fetch('/api/csp-violation', {
@@ -236,7 +236,7 @@ export class CSPService {
  * Security Headers Configuration
  */
 export class SecurityHeadersService {
-  
+
   /**
    * Get recommended security headers for financial applications
    * @returns Object containing security headers
@@ -245,22 +245,22 @@ export class SecurityHeadersService {
     return {
       // Content Security Policy
       'Content-Security-Policy': CSPService.generateStrictCSP(),
-      
+
       // Prevent MIME type sniffing
       'X-Content-Type-Options': 'nosniff',
-      
+
       // Enable XSS protection
       'X-XSS-Protection': '1; mode=block',
-      
+
       // Prevent clickjacking
       'X-Frame-Options': 'DENY',
-      
+
       // Strict Transport Security (HTTPS only)
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      
+
       // Referrer Policy
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      
+
       // Permissions Policy (formerly Feature Policy)
       'Permissions-Policy': [
         'camera=()',
@@ -272,13 +272,13 @@ export class SecurityHeadersService {
         'accelerometer=()',
         'gyroscope=()'
       ].join(', '),
-      
+
       // Cross-Origin Embedder Policy
       'Cross-Origin-Embedder-Policy': 'require-corp',
-      
+
       // Cross-Origin Opener Policy
       'Cross-Origin-Opener-Policy': 'same-origin',
-      
+
       // Cross-Origin Resource Policy
       'Cross-Origin-Resource-Policy': 'same-origin'
     };
@@ -319,4 +319,3 @@ if (typeof window !== 'undefined') {
 }
 
 export default CSPService;
-

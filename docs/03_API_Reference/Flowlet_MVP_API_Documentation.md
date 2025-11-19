@@ -469,4 +469,3 @@ curl -X POST http://localhost:5001/api/v1/payment/transfer \
   -H "Content-Type: application/json" \
   -d '{"from_wallet_id":"wallet1","to_wallet_id":"wallet2","amount":"25.00"}'
 ```
-

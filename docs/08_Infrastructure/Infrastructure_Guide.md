@@ -291,7 +291,7 @@ groups:
       severity: critical
     annotations:
       summary: "Service {{ $labels.kubernetes_name }} is down"
-  
+
   - alert: HighErrorRate
     expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
     for: 5m
@@ -776,4 +776,3 @@ cd infrastructure
 - **Custom Development**: Tailored feature development
 
 For enterprise support, contact: enterprise@flowlet.com
-

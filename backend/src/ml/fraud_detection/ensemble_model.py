@@ -1,21 +1,22 @@
-"""
-Ensemble Fraud Detection Model
-Combines multiple ML models for improved fraud detection accuracy
-"""
-
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
-from . import (FraudAlert, FraudDetectionError, FraudModelBase, FraudType,
-               ModelNotTrainedError, ModelType, RiskLevel)
-from .anomaly_models import (AutoencoderModel, IsolationForestModel,
-                             OneClassSVMModel)
-from .supervised_models import (LightGBMFraudModel, NeuralNetworkFraudModel,
-                                RandomForestFraudModel, XGBoostFraudModel)
+from . import (ML, AutoencoderModel, Combines, Detection, Ensemble, Fraud,
+               FraudAlert, FraudDetectionError, FraudModelBase, FraudType,
+               IsolationForestModel, Model, ModelNotTrainedError,
+               OneClassSVMModel, RiskLevel, """, .anomaly_models,
+               .supervised_models, accuracy, detection, for, fraud, from,
+               import, improved, models, multiple)
+
+    LightGBMFraudModel,
+    NeuralNetworkFraudModel,
+    RandomForestFraudModel,
+    XGBoostFraudModel,
+)
 
 logger = logging.getLogger(__name__)
 

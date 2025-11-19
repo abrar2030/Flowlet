@@ -86,4 +86,3 @@ Redis URL
 {{- .Values.externalRedis.url }}
 {{- end }}
 {{- end }}
-

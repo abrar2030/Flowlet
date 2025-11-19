@@ -111,7 +111,7 @@ This modular structure facilitates easier navigation, maintenance, and auditing 
 *   `setup-dev.sh`
     *   **Description:** This script is intended to automate the setup of a local development environment for Flowlet. It would typically handle tasks such as installing necessary development tools, configuring environment variables, and setting up local dependencies.
     *   **Financial Industry Relevance:**
-        *   **Developer Productivity and Consistency:** Ensures that all developers work within a consistent and correctly configured environment, reducing 
+        *   **Developer Productivity and Consistency:** Ensures that all developers work within a consistent and correctly configured environment, reducing
 
 
  "works on my machine" issues. This is crucial for maintaining development velocity and code quality in a regulated environment.
@@ -162,5 +162,3 @@ Contributions to the operational scripts are highly encouraged to enhance the re
 The scripts within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.
 
 ---
-
-

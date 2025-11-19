@@ -1,17 +1,8 @@
-# API Integration Tests for External Services
-
-import json
 import os
 import sys
-import time
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
 from src.integrations.banking.fdx_integration import FDXIntegration
 from src.integrations.banking.open_banking_integration import \
     OpenBankingIntegration
@@ -19,6 +10,12 @@ from src.integrations.banking.plaid_integration import PlaidIntegration
 from src.ml.fraud_detection.service import FraudDetectionService
 from src.services.compliance.sanctions_screening import \
     SanctionsScreeningService
+
+# API Integration Tests for External Services
+
+
+# Add src to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
 class TestExternalAPIIntegrations:
@@ -482,7 +479,6 @@ class TestMonitoringIntegration:
 
     def test_error_logging_integration(self):
         """Test error logging integration"""
-        import logging
 
         from src.services.monitoring.error_tracking import ErrorTracker
 

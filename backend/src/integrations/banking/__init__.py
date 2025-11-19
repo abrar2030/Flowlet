@@ -1,8 +1,3 @@
-"""
-Banking Integration Base Classes
-Provides abstract base classes for third-party banking integrations
-"""
-
 import logging
 import uuid
 from abc import ABC, abstractmethod
@@ -10,6 +5,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+"""
+Banking Integration Base Classes
+Provides abstract base classes for third-party banking integrations
+"""
+
 
 logger = logging.getLogger(__name__)
 
@@ -88,31 +89,21 @@ class PaymentRequest:
 class BankingIntegrationError(Exception):
     """Base exception for banking integration errors"""
 
-    pass
-
 
 class AuthenticationError(BankingIntegrationError):
     """Authentication related errors"""
-
-    pass
 
 
 class InsufficientFundsError(BankingIntegrationError):
     """Insufficient funds error"""
 
-    pass
-
 
 class InvalidAccountError(BankingIntegrationError):
     """Invalid account error"""
 
-    pass
-
 
 class TransactionLimitError(BankingIntegrationError):
     """Transaction limit exceeded error"""
-
-    pass
 
 
 class BankingIntegrationBase(ABC):
@@ -132,14 +123,12 @@ class BankingIntegrationBase(ABC):
         Authenticate with the banking service
         Returns True if authentication successful
         """
-        pass
 
     @abstractmethod
     async def get_accounts(self, customer_id: str) -> List[BankAccount]:
         """
         Retrieve list of accounts for a customer
         """
-        pass
 
     @abstractmethod
     async def get_account_balance(self, account_id: str) -> Dict[str, float]:
@@ -147,7 +136,6 @@ class BankingIntegrationBase(ABC):
         Get account balance information
         Returns dict with 'balance' and 'available_balance'
         """
-        pass
 
     @abstractmethod
     async def get_transactions(
@@ -160,7 +148,6 @@ class BankingIntegrationBase(ABC):
         """
         Retrieve transaction history for an account
         """
-        pass
 
     @abstractmethod
     async def initiate_payment(self, payment_request: PaymentRequest) -> str:
@@ -168,14 +155,12 @@ class BankingIntegrationBase(ABC):
         Initiate a payment transaction
         Returns transaction ID
         """
-        pass
 
     @abstractmethod
     async def get_payment_status(self, transaction_id: str) -> TransactionStatus:
         """
         Get status of a payment transaction
         """
-        pass
 
     @abstractmethod
     async def cancel_payment(self, transaction_id: str) -> bool:
@@ -183,7 +168,6 @@ class BankingIntegrationBase(ABC):
         Cancel a pending payment
         Returns True if cancellation successful
         """
-        pass
 
     def generate_reference_id(self) -> str:
         """Generate a unique reference ID for transactions"""
@@ -214,14 +198,12 @@ class PSD2ComplianceBase(ABC):
         Initiate Strong Customer Authentication
         Returns SCA session ID
         """
-        pass
 
     @abstractmethod
     async def verify_sca(self, sca_session_id: str, auth_code: str) -> bool:
         """
         Verify SCA authentication code
         """
-        pass
 
     @abstractmethod
     async def get_consent(self, customer_id: str, scope: List[str]) -> str:
@@ -229,7 +211,6 @@ class PSD2ComplianceBase(ABC):
         Get customer consent for data access
         Returns consent ID
         """
-        pass
 
 
 class OpenBankingBase(ABC):
@@ -245,7 +226,6 @@ class OpenBankingBase(ABC):
         """
         Get account information using Open Banking AIS
         """
-        pass
 
     @abstractmethod
     async def initiate_payment_pis(
@@ -254,4 +234,3 @@ class OpenBankingBase(ABC):
         """
         Initiate payment using Open Banking PIS
         """
-        pass

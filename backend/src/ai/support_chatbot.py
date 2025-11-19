@@ -1,25 +1,21 @@
-"""
-AI Support Chatbot for Flowlet Developer Portal
-Provides intelligent assistance for developers integrating with the platform
-"""
-
-import asyncio
 import json
 import logging
 import os
-import pickle
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-import aiohttp
 import numpy as np
-import openai
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
-                          pipeline)
+from transformers import pipeline
+
+"""
+AI Support Chatbot for Flowlet Developer Portal
+Provides intelligent assistance for developers integrating with the platform
+"""
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

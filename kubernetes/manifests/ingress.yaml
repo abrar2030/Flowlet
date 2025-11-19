@@ -29,5 +29,3 @@ spec:
   - hosts:
     - flowlet.example.com
     secretName: flowlet-tls-secret
-
-

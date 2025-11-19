@@ -1,23 +1,22 @@
-"""
-Anomaly Detection Models for Fraud Detection
-Implements unsupervised learning models for detecting fraudulent transactions
-"""
-
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import OneClassSVM
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from . import (FraudDetectionError, FraudModelBase, ModelNotTrainedError,
-               ModelType)
+from . import FraudDetectionError, FraudModelBase, ModelNotTrainedError
+
+"""
+Anomaly Detection Models for Fraud Detection
+Implements unsupervised learning models for detecting fraudulent transactions
+"""
+
 
 logger = logging.getLogger(__name__)
 

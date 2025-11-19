@@ -356,6 +356,3 @@ resource "aws_secretsmanager_secret_version" "flowlet_secrets_version" {
 }
 
 data "aws_caller_identity" "current" {}
-
-
-

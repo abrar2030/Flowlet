@@ -143,7 +143,7 @@ export class SecurityHeadersService {
   } {
     const missingHeaders: string[] = [];
     const warnings: string[] = [];
-    
+
     const requiredHeaders = [
       'Content-Security-Policy',
       'X-Content-Type-Options',
@@ -228,13 +228,13 @@ export class SecurityHeadersService {
 
       try {
         const response = await fetch(url, secureOptions);
-        
+
         // Validate response security headers
         const validation = this.validateResponse(response);
         if (!validation.isSecure) {
           console.warn('Response missing security headers:', validation.missingHeaders);
         }
-        
+
         if (validation.warnings.length > 0) {
           console.warn('Security warnings:', validation.warnings);
         }
@@ -265,7 +265,7 @@ export class SecurityHeadersService {
     try {
       const response = await fetch(url, { method: 'HEAD' });
       const compliance = this.validateResponse(response);
-      
+
       const headers: Record<string, string> = {};
       response.headers.forEach((value, key) => {
         headers[key] = value;
@@ -320,11 +320,11 @@ export class SecurityHeadersService {
     );
 
     const overallCompliance = results.every(result => result.isSecure);
-    
+
     // Generate recommendations
     const recommendations: string[] = [];
     const allMissingHeaders = new Set<string>();
-    
+
     results.forEach(result => {
       result.missingHeaders.forEach(header => allMissingHeaders.add(header));
     });
@@ -332,11 +332,11 @@ export class SecurityHeadersService {
     if (allMissingHeaders.has('Content-Security-Policy')) {
       recommendations.push('Implement Content Security Policy to prevent XSS attacks');
     }
-    
+
     if (allMissingHeaders.has('Strict-Transport-Security')) {
       recommendations.push('Enable HSTS to enforce HTTPS connections');
     }
-    
+
     if (allMissingHeaders.has('X-Frame-Options')) {
       recommendations.push('Set X-Frame-Options to prevent clickjacking attacks');
     }
@@ -418,4 +418,3 @@ export class CSRFService {
 }
 
 export default SecurityHeadersService;
-

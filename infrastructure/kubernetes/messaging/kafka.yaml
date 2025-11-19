@@ -208,4 +208,3 @@ spec:
     targetPort: 9092
     name: kafka
   clusterIP: None
-

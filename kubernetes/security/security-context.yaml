@@ -61,5 +61,3 @@ spec:
             type: RuntimeDefault
         ports:
         - containerPort: 80
-
-

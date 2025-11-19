@@ -1,26 +1,25 @@
-"""
-Supervised Learning Models for Fraud Detection
-Implements supervised ML models for fraud classification
-"""
-
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict
 
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import xgboost as xgb
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.metrics import (classification_report, precision_recall_curve,
-                             roc_auc_score)
-from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from . import (FraudDetectionError, FraudModelBase, ModelNotTrainedError,
-               ModelType)
+from . import FraudDetectionError, FraudModelBase, ModelNotTrainedError
+
+"""
+Supervised Learning Models for Fraud Detection
+Implements supervised ML models for fraud classification
+"""
+
 
 logger = logging.getLogger(__name__)
 

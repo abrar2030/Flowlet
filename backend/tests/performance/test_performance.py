@@ -1,21 +1,19 @@
-# Performance and Load Testing Suite
-
 import json
 import os
 import statistics
 import sys
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import psutil
 import pytest
-import requests
+from src.main import create_app
+
+# Performance and Load Testing Suite
+
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from src.main import create_app
 
 
 class TestPerformanceMetrics:
@@ -131,7 +129,6 @@ class TestDatabasePerformance:
     def test_database_query_performance(self, app_with_db):
         """Test database query performance"""
         with app_with_db.app_context():
-            from sqlalchemy import text
             from src.models.database import db
             from src.models.user import User
 
@@ -251,7 +248,7 @@ class TestCachePerformance:
         hit_times = []
         for _ in range(100):
             start_time = time.time()
-            result = cache_service.get("test_key")
+            cache_service.get("test_key")
             end_time = time.time()
             hit_times.append(end_time - start_time)
 
@@ -340,13 +337,13 @@ class TestScalabilityMetrics:
 
             # Login simulation
             start_time = time.time()
-            response = client.get("/api/v1/info")
+            client.get("/api/v1/info")
             session_times.append(time.time() - start_time)
 
             # Multiple API calls
             for _ in range(5):
                 start_time = time.time()
-                response = client.get("/health")
+                client.get("/health")
                 session_times.append(time.time() - start_time)
 
             return {
@@ -395,7 +392,7 @@ class TestResourceUtilization:
         process = psutil.Process(os.getpid())
 
         # Measure CPU usage before load
-        cpu_before = process.cpu_percent()
+        process.cpu_percent()
         time.sleep(1)  # Let CPU measurement stabilize
 
         # Generate load

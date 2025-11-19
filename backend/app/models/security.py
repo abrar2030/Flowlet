@@ -1,7 +1,3 @@
-"""
-Security Event model for tracking security-related events
-"""
-
 import enum
 import uuid
 from datetime import datetime, timezone
@@ -12,6 +8,10 @@ from sqlalchemy import (Column, DateTime, Enum, ForeignKey, Integer, String,
 from sqlalchemy.orm import relationship
 
 from .mixins import UUID
+
+"""
+Security Event model for tracking security-related events
+"""
 
 
 class SecurityEventType(enum.Enum):

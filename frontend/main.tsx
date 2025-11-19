@@ -39,7 +39,7 @@ window.addEventListener('error', (event) => {
   };
 
   console.error('Global error:', errorInfo);
-  
+
   // In production, send to error reporting service
   if (import.meta.env.PROD) {
     // Example: Send to error reporting service
@@ -57,7 +57,7 @@ window.addEventListener('unhandledrejection', (event) => {
   };
 
   console.error('Unhandled promise rejection:', errorInfo);
-  
+
   // In production, send to error reporting service
   if (import.meta.env.PROD) {
     // Example: Send to error reporting service
@@ -83,4 +83,3 @@ ReactDOM.createRoot(rootElement).render(
     <App />
   </React.StrictMode>
 );
-
