@@ -1,14 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useOnlineStatus, useResponsive, useLocalStorage, useDebounce } from '@/hooks';
+import { describe, it, expect, vi } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import {
+  useOnlineStatus,
+  useResponsive,
+  useLocalStorage,
+  useDebounce,
+} from "@/hooks";
 
-describe('useOnlineStatus', () => {
+describe("useOnlineStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('returns initial online status', () => {
-    Object.defineProperty(navigator, 'onLine', {
+  it("returns initial online status", () => {
+    Object.defineProperty(navigator, "onLine", {
       writable: true,
       value: true,
     });
@@ -17,8 +22,8 @@ describe('useOnlineStatus', () => {
     expect(result.current).toBe(true);
   });
 
-  it('updates status when going offline', () => {
-    Object.defineProperty(navigator, 'onLine', {
+  it("updates status when going offline", () => {
+    Object.defineProperty(navigator, "onLine", {
       writable: true,
       value: true,
     });
@@ -26,24 +31,24 @@ describe('useOnlineStatus', () => {
     const { result } = renderHook(() => useOnlineStatus());
 
     act(() => {
-      Object.defineProperty(navigator, 'onLine', {
+      Object.defineProperty(navigator, "onLine", {
         writable: true,
         value: false,
       });
-      window.dispatchEvent(new Event('offline'));
+      window.dispatchEvent(new Event("offline"));
     });
 
     expect(result.current).toBe(false);
   });
 });
 
-describe('useResponsive', () => {
+describe("useResponsive", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('returns correct responsive states for mobile', () => {
-    Object.defineProperty(window, 'innerWidth', {
+  it("returns correct responsive states for mobile", () => {
+    Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 500,
@@ -56,8 +61,8 @@ describe('useResponsive', () => {
     expect(result.current.isDesktop).toBe(false);
   });
 
-  it('returns correct responsive states for tablet', () => {
-    Object.defineProperty(window, 'innerWidth', {
+  it("returns correct responsive states for tablet", () => {
+    Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 800,
@@ -70,8 +75,8 @@ describe('useResponsive', () => {
     expect(result.current.isDesktop).toBe(false);
   });
 
-  it('returns correct responsive states for desktop', () => {
-    Object.defineProperty(window, 'innerWidth', {
+  it("returns correct responsive states for desktop", () => {
+    Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 1200,
@@ -85,39 +90,45 @@ describe('useResponsive', () => {
   });
 });
 
-describe('useLocalStorage', () => {
+describe("useLocalStorage", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
   });
 
-  it('returns initial value when no stored value exists', () => {
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+  it("returns initial value when no stored value exists", () => {
+    const { result } = renderHook(() =>
+      useLocalStorage("test-key", "initial-value"),
+    );
 
-    expect(result.current[0]).toBe('initial-value');
+    expect(result.current[0]).toBe("initial-value");
   });
 
-  it('returns stored value when it exists', () => {
-    localStorage.setItem('test-key', JSON.stringify('stored-value'));
+  it("returns stored value when it exists", () => {
+    localStorage.setItem("test-key", JSON.stringify("stored-value"));
 
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+    const { result } = renderHook(() =>
+      useLocalStorage("test-key", "initial-value"),
+    );
 
-    expect(result.current[0]).toBe('stored-value');
+    expect(result.current[0]).toBe("stored-value");
   });
 
-  it('updates localStorage when value is set', () => {
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+  it("updates localStorage when value is set", () => {
+    const { result } = renderHook(() =>
+      useLocalStorage("test-key", "initial-value"),
+    );
 
     act(() => {
-      result.current[1]('new-value');
+      result.current[1]("new-value");
     });
 
-    expect(result.current[0]).toBe('new-value');
-    expect(localStorage.getItem('test-key')).toBe(JSON.stringify('new-value'));
+    expect(result.current[0]).toBe("new-value");
+    expect(localStorage.getItem("test-key")).toBe(JSON.stringify("new-value"));
   });
 
-  it('handles function updates', () => {
-    const { result } = renderHook(() => useLocalStorage('test-key', 0));
+  it("handles function updates", () => {
+    const { result } = renderHook(() => useLocalStorage("test-key", 0));
 
     act(() => {
       result.current[1]((prev: number) => prev + 1);
@@ -127,7 +138,7 @@ describe('useLocalStorage', () => {
   });
 });
 
-describe('useDebounce', () => {
+describe("useDebounce", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -136,48 +147,48 @@ describe('useDebounce', () => {
     vi.useRealTimers();
   });
 
-  it('returns initial value immediately', () => {
-    const { result } = renderHook(() => useDebounce('initial', 500));
+  it("returns initial value immediately", () => {
+    const { result } = renderHook(() => useDebounce("initial", 500));
 
-    expect(result.current).toBe('initial');
+    expect(result.current).toBe("initial");
   });
 
-  it('debounces value updates', () => {
+  it("debounces value updates", () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'initial', delay: 500 } }
+      { initialProps: { value: "initial", delay: 500 } },
     );
 
-    expect(result.current).toBe('initial');
+    expect(result.current).toBe("initial");
 
-    rerender({ value: 'updated', delay: 500 });
-    expect(result.current).toBe('initial'); // Still old value
+    rerender({ value: "updated", delay: 500 });
+    expect(result.current).toBe("initial"); // Still old value
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(result.current).toBe('updated'); // Now updated
+    expect(result.current).toBe("updated"); // Now updated
   });
 
-  it('cancels previous timeout on rapid updates', () => {
+  it("cancels previous timeout on rapid updates", () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'initial', delay: 500 } }
+      { initialProps: { value: "initial", delay: 500 } },
     );
 
-    rerender({ value: 'first-update', delay: 500 });
+    rerender({ value: "first-update", delay: 500 });
 
     act(() => {
       vi.advanceTimersByTime(250);
     });
 
-    rerender({ value: 'second-update', delay: 500 });
+    rerender({ value: "second-update", delay: 500 });
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(result.current).toBe('second-update');
+    expect(result.current).toBe("second-update");
   });
 });

@@ -1,20 +1,26 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useForm, Controller, FieldValues, Path, PathValue } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { ValidationService } from '../../lib/security/validation';
-import { CSRFService } from '../../lib/security/headers';
-import { EncryptionService } from '../../lib/security/encryption';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Shield, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  useForm,
+  Controller,
+  FieldValues,
+  Path,
+  PathValue,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ValidationService } from "../../lib/security/validation";
+import { CSRFService } from "../../lib/security/headers";
+import { EncryptionService } from "../../lib/security/encryption";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Shield, Eye, EyeOff, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface SecureFormField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'tel' | 'number' | 'hidden';
+  type: "text" | "email" | "password" | "tel" | "number" | "hidden";
   validation: z.ZodType<any>;
   encrypted?: boolean;
   sensitive?: boolean;
@@ -58,13 +64,13 @@ export function SecureForm<T extends FieldValues>({
   schema,
   title,
   description,
-  submitText = 'Submit',
-  className = '',
+  submitText = "Submit",
+  className = "",
   enableCSRF = true,
   enableEncryption = true,
   enableRealTimeValidation = true,
   maxAttempts = 5,
-  lockoutDuration = 300000 // 5 minutes
+  lockoutDuration = 300000, // 5 minutes
 }: SecureFormProps<T>) {
   const [formState, setFormState] = useState<FormState>({
     isSubmitting: false,
@@ -73,7 +79,7 @@ export function SecureForm<T extends FieldValues>({
     lockoutEndTime: null,
     showPasswords: {},
     validationErrors: {},
-    securityWarnings: []
+    securityWarnings: [],
   });
 
   const {
@@ -82,11 +88,11 @@ export function SecureForm<T extends FieldValues>({
     formState: { errors, isValid },
     watch,
     setValue,
-    trigger
+    trigger,
   } = useForm<T>({
     resolver: zodResolver(schema),
-    mode: enableRealTimeValidation ? 'onChange' : 'onSubmit',
-    defaultValues: {} as T
+    mode: enableRealTimeValidation ? "onChange" : "onSubmit",
+    defaultValues: {} as T,
   });
 
   // Watch all form values for real-time validation
@@ -105,11 +111,11 @@ export function SecureForm<T extends FieldValues>({
     if (formState.isLocked && formState.lockoutEndTime) {
       const timer = setInterval(() => {
         if (Date.now() >= formState.lockoutEndTime!) {
-          setFormState(prev => ({
+          setFormState((prev) => ({
             ...prev,
             isLocked: false,
             lockoutEndTime: null,
-            submitAttempts: 0
+            submitAttempts: 0,
           }));
           clearInterval(timer);
         }
@@ -131,35 +137,36 @@ export function SecureForm<T extends FieldValues>({
           if (value) {
             try {
               // Custom validation based on field type
-              if (field.type === 'email') {
+              if (field.type === "email") {
                 const emailValidation = ValidationService.validateEmail(value);
                 if (!emailValidation.isValid) {
                   newErrors[field.name] = emailValidation.errors[0];
                 }
-              } else if (field.type === 'password') {
-                const passwordValidation = ValidationService.validatePassword(value);
+              } else if (field.type === "password") {
+                const passwordValidation =
+                  ValidationService.validatePassword(value);
                 if (!passwordValidation.isValid) {
                   newErrors[field.name] = passwordValidation.errors[0];
                 }
-                if (passwordValidation.strength === 'weak') {
+                if (passwordValidation.strength === "weak") {
                   warnings.push(`${field.label} strength is weak`);
                 }
-              } else if (field.type === 'tel') {
+              } else if (field.type === "tel") {
                 const phoneValidation = ValidationService.validatePhone(value);
                 if (!phoneValidation.isValid) {
                   newErrors[field.name] = phoneValidation.errors[0];
                 }
               }
             } catch (error) {
-              console.error('Validation error:', error);
+              console.error("Validation error:", error);
             }
           }
         }
 
-        setFormState(prev => ({
+        setFormState((prev) => ({
           ...prev,
           validationErrors: newErrors,
-          securityWarnings: warnings
+          securityWarnings: warnings,
         }));
       };
 
@@ -168,77 +175,95 @@ export function SecureForm<T extends FieldValues>({
   }, [watchedValues, fields, enableRealTimeValidation]);
 
   const togglePasswordVisibility = useCallback((fieldName: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       showPasswords: {
         ...prev.showPasswords,
-        [fieldName]: !prev.showPasswords[fieldName]
-      }
+        [fieldName]: !prev.showPasswords[fieldName],
+      },
     }));
   }, []);
 
-  const handleFormSubmit = useCallback(async (data: T) => {
-    if (formState.isLocked) {
-      return;
-    }
-
-    setFormState(prev => ({ ...prev, isSubmitting: true }));
-
-    try {
-      // Validate CSRF token
-      if (enableCSRF) {
-        const csrfToken = CSRFService.getToken();
-        if (!csrfToken) {
-          throw new Error('CSRF token missing');
-        }
+  const handleFormSubmit = useCallback(
+    async (data: T) => {
+      if (formState.isLocked) {
+        return;
       }
 
-      // Encrypt sensitive data
-      let encryptedData: Record<string, any> = {};
-      if (enableEncryption) {
-        for (const field of fields) {
-          if (field.encrypted || field.sensitive) {
-            const value = data[field.name as Path<T>];
-            if (value) {
-              encryptedData[field.name] = EncryptionService.encrypt(String(value));
+      setFormState((prev) => ({ ...prev, isSubmitting: true }));
+
+      try {
+        // Validate CSRF token
+        if (enableCSRF) {
+          const csrfToken = CSRFService.getToken();
+          if (!csrfToken) {
+            throw new Error("CSRF token missing");
+          }
+        }
+
+        // Encrypt sensitive data
+        let encryptedData: Record<string, any> = {};
+        if (enableEncryption) {
+          for (const field of fields) {
+            if (field.encrypted || field.sensitive) {
+              const value = data[field.name as Path<T>];
+              if (value) {
+                encryptedData[field.name] = EncryptionService.encrypt(
+                  String(value),
+                );
+              }
             }
           }
         }
+
+        // Submit form
+        await onSubmit(data, encryptedData);
+
+        // Reset attempts on successful submission
+        setFormState((prev) => ({
+          ...prev,
+          submitAttempts: 0,
+          isSubmitting: false,
+        }));
+      } catch (error) {
+        console.error("Form submission error:", error);
+
+        const newAttempts = formState.submitAttempts + 1;
+        const shouldLock = newAttempts >= maxAttempts;
+
+        setFormState((prev) => ({
+          ...prev,
+          submitAttempts: newAttempts,
+          isSubmitting: false,
+          isLocked: shouldLock,
+          lockoutEndTime: shouldLock ? Date.now() + lockoutDuration : null,
+        }));
+
+        if (onValidationError) {
+          onValidationError({
+            submit:
+              error instanceof Error ? error.message : "Submission failed",
+          });
+        }
       }
-
-      // Submit form
-      await onSubmit(data, encryptedData);
-
-      // Reset attempts on successful submission
-      setFormState(prev => ({
-        ...prev,
-        submitAttempts: 0,
-        isSubmitting: false
-      }));
-
-    } catch (error) {
-      console.error('Form submission error:', error);
-
-      const newAttempts = formState.submitAttempts + 1;
-      const shouldLock = newAttempts >= maxAttempts;
-
-      setFormState(prev => ({
-        ...prev,
-        submitAttempts: newAttempts,
-        isSubmitting: false,
-        isLocked: shouldLock,
-        lockoutEndTime: shouldLock ? Date.now() + lockoutDuration : null
-      }));
-
-      if (onValidationError) {
-        onValidationError({ submit: error instanceof Error ? error.message : 'Submission failed' });
-      }
-    }
-  }, [formState, enableCSRF, enableEncryption, fields, onSubmit, onValidationError, maxAttempts, lockoutDuration]);
+    },
+    [
+      formState,
+      enableCSRF,
+      enableEncryption,
+      fields,
+      onSubmit,
+      onValidationError,
+      maxAttempts,
+      lockoutDuration,
+    ],
+  );
 
   const renderField = (field: SecureFormField) => {
-    const fieldError = errors[field.name as Path<T>]?.message || formState.validationErrors[field.name];
-    const isPassword = field.type === 'password';
+    const fieldError =
+      errors[field.name as Path<T>]?.message ||
+      formState.validationErrors[field.name];
+    const isPassword = field.type === "password";
     const showPassword = formState.showPasswords[field.name];
 
     return (
@@ -246,7 +271,9 @@ export function SecureForm<T extends FieldValues>({
         <Label htmlFor={field.name} className="text-sm font-medium">
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
-          {field.sensitive && <Shield className="inline w-3 h-3 ml-1 text-amber-500" />}
+          {field.sensitive && (
+            <Shield className="inline w-3 h-3 ml-1 text-amber-500" />
+          )}
         </Label>
 
         <div className="relative">
@@ -257,23 +284,27 @@ export function SecureForm<T extends FieldValues>({
               <Input
                 {...fieldProps}
                 id={field.name}
-                type={isPassword ? (showPassword ? 'text' : 'password') : field.type}
+                type={
+                  isPassword ? (showPassword ? "text" : "password") : field.type
+                }
                 placeholder={field.placeholder}
                 autoComplete={field.autoComplete}
                 maxLength={field.maxLength}
                 pattern={field.pattern}
-                value={value || ''}
+                value={value || ""}
                 onChange={(e) => {
                   onChange(e.target.value);
                   if (enableRealTimeValidation) {
                     trigger(field.name as Path<T>);
                   }
                 }}
-                className={`pr-10 ${fieldError ? 'border-red-500' : ''} ${
-                  field.sensitive ? 'bg-yellow-50' : ''
+                className={`pr-10 ${fieldError ? "border-red-500" : ""} ${
+                  field.sensitive ? "bg-yellow-50" : ""
                 }`}
                 disabled={formState.isSubmitting || formState.isLocked}
-                aria-describedby={fieldError ? `${field.name}-error` : undefined}
+                aria-describedby={
+                  fieldError ? `${field.name}-error` : undefined
+                }
               />
             )}
           />
@@ -285,13 +316,20 @@ export function SecureForm<T extends FieldValues>({
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
               disabled={formState.isSubmitting || formState.isLocked}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </button>
           )}
         </div>
 
         {fieldError && (
-          <p id={`${field.name}-error`} className="text-sm text-red-600 flex items-center">
+          <p
+            id={`${field.name}-error`}
+            className="text-sm text-red-600 flex items-center"
+          >
             <AlertTriangle className="w-3 h-3 mr-1" />
             {fieldError}
           </p>
@@ -300,10 +338,14 @@ export function SecureForm<T extends FieldValues>({
     );
   };
 
-  const remainingTime = formState.lockoutEndTime ? Math.ceil((formState.lockoutEndTime - Date.now()) / 1000) : 0;
+  const remainingTime = formState.lockoutEndTime
+    ? Math.ceil((formState.lockoutEndTime - Date.now()) / 1000)
+    : 0;
 
   return (
-    <div className={`max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg ${className}`}>
+    <div
+      className={`max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg ${className}`}
+    >
       {title && (
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center">
@@ -333,7 +375,8 @@ export function SecureForm<T extends FieldValues>({
         <Alert className="mb-4 border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Form locked due to multiple failed attempts. Please wait {remainingTime} seconds before trying again.
+            Form locked due to multiple failed attempts. Please wait{" "}
+            {remainingTime} seconds before trying again.
           </AlertDescription>
         </Alert>
       )}
@@ -371,7 +414,7 @@ export function SecureForm<T extends FieldValues>({
           <input
             type="hidden"
             name="csrf_token"
-            value={CSRFService.getToken() || ''}
+            value={CSRFService.getToken() || ""}
           />
         )}
       </form>

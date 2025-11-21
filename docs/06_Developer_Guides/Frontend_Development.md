@@ -30,6 +30,7 @@ The main source code for the web frontend is located in `Flowlet/frontend/web-fr
 To set up the development environment, follow these steps:
 
 1.  **Clone the repository**:
+
     ```bash
     git clone https://github.com/abrar2030/Flowlet.git
     cd Flowlet/frontend/web-frontend
@@ -37,16 +38,20 @@ To set up the development environment, follow these steps:
 
 2.  **Install dependencies**:
     The project uses `pnpm` as the package manager. If you don't have `pnpm` installed, you can install it via npm:
+
     ```bash
     npm install -g pnpm
     ```
+
     Then, install the project dependencies:
+
     ```bash
     pnpm install
     ```
 
 3.  **Environment Variables**:
     Create a `.env` file in the `Flowlet/frontend/web-frontend/` directory based on `example.env` (if available) or consult the backend documentation for required API endpoints. Typically, you might need to configure the backend API URL:
+
     ```
     VITE_API_BASE_URL=http://localhost:5000/api/v1
     ```

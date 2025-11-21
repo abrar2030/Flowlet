@@ -26,6 +26,7 @@ Analyzes a given transaction for potential fraud using AI algorithms. The analys
 **Permissions**: Requires appropriate authentication and authorization (e.g., `internal_service_token` or `fraud_analyst` role).
 
 **Request Body**:
+
 ```json
 {
   "transaction_id": "string" (required): The unique identifier of the transaction to analyze.
@@ -44,6 +45,7 @@ Analyzes a given transaction for potential fraud using AI algorithms. The analys
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully performed fraud analysis.
   ```json
   {
@@ -76,6 +78,7 @@ Retrieves a paginated list of fraud alerts, with options for filtering by status
 **Permissions**: Requires appropriate authentication and authorization (e.g., `fraud_analyst` or `admin` role).
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number for pagination. Default is `1`.
 - `per_page` (integer, optional): Number of items per page. Default is `20`.
 - `status` (string, optional): Filter by alert status (e.g., `open`, `resolved`, `false_positive`, `investigating`).
@@ -83,6 +86,7 @@ Retrieves a paginated list of fraud alerts, with options for filtering by status
 - `user_id` (string, optional): Filter alerts by the associated user ID.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved fraud alerts.
   ```json
   {
@@ -125,9 +129,11 @@ Resolves a specific fraud alert, updating its status and optionally adding resol
 **Permissions**: Requires appropriate authentication and authorization (e.g., `fraud_analyst` or `admin` role).
 
 **Path Parameters**:
+
 - `alert_id` (string, required): The unique identifier of the fraud alert to resolve.
 
 **Request Body**:
+
 ```json
 {
   "resolution": "string" (optional, default: "resolved"): The resolution status (e.g., "resolved", "false_positive", "investigating").
@@ -136,6 +142,7 @@ Resolves a specific fraud alert, updating its status and optionally adding resol
 ```
 
 **Responses**:
+
 - `200 OK`: Alert resolved successfully.
   ```json
   {
@@ -158,6 +165,7 @@ Provides an interface for the AI-powered support chatbot, allowing users and dev
 **Permissions**: None (publicly accessible, or requires basic user authentication)
 
 **Request Body**:
+
 ```json
 {
   "query": "string" (required): The user's query or question.
@@ -166,6 +174,7 @@ Provides an interface for the AI-powered support chatbot, allowing users and dev
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully received and processed the chatbot query.
   ```json
   {

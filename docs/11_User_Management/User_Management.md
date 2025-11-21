@@ -29,6 +29,7 @@ Retrieves a paginated and filterable list of all registered users. This endpoint
 **Permissions**: `admin_required`
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number for pagination. Default is `1`.
 - `per_page` (integer, optional): Number of items per page. Default is `20`, maximum is `100`.
 - `search` (string, optional): Search users by first name, last name, or email (case-insensitive).
@@ -38,6 +39,7 @@ Retrieves a paginated and filterable list of all registered users. This endpoint
 - `sort_order` (string, optional): Sort order (`asc` for ascending, `desc` for descending). Default is `desc`.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved user list.
   ```json
   {
@@ -92,9 +94,11 @@ Retrieves detailed information for a specific user, including their accounts, re
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved user details.
   ```json
   {
@@ -170,9 +174,11 @@ Updates the details of a specific user. Users can update their own profile, and 
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user to update.
 
 **Request Body**:
+
 ```json
 {
   "first_name": "string" (optional),
@@ -192,6 +198,7 @@ Updates the details of a specific user. Users can update their own profile, and 
 ```
 
 **Responses**:
+
 - `200 OK`: User profile updated successfully.
   ```json
   {
@@ -230,9 +237,11 @@ Performs a soft delete on a user account, marking it as inactive rather than per
 **Permissions**: `admin_required`
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user to soft delete.
 
 **Responses**:
+
 - `200 OK`: User soft deleted successfully.
   ```json
   {
@@ -254,9 +263,11 @@ Reactivates a previously soft-deleted or inactive user account.
 **Permissions**: `admin_required`
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user to reactivate.
 
 **Responses**:
+
 - `200 OK`: User reactivated successfully.
   ```json
   {
@@ -279,9 +290,11 @@ Sets the active/inactive status of a user account. This can be used to temporari
 **Permissions**: `admin_required`
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Request Body**:
+
 ```json
 {
   "is_active": "boolean" (required)
@@ -289,6 +302,7 @@ Sets the active/inactive status of a user account. This can be used to temporari
 ```
 
 **Responses**:
+
 - `200 OK`: User status updated successfully.
   ```json
   {
@@ -312,6 +326,7 @@ Allows an authenticated user to change their password. Requires the current pass
 **Permissions**: `token_required`
 
 **Request Body**:
+
 ```json
 {
   "current_password": "string" (required),
@@ -320,6 +335,7 @@ Allows an authenticated user to change their password. Requires the current pass
 ```
 
 **Responses**:
+
 - `200 OK`: Password updated successfully.
   ```json
   {
@@ -340,6 +356,7 @@ Initiates the password reset process by sending a reset token to the user's regi
 **Permissions**: None (publicly accessible)
 
 **Request Body**:
+
 ```json
 {
   "email": "string" (required)
@@ -347,6 +364,7 @@ Initiates the password reset process by sending a reset token to the user's regi
 ```
 
 **Responses**:
+
 - `200 OK`: Password reset email sent (or simulated) successfully. (Always returns 200 to prevent email enumeration).
   ```json
   {
@@ -367,6 +385,7 @@ Confirms the password reset using the token received via email and sets a new pa
 **Permissions**: None (publicly accessible)
 
 **Request Body**:
+
 ```json
 {
   "token": "string" (required),
@@ -375,6 +394,7 @@ Confirms the password reset using the token received via email and sets a new pa
 ```
 
 **Responses**:
+
 - `200 OK`: Password reset successfully.
   ```json
   {
@@ -395,6 +415,7 @@ Initiates the 2FA setup process for the authenticated user. Returns a QR code im
 **Permissions**: `token_required`
 
 **Responses**:
+
 - `200 OK`: 2FA setup initiated successfully.
   ```json
   {
@@ -416,6 +437,7 @@ Verifies the 2FA code provided by the user during login or setup.
 **Permissions**: `token_required`
 
 **Request Body**:
+
 ```json
 {
   "two_factor_code": "string" (required)
@@ -423,6 +445,7 @@ Verifies the 2FA code provided by the user during login or setup.
 ```
 
 **Responses**:
+
 - `200 OK`: 2FA code verified successfully.
   ```json
   {
@@ -443,6 +466,7 @@ Disables 2FA for the authenticated user. Requires the current 2FA code for secur
 **Permissions**: `token_required`
 
 **Request Body**:
+
 ```json
 {
   "two_factor_code": "string" (required)
@@ -450,6 +474,7 @@ Disables 2FA for the authenticated user. Requires the current 2FA code for secur
 ```
 
 **Responses**:
+
 - `200 OK`: 2FA disabled successfully.
   ```json
   {
@@ -470,6 +495,7 @@ Verifies the user's email address using a token sent to their email.
 **Permissions**: None (publicly accessible)
 
 **Request Body**:
+
 ```json
 {
   "token": "string" (required)
@@ -477,6 +503,7 @@ Verifies the user's email address using a token sent to their email.
 ```
 
 **Responses**:
+
 - `200 OK`: Email verified successfully.
   ```json
   {
@@ -497,6 +524,7 @@ Verifies the user's phone number using a code sent via SMS.
 **Permissions**: `token_required`
 
 **Request Body**:
+
 ```json
 {
   "phone_code": "string" (required)
@@ -504,6 +532,7 @@ Verifies the user's phone number using a code sent via SMS.
 ```
 
 **Responses**:
+
 - `200 OK`: Phone verified successfully.
   ```json
   {
@@ -524,6 +553,7 @@ Allows a user to request a KYC verification. This will typically redirect to or 
 **Permissions**: `token_required`
 
 **Request Body**:
+
 ```json
 {
   "verification_level": "string" (e.g., "basic", "enhanced", "premium")
@@ -531,6 +561,7 @@ Allows a user to request a KYC verification. This will typically redirect to or 
 ```
 
 **Responses**:
+
 - `200 OK`: KYC verification request initiated.
   ```json
   {

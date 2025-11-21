@@ -1,5 +1,5 @@
-import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -18,7 +18,7 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
     matches: false,
@@ -33,7 +33,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock scrollTo
-Object.defineProperty(window, 'scrollTo', {
+Object.defineProperty(window, "scrollTo", {
   writable: true,
   value: () => {},
 });
@@ -50,15 +50,20 @@ const localStorageMock = {
     delete localStorageMock[key];
   },
   clear: () => {
-    Object.keys(localStorageMock).forEach(key => {
-      if (key !== 'getItem' && key !== 'setItem' && key !== 'removeItem' && key !== 'clear') {
+    Object.keys(localStorageMock).forEach((key) => {
+      if (
+        key !== "getItem" &&
+        key !== "setItem" &&
+        key !== "removeItem" &&
+        key !== "clear"
+      ) {
         delete localStorageMock[key];
       }
     });
   },
 };
 
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
@@ -67,5 +72,5 @@ global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({}),
-  })
+  }),
 ) as any;

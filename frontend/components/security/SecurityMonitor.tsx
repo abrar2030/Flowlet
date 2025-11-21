@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Progress } from '../ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Progress } from "../ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Shield,
   AlertTriangle,
@@ -18,13 +18,19 @@ import {
   Clock,
   TrendingUp,
   RefreshCw,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 interface SecurityEvent {
   id: string;
-  type: 'login' | 'logout' | 'failed_login' | 'permission_denied' | 'data_access' | 'security_violation';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "login"
+    | "logout"
+    | "failed_login"
+    | "permission_denied"
+    | "data_access"
+    | "security_violation";
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: string;
   description: string;
   userAgent?: string;
@@ -47,7 +53,7 @@ interface SecurityMetrics {
 }
 
 interface ThreatLevel {
-  level: 'low' | 'medium' | 'high' | 'critical';
+  level: "low" | "medium" | "high" | "critical";
   score: number;
   factors: string[];
   recommendations: string[];
@@ -72,11 +78,15 @@ export function SecurityMonitor({
   onExport,
   autoRefresh = true,
   refreshInterval = 30000, // 30 seconds
-  className = ''
+  className = "",
 }: SecurityMonitorProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<SecurityEvent | null>(null);
-  const [filter, setFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+  const [selectedEvent, setSelectedEvent] = useState<SecurityEvent | null>(
+    null,
+  );
+  const [filter, setFilter] = useState<
+    "all" | "critical" | "high" | "medium" | "low"
+  >("all");
 
   // Auto-refresh functionality
   useEffect(() => {
@@ -102,36 +112,51 @@ export function SecurityMonitor({
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-100 border-red-200';
-      case 'high': return 'text-orange-600 bg-orange-100 border-orange-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-100 border-green-200';
-      default: return 'text-gray-600 bg-gray-100 border-gray-200';
+      case "critical":
+        return "text-red-600 bg-red-100 border-red-200";
+      case "high":
+        return "text-orange-600 bg-orange-100 border-orange-200";
+      case "medium":
+        return "text-yellow-600 bg-yellow-100 border-yellow-200";
+      case "low":
+        return "text-green-600 bg-green-100 border-green-200";
+      default:
+        return "text-gray-600 bg-gray-100 border-gray-200";
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <XCircle className="w-4 h-4" />;
-      case 'high': return <AlertTriangle className="w-4 h-4" />;
-      case 'medium': return <Activity className="w-4 h-4" />;
-      case 'low': return <CheckCircle className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
+      case "critical":
+        return <XCircle className="w-4 h-4" />;
+      case "high":
+        return <AlertTriangle className="w-4 h-4" />;
+      case "medium":
+        return <Activity className="w-4 h-4" />;
+      case "low":
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <Activity className="w-4 h-4" />;
     }
   };
 
   const getThreatLevelColor = (level: string) => {
     switch (level) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case "critical":
+        return "bg-red-500";
+      case "high":
+        return "bg-orange-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
-  const filteredEvents = events.filter(event =>
-    filter === 'all' || event.severity === filter
+  const filteredEvents = events.filter(
+    (event) => filter === "all" || event.severity === filter,
   );
 
   const formatTimestamp = (timestamp: string) => {
@@ -145,19 +170,24 @@ export function SecurityMonitor({
     const { criticalEvents, highEvents, mediumEvents, totalEvents } = metrics;
     if (totalEvents === 0) return 0;
 
-    const score = ((criticalEvents * 4 + highEvents * 3 + mediumEvents * 2) / totalEvents) * 25;
+    const score =
+      ((criticalEvents * 4 + highEvents * 3 + mediumEvents * 2) / totalEvents) *
+      25;
     return Math.min(100, Math.round(score));
   };
 
-  const getThreatLevelFromScore = (score: number): 'low' | 'medium' | 'high' | 'critical' => {
-    if (score >= 75) return 'critical';
-    if (score >= 50) return 'high';
-    if (score >= 25) return 'medium';
-    return 'low';
+  const getThreatLevelFromScore = (
+    score: number,
+  ): "low" | "medium" | "high" | "critical" => {
+    if (score >= 75) return "critical";
+    if (score >= 50) return "high";
+    if (score >= 25) return "medium";
+    return "low";
   };
 
   const currentThreatScore = calculateThreatScore();
-  const currentThreatLevel = threatLevel?.level || getThreatLevelFromScore(currentThreatScore);
+  const currentThreatLevel =
+    threatLevel?.level || getThreatLevelFromScore(currentThreatScore);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -174,7 +204,9 @@ export function SecurityMonitor({
             size="sm"
             variant="outline"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
           {onExport && (
@@ -198,7 +230,9 @@ export function SecurityMonitor({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Current Threat Level</span>
-              <Badge className={`${getSeverityColor(currentThreatLevel)} border`}>
+              <Badge
+                className={`${getSeverityColor(currentThreatLevel)} border`}
+              >
                 {getSeverityIcon(currentThreatLevel)}
                 <span className="ml-1 capitalize">{currentThreatLevel}</span>
               </Badge>
@@ -213,14 +247,16 @@ export function SecurityMonitor({
                 value={currentThreatScore}
                 className="h-2"
                 style={{
-                  background: `linear-gradient(to right, ${getThreatLevelColor(currentThreatLevel)} 0%, ${getThreatLevelColor(currentThreatLevel)} ${currentThreatScore}%, #e5e7eb ${currentThreatScore}%, #e5e7eb 100%)`
+                  background: `linear-gradient(to right, ${getThreatLevelColor(currentThreatLevel)} 0%, ${getThreatLevelColor(currentThreatLevel)} ${currentThreatScore}%, #e5e7eb ${currentThreatScore}%, #e5e7eb 100%)`,
                 }}
               />
             </div>
 
             {threatLevel?.factors && threatLevel.factors.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium mb-2">Contributing Factors:</h4>
+                <h4 className="text-sm font-medium mb-2">
+                  Contributing Factors:
+                </h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   {threatLevel.factors.map((factor, index) => (
                     <li key={index} className="flex items-center">
@@ -232,19 +268,20 @@ export function SecurityMonitor({
               </div>
             )}
 
-            {threatLevel?.recommendations && threatLevel.recommendations.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Recommendations:</h4>
-                <ul className="text-sm text-blue-600 space-y-1">
-                  {threatLevel.recommendations.map((rec, index) => (
-                    <li key={index} className="flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-2 text-blue-500" />
-                      {rec}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {threatLevel?.recommendations &&
+              threatLevel.recommendations.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Recommendations:</h4>
+                  <ul className="text-sm text-blue-600 space-y-1">
+                    {threatLevel.recommendations.map((rec, index) => (
+                      <li key={index} className="flex items-center">
+                        <CheckCircle className="w-3 h-3 mr-2 text-blue-500" />
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>
@@ -256,7 +293,9 @@ export function SecurityMonitor({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Events</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Events
+                  </p>
                   <p className="text-2xl font-bold">{metrics.totalEvents}</p>
                 </div>
                 <Activity className="w-8 h-8 text-blue-500" />
@@ -268,8 +307,12 @@ export function SecurityMonitor({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Critical Events</p>
-                  <p className="text-2xl font-bold text-red-600">{metrics.criticalEvents}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Critical Events
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {metrics.criticalEvents}
+                  </p>
                 </div>
                 <XCircle className="w-8 h-8 text-red-500" />
               </div>
@@ -280,8 +323,12 @@ export function SecurityMonitor({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Failed Logins</p>
-                  <p className="text-2xl font-bold text-orange-600">{metrics.failedLogins}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Failed Logins
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {metrics.failedLogins}
+                  </p>
                 </div>
                 <Lock className="w-8 h-8 text-orange-500" />
               </div>
@@ -292,8 +339,12 @@ export function SecurityMonitor({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Data Accesses</p>
-                  <p className="text-2xl font-bold text-green-600">{metrics.dataAccesses}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Data Accesses
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {metrics.dataAccesses}
+                  </p>
                 </div>
                 <Eye className="w-8 h-8 text-green-500" />
               </div>
@@ -311,7 +362,7 @@ export function SecurityMonitor({
               Security Events
             </CardTitle>
             <div className="flex space-x-2">
-              {['all', 'critical', 'high', 'medium', 'low'].map((severity) => (
+              {["all", "critical", "high", "medium", "low"].map((severity) => (
                 <Button
                   key={severity}
                   onClick={() => setFilter(severity as any)}
@@ -337,18 +388,24 @@ export function SecurityMonitor({
                 <div
                   key={event.id}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${
-                    selectedEvent?.id === event.id ? 'ring-2 ring-blue-500' : ''
+                    selectedEvent?.id === event.id ? "ring-2 ring-blue-500" : ""
                   }`}
                   onClick={() => setSelectedEvent(event)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
-                      <Badge className={`${getSeverityColor(event.severity)} border`}>
+                      <Badge
+                        className={`${getSeverityColor(event.severity)} border`}
+                      >
                         {getSeverityIcon(event.severity)}
-                        <span className="ml-1 capitalize">{event.severity}</span>
+                        <span className="ml-1 capitalize">
+                          {event.severity}
+                        </span>
                       </Badge>
                       <div>
-                        <p className="font-medium text-sm">{event.description}</p>
+                        <p className="font-medium text-sm">
+                          {event.description}
+                        </p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
                           <span className="flex items-center">
                             <Clock className="w-3 h-3 mr-1" />
@@ -396,34 +453,52 @@ export function SecurityMonitor({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Event ID</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Event ID
+                  </label>
                   <p className="font-mono text-sm">{selectedEvent.id}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Type</label>
-                  <p className="capitalize">{selectedEvent.type.replace('_', ' ')}</p>
+                  <label className="text-sm font-medium text-gray-600">
+                    Type
+                  </label>
+                  <p className="capitalize">
+                    {selectedEvent.type.replace("_", " ")}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Severity</label>
-                  <Badge className={`${getSeverityColor(selectedEvent.severity)} border`}>
+                  <label className="text-sm font-medium text-gray-600">
+                    Severity
+                  </label>
+                  <Badge
+                    className={`${getSeverityColor(selectedEvent.severity)} border`}
+                  >
                     {getSeverityIcon(selectedEvent.severity)}
-                    <span className="ml-1 capitalize">{selectedEvent.severity}</span>
+                    <span className="ml-1 capitalize">
+                      {selectedEvent.severity}
+                    </span>
                   </Badge>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Timestamp</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Timestamp
+                  </label>
                   <p>{formatTimestamp(selectedEvent.timestamp)}</p>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-600">Description</label>
+                <label className="text-sm font-medium text-gray-600">
+                  Description
+                </label>
                 <p className="mt-1">{selectedEvent.description}</p>
               </div>
 
               {selectedEvent.userAgent && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">User Agent</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    User Agent
+                  </label>
                   <p className="font-mono text-xs bg-gray-100 p-2 rounded mt-1">
                     {selectedEvent.userAgent}
                   </p>
@@ -432,7 +507,9 @@ export function SecurityMonitor({
 
               {selectedEvent.metadata && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Metadata</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Metadata
+                  </label>
                   <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
                     {JSON.stringify(selectedEvent.metadata, null, 2)}
                   </pre>

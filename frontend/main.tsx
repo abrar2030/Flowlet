@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
 // Performance monitoring with better error handling
 if (import.meta.env.PROD) {
@@ -9,24 +9,25 @@ if (import.meta.env.PROD) {
   try {
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        if (entry.entryType === 'navigation') {
+        if (entry.entryType === "navigation") {
           // Log navigation timing for monitoring
-          console.log('Navigation timing:', {
+          console.log("Navigation timing:", {
             loadTime: entry.loadEventEnd - entry.loadEventStart,
-            domContentLoaded: entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart,
+            domContentLoaded:
+              entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart,
             firstPaint: entry.responseEnd - entry.requestStart,
           });
         }
       }
     });
-    observer.observe({ entryTypes: ['navigation'] });
+    observer.observe({ entryTypes: ["navigation"] });
   } catch (error) {
-    console.warn('Performance monitoring not available:', error);
+    console.warn("Performance monitoring not available:", error);
   }
 }
 
 // Global error handling with improved logging
-window.addEventListener('error', (event) => {
+window.addEventListener("error", (event) => {
   const errorInfo = {
     message: event.error?.message || event.message,
     filename: event.filename,
@@ -38,7 +39,7 @@ window.addEventListener('error', (event) => {
     url: window.location.href,
   };
 
-  console.error('Global error:', errorInfo);
+  console.error("Global error:", errorInfo);
 
   // In production, send to error reporting service
   if (import.meta.env.PROD) {
@@ -47,7 +48,7 @@ window.addEventListener('error', (event) => {
   }
 });
 
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener("unhandledrejection", (event) => {
   const errorInfo = {
     reason: event.reason,
     promise: event.promise,
@@ -56,7 +57,7 @@ window.addEventListener('unhandledrejection', (event) => {
     url: window.location.href,
   };
 
-  console.error('Unhandled promise rejection:', errorInfo);
+  console.error("Unhandled promise rejection:", errorInfo);
 
   // In production, send to error reporting service
   if (import.meta.env.PROD) {
@@ -73,13 +74,13 @@ if (import.meta.env.PROD) {
 }
 
 // Initialize app
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById("root");
 if (!rootElement) {
-  throw new Error('Root element not found');
+  throw new Error("Root element not found");
 }
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

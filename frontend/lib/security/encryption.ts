@@ -1,11 +1,11 @@
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 /**
  * Encryption utility class for client-side data protection
  * Implements AES-256-GCM encryption for sensitive data
  */
 export class EncryptionService {
-  private static readonly ALGORITHM = 'AES';
+  private static readonly ALGORITHM = "AES";
   private static readonly KEY_SIZE = 256;
   private static readonly IV_SIZE = 96; // 12 bytes for GCM
   private static readonly TAG_SIZE = 128; // 16 bytes for GCM
@@ -30,7 +30,10 @@ export class EncryptionService {
    * @param key - The encryption key (optional, generates if not provided)
    * @returns Object containing encrypted data, IV, and key
    */
-  static encrypt(data: string, key?: string): {
+  static encrypt(
+    data: string,
+    key?: string,
+  ): {
     encrypted: string;
     iv: string;
     key: string;
@@ -43,17 +46,19 @@ export class EncryptionService {
       const encrypted = CryptoJS.AES.encrypt(data, encryptionKey, {
         iv: CryptoJS.enc.Hex.parse(iv),
         mode: CryptoJS.mode.GCM,
-        padding: CryptoJS.pad.NoPadding
+        padding: CryptoJS.pad.NoPadding,
       });
 
       return {
         encrypted: encrypted.ciphertext.toString(),
         iv,
         key: encryptionKey,
-        tag: encrypted.tag?.toString() || ''
+        tag: encrypted.tag?.toString() || "",
       };
     } catch (error) {
-      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Encryption failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -74,19 +79,21 @@ export class EncryptionService {
       const decrypted = CryptoJS.AES.decrypt(
         {
           ciphertext: CryptoJS.enc.Hex.parse(encrypted),
-          tag: CryptoJS.enc.Hex.parse(tag)
+          tag: CryptoJS.enc.Hex.parse(tag),
         } as any,
         key,
         {
           iv: CryptoJS.enc.Hex.parse(iv),
           mode: CryptoJS.mode.GCM,
-          padding: CryptoJS.pad.NoPadding
-        }
+          padding: CryptoJS.pad.NoPadding,
+        },
       );
 
       return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (error) {
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -127,18 +134,21 @@ export class EncryptionService {
    * @param includeSymbols - Include special characters (default: true)
    * @returns Secure random password
    */
-  static generateSecurePassword(length: number = 16, includeSymbols: boolean = true): string {
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  static generateSecurePassword(
+    length: number = 16,
+    includeSymbols: boolean = true,
+  ): string {
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
     let charset = lowercase + uppercase + numbers;
     if (includeSymbols) {
       charset += symbols;
     }
 
-    let password = '';
+    let password = "";
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
@@ -157,12 +167,13 @@ export class EncryptionService {
   static deriveKeyFromPassword(
     password: string,
     salt?: string,
-    iterations: number = 100000
+    iterations: number = 100000,
   ): { key: string; salt: string } {
-    const derivedSalt = salt || CryptoJS.lib.WordArray.random(128/8).toString();
+    const derivedSalt =
+      salt || CryptoJS.lib.WordArray.random(128 / 8).toString();
     const key = CryptoJS.PBKDF2(password, derivedSalt, {
       keySize: this.KEY_SIZE / 32,
-      iterations
+      iterations,
     }).toString();
 
     return { key, salt: derivedSalt };
@@ -173,7 +184,7 @@ export class EncryptionService {
  * Secure storage utility for encrypted data
  */
 export class SecureStorage {
-  private static readonly STORAGE_PREFIX = 'secure_';
+  private static readonly STORAGE_PREFIX = "secure_";
 
   /**
    * Store encrypted data in localStorage
@@ -184,10 +195,18 @@ export class SecureStorage {
   static setItem(key: string, data: any, encryptionKey?: string): void {
     try {
       const serializedData = JSON.stringify(data);
-      const encrypted = EncryptionService.encrypt(serializedData, encryptionKey);
-      localStorage.setItem(this.STORAGE_PREFIX + key, JSON.stringify(encrypted));
+      const encrypted = EncryptionService.encrypt(
+        serializedData,
+        encryptionKey,
+      );
+      localStorage.setItem(
+        this.STORAGE_PREFIX + key,
+        JSON.stringify(encrypted),
+      );
     } catch (error) {
-      throw new Error(`Secure storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Secure storage failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -205,7 +224,7 @@ export class SecureStorage {
       const decrypted = EncryptionService.decrypt(encrypted);
       return JSON.parse(decrypted);
     } catch (error) {
-      console.error('Secure storage retrieval failed:', error);
+      console.error("Secure storage retrieval failed:", error);
       return null;
     }
   }
@@ -223,7 +242,7 @@ export class SecureStorage {
    */
   static clear(): void {
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.STORAGE_PREFIX)) {
         localStorage.removeItem(key);
       }

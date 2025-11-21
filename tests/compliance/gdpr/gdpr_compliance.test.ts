@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 import { getUserData, deleteUserData, updateConsent } from "@/lib/utils";
 
 describe("GDPR Compliance Tests", () => {
@@ -11,7 +11,7 @@ describe("GDPR Compliance Tests", () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ userId: "123", data: "user_data_here" }),
-      })
+      }),
     ) as any;
 
     const userData = await getUserData("123");
@@ -24,7 +24,7 @@ describe("GDPR Compliance Tests", () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ message: "User data deleted" }),
-      })
+      }),
     ) as any;
 
     const response = await deleteUserData("123");
@@ -33,7 +33,7 @@ describe("GDPR Compliance Tests", () => {
       "/api/user/123/data",
       expect.objectContaining({
         method: "DELETE",
-      })
+      }),
     );
   });
 
@@ -42,17 +42,20 @@ describe("GDPR Compliance Tests", () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ message: "Consent updated" }),
-      })
+      }),
     ) as any;
 
-    const response = await updateConsent("123", { marketing: true, analytics: false });
+    const response = await updateConsent("123", {
+      marketing: true,
+      analytics: false,
+    });
     expect(response.message).toBe("Consent updated");
     expect(global.fetch).toHaveBeenCalledWith(
       "/api/user/123/consent",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({ marketing: true, analytics: false }),
-      })
+      }),
     );
   });
 });

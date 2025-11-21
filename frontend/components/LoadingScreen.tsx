@@ -1,12 +1,12 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import React from "react";
+import { Loader2 } from "lucide-react";
 
 interface LoadingScreenProps {
   message?: string;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
-  message = 'Loading...'
+  message = "Loading...",
 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

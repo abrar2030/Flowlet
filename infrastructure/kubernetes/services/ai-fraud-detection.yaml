@@ -49,64 +49,64 @@ spec:
         app: ai-fraud-detection
     spec:
       containers:
-      - name: ai-fraud-detection
-        image: flowlet/ai-fraud-detection:latest
-        ports:
-        - containerPort: 3008
-        env:
-        - name: PYTHON_ENV
-          value: "production"
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: password
-        - name: MONGODB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-credentials
-              key: password
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-credentials
-              key: password
-        - name: INFLUXDB_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: influxdb-credentials
-              key: token
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-        - name: models
-          mountPath: /app/models
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3008
-          initialDelaySeconds: 60
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3008
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - name: ai-fraud-detection
+          image: flowlet/ai-fraud-detection:latest
+          ports:
+            - containerPort: 3008
+          env:
+            - name: PYTHON_ENV
+              value: "production"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: password
+            - name: INFLUXDB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-credentials
+                  key: token
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+            - name: models
+              mountPath: /app/models
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3008
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3008
+            initialDelaySeconds: 30
+            periodSeconds: 10
       volumes:
-      - name: config
-        configMap:
-          name: ai-fraud-detection-config
-      - name: models
-        persistentVolumeClaim:
-          claimName: ai-models-pvc
+        - name: config
+          configMap:
+            name: ai-fraud-detection-config
+        - name: models
+          persistentVolumeClaim:
+            claimName: ai-models-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -117,8 +117,8 @@ spec:
   selector:
     app: ai-fraud-detection
   ports:
-  - port: 80
-    targetPort: 3008
+    - port: 80
+      targetPort: 3008
   type: ClusterIP
 ---
 apiVersion: v1

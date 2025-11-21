@@ -1,30 +1,43 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAppDispatch } from '@/hooks/redux';
-import { registerUser } from '@/store/authSlice';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAppDispatch } from "@/hooks/redux";
+import { registerUser } from "@/store/authSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
-const registerSchema = z.object({
-  first_name: z.string().min(2, 'First name must be at least 2 characters'),
-  last_name: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    first_name: z.string().min(2, "First name must be at least 2 characters"),
+    last_name: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+    acceptTerms: z
+      .boolean()
+      .refine(
+        (val) => val === true,
+        "You must accept the terms and conditions",
+      ),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -51,11 +64,11 @@ const RegisterScreen: React.FC = () => {
       const { confirmPassword, acceptTerms, ...registerData } = data;
 
       await dispatch(registerUser(registerData)).unwrap();
-      toast.success('Account created successfully!');
-      navigate('/onboarding');
+      toast.success("Account created successfully!");
+      navigate("/onboarding");
     } catch (error: any) {
-      setError('root', { message: error || 'Registration failed' });
-      toast.error('Registration failed. Please try again.');
+      setError("root", { message: error || "Registration failed" });
+      toast.error("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +97,13 @@ const RegisterScreen: React.FC = () => {
                 id="first_name"
                 type="text"
                 placeholder="Enter your first name"
-                {...register('first_name')}
-                className={errors.first_name ? 'border-destructive' : ''}
+                {...register("first_name")}
+                className={errors.first_name ? "border-destructive" : ""}
               />
               {errors.first_name && (
-                <p className="text-sm text-destructive">{errors.first_name.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.first_name.message}
+                </p>
               )}
             </div>
 
@@ -98,11 +113,13 @@ const RegisterScreen: React.FC = () => {
                 id="last_name"
                 type="text"
                 placeholder="Enter your last name"
-                {...register('last_name')}
-                className={errors.last_name ? 'border-destructive' : ''}
+                {...register("last_name")}
+                className={errors.last_name ? "border-destructive" : ""}
               />
               {errors.last_name && (
-                <p className="text-sm text-destructive">{errors.last_name.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.last_name.message}
+                </p>
               )}
             </div>
 
@@ -112,11 +129,13 @@ const RegisterScreen: React.FC = () => {
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                {...register('email')}
-                className={errors.email ? 'border-destructive' : ''}
+                {...register("email")}
+                className={errors.email ? "border-destructive" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -125,10 +144,12 @@ const RegisterScreen: React.FC = () => {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
-                  {...register('password')}
-                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                  {...register("password")}
+                  className={
+                    errors.password ? "border-destructive pr-10" : "pr-10"
+                  }
                 />
                 <Button
                   type="button"
@@ -145,7 +166,9 @@ const RegisterScreen: React.FC = () => {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -154,10 +177,14 @@ const RegisterScreen: React.FC = () => {
               <div className="relative">
                 <Input
                   id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  {...register('confirmPassword')}
-                  className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
+                  {...register("confirmPassword")}
+                  className={
+                    errors.confirmPassword
+                      ? "border-destructive pr-10"
+                      : "pr-10"
+                  }
                 />
                 <Button
                   type="button"
@@ -174,25 +201,29 @@ const RegisterScreen: React.FC = () => {
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
             <div className="flex items-center space-x-2">
-              <Checkbox id="acceptTerms" {...register('acceptTerms')} />
+              <Checkbox id="acceptTerms" {...register("acceptTerms")} />
               <Label htmlFor="acceptTerms" className="text-sm">
-                I agree to the{' '}
+                I agree to the{" "}
                 <Link to="/terms" className="text-primary hover:underline">
                   Terms of Service
-                </Link>{' '}
-                and{' '}
+                </Link>{" "}
+                and{" "}
                 <Link to="/privacy" className="text-primary hover:underline">
                   Privacy Policy
                 </Link>
               </Label>
             </div>
             {errors.acceptTerms && (
-              <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.acceptTerms.message}
+              </p>
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -201,7 +232,7 @@ const RegisterScreen: React.FC = () => {
             </Button>
 
             <div className="text-center text-sm">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
                 Sign in
               </Link>

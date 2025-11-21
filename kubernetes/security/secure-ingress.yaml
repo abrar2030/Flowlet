@@ -15,17 +15,17 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: flowlet.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: flowlet-frontend
-            port:
-              number: 80
+    - host: flowlet.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flowlet-frontend
+                port:
+                  number: 80
   tls:
-  - hosts:
-    - flowlet.example.com
-    secretName: flowlet-tls-secret
+    - hosts:
+        - flowlet.example.com
+      secretName: flowlet-tls-secret

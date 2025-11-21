@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useResponsive } from './use-responsive';
-import { useAppDispatch } from './redux';
-import { setOnlineStatus } from '@/store/uiSlice';
+import { useState, useEffect } from "react";
+import { useResponsive } from "./use-responsive";
+import { useAppDispatch } from "./redux";
+import { setOnlineStatus } from "@/store/uiSlice";
 
 export const useOnlineStatus = () => {
   const dispatch = useAppDispatch();
@@ -18,12 +18,12 @@ export const useOnlineStatus = () => {
       dispatch(setOnlineStatus(false));
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [dispatch]);
 
@@ -43,7 +43,8 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
@@ -73,7 +74,7 @@ export { useResponsive };
 
 export const useClickOutside = (
   ref: React.RefObject<HTMLElement>,
-  handler: () => void
+  handler: () => void,
 ) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -82,9 +83,9 @@ export const useClickOutside = (
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [ref, handler]);
 };

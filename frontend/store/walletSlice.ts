@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { walletService, Account, Transaction, Card } from '@/lib/walletService';
-import { ApiError } from '@/lib/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { walletService, Account, Transaction, Card } from "@/lib/walletService";
+import { ApiError } from "@/lib/api";
 
 // State interface
 interface WalletState {
@@ -41,7 +41,7 @@ const initialState: WalletState = {
 
 // Async thunks
 export const fetchAccounts = createAsyncThunk(
-  'wallet/fetchAccounts',
+  "wallet/fetchAccounts",
   async (_, { rejectWithValue }) => {
     try {
       return await walletService.getAccounts();
@@ -49,13 +49,13 @@ export const fetchAccounts = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch accounts');
+      return rejectWithValue(error.message || "Failed to fetch accounts");
     }
-  }
+  },
 );
 
 export const fetchAccountDetails = createAsyncThunk(
-  'wallet/fetchAccountDetails',
+  "wallet/fetchAccountDetails",
   async (accountId: string, { rejectWithValue }) => {
     try {
       return await walletService.getAccount(accountId);
@@ -63,28 +63,39 @@ export const fetchAccountDetails = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch account details');
+      return rejectWithValue(
+        error.message || "Failed to fetch account details",
+      );
     }
-  }
+  },
 );
 
 export const createAccount = createAsyncThunk(
-  'wallet/createAccount',
-  async (accountData: { account_type: 'checking' | 'savings' | 'business'; currency?: string }, { rejectWithValue }) => {
+  "wallet/createAccount",
+  async (
+    accountData: {
+      account_type: "checking" | "savings" | "business";
+      currency?: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.createAccount(accountData);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to create account');
+      return rejectWithValue(error.message || "Failed to create account");
     }
-  }
+  },
 );
 
 export const fetchTransactions = createAsyncThunk(
-  'wallet/fetchTransactions',
-  async ({ accountId, filters }: { accountId: string; filters?: any }, { rejectWithValue }) => {
+  "wallet/fetchTransactions",
+  async (
+    { accountId, filters }: { accountId: string; filters?: any },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await walletService.getTransactions(accountId, filters);
       return response.data || [];
@@ -92,55 +103,73 @@ export const fetchTransactions = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch transactions');
+      return rejectWithValue(error.message || "Failed to fetch transactions");
     }
-  }
+  },
 );
 
 export const depositFunds = createAsyncThunk(
-  'wallet/depositFunds',
-  async (depositData: { account_id: string; amount: number; description?: string }, { rejectWithValue }) => {
+  "wallet/depositFunds",
+  async (
+    depositData: { account_id: string; amount: number; description?: string },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.depositFunds(depositData);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to deposit funds');
+      return rejectWithValue(error.message || "Failed to deposit funds");
     }
-  }
+  },
 );
 
 export const withdrawFunds = createAsyncThunk(
-  'wallet/withdrawFunds',
-  async (withdrawalData: { account_id: string; amount: number; description?: string }, { rejectWithValue }) => {
+  "wallet/withdrawFunds",
+  async (
+    withdrawalData: {
+      account_id: string;
+      amount: number;
+      description?: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.withdrawFunds(withdrawalData);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to withdraw funds');
+      return rejectWithValue(error.message || "Failed to withdraw funds");
     }
-  }
+  },
 );
 
 export const transferFunds = createAsyncThunk(
-  'wallet/transferFunds',
-  async (transferData: { from_account_id: string; to_account_id: string; amount: number; description?: string }, { rejectWithValue }) => {
+  "wallet/transferFunds",
+  async (
+    transferData: {
+      from_account_id: string;
+      to_account_id: string;
+      amount: number;
+      description?: string;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.transferFunds(transferData);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to transfer funds');
+      return rejectWithValue(error.message || "Failed to transfer funds");
     }
-  }
+  },
 );
 
 export const fetchCards = createAsyncThunk(
-  'wallet/fetchCards',
+  "wallet/fetchCards",
   async (_, { rejectWithValue }) => {
     try {
       return await walletService.getCards();
@@ -148,13 +177,13 @@ export const fetchCards = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch cards');
+      return rejectWithValue(error.message || "Failed to fetch cards");
     }
-  }
+  },
 );
 
 export const fetchCardDetails = createAsyncThunk(
-  'wallet/fetchCardDetails',
+  "wallet/fetchCardDetails",
   async (cardId: string, { rejectWithValue }) => {
     try {
       return await walletService.getCard(cardId);
@@ -162,28 +191,39 @@ export const fetchCardDetails = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch card details');
+      return rejectWithValue(error.message || "Failed to fetch card details");
     }
-  }
+  },
 );
 
 export const issueCard = createAsyncThunk(
-  'wallet/issueCard',
-  async (cardData: { account_id: string; card_type: 'debit' | 'credit' | 'prepaid'; daily_limit?: number; monthly_limit?: number }, { rejectWithValue }) => {
+  "wallet/issueCard",
+  async (
+    cardData: {
+      account_id: string;
+      card_type: "debit" | "credit" | "prepaid";
+      daily_limit?: number;
+      monthly_limit?: number;
+    },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.issueCard(cardData);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to issue card');
+      return rejectWithValue(error.message || "Failed to issue card");
     }
-  }
+  },
 );
 
 export const activateCard = createAsyncThunk(
-  'wallet/activateCard',
-  async ({ cardId, activationCode }: { cardId: string; activationCode: string }, { rejectWithValue }) => {
+  "wallet/activateCard",
+  async (
+    { cardId, activationCode }: { cardId: string; activationCode: string },
+    { rejectWithValue },
+  ) => {
     try {
       await walletService.activateCard(cardId, activationCode);
       return cardId;
@@ -191,14 +231,17 @@ export const activateCard = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to activate card');
+      return rejectWithValue(error.message || "Failed to activate card");
     }
-  }
+  },
 );
 
 export const toggleCardStatus = createAsyncThunk(
-  'wallet/toggleCardStatus',
-  async ({ cardId, action }: { cardId: string; action: 'block' | 'unblock' }, { rejectWithValue }) => {
+  "wallet/toggleCardStatus",
+  async (
+    { cardId, action }: { cardId: string; action: "block" | "unblock" },
+    { rejectWithValue },
+  ) => {
     try {
       await walletService.toggleCardStatus(cardId, action);
       return { cardId, action };
@@ -208,11 +251,11 @@ export const toggleCardStatus = createAsyncThunk(
       }
       return rejectWithValue(error.message || `Failed to ${action} card`);
     }
-  }
+  },
 );
 
 export const fetchDashboardSummary = createAsyncThunk(
-  'wallet/fetchDashboardSummary',
+  "wallet/fetchDashboardSummary",
   async (_, { rejectWithValue }) => {
     try {
       return await walletService.getAccountSummary();
@@ -220,28 +263,38 @@ export const fetchDashboardSummary = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch dashboard summary');
+      return rejectWithValue(
+        error.message || "Failed to fetch dashboard summary",
+      );
     }
-  }
+  },
 );
 
 export const fetchSpendingAnalytics = createAsyncThunk(
-  'wallet/fetchSpendingAnalytics',
-  async ({ accountId, period }: { accountId?: string; period?: 'week' | 'month' | 'quarter' | 'year' }, { rejectWithValue }) => {
+  "wallet/fetchSpendingAnalytics",
+  async (
+    {
+      accountId,
+      period,
+    }: { accountId?: string; period?: "week" | "month" | "quarter" | "year" },
+    { rejectWithValue },
+  ) => {
     try {
       return await walletService.getSpendingAnalytics(accountId, period);
     } catch (error: any) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Failed to fetch spending analytics');
+      return rejectWithValue(
+        error.message || "Failed to fetch spending analytics",
+      );
     }
-  }
+  },
 );
 
 // Slice
 const walletSlice = createSlice({
-  name: 'wallet',
+  name: "wallet",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -287,7 +340,9 @@ const walletSlice = createSlice({
         state.currentAccount = action.payload;
 
         // Update account in accounts array
-        const index = state.accounts.findIndex(acc => acc.id === action.payload.id);
+        const index = state.accounts.findIndex(
+          (acc) => acc.id === action.payload.id,
+        );
         if (index !== -1) {
           state.accounts[index] = action.payload;
         } else {
@@ -341,15 +396,21 @@ const walletSlice = createSlice({
         state.transactions = [action.payload, ...state.transactions];
 
         // Update account balance
-        if (state.currentAccount && state.currentAccount.id === action.payload.account_id) {
+        if (
+          state.currentAccount &&
+          state.currentAccount.id === action.payload.account_id
+        ) {
           state.currentAccount.balance += action.payload.amount;
           state.currentAccount.available_balance += action.payload.amount;
         }
 
-        const accountIndex = state.accounts.findIndex(acc => acc.id === action.payload.account_id);
+        const accountIndex = state.accounts.findIndex(
+          (acc) => acc.id === action.payload.account_id,
+        );
         if (accountIndex !== -1) {
           state.accounts[accountIndex].balance += action.payload.amount;
-          state.accounts[accountIndex].available_balance += action.payload.amount;
+          state.accounts[accountIndex].available_balance +=
+            action.payload.amount;
         }
       })
       .addCase(depositFunds.rejected, (state, action) => {
@@ -368,15 +429,21 @@ const walletSlice = createSlice({
         state.transactions = [action.payload, ...state.transactions];
 
         // Update account balance
-        if (state.currentAccount && state.currentAccount.id === action.payload.account_id) {
+        if (
+          state.currentAccount &&
+          state.currentAccount.id === action.payload.account_id
+        ) {
           state.currentAccount.balance -= action.payload.amount;
           state.currentAccount.available_balance -= action.payload.amount;
         }
 
-        const accountIndex = state.accounts.findIndex(acc => acc.id === action.payload.account_id);
+        const accountIndex = state.accounts.findIndex(
+          (acc) => acc.id === action.payload.account_id,
+        );
         if (accountIndex !== -1) {
           state.accounts[accountIndex].balance -= action.payload.amount;
-          state.accounts[accountIndex].available_balance -= action.payload.amount;
+          state.accounts[accountIndex].available_balance -=
+            action.payload.amount;
         }
       })
       .addCase(withdrawFunds.rejected, (state, action) => {
@@ -395,16 +462,22 @@ const walletSlice = createSlice({
         state.transactions = [action.payload, ...state.transactions];
 
         // Update account balances
-        const fromAccountIndex = state.accounts.findIndex(acc => acc.id === action.payload.from_account_id);
+        const fromAccountIndex = state.accounts.findIndex(
+          (acc) => acc.id === action.payload.from_account_id,
+        );
         if (fromAccountIndex !== -1) {
           state.accounts[fromAccountIndex].balance -= action.payload.amount;
-          state.accounts[fromAccountIndex].available_balance -= action.payload.amount;
+          state.accounts[fromAccountIndex].available_balance -=
+            action.payload.amount;
         }
 
-        const toAccountIndex = state.accounts.findIndex(acc => acc.id === action.payload.to_account_id);
+        const toAccountIndex = state.accounts.findIndex(
+          (acc) => acc.id === action.payload.to_account_id,
+        );
         if (toAccountIndex !== -1) {
           state.accounts[toAccountIndex].balance += action.payload.amount;
-          state.accounts[toAccountIndex].available_balance += action.payload.amount;
+          state.accounts[toAccountIndex].available_balance +=
+            action.payload.amount;
         }
 
         if (state.currentAccount) {
@@ -451,7 +524,9 @@ const walletSlice = createSlice({
         state.currentCard = action.payload;
 
         // Update card in cards array
-        const index = state.cards.findIndex(card => card.id === action.payload.id);
+        const index = state.cards.findIndex(
+          (card) => card.id === action.payload.id,
+        );
         if (index !== -1) {
           state.cards[index] = action.payload;
         } else {
@@ -489,13 +564,15 @@ const walletSlice = createSlice({
         state.isLoading = false;
 
         // Update card status
-        const cardIndex = state.cards.findIndex(card => card.id === action.payload);
+        const cardIndex = state.cards.findIndex(
+          (card) => card.id === action.payload,
+        );
         if (cardIndex !== -1) {
-          state.cards[cardIndex].status = 'active';
+          state.cards[cardIndex].status = "active";
         }
 
         if (state.currentCard && state.currentCard.id === action.payload) {
-          state.currentCard.status = 'active';
+          state.currentCard.status = "active";
         }
       })
       .addCase(activateCard.rejected, (state, action) => {
@@ -514,9 +591,9 @@ const walletSlice = createSlice({
 
         // Update card status
         const { cardId, action: cardAction } = action.payload;
-        const newStatus = cardAction === 'block' ? 'blocked' : 'active';
+        const newStatus = cardAction === "block" ? "blocked" : "active";
 
-        const cardIndex = state.cards.findIndex(card => card.id === cardId);
+        const cardIndex = state.cards.findIndex((card) => card.id === cardId);
         if (cardIndex !== -1) {
           state.cards[cardIndex].status = newStatus;
         }
@@ -562,5 +639,10 @@ const walletSlice = createSlice({
   },
 });
 
-export const { clearError, setCurrentAccount, setCurrentCard, clearWalletState } = walletSlice.actions;
+export const {
+  clearError,
+  setCurrentAccount,
+  setCurrentCard,
+  clearWalletState,
+} = walletSlice.actions;
 export default walletSlice.reducer;

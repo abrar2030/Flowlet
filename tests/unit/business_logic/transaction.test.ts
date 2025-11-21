@@ -18,12 +18,22 @@ describe("Transaction Business Logic", () => {
     });
 
     it("should return false if wallet balance is insufficient for withdrawal", () => {
-      const withdrawalTransaction = { ...mockTransaction, type: "withdrawal", amount: 2000 };
-      expect(validateTransaction(withdrawalTransaction, mockWallet)).toBe(false);
+      const withdrawalTransaction = {
+        ...mockTransaction,
+        type: "withdrawal",
+        amount: 2000,
+      };
+      expect(validateTransaction(withdrawalTransaction, mockWallet)).toBe(
+        false,
+      );
     });
 
     it("should return true if wallet balance is sufficient for withdrawal", () => {
-      const withdrawalTransaction = { ...mockTransaction, type: "withdrawal", amount: 500 };
+      const withdrawalTransaction = {
+        ...mockTransaction,
+        type: "withdrawal",
+        amount: 500,
+      };
       expect(validateTransaction(withdrawalTransaction, mockWallet)).toBe(true);
     });
 
@@ -37,14 +47,25 @@ describe("Transaction Business Logic", () => {
     it("should correctly process a deposit transaction", () => {
       const initialBalance = mockWallet.balance;
       const updatedWallet = processTransaction(mockTransaction, mockWallet);
-      expect(updatedWallet.balance).toBe(initialBalance + mockTransaction.amount);
+      expect(updatedWallet.balance).toBe(
+        initialBalance + mockTransaction.amount,
+      );
     });
 
     it("should correctly process a withdrawal transaction", () => {
-      const withdrawalTransaction = { ...mockTransaction, type: "withdrawal", amount: 50 };
+      const withdrawalTransaction = {
+        ...mockTransaction,
+        type: "withdrawal",
+        amount: 50,
+      };
       const initialBalance = mockWallet.balance;
-      const updatedWallet = processTransaction(withdrawalTransaction, mockWallet);
-      expect(updatedWallet.balance).toBe(initialBalance - withdrawalTransaction.amount);
+      const updatedWallet = processTransaction(
+        withdrawalTransaction,
+        mockWallet,
+      );
+      expect(updatedWallet.balance).toBe(
+        initialBalance - withdrawalTransaction.amount,
+      );
     });
 
     it("should not process an invalid transaction", () => {
@@ -55,9 +76,16 @@ describe("Transaction Business Logic", () => {
     });
 
     it("should handle insufficient funds for withdrawal", () => {
-      const withdrawalTransaction = { ...mockTransaction, type: "withdrawal", amount: 2000 };
+      const withdrawalTransaction = {
+        ...mockTransaction,
+        type: "withdrawal",
+        amount: 2000,
+      };
       const initialBalance = mockWallet.balance;
-      const updatedWallet = processTransaction(withdrawalTransaction, mockWallet);
+      const updatedWallet = processTransaction(
+        withdrawalTransaction,
+        mockWallet,
+      );
       expect(updatedWallet.balance).toBe(initialBalance);
     });
   });

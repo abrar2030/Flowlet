@@ -44,49 +44,49 @@ spec:
         app: auth-service
     spec:
       containers:
-      - name: auth-service
-        image: flowlet/auth-service:latest
-        ports:
-        - containerPort: 3006
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: password
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-credentials
-              key: password
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3006
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3006
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: auth-service
+          image: flowlet/auth-service:latest
+          ports:
+            - containerPort: 3006
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3006
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3006
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: config
-        configMap:
-          name: auth-service-config
+        - name: config
+          configMap:
+            name: auth-service-config
 ---
 apiVersion: v1
 kind: Service
@@ -97,6 +97,6 @@ spec:
   selector:
     app: auth-service
   ports:
-  - port: 80
-    targetPort: 3006
+    - port: 80
+      targetPort: 3006
   type: ClusterIP

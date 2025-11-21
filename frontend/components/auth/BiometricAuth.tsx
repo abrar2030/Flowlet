@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Progress } from '../ui/progress';
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Progress } from "../ui/progress";
 import {
   Fingerprint,
   Eye,
@@ -16,11 +16,11 @@ import {
   Lock,
   Unlock,
   RefreshCw,
-  Settings
-} from 'lucide-react';
+  Settings,
+} from "lucide-react";
 
 interface BiometricCapability {
-  type: 'fingerprint' | 'face' | 'voice' | 'iris';
+  type: "fingerprint" | "face" | "voice" | "iris";
   available: boolean;
   enrolled: boolean;
   name: string;
@@ -66,7 +66,7 @@ export function BiometricAuth({
   allowEnrollment = true,
   requireBiometric = false,
   fallbackToPassword = true,
-  className = ''
+  className = "",
 }: BiometricAuthProps) {
   const [state, setState] = useState<AuthState>({
     isSupported: false,
@@ -78,7 +78,7 @@ export function BiometricAuth({
     enrollmentProgress: 0,
     authAttempts: 0,
     maxAttempts: 3,
-    lockoutEndTime: null
+    lockoutEndTime: null,
   });
 
   // Initialize biometric capabilities
@@ -86,62 +86,62 @@ export function BiometricAuth({
     const initializeBiometrics = async () => {
       const capabilities: BiometricCapability[] = [
         {
-          type: 'fingerprint',
+          type: "fingerprint",
           available: false,
           enrolled: false,
-          name: 'Fingerprint',
-          description: 'Use your fingerprint to authenticate',
-          icon: <Fingerprint className="w-6 h-6" />
+          name: "Fingerprint",
+          description: "Use your fingerprint to authenticate",
+          icon: <Fingerprint className="w-6 h-6" />,
         },
         {
-          type: 'face',
+          type: "face",
           available: false,
           enrolled: false,
-          name: 'Face Recognition',
-          description: 'Use facial recognition to authenticate',
-          icon: <Eye className="w-6 h-6" />
+          name: "Face Recognition",
+          description: "Use facial recognition to authenticate",
+          icon: <Eye className="w-6 h-6" />,
         },
         {
-          type: 'voice',
+          type: "voice",
           available: false,
           enrolled: false,
-          name: 'Voice Recognition',
-          description: 'Use voice recognition to authenticate',
-          icon: <Mic className="w-6 h-6" />
+          name: "Voice Recognition",
+          description: "Use voice recognition to authenticate",
+          icon: <Mic className="w-6 h-6" />,
         },
         {
-          type: 'iris',
+          type: "iris",
           available: false,
           enrolled: false,
-          name: 'Iris Scan',
-          description: 'Use iris scanning to authenticate',
-          icon: <Eye className="w-6 h-6" />
-        }
+          name: "Iris Scan",
+          description: "Use iris scanning to authenticate",
+          icon: <Eye className="w-6 h-6" />,
+        },
       ];
 
       // Check WebAuthn support
-      if ('credentials' in navigator && 'create' in navigator.credentials) {
+      if ("credentials" in navigator && "create" in navigator.credentials) {
         try {
           // Check for platform authenticator (built-in biometrics)
           const available = await (navigator.credentials as any).get({
             publicKey: {
               challenge: new Uint8Array(32),
               timeout: 60000,
-              userVerification: 'required',
+              userVerification: "required",
               authenticatorSelection: {
-                authenticatorAttachment: 'platform',
-                userVerification: 'required'
-              }
-            }
+                authenticatorAttachment: "platform",
+                userVerification: "required",
+              },
+            },
           });
 
           // Update fingerprint availability (most common platform authenticator)
           capabilities[0].available = true;
 
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             isSupported: true,
-            capabilities
+            capabilities,
           }));
         } catch (error) {
           // Check for specific biometric APIs
@@ -152,42 +152,51 @@ export function BiometricAuth({
       }
     };
 
-    const checkSpecificBiometrics = async (capabilities: BiometricCapability[]) => {
+    const checkSpecificBiometrics = async (
+      capabilities: BiometricCapability[],
+    ) => {
       // Check for Touch ID / Face ID on iOS Safari
-      if ('TouchID' in window || 'FaceID' in window) {
-        capabilities[0].available = 'TouchID' in window;
-        capabilities[1].available = 'FaceID' in window;
+      if ("TouchID" in window || "FaceID" in window) {
+        capabilities[0].available = "TouchID" in window;
+        capabilities[1].available = "FaceID" in window;
       }
 
       // Check for Windows Hello
-      if ('msCredentials' in navigator) {
+      if ("msCredentials" in navigator) {
         capabilities[0].available = true;
         capabilities[1].available = true;
       }
 
       // Check for Android biometrics
-      if ('userAgent' in navigator && /Android/i.test(navigator.userAgent)) {
+      if ("userAgent" in navigator && /Android/i.test(navigator.userAgent)) {
         capabilities[0].available = true; // Most Android devices have fingerprint
       }
 
       // Check for media devices (camera/microphone for face/voice)
-      if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+      if (
+        "mediaDevices" in navigator &&
+        "getUserMedia" in navigator.mediaDevices
+      ) {
         try {
           const devices = await navigator.mediaDevices.enumerateDevices();
-          const hasCamera = devices.some(device => device.kind === 'videoinput');
-          const hasMicrophone = devices.some(device => device.kind === 'audioinput');
+          const hasCamera = devices.some(
+            (device) => device.kind === "videoinput",
+          );
+          const hasMicrophone = devices.some(
+            (device) => device.kind === "audioinput",
+          );
 
           if (hasCamera) capabilities[1].available = true; // Face recognition
           if (hasMicrophone) capabilities[2].available = true; // Voice recognition
         } catch (error) {
-          console.warn('Could not enumerate media devices:', error);
+          console.warn("Could not enumerate media devices:", error);
         }
       }
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        isSupported: capabilities.some(cap => cap.available),
-        capabilities
+        isSupported: capabilities.some((cap) => cap.available),
+        capabilities,
       }));
     };
 
@@ -199,10 +208,10 @@ export function BiometricAuth({
     if (state.lockoutEndTime) {
       const timer = setInterval(() => {
         if (Date.now() >= state.lockoutEndTime!) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             lockoutEndTime: null,
-            authAttempts: 0
+            authAttempts: 0,
           }));
           clearInterval(timer);
         }
@@ -212,104 +221,117 @@ export function BiometricAuth({
     }
   }, [state.lockoutEndTime]);
 
-  const handleAuthenticate = useCallback(async (type: string) => {
-    if (state.lockoutEndTime && Date.now() < state.lockoutEndTime) {
-      setState(prev => ({ ...prev, error: 'Authentication locked. Please try again later.' }));
-      return;
-    }
-
-    setState(prev => ({ ...prev, isAuthenticating: true, error: null }));
-
-    try {
-      let result: BiometricAuthResult;
-
-      switch (type) {
-        case 'fingerprint':
-          result = await authenticateWithFingerprint();
-          break;
-        case 'face':
-          result = await authenticateWithFace();
-          break;
-        case 'voice':
-          result = await authenticateWithVoice();
-          break;
-        case 'iris':
-          result = await authenticateWithIris();
-          break;
-        default:
-          throw new Error('Unsupported biometric type');
+  const handleAuthenticate = useCallback(
+    async (type: string) => {
+      if (state.lockoutEndTime && Date.now() < state.lockoutEndTime) {
+        setState((prev) => ({
+          ...prev,
+          error: "Authentication locked. Please try again later.",
+        }));
+        return;
       }
 
-      if (result.success) {
-        setState(prev => ({
-          ...prev,
-          lastAuthResult: result,
-          authAttempts: 0,
-          lockoutEndTime: null
-        }));
+      setState((prev) => ({ ...prev, isAuthenticating: true, error: null }));
 
-        if (onAuthenticate) {
-          onAuthenticate(result);
+      try {
+        let result: BiometricAuthResult;
+
+        switch (type) {
+          case "fingerprint":
+            result = await authenticateWithFingerprint();
+            break;
+          case "face":
+            result = await authenticateWithFace();
+            break;
+          case "voice":
+            result = await authenticateWithVoice();
+            break;
+          case "iris":
+            result = await authenticateWithIris();
+            break;
+          default:
+            throw new Error("Unsupported biometric type");
         }
-      } else {
+
+        if (result.success) {
+          setState((prev) => ({
+            ...prev,
+            lastAuthResult: result,
+            authAttempts: 0,
+            lockoutEndTime: null,
+          }));
+
+          if (onAuthenticate) {
+            onAuthenticate(result);
+          }
+        } else {
+          const newAttempts = state.authAttempts + 1;
+          const shouldLock = newAttempts >= state.maxAttempts;
+
+          setState((prev) => ({
+            ...prev,
+            authAttempts: newAttempts,
+            lockoutEndTime: shouldLock ? Date.now() + 300000 : null, // 5 minutes
+            error: result.error || "Authentication failed",
+          }));
+        }
+      } catch (error) {
         const newAttempts = state.authAttempts + 1;
         const shouldLock = newAttempts >= state.maxAttempts;
 
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           authAttempts: newAttempts,
-          lockoutEndTime: shouldLock ? Date.now() + 300000 : null, // 5 minutes
-          error: result.error || 'Authentication failed'
+          lockoutEndTime: shouldLock ? Date.now() + 300000 : null,
+          error:
+            error instanceof Error ? error.message : "Authentication failed",
         }));
+      } finally {
+        setState((prev) => ({ ...prev, isAuthenticating: false }));
       }
-    } catch (error) {
-      const newAttempts = state.authAttempts + 1;
-      const shouldLock = newAttempts >= state.maxAttempts;
+    },
+    [
+      state.authAttempts,
+      state.maxAttempts,
+      state.lockoutEndTime,
+      onAuthenticate,
+    ],
+  );
 
-      setState(prev => ({
-        ...prev,
-        authAttempts: newAttempts,
-        lockoutEndTime: shouldLock ? Date.now() + 300000 : null,
-        error: error instanceof Error ? error.message : 'Authentication failed'
-      }));
-    } finally {
-      setState(prev => ({ ...prev, isAuthenticating: false }));
-    }
-  }, [state.authAttempts, state.maxAttempts, state.lockoutEndTime, onAuthenticate]);
+  const authenticateWithFingerprint =
+    async (): Promise<BiometricAuthResult> => {
+      if ("credentials" in navigator) {
+        try {
+          const credential = await (navigator.credentials as any).get({
+            publicKey: {
+              challenge: new Uint8Array(32),
+              timeout: 60000,
+              userVerification: "required",
+              authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                userVerification: "required",
+              },
+            },
+          });
 
-  const authenticateWithFingerprint = async (): Promise<BiometricAuthResult> => {
-    if ('credentials' in navigator) {
-      try {
-        const credential = await (navigator.credentials as any).get({
-          publicKey: {
-            challenge: new Uint8Array(32),
-            timeout: 60000,
-            userVerification: 'required',
-            authenticatorSelection: {
-              authenticatorAttachment: 'platform',
-              userVerification: 'required'
-            }
-          }
-        });
-
-        return {
-          success: true,
-          type: 'fingerprint',
-          credential,
-          timestamp: new Date().toISOString()
-        };
-      } catch (error) {
-        return {
-          success: false,
-          type: 'fingerprint',
-          error: 'Fingerprint authentication failed',
-          timestamp: new Date().toISOString()
-        };
+          return {
+            success: true,
+            type: "fingerprint",
+            credential,
+            timestamp: new Date().toISOString(),
+          };
+        } catch (error) {
+          return {
+            success: false,
+            type: "fingerprint",
+            error: "Fingerprint authentication failed",
+            timestamp: new Date().toISOString(),
+          };
+        }
       }
-    }
 
-    throw new Error('WebAuthn not supported');
-  };
+      throw new Error("WebAuthn not supported");
+    };
 
   const authenticateWithFace = async (): Promise<BiometricAuthResult> => {
     // Simulate face recognition (would integrate with actual face recognition API)
@@ -317,8 +339,8 @@ export function BiometricAuth({
       setTimeout(() => {
         resolve({
           success: Math.random() > 0.3, // 70% success rate for demo
-          type: 'face',
-          timestamp: new Date().toISOString()
+          type: "face",
+          timestamp: new Date().toISOString(),
         });
       }, 2000);
     });
@@ -330,8 +352,8 @@ export function BiometricAuth({
       setTimeout(() => {
         resolve({
           success: Math.random() > 0.4, // 60% success rate for demo
-          type: 'voice',
-          timestamp: new Date().toISOString()
+          type: "voice",
+          timestamp: new Date().toISOString(),
         });
       }, 3000);
     });
@@ -343,75 +365,88 @@ export function BiometricAuth({
       setTimeout(() => {
         resolve({
           success: Math.random() > 0.2, // 80% success rate for demo
-          type: 'iris',
-          timestamp: new Date().toISOString()
+          type: "iris",
+          timestamp: new Date().toISOString(),
         });
       }, 2500);
     });
   };
 
-  const handleEnroll = useCallback(async (type: string) => {
-    if (!allowEnrollment) return;
+  const handleEnroll = useCallback(
+    async (type: string) => {
+      if (!allowEnrollment) return;
 
-    setState(prev => ({ ...prev, isEnrolling: true, error: null, enrollmentProgress: 0 }));
-
-    try {
-      // Simulate enrollment progress
-      for (let i = 0; i <= 100; i += 10) {
-        setState(prev => ({ ...prev, enrollmentProgress: i }));
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-
-      if (onEnroll) {
-        await onEnroll(type);
-      }
-
-      // Update capability as enrolled
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        capabilities: prev.capabilities.map(cap =>
-          cap.type === type ? { ...cap, enrolled: true } : cap
-        ),
-        enrollmentProgress: 100
+        isEnrolling: true,
+        error: null,
+        enrollmentProgress: 0,
       }));
 
-      setTimeout(() => {
-        setState(prev => ({ ...prev, enrollmentProgress: 0 }));
-      }, 1000);
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: `Failed to enroll ${type}`,
-        enrollmentProgress: 0
-      }));
-    } finally {
-      setState(prev => ({ ...prev, isEnrolling: false }));
-    }
-  }, [allowEnrollment, onEnroll]);
+      try {
+        // Simulate enrollment progress
+        for (let i = 0; i <= 100; i += 10) {
+          setState((prev) => ({ ...prev, enrollmentProgress: i }));
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
 
-  const handleUnenroll = useCallback(async (type: string) => {
-    try {
-      if (onUnenroll) {
-        await onUnenroll(type);
+        if (onEnroll) {
+          await onEnroll(type);
+        }
+
+        // Update capability as enrolled
+        setState((prev) => ({
+          ...prev,
+          capabilities: prev.capabilities.map((cap) =>
+            cap.type === type ? { ...cap, enrolled: true } : cap,
+          ),
+          enrollmentProgress: 100,
+        }));
+
+        setTimeout(() => {
+          setState((prev) => ({ ...prev, enrollmentProgress: 0 }));
+        }, 1000);
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          error: `Failed to enroll ${type}`,
+          enrollmentProgress: 0,
+        }));
+      } finally {
+        setState((prev) => ({ ...prev, isEnrolling: false }));
       }
+    },
+    [allowEnrollment, onEnroll],
+  );
 
-      setState(prev => ({
-        ...prev,
-        capabilities: prev.capabilities.map(cap =>
-          cap.type === type ? { ...cap, enrolled: false } : cap
-        )
-      }));
-    } catch (error) {
-      setState(prev => ({ ...prev, error: `Failed to unenroll ${type}` }));
-    }
-  }, [onUnenroll]);
+  const handleUnenroll = useCallback(
+    async (type: string) => {
+      try {
+        if (onUnenroll) {
+          await onUnenroll(type);
+        }
+
+        setState((prev) => ({
+          ...prev,
+          capabilities: prev.capabilities.map((cap) =>
+            cap.type === type ? { ...cap, enrolled: false } : cap,
+          ),
+        }));
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: `Failed to unenroll ${type}` }));
+      }
+    },
+    [onUnenroll],
+  );
 
   const remainingLockoutTime = state.lockoutEndTime
     ? Math.ceil((state.lockoutEndTime - Date.now()) / 1000)
     : 0;
 
-  const enrolledCapabilities = state.capabilities.filter(cap => cap.enrolled);
-  const availableCapabilities = state.capabilities.filter(cap => cap.available);
+  const enrolledCapabilities = state.capabilities.filter((cap) => cap.enrolled);
+  const availableCapabilities = state.capabilities.filter(
+    (cap) => cap.available,
+  );
 
   if (!state.isSupported) {
     return (
@@ -445,7 +480,13 @@ export function BiometricAuth({
               <Shield className="w-6 h-6 mr-3 text-blue-600" />
               Biometric Authentication
             </div>
-            <Badge className={enrolledCapabilities.length > 0 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
+            <Badge
+              className={
+                enrolledCapabilities.length > 0
+                  ? "bg-green-100 text-green-600"
+                  : "bg-gray-100 text-gray-600"
+              }
+            >
               {enrolledCapabilities.length > 0 ? (
                 <>
                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -462,7 +503,8 @@ export function BiometricAuth({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            Use your device's built-in biometric sensors for secure, convenient authentication.
+            Use your device's built-in biometric sensors for secure, convenient
+            authentication.
           </p>
         </CardContent>
       </Card>
@@ -471,7 +513,9 @@ export function BiometricAuth({
       {state.error && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{state.error}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {state.error}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -479,7 +523,8 @@ export function BiometricAuth({
         <Alert className="border-red-200 bg-red-50">
           <Lock className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Authentication locked for {remainingLockoutTime} seconds due to multiple failed attempts.
+            Authentication locked for {remainingLockoutTime} seconds due to
+            multiple failed attempts.
           </AlertDescription>
         </Alert>
       )}
@@ -488,7 +533,7 @@ export function BiometricAuth({
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
-            Successfully authenticated with {state.lastAuthResult.type} at{' '}
+            Successfully authenticated with {state.lastAuthResult.type} at{" "}
             {new Date(state.lastAuthResult.timestamp).toLocaleTimeString()}
           </AlertDescription>
         </Alert>
@@ -522,13 +567,21 @@ export function BiometricAuth({
                   <div className="text-blue-600">{capability.icon}</div>
                   <div>
                     <h3 className="font-medium">{capability.name}</h3>
-                    <p className="text-sm text-gray-600">{capability.description}</p>
+                    <p className="text-sm text-gray-600">
+                      {capability.description}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <Badge className={capability.enrolled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
-                    {capability.enrolled ? 'Enrolled' : 'Not Enrolled'}
+                  <Badge
+                    className={
+                      capability.enrolled
+                        ? "bg-green-100 text-green-600"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {capability.enrolled ? "Enrolled" : "Not Enrolled"}
                   </Badge>
 
                   <div className="flex space-x-2">
@@ -536,7 +589,10 @@ export function BiometricAuth({
                       <>
                         <Button
                           onClick={() => handleAuthenticate(capability.type)}
-                          disabled={state.isAuthenticating || state.lockoutEndTime !== null}
+                          disabled={
+                            state.isAuthenticating ||
+                            state.lockoutEndTime !== null
+                          }
                           size="sm"
                         >
                           {state.isAuthenticating ? (
@@ -567,7 +623,7 @@ export function BiometricAuth({
                         size="sm"
                         variant="outline"
                       >
-                        {state.isEnrolling ? 'Enrolling...' : 'Enroll'}
+                        {state.isEnrolling ? "Enrolling..." : "Enroll"}
                       </Button>
                     )}
                   </div>
@@ -583,7 +639,8 @@ export function BiometricAuth({
         <Alert className="border-amber-200 bg-amber-50">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
-            Biometric authentication is required. Please enroll at least one biometric method.
+            Biometric authentication is required. Please enroll at least one
+            biometric method.
           </AlertDescription>
         </Alert>
       )}
@@ -608,11 +665,19 @@ export function BiometricAuth({
           <div className="flex items-start space-x-3">
             <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
             <div className="text-sm text-gray-600">
-              <p className="font-medium text-gray-900 mb-1">Security Information</p>
+              <p className="font-medium text-gray-900 mb-1">
+                Security Information
+              </p>
               <ul className="space-y-1 text-xs">
                 <li>• Biometric data is stored securely on your device</li>
-                <li>• Authentication attempts: {state.authAttempts}/{state.maxAttempts}</li>
-                <li>• Fallback authentication is {fallbackToPassword ? 'available' : 'disabled'}</li>
+                <li>
+                  • Authentication attempts: {state.authAttempts}/
+                  {state.maxAttempts}
+                </li>
+                <li>
+                  • Fallback authentication is{" "}
+                  {fallbackToPassword ? "available" : "disabled"}
+                </li>
                 <li>• All authentication attempts are logged for security</li>
               </ul>
             </div>

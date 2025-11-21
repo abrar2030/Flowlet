@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Progress } from '../ui/progress';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Progress } from "../ui/progress";
 import {
   Shield,
   AlertTriangle,
@@ -47,30 +53,42 @@ import {
   HardDrive,
   Cpu,
   MemoryStick,
-  Network
-} from 'lucide-react';
+  Network,
+} from "lucide-react";
 
 interface SecurityMetric {
   id: string;
   name: string;
   value: number;
   unit: string;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   trendPercentage: number;
-  status: 'normal' | 'warning' | 'critical';
+  status: "normal" | "warning" | "critical";
   threshold: {
     warning: number;
     critical: number;
   };
   lastUpdated: string;
-  category: 'authentication' | 'authorization' | 'data_protection' | 'network' | 'system' | 'compliance';
+  category:
+    | "authentication"
+    | "authorization"
+    | "data_protection"
+    | "network"
+    | "system"
+    | "compliance";
 }
 
 interface SecurityEvent {
   id: string;
   timestamp: string;
-  type: 'login_attempt' | 'data_access' | 'permission_change' | 'system_alert' | 'threat_detected' | 'compliance_violation';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "login_attempt"
+    | "data_access"
+    | "permission_change"
+    | "system_alert"
+    | "threat_detected"
+    | "compliance_violation";
+  severity: "low" | "medium" | "high" | "critical";
   source: string;
   target: string;
   userId?: string;
@@ -83,7 +101,7 @@ interface SecurityEvent {
     coordinates?: { lat: number; lng: number };
   };
   details: Record<string, any>;
-  status: 'new' | 'investigating' | 'resolved' | 'false_positive';
+  status: "new" | "investigating" | "resolved" | "false_positive";
   riskScore: number;
   actionsTaken: string[];
   correlatedEvents: string[];
@@ -91,9 +109,14 @@ interface SecurityEvent {
 
 interface ThreatIndicator {
   id: string;
-  type: 'ip_address' | 'domain' | 'file_hash' | 'user_behavior' | 'network_pattern';
+  type:
+    | "ip_address"
+    | "domain"
+    | "file_hash"
+    | "user_behavior"
+    | "network_pattern";
   value: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   confidence: number; // 0-100
   source: string;
   firstSeen: string;
@@ -108,7 +131,7 @@ interface ThreatIndicator {
 interface SystemHealth {
   id: string;
   component: string;
-  status: 'healthy' | 'degraded' | 'down' | 'maintenance';
+  status: "healthy" | "degraded" | "down" | "maintenance";
   uptime: number; // percentage
   responseTime: number; // milliseconds
   errorRate: number; // percentage
@@ -120,7 +143,7 @@ interface SystemHealth {
 
 interface ComplianceStatus {
   framework: string;
-  status: 'compliant' | 'non_compliant' | 'partial' | 'unknown';
+  status: "compliant" | "non_compliant" | "partial" | "unknown";
   score: number; // 0-100
   requirements: {
     total: number;
@@ -142,7 +165,10 @@ interface SecurityDashboardProps {
   onEventInvestigate?: (eventId: string) => Promise<void>;
   onThreatMitigate?: (threatId: string, action: string) => Promise<void>;
   onMetricRefresh?: (metricId: string) => Promise<void>;
-  onExportReport?: (type: 'security' | 'compliance' | 'threats', filters: any) => Promise<Blob>;
+  onExportReport?: (
+    type: "security" | "compliance" | "threats",
+    filters: any,
+  ) => Promise<Blob>;
   realTimeUpdates?: boolean;
   refreshInterval?: number; // seconds
   className?: string;
@@ -152,7 +178,7 @@ interface ComponentState {
   activeTab: string;
   selectedEvent: SecurityEvent | null;
   selectedThreat: ThreatIndicator | null;
-  timeRange: '1h' | '24h' | '7d' | '30d';
+  timeRange: "1h" | "24h" | "7d" | "30d";
   searchTerm: string;
   filterSeverity: string;
   filterType: string;
@@ -178,24 +204,24 @@ export function SecurityDashboard({
   onExportReport,
   realTimeUpdates = true,
   refreshInterval = 30,
-  className = ''
+  className = "",
 }: SecurityDashboardProps) {
   const [state, setState] = useState<ComponentState>({
-    activeTab: 'overview',
+    activeTab: "overview",
     selectedEvent: null,
     selectedThreat: null,
-    timeRange: '24h',
-    searchTerm: '',
-    filterSeverity: 'all',
-    filterType: 'all',
-    filterStatus: 'all',
+    timeRange: "24h",
+    searchTerm: "",
+    filterSeverity: "all",
+    filterType: "all",
+    filterStatus: "all",
     showEventDetails: false,
     showThreatDetails: false,
     isRefreshing: false,
     isExporting: false,
     error: null,
     success: null,
-    lastRefresh: new Date().toISOString()
+    lastRefresh: new Date().toISOString(),
   });
 
   // Auto-refresh functionality
@@ -203,7 +229,7 @@ export function SecurityDashboard({
     if (!realTimeUpdates) return;
 
     const interval = setInterval(() => {
-      setState(prev => ({ ...prev, lastRefresh: new Date().toISOString() }));
+      setState((prev) => ({ ...prev, lastRefresh: new Date().toISOString() }));
     }, refreshInterval * 1000);
 
     return () => clearInterval(interval);
@@ -213,55 +239,84 @@ export function SecurityDashboard({
   const dashboardMetrics = useMemo(() => {
     const now = new Date();
     const timeRangeMs = {
-      '1h': 60 * 60 * 1000,
-      '24h': 24 * 60 * 60 * 1000,
-      '7d': 7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000
+      "1h": 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
     }[state.timeRange];
 
     const cutoffTime = new Date(now.getTime() - timeRangeMs);
 
     // Filter events by time range
-    const recentEvents = events.filter(event => new Date(event.timestamp) > cutoffTime);
+    const recentEvents = events.filter(
+      (event) => new Date(event.timestamp) > cutoffTime,
+    );
 
     const totalEvents = recentEvents.length;
-    const criticalEvents = recentEvents.filter(e => e.severity === 'critical').length;
-    const highSeverityEvents = recentEvents.filter(e => e.severity === 'high').length;
-    const newEvents = recentEvents.filter(e => e.status === 'new').length;
+    const criticalEvents = recentEvents.filter(
+      (e) => e.severity === "critical",
+    ).length;
+    const highSeverityEvents = recentEvents.filter(
+      (e) => e.severity === "high",
+    ).length;
+    const newEvents = recentEvents.filter((e) => e.status === "new").length;
 
-    const activeThreats = threats.filter(t => t.isActive).length;
-    const criticalThreats = threats.filter(t => t.severity === 'critical' && t.isActive).length;
+    const activeThreats = threats.filter((t) => t.isActive).length;
+    const criticalThreats = threats.filter(
+      (t) => t.severity === "critical" && t.isActive,
+    ).length;
 
-    const healthyComponents = systemHealth.filter(s => s.status === 'healthy').length;
-    const degradedComponents = systemHealth.filter(s => s.status === 'degraded').length;
-    const downComponents = systemHealth.filter(s => s.status === 'down').length;
+    const healthyComponents = systemHealth.filter(
+      (s) => s.status === "healthy",
+    ).length;
+    const degradedComponents = systemHealth.filter(
+      (s) => s.status === "degraded",
+    ).length;
+    const downComponents = systemHealth.filter(
+      (s) => s.status === "down",
+    ).length;
 
-    const averageUptime = systemHealth.length > 0
-      ? systemHealth.reduce((sum, s) => sum + s.uptime, 0) / systemHealth.length
-      : 100;
+    const averageUptime =
+      systemHealth.length > 0
+        ? systemHealth.reduce((sum, s) => sum + s.uptime, 0) /
+          systemHealth.length
+        : 100;
 
-    const averageResponseTime = systemHealth.length > 0
-      ? systemHealth.reduce((sum, s) => sum + s.responseTime, 0) / systemHealth.length
-      : 0;
+    const averageResponseTime =
+      systemHealth.length > 0
+        ? systemHealth.reduce((sum, s) => sum + s.responseTime, 0) /
+          systemHealth.length
+        : 0;
 
-    const eventsByType = recentEvents.reduce((acc, event) => {
-      acc[event.type] = (acc[event.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const eventsByType = recentEvents.reduce(
+      (acc, event) => {
+        acc[event.type] = (acc[event.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const eventsBySeverity = recentEvents.reduce((acc, event) => {
-      acc[event.severity] = (acc[event.severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const eventsBySeverity = recentEvents.reduce(
+      (acc, event) => {
+        acc[event.severity] = (acc[event.severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const threatsByType = threats.reduce((acc, threat) => {
-      acc[threat.type] = (acc[threat.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const threatsByType = threats.reduce(
+      (acc, threat) => {
+        acc[threat.type] = (acc[threat.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const complianceOverall = complianceStatus.length > 0
-      ? complianceStatus.reduce((sum, c) => sum + c.score, 0) / complianceStatus.length
-      : 100;
+    const complianceOverall =
+      complianceStatus.length > 0
+        ? complianceStatus.reduce((sum, c) => sum + c.score, 0) /
+          complianceStatus.length
+        : 100;
 
     return {
       totalEvents,
@@ -279,166 +334,256 @@ export function SecurityDashboard({
       eventsBySeverity,
       threatsByType,
       complianceOverall,
-      systemHealthScore: systemHealth.length > 0 ? (healthyComponents / systemHealth.length) * 100 : 100
+      systemHealthScore:
+        systemHealth.length > 0
+          ? (healthyComponents / systemHealth.length) * 100
+          : 100,
     };
   }, [events, threats, systemHealth, complianceStatus, state.timeRange]);
 
   // Filter events
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      const matchesSearch = event.type.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           event.source.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           (event.userName && event.userName.toLowerCase().includes(state.searchTerm.toLowerCase()));
+    return events.filter((event) => {
+      const matchesSearch =
+        event.type.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        event.source.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        (event.userName &&
+          event.userName
+            .toLowerCase()
+            .includes(state.searchTerm.toLowerCase()));
 
-      const matchesSeverity = state.filterSeverity === 'all' || event.severity === state.filterSeverity;
-      const matchesType = state.filterType === 'all' || event.type === state.filterType;
-      const matchesStatus = state.filterStatus === 'all' || event.status === state.filterStatus;
+      const matchesSeverity =
+        state.filterSeverity === "all" ||
+        event.severity === state.filterSeverity;
+      const matchesType =
+        state.filterType === "all" || event.type === state.filterType;
+      const matchesStatus =
+        state.filterStatus === "all" || event.status === state.filterStatus;
 
       return matchesSearch && matchesSeverity && matchesType && matchesStatus;
     });
-  }, [events, state.searchTerm, state.filterSeverity, state.filterType, state.filterStatus]);
+  }, [
+    events,
+    state.searchTerm,
+    state.filterSeverity,
+    state.filterType,
+    state.filterStatus,
+  ]);
 
   // Handle event investigation
-  const handleEventInvestigate = useCallback(async (eventId: string) => {
-    setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+  const handleEventInvestigate = useCallback(
+    async (eventId: string) => {
+      setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
 
-    try {
-      if (onEventInvestigate) {
-        await onEventInvestigate(eventId);
-        setState(prev => ({ ...prev, success: 'Event investigation initiated' }));
+      try {
+        if (onEventInvestigate) {
+          await onEventInvestigate(eventId);
+          setState((prev) => ({
+            ...prev,
+            success: "Event investigation initiated",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          error: "Failed to initiate investigation",
+        }));
+      } finally {
+        setState((prev) => ({ ...prev, isRefreshing: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to initiate investigation' }));
-    } finally {
-      setState(prev => ({ ...prev, isRefreshing: false }));
-    }
-  }, [onEventInvestigate]);
+    },
+    [onEventInvestigate],
+  );
 
   // Handle threat mitigation
-  const handleThreatMitigate = useCallback(async (threatId: string, action: string) => {
-    setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+  const handleThreatMitigate = useCallback(
+    async (threatId: string, action: string) => {
+      setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
 
-    try {
-      if (onThreatMitigate) {
-        await onThreatMitigate(threatId, action);
-        setState(prev => ({ ...prev, success: 'Threat mitigation initiated' }));
+      try {
+        if (onThreatMitigate) {
+          await onThreatMitigate(threatId, action);
+          setState((prev) => ({
+            ...prev,
+            success: "Threat mitigation initiated",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to mitigate threat" }));
+      } finally {
+        setState((prev) => ({ ...prev, isRefreshing: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to mitigate threat' }));
-    } finally {
-      setState(prev => ({ ...prev, isRefreshing: false }));
-    }
-  }, [onThreatMitigate]);
+    },
+    [onThreatMitigate],
+  );
 
   // Handle metric refresh
-  const handleMetricRefresh = useCallback(async (metricId?: string) => {
-    setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+  const handleMetricRefresh = useCallback(
+    async (metricId?: string) => {
+      setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
 
-    try {
-      if (onMetricRefresh && metricId) {
-        await onMetricRefresh(metricId);
+      try {
+        if (onMetricRefresh && metricId) {
+          await onMetricRefresh(metricId);
+        }
+        setState((prev) => ({
+          ...prev,
+          success: "Metrics refreshed successfully",
+          lastRefresh: new Date().toISOString(),
+        }));
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to refresh metrics" }));
+      } finally {
+        setState((prev) => ({ ...prev, isRefreshing: false }));
       }
-      setState(prev => ({
-        ...prev,
-        success: 'Metrics refreshed successfully',
-        lastRefresh: new Date().toISOString()
-      }));
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to refresh metrics' }));
-    } finally {
-      setState(prev => ({ ...prev, isRefreshing: false }));
-    }
-  }, [onMetricRefresh]);
+    },
+    [onMetricRefresh],
+  );
 
   // Handle export
-  const handleExport = useCallback(async (type: 'security' | 'compliance' | 'threats') => {
-    setState(prev => ({ ...prev, isExporting: true, error: null }));
+  const handleExport = useCallback(
+    async (type: "security" | "compliance" | "threats") => {
+      setState((prev) => ({ ...prev, isExporting: true, error: null }));
 
-    try {
-      if (onExportReport) {
-        const filters = {
-          timeRange: state.timeRange,
-          severity: state.filterSeverity,
-          type: state.filterType,
-          status: state.filterStatus,
-          search: state.searchTerm
-        };
+      try {
+        if (onExportReport) {
+          const filters = {
+            timeRange: state.timeRange,
+            severity: state.filterSeverity,
+            type: state.filterType,
+            status: state.filterStatus,
+            search: state.searchTerm,
+          };
 
-        const blob = await onExportReport(type, filters);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+          const blob = await onExportReport(type, filters);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${type}-report-${new Date().toISOString().split("T")[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
 
-        setState(prev => ({ ...prev, success: 'Report exported successfully' }));
+          setState((prev) => ({
+            ...prev,
+            success: "Report exported successfully",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to export report" }));
+      } finally {
+        setState((prev) => ({ ...prev, isExporting: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to export report' }));
-    } finally {
-      setState(prev => ({ ...prev, isExporting: false }));
-    }
-  }, [onExportReport, state.timeRange, state.filterSeverity, state.filterType, state.filterStatus, state.searchTerm]);
+    },
+    [
+      onExportReport,
+      state.timeRange,
+      state.filterSeverity,
+      state.filterType,
+      state.filterStatus,
+      state.searchTerm,
+    ],
+  );
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'low': return 'bg-green-100 text-green-600';
-      case 'medium': return 'bg-yellow-100 text-yellow-600';
-      case 'high': return 'bg-orange-100 text-orange-600';
-      case 'critical': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "low":
+        return "bg-green-100 text-green-600";
+      case "medium":
+        return "bg-yellow-100 text-yellow-600";
+      case "high":
+        return "bg-orange-100 text-orange-600";
+      case "critical":
+        return "bg-red-100 text-red-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': case 'compliant': case 'resolved': return 'bg-green-100 text-green-600';
-      case 'degraded': case 'partial': case 'investigating': return 'bg-yellow-100 text-yellow-600';
-      case 'down': case 'non_compliant': case 'new': return 'bg-red-100 text-red-600';
-      case 'maintenance': case 'unknown': case 'false_positive': return 'bg-gray-100 text-gray-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "healthy":
+      case "compliant":
+      case "resolved":
+        return "bg-green-100 text-green-600";
+      case "degraded":
+      case "partial":
+      case "investigating":
+        return "bg-yellow-100 text-yellow-600";
+      case "down":
+      case "non_compliant":
+      case "new":
+        return "bg-red-100 text-red-600";
+      case "maintenance":
+      case "unknown":
+      case "false_positive":
+        return "bg-gray-100 text-gray-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getMetricStatusColor = (metric: SecurityMetric) => {
     switch (metric.status) {
-      case 'normal': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'critical': return 'text-red-600';
-      default: return 'text-gray-600';
+      case "normal":
+        return "text-green-600";
+      case "warning":
+        return "text-yellow-600";
+      case "critical":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
     }
   };
 
   const getTrendIcon = (trend: string, percentage: number) => {
-    if (trend === 'up') {
-      return <TrendingUp className={`w-4 h-4 ${percentage > 0 ? 'text-red-500' : 'text-green-500'}`} />;
-    } else if (trend === 'down') {
-      return <TrendingDown className={`w-4 h-4 ${percentage > 0 ? 'text-green-500' : 'text-red-500'}`} />;
+    if (trend === "up") {
+      return (
+        <TrendingUp
+          className={`w-4 h-4 ${percentage > 0 ? "text-red-500" : "text-green-500"}`}
+        />
+      );
+    } else if (trend === "down") {
+      return (
+        <TrendingDown
+          className={`w-4 h-4 ${percentage > 0 ? "text-green-500" : "text-red-500"}`}
+        />
+      );
     }
     return <Activity className="w-4 h-4 text-gray-500" />;
   };
 
   const getEventTypeIcon = (type: string) => {
     switch (type) {
-      case 'login_attempt': return <Key className="w-4 h-4" />;
-      case 'data_access': return <Database className="w-4 h-4" />;
-      case 'permission_change': return <Shield className="w-4 h-4" />;
-      case 'system_alert': return <Monitor className="w-4 h-4" />;
-      case 'threat_detected': return <AlertTriangle className="w-4 h-4" />;
-      case 'compliance_violation': return <FileText className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
+      case "login_attempt":
+        return <Key className="w-4 h-4" />;
+      case "data_access":
+        return <Database className="w-4 h-4" />;
+      case "permission_change":
+        return <Shield className="w-4 h-4" />;
+      case "system_alert":
+        return <Monitor className="w-4 h-4" />;
+      case "threat_detected":
+        return <AlertTriangle className="w-4 h-4" />;
+      case "compliance_violation":
+        return <FileText className="w-4 h-4" />;
+      default:
+        return <Activity className="w-4 h-4" />;
     }
   };
 
   const getSystemIcon = (component: string) => {
-    if (component.toLowerCase().includes('database')) return <Database className="w-4 h-4" />;
-    if (component.toLowerCase().includes('api')) return <Globe className="w-4 h-4" />;
-    if (component.toLowerCase().includes('auth')) return <Key className="w-4 h-4" />;
-    if (component.toLowerCase().includes('network')) return <Network className="w-4 h-4" />;
-    if (component.toLowerCase().includes('storage')) return <HardDrive className="w-4 h-4" />;
+    if (component.toLowerCase().includes("database"))
+      return <Database className="w-4 h-4" />;
+    if (component.toLowerCase().includes("api"))
+      return <Globe className="w-4 h-4" />;
+    if (component.toLowerCase().includes("auth"))
+      return <Key className="w-4 h-4" />;
+    if (component.toLowerCase().includes("network"))
+      return <Network className="w-4 h-4" />;
+    if (component.toLowerCase().includes("storage"))
+      return <HardDrive className="w-4 h-4" />;
     return <Server className="w-4 h-4" />;
   };
 
@@ -453,7 +598,12 @@ export function SecurityDashboard({
               Security Operations Center
             </div>
             <div className="flex items-center space-x-2">
-              <Select value={state.timeRange} onValueChange={(value) => setState(prev => ({ ...prev, timeRange: value as any }))}>
+              <Select
+                value={state.timeRange}
+                onValueChange={(value) =>
+                  setState((prev) => ({ ...prev, timeRange: value as any }))
+                }
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -470,7 +620,9 @@ export function SecurityDashboard({
                 size="sm"
                 variant="outline"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${state.isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${state.isRefreshing ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
               {realTimeUpdates && (
@@ -498,14 +650,18 @@ export function SecurityDashboard({
       {state.error && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{state.error}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {state.error}
+          </AlertDescription>
         </Alert>
       )}
 
       {state.success && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{state.success}</AlertDescription>
+          <AlertDescription className="text-green-800">
+            {state.success}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -513,7 +669,8 @@ export function SecurityDashboard({
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>Critical Alert:</strong> {dashboardMetrics.criticalEvents} critical security events detected.
+            <strong>Critical Alert:</strong> {dashboardMetrics.criticalEvents}{" "}
+            critical security events detected.
           </AlertDescription>
         </Alert>
       )}
@@ -522,7 +679,8 @@ export function SecurityDashboard({
         <Alert className="border-red-200 bg-red-50">
           <Flag className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>Threat Alert:</strong> {dashboardMetrics.criticalThreats} critical threats require immediate attention.
+            <strong>Threat Alert:</strong> {dashboardMetrics.criticalThreats}{" "}
+            critical threats require immediate attention.
           </AlertDescription>
         </Alert>
       )}
@@ -531,13 +689,19 @@ export function SecurityDashboard({
         <Alert className="border-red-200 bg-red-50">
           <XCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>System Alert:</strong> {dashboardMetrics.downComponents} system components are down.
+            <strong>System Alert:</strong> {dashboardMetrics.downComponents}{" "}
+            system components are down.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Main Content */}
-      <Tabs value={state.activeTab} onValueChange={(value) => setState(prev => ({ ...prev, activeTab: value }))}>
+      <Tabs
+        value={state.activeTab}
+        onValueChange={(value) =>
+          setState((prev) => ({ ...prev, activeTab: value }))
+        }
+      >
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
@@ -556,9 +720,15 @@ export function SecurityDashboard({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Security Events</p>
-                      <p className="text-2xl font-bold">{dashboardMetrics.totalEvents}</p>
-                      <p className="text-xs text-gray-500">{dashboardMetrics.criticalEvents} critical</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Security Events
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {dashboardMetrics.totalEvents}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {dashboardMetrics.criticalEvents} critical
+                      </p>
                     </div>
                     <AlertTriangle className="w-8 h-8 text-orange-500" />
                   </div>
@@ -569,9 +739,15 @@ export function SecurityDashboard({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Active Threats</p>
-                      <p className="text-2xl font-bold text-red-600">{dashboardMetrics.activeThreats}</p>
-                      <p className="text-xs text-gray-500">{dashboardMetrics.criticalThreats} critical</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Active Threats
+                      </p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {dashboardMetrics.activeThreats}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {dashboardMetrics.criticalThreats} critical
+                      </p>
                     </div>
                     <Flag className="w-8 h-8 text-red-500" />
                   </div>
@@ -582,9 +758,16 @@ export function SecurityDashboard({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">System Health</p>
-                      <p className="text-2xl font-bold text-green-600">{dashboardMetrics.systemHealthScore.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500">{dashboardMetrics.healthyComponents}/{systemHealth.length} healthy</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        System Health
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {dashboardMetrics.systemHealthScore.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {dashboardMetrics.healthyComponents}/
+                        {systemHealth.length} healthy
+                      </p>
                     </div>
                     <Monitor className="w-8 h-8 text-green-500" />
                   </div>
@@ -595,9 +778,15 @@ export function SecurityDashboard({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Compliance Score</p>
-                      <p className="text-2xl font-bold text-blue-600">{dashboardMetrics.complianceOverall.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500">{complianceStatus.length} frameworks</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Compliance Score
+                      </p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {dashboardMetrics.complianceOverall.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {complianceStatus.length} frameworks
+                      </p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-blue-500" />
                   </div>
@@ -613,17 +802,24 @@ export function SecurityDashboard({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(dashboardMetrics.eventsByType).map(([type, count]) => (
-                      <div key={type} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          {getEventTypeIcon(type)}
-                          <span className="font-medium capitalize">{type.replace('_', ' ')}</span>
+                    {Object.entries(dashboardMetrics.eventsByType).map(
+                      ([type, count]) => (
+                        <div
+                          key={type}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getEventTypeIcon(type)}
+                            <span className="font-medium capitalize">
+                              {type.replace("_", " ")}
+                            </span>
+                          </div>
+                          <Badge className="bg-blue-100 text-blue-600">
+                            {count} events
+                          </Badge>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-600">
-                          {count} events
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -634,17 +830,24 @@ export function SecurityDashboard({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(dashboardMetrics.eventsBySeverity).map(([severity, count]) => (
-                      <div key={severity} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          <AlertTriangle className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium capitalize">{severity}</span>
+                    {Object.entries(dashboardMetrics.eventsBySeverity).map(
+                      ([severity, count]) => (
+                        <div
+                          key={severity}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <AlertTriangle className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium capitalize">
+                              {severity}
+                            </span>
+                          </div>
+                          <Badge className={getSeverityColor(severity)}>
+                            {count} events
+                          </Badge>
                         </div>
-                        <Badge className={getSeverityColor(severity)}>
-                          {count} events
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -658,16 +861,24 @@ export function SecurityDashboard({
               <CardContent>
                 <div className="space-y-3">
                   {filteredEvents
-                    .filter(e => e.severity === 'critical' || e.severity === 'high')
+                    .filter(
+                      (e) => e.severity === "critical" || e.severity === "high",
+                    )
                     .slice(0, 5)
-                    .map(event => (
-                      <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    .map((event) => (
+                      <div
+                        key={event.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                      >
                         <div className="flex items-center space-x-3">
                           {getEventTypeIcon(event.type)}
                           <div>
-                            <p className="font-medium text-sm capitalize">{event.type.replace('_', ' ')}</p>
+                            <p className="font-medium text-sm capitalize">
+                              {event.type.replace("_", " ")}
+                            </p>
                             <p className="text-xs text-gray-600">
-                              {event.source} • {event.userName || 'System'} • {event.ipAddress}
+                              {event.source} • {event.userName || "System"} •{" "}
+                              {event.ipAddress}
                             </p>
                           </div>
                         </div>
@@ -676,7 +887,7 @@ export function SecurityDashboard({
                             {event.severity}
                           </Badge>
                           <Badge className={getStatusColor(event.status)}>
-                            {event.status.replace('_', ' ')}
+                            {event.status.replace("_", " ")}
                           </Badge>
                           <span className="text-xs text-gray-500">
                             {new Date(event.timestamp).toLocaleTimeString()}
@@ -703,12 +914,22 @@ export function SecurityDashboard({
                       <Input
                         placeholder="Search events by type, source, user..."
                         value={state.searchTerm}
-                        onChange={(e) => setState(prev => ({ ...prev, searchTerm: e.target.value }))}
+                        onChange={(e) =>
+                          setState((prev) => ({
+                            ...prev,
+                            searchTerm: e.target.value,
+                          }))
+                        }
                         className="pl-10"
                       />
                     </div>
                   </div>
-                  <Select value={state.filterSeverity} onValueChange={(value) => setState(prev => ({ ...prev, filterSeverity: value }))}>
+                  <Select
+                    value={state.filterSeverity}
+                    onValueChange={(value) =>
+                      setState((prev) => ({ ...prev, filterSeverity: value }))
+                    }
+                  >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Severity" />
                     </SelectTrigger>
@@ -720,30 +941,52 @@ export function SecurityDashboard({
                       <SelectItem value="critical">Critical</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={state.filterType} onValueChange={(value) => setState(prev => ({ ...prev, filterType: value }))}>
+                  <Select
+                    value={state.filterType}
+                    onValueChange={(value) =>
+                      setState((prev) => ({ ...prev, filterType: value }))
+                    }
+                  >
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Event Type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="login_attempt">Login Attempt</SelectItem>
+                      <SelectItem value="login_attempt">
+                        Login Attempt
+                      </SelectItem>
                       <SelectItem value="data_access">Data Access</SelectItem>
-                      <SelectItem value="permission_change">Permission Change</SelectItem>
+                      <SelectItem value="permission_change">
+                        Permission Change
+                      </SelectItem>
                       <SelectItem value="system_alert">System Alert</SelectItem>
-                      <SelectItem value="threat_detected">Threat Detected</SelectItem>
-                      <SelectItem value="compliance_violation">Compliance Violation</SelectItem>
+                      <SelectItem value="threat_detected">
+                        Threat Detected
+                      </SelectItem>
+                      <SelectItem value="compliance_violation">
+                        Compliance Violation
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={state.filterStatus} onValueChange={(value) => setState(prev => ({ ...prev, filterStatus: value }))}>
+                  <Select
+                    value={state.filterStatus}
+                    onValueChange={(value) =>
+                      setState((prev) => ({ ...prev, filterStatus: value }))
+                    }
+                  >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="investigating">Investigating</SelectItem>
+                      <SelectItem value="investigating">
+                        Investigating
+                      </SelectItem>
                       <SelectItem value="resolved">Resolved</SelectItem>
-                      <SelectItem value="false_positive">False Positive</SelectItem>
+                      <SelectItem value="false_positive">
+                        False Positive
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -753,7 +996,7 @@ export function SecurityDashboard({
                     Showing {filteredEvents.length} of {events.length} events
                   </p>
                   <Button
-                    onClick={() => handleExport('security')}
+                    onClick={() => handleExport("security")}
                     disabled={state.isExporting}
                     size="sm"
                     variant="outline"
@@ -767,20 +1010,25 @@ export function SecurityDashboard({
 
             {/* Events List */}
             <div className="grid gap-4">
-              {filteredEvents.slice(0, 50).map(event => (
-                <Card key={event.id} className="hover:shadow-md transition-shadow">
+              {filteredEvents.slice(0, 50).map((event) => (
+                <Card
+                  key={event.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
                         {getEventTypeIcon(event.type)}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-medium capitalize">{event.type.replace('_', ' ')}</h4>
+                            <h4 className="font-medium capitalize">
+                              {event.type.replace("_", " ")}
+                            </h4>
                             <Badge className={getSeverityColor(event.severity)}>
                               {event.severity}
                             </Badge>
                             <Badge className={getStatusColor(event.status)}>
-                              {event.status.replace('_', ' ')}
+                              {event.status.replace("_", " ")}
                             </Badge>
                             <Badge className="bg-purple-100 text-purple-600">
                               Risk: {event.riskScore}/100
@@ -789,16 +1037,21 @@ export function SecurityDashboard({
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-2">
                             <span>Source: {event.source}</span>
                             <span>Target: {event.target}</span>
-                            <span>User: {event.userName || 'System'}</span>
+                            <span>User: {event.userName || "System"}</span>
                             <span>IP: {event.ipAddress}</span>
                           </div>
                           <div className="flex items-center space-x-2 text-xs text-gray-600">
                             <Clock className="w-3 h-3" />
-                            <span>{new Date(event.timestamp).toLocaleString()}</span>
+                            <span>
+                              {new Date(event.timestamp).toLocaleString()}
+                            </span>
                             {event.location && (
                               <>
                                 <MapPin className="w-3 h-3 ml-2" />
-                                <span>{event.location.city}, {event.location.country}</span>
+                                <span>
+                                  {event.location.city},{" "}
+                                  {event.location.country}
+                                </span>
                               </>
                             )}
                           </div>
@@ -806,14 +1059,20 @@ export function SecurityDashboard({
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedEvent: event, showEventDetails: true }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedEvent: event,
+                              showEventDetails: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           Details
                         </Button>
-                        {event.status === 'new' && (
+                        {event.status === "new" && (
                           <Button
                             onClick={() => handleEventInvestigate(event.id)}
                             disabled={state.isRefreshing}
@@ -834,9 +1093,12 @@ export function SecurityDashboard({
               <Card>
                 <CardContent className="p-6 text-center">
                   <Activity className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Events Found
+                  </h3>
                   <p className="text-sm text-gray-600">
-                    No security events match your current filters. Try adjusting your search criteria.
+                    No security events match your current filters. Try adjusting
+                    your search criteria.
                   </p>
                 </CardContent>
               </Card>
@@ -850,7 +1112,7 @@ export function SecurityDashboard({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Threat Intelligence</h3>
               <Button
-                onClick={() => handleExport('threats')}
+                onClick={() => handleExport("threats")}
                 disabled={state.isExporting}
                 size="sm"
                 variant="outline"
@@ -861,61 +1123,87 @@ export function SecurityDashboard({
             </div>
 
             <div className="grid gap-4">
-              {threats.filter(t => t.isActive).map(threat => (
-                <Card key={threat.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h4 className="font-medium">{threat.value}</h4>
-                          <Badge className={getSeverityColor(threat.severity)}>
-                            {threat.severity}
-                          </Badge>
-                          <Badge className="bg-blue-100 text-blue-600">
-                            {threat.type.replace('_', ' ')}
-                          </Badge>
-                          <Badge className="bg-purple-100 text-purple-600">
-                            Confidence: {threat.confidence}%
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">{threat.description}</p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-2">
-                          <span>Source: {threat.source}</span>
-                          <span>Occurrences: {threat.occurrences}</span>
-                          <span>First Seen: {new Date(threat.firstSeen).toLocaleDateString()}</span>
-                          <span>Last Seen: {new Date(threat.lastSeen).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {threat.tags.map(tag => (
-                            <Badge key={tag} className="bg-gray-100 text-gray-600 text-xs">
-                              {tag}
+              {threats
+                .filter((t) => t.isActive)
+                .map((threat) => (
+                  <Card
+                    key={threat.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <h4 className="font-medium">{threat.value}</h4>
+                            <Badge
+                              className={getSeverityColor(threat.severity)}
+                            >
+                              {threat.severity}
                             </Badge>
-                          ))}
+                            <Badge className="bg-blue-100 text-blue-600">
+                              {threat.type.replace("_", " ")}
+                            </Badge>
+                            <Badge className="bg-purple-100 text-purple-600">
+                              Confidence: {threat.confidence}%
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {threat.description}
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-2">
+                            <span>Source: {threat.source}</span>
+                            <span>Occurrences: {threat.occurrences}</span>
+                            <span>
+                              First Seen:{" "}
+                              {new Date(threat.firstSeen).toLocaleDateString()}
+                            </span>
+                            <span>
+                              Last Seen:{" "}
+                              {new Date(threat.lastSeen).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {threat.tags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                className="bg-gray-100 text-gray-600 text-xs"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() =>
+                              setState((prev) => ({
+                                ...prev,
+                                selectedThreat: threat,
+                                showThreatDetails: true,
+                              }))
+                            }
+                            size="sm"
+                            variant="outline"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Details
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleThreatMitigate(threat.id, "block")
+                            }
+                            disabled={state.isRefreshing}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            <Shield className="w-3 h-3 mr-1" />
+                            Block
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedThreat: threat, showThreatDetails: true }))}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          Details
-                        </Button>
-                        <Button
-                          onClick={() => handleThreatMitigate(threat.id, 'block')}
-                          disabled={state.isRefreshing}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <Shield className="w-3 h-3 mr-1" />
-                          Block
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </div>
         </TabsContent>
@@ -926,7 +1214,7 @@ export function SecurityDashboard({
             <h3 className="text-lg font-medium">System Health Monitoring</h3>
 
             <div className="grid gap-4">
-              {systemHealth.map(system => (
+              {systemHealth.map((system) => (
                 <Card key={system.id}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -942,7 +1230,9 @@ export function SecurityDashboard({
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-3">
                             <span>Uptime: {system.uptime.toFixed(2)}%</span>
                             <span>Response: {system.responseTime}ms</span>
-                            <span>Error Rate: {system.errorRate.toFixed(2)}%</span>
+                            <span>
+                              Error Rate: {system.errorRate.toFixed(2)}%
+                            </span>
                             <span>Throughput: {system.throughput} req/s</span>
                           </div>
                           <div className="space-y-2">
@@ -981,7 +1271,7 @@ export function SecurityDashboard({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Compliance Status</h3>
               <Button
-                onClick={() => handleExport('compliance')}
+                onClick={() => handleExport("compliance")}
                 disabled={state.isExporting}
                 size="sm"
                 variant="outline"
@@ -992,15 +1282,17 @@ export function SecurityDashboard({
             </div>
 
             <div className="grid gap-4">
-              {complianceStatus.map(compliance => (
+              {complianceStatus.map((compliance) => (
                 <Card key={compliance.framework}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
-                          <h4 className="font-medium">{compliance.framework}</h4>
+                          <h4 className="font-medium">
+                            {compliance.framework}
+                          </h4>
                           <Badge className={getStatusColor(compliance.status)}>
-                            {compliance.status.replace('_', ' ')}
+                            {compliance.status.replace("_", " ")}
                           </Badge>
                           <Badge className="bg-blue-100 text-blue-600">
                             Score: {compliance.score}%
@@ -1010,7 +1302,9 @@ export function SecurityDashboard({
                           <span>Total: {compliance.requirements.total}</span>
                           <span>Passed: {compliance.requirements.passed}</span>
                           <span>Failed: {compliance.requirements.failed}</span>
-                          <span>Pending: {compliance.requirements.pending}</span>
+                          <span>
+                            Pending: {compliance.requirements.pending}
+                          </span>
                         </div>
                         <div className="space-y-2">
                           <div>
@@ -1018,16 +1312,23 @@ export function SecurityDashboard({
                               <span>Compliance Score</span>
                               <span>{compliance.score}%</span>
                             </div>
-                            <Progress value={compliance.score} className="h-2" />
+                            <Progress
+                              value={compliance.score}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                         {compliance.criticalFindings.length > 0 && (
                           <div className="mt-3">
-                            <p className="text-sm font-medium text-red-600 mb-1">Critical Findings:</p>
+                            <p className="text-sm font-medium text-red-600 mb-1">
+                              Critical Findings:
+                            </p>
                             <ul className="text-xs text-red-600 space-y-1">
-                              {compliance.criticalFindings.slice(0, 3).map((finding, index) => (
-                                <li key={index}>• {finding}</li>
-                              ))}
+                              {compliance.criticalFindings
+                                .slice(0, 3)
+                                .map((finding, index) => (
+                                  <li key={index}>• {finding}</li>
+                                ))}
                             </ul>
                           </div>
                         )}
@@ -1046,7 +1347,7 @@ export function SecurityDashboard({
             <h3 className="text-lg font-medium">Security Metrics</h3>
 
             <div className="grid gap-4">
-              {metrics.map(metric => (
+              {metrics.map((metric) => (
                 <Card key={metric.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -1058,7 +1359,9 @@ export function SecurityDashboard({
                           </Badge>
                         </div>
                         <div className="flex items-center space-x-4">
-                          <span className={`text-2xl font-bold ${getMetricStatusColor(metric)}`}>
+                          <span
+                            className={`text-2xl font-bold ${getMetricStatusColor(metric)}`}
+                          >
                             {metric.value} {metric.unit}
                           </span>
                           <div className="flex items-center space-x-1">
@@ -1069,7 +1372,8 @@ export function SecurityDashboard({
                           </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                          Last updated: {new Date(metric.lastUpdated).toLocaleString()}
+                          Last updated:{" "}
+                          {new Date(metric.lastUpdated).toLocaleString()}
                         </p>
                       </div>
                       <Button
@@ -1098,7 +1402,13 @@ export function SecurityDashboard({
               <CardTitle className="flex items-center justify-between">
                 <span>Event Details</span>
                 <Button
-                  onClick={() => setState(prev => ({ ...prev, showEventDetails: false, selectedEvent: null }))}
+                  onClick={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      showEventDetails: false,
+                      selectedEvent: null,
+                    }))
+                  }
                   variant="outline"
                   size="sm"
                 >
@@ -1109,26 +1419,38 @@ export function SecurityDashboard({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Event Information</Label>
+                  <Label className="text-sm font-medium">
+                    Event Information
+                  </Label>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">ID:</span>
-                      <span className="font-mono">{state.selectedEvent.id}</span>
+                      <span className="font-mono">
+                        {state.selectedEvent.id}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Type:</span>
-                      <span className="capitalize">{state.selectedEvent.type.replace('_', ' ')}</span>
+                      <span className="capitalize">
+                        {state.selectedEvent.type.replace("_", " ")}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Severity:</span>
-                      <Badge className={getSeverityColor(state.selectedEvent.severity)}>
+                      <Badge
+                        className={getSeverityColor(
+                          state.selectedEvent.severity,
+                        )}
+                      >
                         {state.selectedEvent.severity}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status:</span>
-                      <Badge className={getStatusColor(state.selectedEvent.status)}>
-                        {state.selectedEvent.status.replace('_', ' ')}
+                      <Badge
+                        className={getStatusColor(state.selectedEvent.status)}
+                      >
+                        {state.selectedEvent.status.replace("_", " ")}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -1139,7 +1461,9 @@ export function SecurityDashboard({
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium">Source Information</Label>
+                  <Label className="text-sm font-medium">
+                    Source Information
+                  </Label>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Source:</span>
@@ -1151,15 +1475,21 @@ export function SecurityDashboard({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">User:</span>
-                      <span>{state.selectedEvent.userName || 'System'}</span>
+                      <span>{state.selectedEvent.userName || "System"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">IP Address:</span>
-                      <span className="font-mono">{state.selectedEvent.ipAddress}</span>
+                      <span className="font-mono">
+                        {state.selectedEvent.ipAddress}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Timestamp:</span>
-                      <span>{new Date(state.selectedEvent.timestamp).toLocaleString()}</span>
+                      <span>
+                        {new Date(
+                          state.selectedEvent.timestamp,
+                        ).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1178,7 +1508,7 @@ export function SecurityDashboard({
                 <div>
                   <Label className="text-sm font-medium">Actions Taken</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {state.selectedEvent.actionsTaken.map(action => (
+                    {state.selectedEvent.actionsTaken.map((action) => (
                       <Badge key={action} className="bg-blue-100 text-blue-600">
                         {action}
                       </Badge>
@@ -1188,9 +1518,11 @@ export function SecurityDashboard({
               )}
 
               <div className="flex space-x-2">
-                {state.selectedEvent.status === 'new' && (
+                {state.selectedEvent.status === "new" && (
                   <Button
-                    onClick={() => handleEventInvestigate(state.selectedEvent!.id)}
+                    onClick={() =>
+                      handleEventInvestigate(state.selectedEvent!.id)
+                    }
                     disabled={state.isRefreshing}
                     size="sm"
                   >

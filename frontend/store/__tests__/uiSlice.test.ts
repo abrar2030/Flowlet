@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import uiReducer, {
   setTheme,
   toggleSidebar,
@@ -17,11 +17,11 @@ import uiReducer, {
   addToast,
   removeToast,
   clearToasts,
-} from '@/store/uiSlice';
+} from "@/store/uiSlice";
 
-describe('uiSlice', () => {
+describe("uiSlice", () => {
   const initialState = {
-    theme: 'system' as const,
+    theme: "system" as const,
     sidebarOpen: true,
     mobileMenuOpen: false,
     notifications: [],
@@ -35,48 +35,48 @@ describe('uiSlice', () => {
     toasts: [],
   };
 
-  it('should handle setTheme', () => {
-    const action = setTheme('dark');
+  it("should handle setTheme", () => {
+    const action = setTheme("dark");
     const newState = uiReducer(initialState, action);
 
-    expect(newState.theme).toBe('dark');
+    expect(newState.theme).toBe("dark");
   });
 
-  it('should handle toggleSidebar', () => {
+  it("should handle toggleSidebar", () => {
     const action = toggleSidebar();
     const newState = uiReducer(initialState, action);
 
     expect(newState.sidebarOpen).toBe(false);
   });
 
-  it('should handle setSidebarOpen', () => {
+  it("should handle setSidebarOpen", () => {
     const action = setSidebarOpen(false);
     const newState = uiReducer(initialState, action);
 
     expect(newState.sidebarOpen).toBe(false);
   });
 
-  it('should handle toggleMobileMenu', () => {
+  it("should handle toggleMobileMenu", () => {
     const action = toggleMobileMenu();
     const newState = uiReducer(initialState, action);
 
     expect(newState.mobileMenuOpen).toBe(true);
   });
 
-  it('should handle setMobileMenuOpen', () => {
+  it("should handle setMobileMenuOpen", () => {
     const action = setMobileMenuOpen(true);
     const newState = uiReducer(initialState, action);
 
     expect(newState.mobileMenuOpen).toBe(true);
   });
 
-  it('should handle addNotification', () => {
+  it("should handle addNotification", () => {
     const notification = {
-      id: '1',
-      type: 'info' as const,
-      title: 'Test Notification',
-      message: 'This is a test',
-      timestamp: '2023-01-01T00:00:00Z',
+      id: "1",
+      type: "info" as const,
+      title: "Test Notification",
+      message: "This is a test",
+      timestamp: "2023-01-01T00:00:00Z",
       read: false,
     };
 
@@ -88,45 +88,47 @@ describe('uiSlice', () => {
     expect(newState.unreadNotifications).toBe(1);
   });
 
-  it('should handle markNotificationAsRead', () => {
+  it("should handle markNotificationAsRead", () => {
     const stateWithNotification = {
       ...initialState,
-      notifications: [{
-        id: '1',
-        type: 'info' as const,
-        title: 'Test',
-        message: 'Test',
-        timestamp: '2023-01-01T00:00:00Z',
-        read: false,
-      }],
+      notifications: [
+        {
+          id: "1",
+          type: "info" as const,
+          title: "Test",
+          message: "Test",
+          timestamp: "2023-01-01T00:00:00Z",
+          read: false,
+        },
+      ],
       unreadNotifications: 1,
     };
 
-    const action = markNotificationAsRead('1');
+    const action = markNotificationAsRead("1");
     const newState = uiReducer(stateWithNotification, action);
 
     expect(newState.notifications[0].read).toBe(true);
     expect(newState.unreadNotifications).toBe(0);
   });
 
-  it('should handle markAllNotificationsAsRead', () => {
+  it("should handle markAllNotificationsAsRead", () => {
     const stateWithNotifications = {
       ...initialState,
       notifications: [
         {
-          id: '1',
-          type: 'info' as const,
-          title: 'Test 1',
-          message: 'Test 1',
-          timestamp: '2023-01-01T00:00:00Z',
+          id: "1",
+          type: "info" as const,
+          title: "Test 1",
+          message: "Test 1",
+          timestamp: "2023-01-01T00:00:00Z",
           read: false,
         },
         {
-          id: '2',
-          type: 'warning' as const,
-          title: 'Test 2',
-          message: 'Test 2',
-          timestamp: '2023-01-01T00:00:00Z',
+          id: "2",
+          type: "warning" as const,
+          title: "Test 2",
+          message: "Test 2",
+          timestamp: "2023-01-01T00:00:00Z",
           read: false,
         },
       ],
@@ -136,76 +138,81 @@ describe('uiSlice', () => {
     const action = markAllNotificationsAsRead();
     const newState = uiReducer(stateWithNotifications, action);
 
-    expect(newState.notifications.every(n => n.read)).toBe(true);
+    expect(newState.notifications.every((n) => n.read)).toBe(true);
     expect(newState.unreadNotifications).toBe(0);
   });
 
-  it('should handle removeNotification', () => {
+  it("should handle removeNotification", () => {
     const stateWithNotification = {
       ...initialState,
-      notifications: [{
-        id: '1',
-        type: 'info' as const,
-        title: 'Test',
-        message: 'Test',
-        timestamp: '2023-01-01T00:00:00Z',
-        read: false,
-      }],
+      notifications: [
+        {
+          id: "1",
+          type: "info" as const,
+          title: "Test",
+          message: "Test",
+          timestamp: "2023-01-01T00:00:00Z",
+          read: false,
+        },
+      ],
       unreadNotifications: 1,
     };
 
-    const action = removeNotification('1');
+    const action = removeNotification("1");
     const newState = uiReducer(stateWithNotification, action);
 
     expect(newState.notifications).toHaveLength(0);
     expect(newState.unreadNotifications).toBe(0);
   });
 
-  it('should handle setOnlineStatus', () => {
+  it("should handle setOnlineStatus", () => {
     const action = setOnlineStatus(false);
     const newState = uiReducer(initialState, action);
 
     expect(newState.isOnline).toBe(false);
   });
 
-  it('should handle setGlobalLoading', () => {
+  it("should handle setGlobalLoading", () => {
     const action = setGlobalLoading(true);
     const newState = uiReducer(initialState, action);
 
     expect(newState.loading.global).toBe(true);
   });
 
-  it('should handle setComponentLoading', () => {
-    const action = setComponentLoading({ component: 'dashboard', loading: true });
+  it("should handle setComponentLoading", () => {
+    const action = setComponentLoading({
+      component: "dashboard",
+      loading: true,
+    });
     const newState = uiReducer(initialState, action);
 
     expect(newState.loading.components.dashboard).toBe(true);
   });
 
-  it('should handle openModal', () => {
-    const action = openModal('testModal');
+  it("should handle openModal", () => {
+    const action = openModal("testModal");
     const newState = uiReducer(initialState, action);
 
     expect(newState.modals.testModal).toBe(true);
   });
 
-  it('should handle closeModal', () => {
+  it("should handle closeModal", () => {
     const stateWithModal = {
       ...initialState,
       modals: { testModal: true },
     };
 
-    const action = closeModal('testModal');
+    const action = closeModal("testModal");
     const newState = uiReducer(stateWithModal, action);
 
     expect(newState.modals.testModal).toBe(false);
   });
 
-  it('should handle addToast', () => {
+  it("should handle addToast", () => {
     const toast = {
-      type: 'success' as const,
-      title: 'Success',
-      message: 'Operation completed',
+      type: "success" as const,
+      title: "Success",
+      message: "Operation completed",
     };
 
     const action = addToast(toast);
@@ -216,38 +223,40 @@ describe('uiSlice', () => {
     expect(newState.toasts[0].id).toBeDefined();
   });
 
-  it('should handle removeToast', () => {
+  it("should handle removeToast", () => {
     const stateWithToast = {
       ...initialState,
-      toasts: [{
-        id: '1',
-        type: 'info' as const,
-        title: 'Test',
-        message: 'Test',
-      }],
+      toasts: [
+        {
+          id: "1",
+          type: "info" as const,
+          title: "Test",
+          message: "Test",
+        },
+      ],
     };
 
-    const action = removeToast('1');
+    const action = removeToast("1");
     const newState = uiReducer(stateWithToast, action);
 
     expect(newState.toasts).toHaveLength(0);
   });
 
-  it('should handle clearToasts', () => {
+  it("should handle clearToasts", () => {
     const stateWithToasts = {
       ...initialState,
       toasts: [
         {
-          id: '1',
-          type: 'info' as const,
-          title: 'Test 1',
-          message: 'Test 1',
+          id: "1",
+          type: "info" as const,
+          title: "Test 1",
+          message: "Test 1",
         },
         {
-          id: '2',
-          type: 'success' as const,
-          title: 'Test 2',
-          message: 'Test 2',
+          id: "2",
+          type: "success" as const,
+          title: "Test 2",
+          message: "Test 2",
         },
       ],
     };

@@ -1,16 +1,20 @@
 # Flowlet MVP - API Documentation
 
 ## Base URL
+
 - Simple Implementation: `http://localhost:5001`
 - Enhanced Implementation: `http://localhost:5000`
 
 ## Authentication
+
 Currently, the MVP does not require authentication for testing purposes. In production, all endpoints would require proper authentication tokens.
 
 ## Response Format
+
 All API responses follow a consistent format:
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -20,6 +24,7 @@ All API responses follow a consistent format:
 ```
 
 ### Error Response
+
 ```json
 {
   "error": "Error description",
@@ -33,9 +38,11 @@ All API responses follow a consistent format:
 ### Health Check
 
 #### GET /health
+
 Check the health status of the API.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -51,9 +58,11 @@ Check the health status of the API.
 ### API Information
 
 #### GET /api/v1/info
+
 Get information about the API and available features.
 
 **Response:**
+
 ```json
 {
   "api_name": "Flowlet MVP Backend",
@@ -79,9 +88,11 @@ Get information about the API and available features.
 ### Create Wallet
 
 #### POST /api/v1/wallet/create
+
 Create a new wallet for a user.
 
 **Request Body:**
+
 ```json
 {
   "user_id": "string (required)",
@@ -93,6 +104,7 @@ Create a new wallet for a user.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -102,8 +114,8 @@ Create a new wallet for a user.
     "account_number": "1234", // Last 4 digits only
     "account_type": "checking",
     "currency": "USD",
-    "available_balance": 100.00,
-    "current_balance": 100.00,
+    "available_balance": 100.0,
+    "current_balance": 100.0,
     "status": "active"
   },
   "message": "Wallet created successfully"
@@ -113,16 +125,18 @@ Create a new wallet for a user.
 ### Get Wallet Balance
 
 #### GET /api/v1/wallet/{wallet_id}/balance
+
 Get the current balance of a wallet.
 
 **Response:**
+
 ```json
 {
   "success": true,
   "wallet_id": "wallet_uuid",
   "account_name": "My Checking Account",
-  "available_balance": 125.50,
-  "current_balance": 125.50,
+  "available_balance": 125.5,
+  "current_balance": 125.5,
   "currency": "USD",
   "last_updated": "2025-06-15T19:30:00Z"
 }
@@ -131,9 +145,11 @@ Get the current balance of a wallet.
 ### Deposit Funds
 
 #### POST /api/v1/wallet/{wallet_id}/deposit
+
 Deposit funds into a wallet.
 
 **Request Body:**
+
 ```json
 {
   "amount": "decimal (required)",
@@ -142,17 +158,18 @@ Deposit funds into a wallet.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "transaction": {
     "id": "transaction_uuid",
     "transaction_id": "TXN-20250615-ABC12345",
-    "amount": 50.00,
+    "amount": 50.0,
     "currency": "USD",
     "description": "Deposit to wallet"
   },
-  "new_balance": 175.50,
+  "new_balance": 175.5,
   "message": "Deposit completed successfully"
 }
 ```
@@ -160,9 +177,11 @@ Deposit funds into a wallet.
 ### Withdraw Funds
 
 #### POST /api/v1/wallet/{wallet_id}/withdraw
+
 Withdraw funds from a wallet.
 
 **Request Body:**
+
 ```json
 {
   "amount": "decimal (required)",
@@ -171,17 +190,18 @@ Withdraw funds from a wallet.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "transaction": {
     "id": "transaction_uuid",
     "transaction_id": "TXN-20250615-DEF67890",
-    "amount": 25.00,
+    "amount": 25.0,
     "currency": "USD",
     "description": "Withdrawal from wallet"
   },
-  "new_balance": 150.50,
+  "new_balance": 150.5,
   "message": "Withdrawal completed successfully"
 }
 ```
@@ -189,9 +209,11 @@ Withdraw funds from a wallet.
 ### Get Transaction History
 
 #### GET /api/v1/wallet/{wallet_id}/transactions
+
 Get transaction history for a wallet.
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `per_page`: Items per page (default: 20, max: 100)
 - `transaction_type`: Filter by type (credit, debit, transfer)
@@ -199,6 +221,7 @@ Get transaction history for a wallet.
 - `end_date`: Filter to date (ISO format)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -208,7 +231,7 @@ Get transaction history for a wallet.
       "transaction_id": "TXN-20250615-ABC12345",
       "transaction_type": "credit",
       "transaction_category": "deposit",
-      "amount": 50.00,
+      "amount": 50.0,
       "currency": "USD",
       "description": "Deposit to wallet",
       "created_at": "2025-06-15T19:30:00Z"
@@ -225,9 +248,11 @@ Get transaction history for a wallet.
 ### Get User Wallets
 
 #### GET /api/v1/wallet/user/{user_id}
+
 Get all wallets for a specific user.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -238,8 +263,8 @@ Get all wallets for a specific user.
       "account_name": "My Checking Account",
       "account_type": "checking",
       "currency": "USD",
-      "available_balance": 150.50,
-      "current_balance": 150.50,
+      "available_balance": 150.5,
+      "current_balance": 150.5,
       "status": "active"
     }
   ],
@@ -252,9 +277,11 @@ Get all wallets for a specific user.
 ### Transfer Funds
 
 #### POST /api/v1/payment/transfer
+
 Transfer funds between two wallets.
 
 **Request Body:**
+
 ```json
 {
   "from_wallet_id": "string (required)",
@@ -266,6 +293,7 @@ Transfer funds between two wallets.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -273,15 +301,15 @@ Transfer funds between two wallets.
   "from_wallet": {
     "wallet_id": "from_wallet_uuid",
     "account_name": "Sender Account",
-    "new_balance": 120.50
+    "new_balance": 120.5
   },
   "to_wallet": {
     "wallet_id": "to_wallet_uuid",
     "account_name": "Receiver Account",
-    "new_balance": 80.00
+    "new_balance": 80.0
   },
   "transfer_details": {
-    "amount": 30.00,
+    "amount": 30.0,
     "currency": "USD",
     "description": "Payment for services",
     "processed_at": "2025-06-15T19:30:00Z"
@@ -293,9 +321,11 @@ Transfer funds between two wallets.
 ### Send Payment
 
 #### POST /api/v1/payment/send
+
 Send payment to a recipient (by email, phone, or account number).
 
 **Request Body:**
+
 ```json
 {
   "from_wallet_id": "string (required)",
@@ -308,6 +338,7 @@ Send payment to a recipient (by email, phone, or account number).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -315,7 +346,7 @@ Send payment to a recipient (by email, phone, or account number).
   "sender": {
     "wallet_id": "sender_wallet_uuid",
     "account_name": "Sender Account",
-    "new_balance": 90.50
+    "new_balance": 90.5
   },
   "recipient": {
     "wallet_id": "recipient_wallet_uuid",
@@ -324,7 +355,7 @@ Send payment to a recipient (by email, phone, or account number).
     "type": "email"
   },
   "payment_details": {
-    "amount": 30.00,
+    "amount": 30.0,
     "currency": "USD",
     "description": "Payment to recipient",
     "processed_at": "2025-06-15T19:30:00Z"
@@ -336,9 +367,11 @@ Send payment to a recipient (by email, phone, or account number).
 ### Create Payment Request
 
 #### POST /api/v1/payment/request
+
 Create a payment request (for future implementation).
 
 **Request Body:**
+
 ```json
 {
   "from_wallet_id": "string (required)",
@@ -349,13 +382,14 @@ Create a payment request (for future implementation).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "request_reference": "REQ-20250615193000-GHI12345",
   "wallet_id": "wallet_uuid",
   "account_name": "My Account",
-  "amount": 50.00,
+  "amount": 50.0,
   "currency": "USD",
   "description": "Payment request",
   "status": "pending",
@@ -368,9 +402,11 @@ Create a payment request (for future implementation).
 ### Get Payment History
 
 #### GET /api/v1/payment/history/{wallet_id}
+
 Get payment history for a wallet (payments sent and received).
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `per_page`: Items per page (default: 20, max: 100)
 - `type`: Filter by type (sent, received, all) (default: all)
@@ -378,6 +414,7 @@ Get payment history for a wallet (payments sent and received).
 - `end_date`: Filter to date (ISO format)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -387,7 +424,7 @@ Get payment history for a wallet (payments sent and received).
       "transaction_id": "TXN-20250615-ABC12345",
       "transaction_type": "debit",
       "transaction_category": "payment",
-      "amount": 30.00,
+      "amount": 30.0,
       "currency": "USD",
       "description": "Payment sent",
       "created_at": "2025-06-15T19:30:00Z",
@@ -404,24 +441,25 @@ Get payment history for a wallet (payments sent and received).
 
 ## Error Codes
 
-| Code | Description |
-|------|-------------|
-| `WALLET_NOT_FOUND` | The specified wallet does not exist |
-| `USER_NOT_FOUND` | The specified user does not exist |
-| `INSUFFICIENT_FUNDS` | Not enough balance for the operation |
-| `INVALID_AMOUNT` | Amount is invalid (negative or zero) |
-| `INVALID_AMOUNT_FORMAT` | Amount format is incorrect |
-| `CURRENCY_MISMATCH` | Different currencies between wallets |
-| `MISSING_FIELDS` | Required fields are missing |
-| `WALLET_INACTIVE` | Wallet is not in active status |
-| `DAILY_LIMIT_EXCEEDED` | Daily transaction limit exceeded |
-| `INVALID_CONTENT_TYPE` | Content-Type must be application/json |
-| `INVALID_JSON` | Request body contains invalid JSON |
-| `INTERNAL_ERROR` | Internal server error occurred |
+| Code                    | Description                           |
+| ----------------------- | ------------------------------------- |
+| `WALLET_NOT_FOUND`      | The specified wallet does not exist   |
+| `USER_NOT_FOUND`        | The specified user does not exist     |
+| `INSUFFICIENT_FUNDS`    | Not enough balance for the operation  |
+| `INVALID_AMOUNT`        | Amount is invalid (negative or zero)  |
+| `INVALID_AMOUNT_FORMAT` | Amount format is incorrect            |
+| `CURRENCY_MISMATCH`     | Different currencies between wallets  |
+| `MISSING_FIELDS`        | Required fields are missing           |
+| `WALLET_INACTIVE`       | Wallet is not in active status        |
+| `DAILY_LIMIT_EXCEEDED`  | Daily transaction limit exceeded      |
+| `INVALID_CONTENT_TYPE`  | Content-Type must be application/json |
+| `INVALID_JSON`          | Request body contains invalid JSON    |
+| `INTERNAL_ERROR`        | Internal server error occurred        |
 
 ## Rate Limiting
 
 The API implements rate limiting to prevent abuse:
+
 - 1000 requests per hour per IP
 - 100 requests per minute per IP
 
@@ -436,6 +474,7 @@ python3.11 test_mvp.py
 ```
 
 The test script will:
+
 1. Check API health
 2. Create test wallets
 3. Test deposits and withdrawals
@@ -445,6 +484,7 @@ The test script will:
 ## cURL Examples
 
 ### Create a wallet:
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/wallet/create \
   -H "Content-Type: application/json" \
@@ -452,11 +492,13 @@ curl -X POST http://localhost:5001/api/v1/wallet/create \
 ```
 
 ### Check balance:
+
 ```bash
 curl http://localhost:5001/api/v1/wallet/{wallet_id}/balance
 ```
 
 ### Make a deposit:
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/wallet/{wallet_id}/deposit \
   -H "Content-Type: application/json" \
@@ -464,6 +506,7 @@ curl -X POST http://localhost:5001/api/v1/wallet/{wallet_id}/deposit \
 ```
 
 ### Transfer funds:
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/payment/transfer \
   -H "Content-Type: application/json" \

@@ -25,9 +25,11 @@ Retrieves a summary of key financial metrics for a specific user, suitable for a
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved dashboard analytics.
   ```json
   {
@@ -65,12 +67,15 @@ Provides detailed spending analytics for a user over a specified period, includi
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Query Parameters**:
+
 - `period` (string, optional): The period for which to retrieve spending data. Supported values: `7d` (7 days), `30d` (30 days, default), `90d` (90 days), `1y` (1 year).
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved spending analytics.
   ```json
   {
@@ -105,12 +110,15 @@ Provides detailed income analytics for a user over a specified period, including
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Query Parameters**:
+
 - `period` (string, optional): The period for which to retrieve income data. Supported values: `7d` (7 days), `30d` (30 days, default), `90d` (90 days), `1y` (1 year).
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved income analytics.
   ```json
   {
@@ -145,12 +153,15 @@ Retrieves the historical balance trend for a user over a specified period. Note:
 **Permissions**: `token_required` (User must be `user_id` or `admin_required`)
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user.
 
 **Query Parameters**:
+
 - `period` (string, optional): The period for which to retrieve balance history. Supported values: `7d` (7 days), `30d` (30 days, default), `90d` (90 days), `1y` (1 year).
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved balance history.
   ```json
   {

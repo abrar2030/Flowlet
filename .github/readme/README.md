@@ -10,19 +10,16 @@ GitHub Actions serve as the backbone of Flowlet's automated development lifecycl
 
 The `.github/workflows/` directory contains a collection of YAML files, each defining a specific CI/CD pipeline or automation task. These workflows are categorized by the components or aspects of the Flowlet project they manage:
 
-*   `documentation.yml`: Manages the build and deployment of project documentation.
-*   `kubernetes-ci.yml`: Ensures the quality and validity of Kubernetes and Helm configurations.
-*   `node-ci.yml`: Performs CI checks for general Node.js projects within the repository.
-*   `nodejs-frontend-ci-cd.yml`: Handles CI/CD for the Node.js-based frontend components.
-*   `python-backend-ci-cd.yml`: Manages CI/CD for the Python-based backend components.
-*   `python-ci.yml`: Performs CI checks for general Python projects within the repository.
-*   `scripts-ci.yml`: Validates and lints operational scripts.
-*   `terraform-ci.yml`: Ensures the quality and validity of Terraform infrastructure configurations.
+- `documentation.yml`: Manages the build and deployment of project documentation.
+- `kubernetes-ci.yml`: Ensures the quality and validity of Kubernetes and Helm configurations.
+- `node-ci.yml`: Performs CI checks for general Node.js projects within the repository.
+- `nodejs-frontend-ci-cd.yml`: Handles CI/CD for the Node.js-based frontend components.
+- `python-backend-ci-cd.yml`: Manages CI/CD for the Python-based backend components.
+- `python-ci.yml`: Performs CI checks for general Python projects within the repository.
+- `scripts-ci.yml`: Validates and lints operational scripts.
+- `terraform-ci.yml`: Ensures the quality and validity of Terraform infrastructure configurations.
 
 This modular approach allows for independent testing and deployment of different components, enhancing agility and reducing the blast radius of potential issues, a key consideration for complex financial systems.
-
-
-
 
 ## Detailed Workflow Descriptions
 
@@ -32,22 +29,22 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` branch on changes within the `docs/**` path.
-*   `pull_request` events targeting `main` branch on changes within the `docs/**` path.
+- `push` events to `main` branch on changes within the `docs/**` path.
+- `pull_request` events targeting `main` branch on changes within the `docs/**` path.
 
 **Key Steps:**
 
-*   **Checkout Repository:** Fetches the code from the repository.
-*   **Set up Python:** Configures a Python environment for documentation tools.
-*   **Install Documentation Dependencies:** Installs necessary Python packages like Sphinx and `sphinx-rtd-theme`.
-*   **Build Documentation:** Executes the Sphinx build command to generate HTML documentation.
-*   **Deploy Documentation to GitHub Pages:** If the push is to the `main` branch, the built documentation is deployed to GitHub Pages. This step ensures that the latest documentation is always available.
+- **Checkout Repository:** Fetches the code from the repository.
+- **Set up Python:** Configures a Python environment for documentation tools.
+- **Install Documentation Dependencies:** Installs necessary Python packages like Sphinx and `sphinx-rtd-theme`.
+- **Build Documentation:** Executes the Sphinx build command to generate HTML documentation.
+- **Deploy Documentation to GitHub Pages:** If the push is to the `main` branch, the built documentation is deployed to GitHub Pages. This step ensures that the latest documentation is always available.
 
 **Financial Industry Relevance:**
 
-*   **Auditability and Compliance:** Automated documentation ensures that all operational procedures, system architectures, and compliance-related information are accurately reflected and readily available for audits.
-*   **Knowledge Management:** Provides a centralized and continuously updated resource for developers, operations teams, and auditors, reducing reliance on tribal knowledge.
-*   **Transparency:** Promotes transparency in project development and operations, which is a key principle in regulated financial environments.
+- **Auditability and Compliance:** Automated documentation ensures that all operational procedures, system architectures, and compliance-related information are accurately reflected and readily available for audits.
+- **Knowledge Management:** Provides a centralized and continuously updated resource for developers, operations teams, and auditors, reducing reliance on tribal knowledge.
+- **Transparency:** Promotes transparency in project development and operations, which is a key principle in regulated financial environments.
 
 ### 2. Kubernetes and Helm CI (`kubernetes-ci.yml`)
 
@@ -55,23 +52,23 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` or `develop` branches on changes within `kubernetes/**` or `infrastructure/helm/**` paths.
-*   `pull_request` events targeting `main` or `develop` branches on changes within `kubernetes/**` or `infrastructure/helm/**` paths.
+- `push` events to `main` or `develop` branches on changes within `kubernetes/**` or `infrastructure/helm/**` paths.
+- `pull_request` events targeting `main` or `develop` branches on changes within `kubernetes/**` or `infrastructure/helm/**` paths.
 
 **Key Steps:**
 
-*   **Checkout Repository:** Fetches the code.
-*   **Set up Kubeval:** Installs and configures Kubeval for validating Kubernetes YAML files against their schemas.
-*   **Set up Helm:** Installs and configures Helm for chart management.
-*   **Lint Helm Charts:** Runs `helm lint` to check Helm charts for syntax errors and adherence to best practices.
-*   **Validate Helm Charts:** Uses `helm template` to render the Helm charts into raw Kubernetes YAML and then validates these generated manifests using Kubeval. This ensures that the final deployed resources conform to Kubernetes API specifications.
+- **Checkout Repository:** Fetches the code.
+- **Set up Kubeval:** Installs and configures Kubeval for validating Kubernetes YAML files against their schemas.
+- **Set up Helm:** Installs and configures Helm for chart management.
+- **Lint Helm Charts:** Runs `helm lint` to check Helm charts for syntax errors and adherence to best practices.
+- **Validate Helm Charts:** Uses `helm template` to render the Helm charts into raw Kubernetes YAML and then validates these generated manifests using Kubeval. This ensures that the final deployed resources conform to Kubernetes API specifications.
 
 **Financial Industry Relevance:**
 
-*   **Infrastructure as Code (IaC) Validation:** Ensures that the infrastructure definitions are syntactically correct and semantically valid, preventing deployment failures and misconfigurations that could impact financial services.
-*   **Security by Design:** By validating configurations against schemas, this workflow helps catch potential security misconfigurations early in the development cycle, reducing the attack surface.
-*   **Compliance with Standards:** Enforces adherence to internal and external Kubernetes configuration standards, which is crucial for regulatory compliance (e.g., NIST, ISO 27001).
-*   **Reduced Operational Risk:** Automated validation minimizes the risk of deploying faulty infrastructure, contributing to higher system availability and reliability.
+- **Infrastructure as Code (IaC) Validation:** Ensures that the infrastructure definitions are syntactically correct and semantically valid, preventing deployment failures and misconfigurations that could impact financial services.
+- **Security by Design:** By validating configurations against schemas, this workflow helps catch potential security misconfigurations early in the development cycle, reducing the attack surface.
+- **Compliance with Standards:** Enforces adherence to internal and external Kubernetes configuration standards, which is crucial for regulatory compliance (e.g., NIST, ISO 27001).
+- **Reduced Operational Risk:** Automated validation minimizes the risk of deploying faulty infrastructure, contributing to higher system availability and reliability.
 
 ### 3. Node.js CI (`node-ci.yml`)
 
@@ -79,21 +76,21 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` and `pull_request` events to any branch.
+- `push` and `pull_request` events to any branch.
 
 **Key Steps:**
 
-*   **Checkout Repository:** Fetches the code.
-*   **Use Node.js 16.x:** Sets up a Node.js environment.
-*   **Install dependencies:** Installs Node.js package dependencies using `npm install`.
-*   **Run tests:** Executes `npm test` to run unit and integration tests.
-*   **Build:** Runs `npm run build` to compile or transpile the Node.js project.
+- **Checkout Repository:** Fetches the code.
+- **Use Node.js 16.x:** Sets up a Node.js environment.
+- **Install dependencies:** Installs Node.js package dependencies using `npm install`.
+- **Run tests:** Executes `npm test` to run unit and integration tests.
+- **Build:** Runs `npm run build` to compile or transpile the Node.js project.
 
 **Financial Industry Relevance:**
 
-*   **Code Quality Assurance:** Ensures that all Node.js code components meet defined quality standards, reducing the likelihood of bugs and vulnerabilities.
-*   **Reliability:** Verifies that Node.js components function as expected, contributing to the overall reliability of the Flowlet platform.
-*   **Consistency:** Promotes consistent development practices across all Node.js projects within the repository.
+- **Code Quality Assurance:** Ensures that all Node.js code components meet defined quality standards, reducing the likelihood of bugs and vulnerabilities.
+- **Reliability:** Verifies that Node.js components function as expected, contributing to the overall reliability of the Flowlet platform.
+- **Consistency:** Promotes consistent development practices across all Node.js projects within the repository.
 
 ### 4. Node.js Frontend CI/CD (`nodejs-frontend-ci-cd.yml`)
 
@@ -101,31 +98,31 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` or `develop` branches on changes within the `frontend/**` path.
-*   `pull_request` events targeting `main` or `develop` branches on changes within the `frontend/**` path.
+- `push` events to `main` or `develop` branches on changes within the `frontend/**` path.
+- `pull_request` events targeting `main` or `develop` branches on changes within the `frontend/**` path.
 
 **Key Steps:**
 
-*   **Build and Test Job (`build-and-test`):
-    *   **Checkout Repository:** Fetches the code.
-    *   **Use Node.js 16.x:** Sets up the Node.js environment.
-    *   **Install dependencies (web-frontend):** Installs Node.js dependencies for the `web-frontend`.
-    *   **Run tests (web-frontend):** Executes unit and integration tests for the `web-frontend`.
-    *   **Build (web-frontend):** Builds the `web-frontend` application.
-*   **Security Scan Job (`security-scan`):
-    *   **Needs `build-and-test`:** Ensures that the security scan runs only after a successful build and test.
-    *   **Checkout Repository & Set up Node.js:** Similar setup steps.
-    *   **Install dependencies for security scan:** Installs dependencies required for the security scanning tools.
-    *   **Run npm audit:** Executes `npm audit` to identify known vulnerabilities in project dependencies. The output is saved to a JSON file.
-    *   **Upload npm audit report:** Uploads the generated audit report as a workflow artifact for later review.
-*   **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of frontend deployment logic. This would typically involve deploying the built frontend assets to a web server or CDN.
+- \*\*Build and Test Job (`build-and-test`):
+  - **Checkout Repository:** Fetches the code.
+  - **Use Node.js 16.x:** Sets up the Node.js environment.
+  - **Install dependencies (web-frontend):** Installs Node.js dependencies for the `web-frontend`.
+  - **Run tests (web-frontend):** Executes unit and integration tests for the `web-frontend`.
+  - **Build (web-frontend):** Builds the `web-frontend` application.
+- \*\*Security Scan Job (`security-scan`):
+  - **Needs `build-and-test`:** Ensures that the security scan runs only after a successful build and test.
+  - **Checkout Repository & Set up Node.js:** Similar setup steps.
+  - **Install dependencies for security scan:** Installs dependencies required for the security scanning tools.
+  - **Run npm audit:** Executes `npm audit` to identify known vulnerabilities in project dependencies. The output is saved to a JSON file.
+  - **Upload npm audit report:** Uploads the generated audit report as a workflow artifact for later review.
+- **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of frontend deployment logic. This would typically involve deploying the built frontend assets to a web server or CDN.
 
 **Financial Industry Relevance:**
 
-*   **Frontend Security:** `npm audit` is a critical step for identifying and mitigating known vulnerabilities in third-party JavaScript libraries, which could otherwise expose sensitive user data or lead to application compromise.
-*   **User Experience and Reliability:** Thorough testing and building ensure a stable and performant user interface, crucial for maintaining user trust and facilitating smooth financial transactions.
-*   **Compliance with Security Standards:** Integrates security scanning into the CI/CD pipeline, aligning with secure software development lifecycle (SSDLC) requirements often mandated in financial regulations.
-*   **Automated Quality Gates:** Ensures that only high-quality, secure code is merged and deployed, reducing operational risk.
+- **Frontend Security:** `npm audit` is a critical step for identifying and mitigating known vulnerabilities in third-party JavaScript libraries, which could otherwise expose sensitive user data or lead to application compromise.
+- **User Experience and Reliability:** Thorough testing and building ensure a stable and performant user interface, crucial for maintaining user trust and facilitating smooth financial transactions.
+- **Compliance with Security Standards:** Integrates security scanning into the CI/CD pipeline, aligning with secure software development lifecycle (SSDLC) requirements often mandated in financial regulations.
+- **Automated Quality Gates:** Ensures that only high-quality, secure code is merged and deployed, reducing operational risk.
 
 ### 5. Python Backend CI/CD (`python-backend-ci-cd.yml`)
 
@@ -133,32 +130,32 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` or `develop` branches on changes within the `backend/**` path.
-*   `pull_request` events targeting `main` or `develop` branches on changes within the `backend/**` path.
+- `push` events to `main` or `develop` branches on changes within the `backend/**` path.
+- `pull_request` events targeting `main` or `develop` branches on changes within the `backend/**` path.
 
 **Key Steps:**
 
-*   **Build and Test Job (`build-and-test`):
-    *   **Checkout Repository & Set up Python:** Fetches the code and configures a Python 3.9 environment.
-    *   **Install dependencies:** Installs Python packages from `backend/requirements.txt`.
-    *   **Run Black Formatter:** Enforces consistent code formatting using Black, ensuring readability and maintainability.
-    *   **Run Flake8 Linter:** Performs static code analysis using Flake8 to identify stylistic errors, programming bugs, and complex code.
-    *   **Run Pytest Tests:** Executes unit and integration tests for the backend, ensuring functional correctness.
-*   **Security Scan Job (`security-scan`):
-    *   **Needs `build-and-test`:** Ensures the security scan runs after successful build and tests.
-    *   **Checkout Repository & Set up Python:** Similar setup steps.
-    *   **Install dependencies:** Installs backend dependencies for the security scan.
-    *   **Run Bandit Security Scan:** Executes Bandit, a security linter for Python, to find common security issues in the code. The output is saved to a JSON file.
-    *   **Upload Bandit Report:** Uploads the generated Bandit report as a workflow artifact.
-*   **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of backend deployment logic. This would typically involve building and pushing Docker images and deploying to Kubernetes.
+- \*\*Build and Test Job (`build-and-test`):
+  - **Checkout Repository & Set up Python:** Fetches the code and configures a Python 3.9 environment.
+  - **Install dependencies:** Installs Python packages from `backend/requirements.txt`.
+  - **Run Black Formatter:** Enforces consistent code formatting using Black, ensuring readability and maintainability.
+  - **Run Flake8 Linter:** Performs static code analysis using Flake8 to identify stylistic errors, programming bugs, and complex code.
+  - **Run Pytest Tests:** Executes unit and integration tests for the backend, ensuring functional correctness.
+- \*\*Security Scan Job (`security-scan`):
+  - **Needs `build-and-test`:** Ensures the security scan runs after successful build and tests.
+  - **Checkout Repository & Set up Python:** Similar setup steps.
+  - **Install dependencies:** Installs backend dependencies for the security scan.
+  - **Run Bandit Security Scan:** Executes Bandit, a security linter for Python, to find common security issues in the code. The output is saved to a JSON file.
+  - **Upload Bandit Report:** Uploads the generated Bandit report as a workflow artifact.
+- **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of backend deployment logic. This would typically involve building and pushing Docker images and deploying to Kubernetes.
 
 **Financial Industry Relevance:**
 
-*   **Code Quality and Standards:** Enforces strict coding standards (Black, Flake8) to ensure high-quality, maintainable, and auditable code, which is essential for long-term stability and regulatory compliance.
-*   **Automated Testing:** Comprehensive Pytest execution verifies the correctness of financial logic and API behavior, reducing the risk of errors in transactions or data processing.
-*   **Static Application Security Testing (SAST):** Bandit scan provides SAST capabilities, identifying potential security vulnerabilities in the Python codebase early in the development cycle. This is a critical component of a secure software development lifecycle (SSDLC) in finance.
-*   **Reduced Operational Risk:** By automating testing and security scanning, this workflow significantly reduces the risk of deploying faulty or vulnerable backend services, protecting sensitive financial data and operations.
-*   **Compliance:** The combination of code quality checks, automated testing, and security scanning directly supports compliance with various financial regulations that mandate secure development practices and robust testing.
+- **Code Quality and Standards:** Enforces strict coding standards (Black, Flake8) to ensure high-quality, maintainable, and auditable code, which is essential for long-term stability and regulatory compliance.
+- **Automated Testing:** Comprehensive Pytest execution verifies the correctness of financial logic and API behavior, reducing the risk of errors in transactions or data processing.
+- **Static Application Security Testing (SAST):** Bandit scan provides SAST capabilities, identifying potential security vulnerabilities in the Python codebase early in the development cycle. This is a critical component of a secure software development lifecycle (SSDLC) in finance.
+- **Reduced Operational Risk:** By automating testing and security scanning, this workflow significantly reduces the risk of deploying faulty or vulnerable backend services, protecting sensitive financial data and operations.
+- **Compliance:** The combination of code quality checks, automated testing, and security scanning directly supports compliance with various financial regulations that mandate secure development practices and robust testing.
 
 ### 6. Python CI (`python-ci.yml`)
 
@@ -166,20 +163,20 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` and `pull_request` events to any branch.
+- `push` and `pull_request` events to any branch.
 
 **Key Steps:**
 
-*   **Checkout Repository & Set up Python:** Fetches the code and configures a Python 3.9 environment.
-*   **Install dependencies:** Installs Python packages from `Flowlet/backend/requirements.txt`.
-*   **Lint with flake8:** Performs static code analysis using Flake8 with specific rules for linting.
-*   **Test with pytest:** Executes Pytest tests, specifically targeting `test_api.py` and `test_offline.py` within the backend directory.
+- **Checkout Repository & Set up Python:** Fetches the code and configures a Python 3.9 environment.
+- **Install dependencies:** Installs Python packages from `Flowlet/backend/requirements.txt`.
+- **Lint with flake8:** Performs static code analysis using Flake8 with specific rules for linting.
+- **Test with pytest:** Executes Pytest tests, specifically targeting `test_api.py` and `test_offline.py` within the backend directory.
 
 **Financial Industry Relevance:**
 
-*   **Consistent Code Quality:** Ensures that all Python code, regardless of its primary function, maintains a consistent level of quality and adherence to coding standards.
-*   **Early Bug Detection:** Catches potential issues in Python scripts or modules early in the development process.
-*   **Support for Backend CI/CD:** While `python-backend-ci-cd.yml` is more comprehensive, this workflow provides a baseline for other Python components, ensuring they are also well-maintained.
+- **Consistent Code Quality:** Ensures that all Python code, regardless of its primary function, maintains a consistent level of quality and adherence to coding standards.
+- **Early Bug Detection:** Catches potential issues in Python scripts or modules early in the development process.
+- **Support for Backend CI/CD:** While `python-backend-ci-cd.yml` is more comprehensive, this workflow provides a baseline for other Python components, ensuring they are also well-maintained.
 
 ### 7. Scripts CI (`scripts-ci.yml`)
 
@@ -187,21 +184,21 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` or `develop` branches on changes within the `scripts/**` path.
-*   `pull_request` events targeting `main` or `develop` branches on changes within the `scripts/**` path.
+- `push` events to `main` or `develop` branches on changes within the `scripts/**` path.
+- `pull_request` events targeting `main` or `develop` branches on changes within the `scripts/**` path.
 
 **Key Steps:**
 
-*   **Checkout Repository:** Fetches the code.
-*   **Install ShellCheck:** Installs the ShellCheck static analysis tool for shell scripts.
-*   **Run ShellCheck on scripts:** Executes ShellCheck on all `.sh` files within the `scripts/` directory to identify common syntax errors, logical flaws, and potential security vulnerabilities.
+- **Checkout Repository:** Fetches the code.
+- **Install ShellCheck:** Installs the ShellCheck static analysis tool for shell scripts.
+- **Run ShellCheck on scripts:** Executes ShellCheck on all `.sh` files within the `scripts/` directory to identify common syntax errors, logical flaws, and potential security vulnerabilities.
 
 **Financial Industry Relevance:**
 
-*   **Operational Reliability:** Ensures that critical operational scripts (e.g., deployment, backup, monitoring scripts) are free from errors, reducing the risk of operational failures.
-*   **Security of Automation:** ShellCheck helps identify potential security vulnerabilities in scripts (e.g., improper handling of variables, command injection risks), which is crucial for maintaining the integrity of automated processes in a financial context.
-*   **Compliance with Scripting Standards:** Enforces consistent scripting practices and helps adhere to internal and external guidelines for secure and robust automation.
-*   **Auditability:** By ensuring script quality, this workflow contributes to the overall auditability of operational procedures.
+- **Operational Reliability:** Ensures that critical operational scripts (e.g., deployment, backup, monitoring scripts) are free from errors, reducing the risk of operational failures.
+- **Security of Automation:** ShellCheck helps identify potential security vulnerabilities in scripts (e.g., improper handling of variables, command injection risks), which is crucial for maintaining the integrity of automated processes in a financial context.
+- **Compliance with Scripting Standards:** Enforces consistent scripting practices and helps adhere to internal and external guidelines for secure and robust automation.
+- **Auditability:** By ensuring script quality, this workflow contributes to the overall auditability of operational procedures.
 
 ### 8. Terraform CI (`terraform-ci.yml`)
 
@@ -209,44 +206,41 @@ This modular approach allows for independent testing and deployment of different
 
 **Triggers:**
 
-*   `push` events to `main` or `develop` branches on changes within the `infrastructure/terraform/**` path.
-*   `pull_request` events targeting `main` or `develop` branches on changes within the `infrastructure/terraform/**` path.
+- `push` events to `main` or `develop` branches on changes within the `infrastructure/terraform/**` path.
+- `pull_request` events targeting `main` or `develop` branches on changes within the `infrastructure/terraform/**` path.
 
 **Key Steps:**
 
-*   **Checkout Repository:** Fetches the code.
-*   **Setup Terraform:** Installs and configures a specified version of Terraform.
-*   **Terraform Init:** Initializes a Terraform working directory, downloading necessary providers.
-*   **Terraform Format:** Checks if Terraform configuration files are correctly formatted.
-*   **Terraform Validate:** Validates the syntax and configuration of Terraform files, ensuring they are internally consistent and valid.
-*   **Terraform Plan:** Generates an execution plan, showing what actions Terraform will take to achieve the desired state. This step is crucial for reviewing infrastructure changes before they are applied.
-*   **Update Pull Request:** For pull requests, the output of the Terraform plan (including format and validation results) is posted as a comment on the pull request, providing immediate feedback to developers and reviewers.
+- **Checkout Repository:** Fetches the code.
+- **Setup Terraform:** Installs and configures a specified version of Terraform.
+- **Terraform Init:** Initializes a Terraform working directory, downloading necessary providers.
+- **Terraform Format:** Checks if Terraform configuration files are correctly formatted.
+- **Terraform Validate:** Validates the syntax and configuration of Terraform files, ensuring they are internally consistent and valid.
+- **Terraform Plan:** Generates an execution plan, showing what actions Terraform will take to achieve the desired state. This step is crucial for reviewing infrastructure changes before they are applied.
+- **Update Pull Request:** For pull requests, the output of the Terraform plan (including format and validation results) is posted as a comment on the pull request, providing immediate feedback to developers and reviewers.
 
 **Financial Industry Relevance:**
 
-*   **Infrastructure as Code (IaC) Validation:** Ensures that the infrastructure definitions are syntactically correct and semantically valid, preventing deployment failures and misconfigurations that could impact financial services.
-*   **Change Management and Auditability:** The `terraform plan` output provides a clear, auditable record of proposed infrastructure changes, which is essential for regulatory compliance and internal change management processes.
-*   **Security and Compliance:** Helps identify potential security misconfigurations or non-compliant infrastructure deployments early in the development cycle.
-*   **Reduced Operational Risk:** By validating infrastructure changes before application, this workflow significantly reduces the risk of unintended infrastructure modifications that could lead to outages or security breaches.
-*   **Cost Control:** Reviewing the `terraform plan` can help identify unintended resource provisioning that could lead to unnecessary costs.
-
-
-
+- **Infrastructure as Code (IaC) Validation:** Ensures that the infrastructure definitions are syntactically correct and semantically valid, preventing deployment failures and misconfigurations that could impact financial services.
+- **Change Management and Auditability:** The `terraform plan` output provides a clear, auditable record of proposed infrastructure changes, which is essential for regulatory compliance and internal change management processes.
+- **Security and Compliance:** Helps identify potential security misconfigurations or non-compliant infrastructure deployments early in the development cycle.
+- **Reduced Operational Risk:** By validating infrastructure changes before application, this workflow significantly reduces the risk of unintended infrastructure modifications that could lead to outages or security breaches.
+- **Cost Control:** Reviewing the `terraform plan` can help identify unintended resource provisioning that could lead to unnecessary costs.
 
 ## Security and Compliance Considerations for GitHub Actions
 
 In the financial industry, the security and compliance of CI/CD pipelines are as critical as the application code itself. GitHub Actions, as a core component of our automation, are designed and managed with the following security and compliance considerations:
 
-*   **Least Privilege:** Workflows are configured to run with the minimum necessary permissions. Where possible, fine-grained permissions are applied to jobs and steps to limit access to sensitive resources (e.g., secrets, repositories).
-*   **Secrets Management:** All sensitive credentials (e.g., API keys, deployment tokens) are stored securely as GitHub Secrets and are never hardcoded into workflow files. Access to these secrets is restricted and audited.
-*   **Code Scanning and Security Analysis:** Workflows integrate security scanning tools (e.g., `npm audit`, Bandit) to identify vulnerabilities in application code and dependencies early in the development lifecycle. This aligns with Secure Software Development Lifecycle (SSDLC) requirements.
-*   **Dependency Scanning:** Automated checks for vulnerable dependencies are performed to mitigate risks associated with third-party libraries.
-*   **Immutable Infrastructure:** Workflows promote immutable infrastructure principles by building new container images and deploying new resources rather than modifying existing ones, reducing configuration drift and enhancing security.
-*   **Auditing and Logging:** Every workflow run generates detailed logs, providing an auditable trail of all CI/CD activities. These logs are crucial for forensic analysis, compliance reporting, and troubleshooting.
-*   **Branch Protection Rules:** Critical branches (e.g., `main`, `develop`) are protected with rules that require successful completion of CI workflows (e.g., tests, security scans) and code reviews before merging, preventing unauthorized or insecure code from reaching production.
-*   **Third-Party Action Review:** All third-party GitHub Actions used in workflows are carefully reviewed for security vulnerabilities and adherence to best practices before being incorporated.
-*   **Environment Segregation:** Where applicable, different environments (development, staging, production) are segregated, and deployments to sensitive environments are gated by manual approvals or specific access controls.
-*   **Regular Review:** Workflows are regularly reviewed by security and operations teams to ensure they remain compliant with evolving security standards and regulatory requirements.
+- **Least Privilege:** Workflows are configured to run with the minimum necessary permissions. Where possible, fine-grained permissions are applied to jobs and steps to limit access to sensitive resources (e.g., secrets, repositories).
+- **Secrets Management:** All sensitive credentials (e.g., API keys, deployment tokens) are stored securely as GitHub Secrets and are never hardcoded into workflow files. Access to these secrets is restricted and audited.
+- **Code Scanning and Security Analysis:** Workflows integrate security scanning tools (e.g., `npm audit`, Bandit) to identify vulnerabilities in application code and dependencies early in the development lifecycle. This aligns with Secure Software Development Lifecycle (SSDLC) requirements.
+- **Dependency Scanning:** Automated checks for vulnerable dependencies are performed to mitigate risks associated with third-party libraries.
+- **Immutable Infrastructure:** Workflows promote immutable infrastructure principles by building new container images and deploying new resources rather than modifying existing ones, reducing configuration drift and enhancing security.
+- **Auditing and Logging:** Every workflow run generates detailed logs, providing an auditable trail of all CI/CD activities. These logs are crucial for forensic analysis, compliance reporting, and troubleshooting.
+- **Branch Protection Rules:** Critical branches (e.g., `main`, `develop`) are protected with rules that require successful completion of CI workflows (e.g., tests, security scans) and code reviews before merging, preventing unauthorized or insecure code from reaching production.
+- **Third-Party Action Review:** All third-party GitHub Actions used in workflows are carefully reviewed for security vulnerabilities and adherence to best practices before being incorporated.
+- **Environment Segregation:** Where applicable, different environments (development, staging, production) are segregated, and deployments to sensitive environments are gated by manual approvals or specific access controls.
+- **Regular Review:** Workflows are regularly reviewed by security and operations teams to ensure they remain compliant with evolving security standards and regulatory requirements.
 
 ## Contributing to Workflows
 

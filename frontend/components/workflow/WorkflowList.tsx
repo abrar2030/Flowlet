@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Plus,
   Search,
@@ -19,36 +19,36 @@ import {
   TrendingUp,
   AlertCircle,
   CheckCircle2,
-  Zap
-} from 'lucide-react';
+  Zap,
+} from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface WorkflowSummary {
   id: string;
   name: string;
   description: string;
-  status: 'draft' | 'active' | 'paused' | 'archived';
+  status: "draft" | "active" | "paused" | "archived";
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -62,79 +62,81 @@ interface WorkflowSummary {
 
 const SAMPLE_WORKFLOWS: WorkflowSummary[] = [
   {
-    id: '1',
-    name: 'Payment Processing Pipeline',
-    description: 'Automated payment processing with fraud detection and compliance checks',
-    status: 'active',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20'),
+    id: "1",
+    name: "Payment Processing Pipeline",
+    description:
+      "Automated payment processing with fraud detection and compliance checks",
+    status: "active",
+    createdAt: new Date("2024-01-15"),
+    updatedAt: new Date("2024-01-20"),
     version: 3,
     nodeCount: 8,
     executionCount: 1247,
     successRate: 98.5,
-    lastRun: new Date('2024-01-21'),
-    creator: 'John Doe',
-    category: 'Payments'
+    lastRun: new Date("2024-01-21"),
+    creator: "John Doe",
+    category: "Payments",
   },
   {
-    id: '2',
-    name: 'KYC Verification Flow',
-    description: 'Customer verification workflow with document validation and risk assessment',
-    status: 'active',
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-18'),
+    id: "2",
+    name: "KYC Verification Flow",
+    description:
+      "Customer verification workflow with document validation and risk assessment",
+    status: "active",
+    createdAt: new Date("2024-01-10"),
+    updatedAt: new Date("2024-01-18"),
     version: 2,
     nodeCount: 12,
     executionCount: 856,
     successRate: 94.2,
-    lastRun: new Date('2024-01-21'),
-    creator: 'Jane Smith',
-    category: 'Compliance'
+    lastRun: new Date("2024-01-21"),
+    creator: "Jane Smith",
+    category: "Compliance",
   },
   {
-    id: '3',
-    name: 'Card Issuance Automation',
-    description: 'Automated card creation and activation process',
-    status: 'paused',
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-15'),
+    id: "3",
+    name: "Card Issuance Automation",
+    description: "Automated card creation and activation process",
+    status: "paused",
+    createdAt: new Date("2024-01-05"),
+    updatedAt: new Date("2024-01-15"),
     version: 1,
     nodeCount: 6,
     executionCount: 423,
     successRate: 99.1,
-    lastRun: new Date('2024-01-15'),
-    creator: 'Mike Johnson',
-    category: 'Cards'
+    lastRun: new Date("2024-01-15"),
+    creator: "Mike Johnson",
+    category: "Cards",
   },
   {
-    id: '4',
-    name: 'Fraud Alert System',
-    description: 'Real-time fraud detection and alert notification system',
-    status: 'active',
-    createdAt: new Date('2024-01-12'),
-    updatedAt: new Date('2024-01-19'),
+    id: "4",
+    name: "Fraud Alert System",
+    description: "Real-time fraud detection and alert notification system",
+    status: "active",
+    createdAt: new Date("2024-01-12"),
+    updatedAt: new Date("2024-01-19"),
     version: 4,
     nodeCount: 15,
     executionCount: 2341,
     successRate: 96.8,
-    lastRun: new Date('2024-01-21'),
-    creator: 'Sarah Wilson',
-    category: 'Security'
+    lastRun: new Date("2024-01-21"),
+    creator: "Sarah Wilson",
+    category: "Security",
   },
   {
-    id: '5',
-    name: 'Monthly Report Generation',
-    description: 'Automated monthly financial reports and analytics',
-    status: 'draft',
-    createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-01-21'),
+    id: "5",
+    name: "Monthly Report Generation",
+    description: "Automated monthly financial reports and analytics",
+    status: "draft",
+    createdAt: new Date("2024-01-20"),
+    updatedAt: new Date("2024-01-21"),
     version: 1,
     nodeCount: 4,
     executionCount: 0,
     successRate: 0,
-    creator: 'Alex Brown',
-    category: 'Analytics'
-  }
+    creator: "Alex Brown",
+    category: "Analytics",
+  },
 ];
 
 interface WorkflowListProps {
@@ -142,42 +144,61 @@ interface WorkflowListProps {
   onEditWorkflow: (workflowId: string) => void;
 }
 
-const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow }) => {
+const WorkflowList: React.FC<WorkflowListProps> = ({
+  onCreateNew,
+  onEditWorkflow,
+}) => {
   const [workflows] = useState<WorkflowSummary[]>(SAMPLE_WORKFLOWS);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  const filteredWorkflows = workflows.filter(workflow => {
-    const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || workflow.category === categoryFilter;
+  const filteredWorkflows = workflows.filter((workflow) => {
+    const matchesSearch =
+      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || workflow.status === statusFilter;
+    const matchesCategory =
+      categoryFilter === "all" || workflow.category === categoryFilter;
 
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'paused': return 'bg-yellow-500';
-      case 'draft': return 'bg-gray-500';
-      case 'archived': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case "active":
+        return "bg-green-500";
+      case "paused":
+        return "bg-yellow-500";
+      case "draft":
+        return "bg-gray-500";
+      case "archived":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return <Play className="h-3 w-3" />;
-      case 'paused': return <Pause className="h-3 w-3" />;
-      case 'draft': return <Edit className="h-3 w-3" />;
-      case 'archived': return <Archive className="h-3 w-3" />;
-      default: return <AlertCircle className="h-3 w-3" />;
+      case "active":
+        return <Play className="h-3 w-3" />;
+      case "paused":
+        return <Pause className="h-3 w-3" />;
+      case "draft":
+        return <Edit className="h-3 w-3" />;
+      case "archived":
+        return <Archive className="h-3 w-3" />;
+      default:
+        return <AlertCircle className="h-3 w-3" />;
     }
   };
 
-  const categories = ['all', ...Array.from(new Set(workflows.map(w => w.category)))];
+  const categories = [
+    "all",
+    ...Array.from(new Set(workflows.map((w) => w.category))),
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -217,7 +238,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
               <span className="text-sm font-medium">Active</span>
             </div>
             <div className="text-2xl font-bold mt-1">
-              {workflows.filter(w => w.status === 'active').length}
+              {workflows.filter((w) => w.status === "active").length}
             </div>
           </CardContent>
         </Card>
@@ -229,7 +250,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
               <span className="text-sm font-medium">Total Executions</span>
             </div>
             <div className="text-2xl font-bold mt-1">
-              {workflows.reduce((sum, w) => sum + w.executionCount, 0).toLocaleString()}
+              {workflows
+                .reduce((sum, w) => sum + w.executionCount, 0)
+                .toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -241,7 +264,11 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
               <span className="text-sm font-medium">Avg Success Rate</span>
             </div>
             <div className="text-2xl font-bold mt-1">
-              {(workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length).toFixed(1)}%
+              {(
+                workflows.reduce((sum, w) => sum + w.successRate, 0) /
+                workflows.length
+              ).toFixed(1)}
+              %
             </div>
           </CardContent>
         </Card>
@@ -277,9 +304,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            {categories.map(category => (
+            {categories.map((category) => (
               <SelectItem key={category} value={category}>
-                {category === 'all' ? 'All Categories' : category}
+                {category === "all" ? "All Categories" : category}
               </SelectItem>
             ))}
           </SelectContent>
@@ -300,7 +327,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-1">{workflow.name}</CardTitle>
+                    <CardTitle className="text-lg line-clamp-1">
+                      {workflow.name}
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                       {workflow.description}
                     </p>
@@ -313,7 +342,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditWorkflow(workflow.id)}>
+                      <DropdownMenuItem
+                        onClick={() => onEditWorkflow(workflow.id)}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
@@ -355,7 +386,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   </div>
                   <div>
                     <div className="text-muted-foreground">Executions</div>
-                    <div className="font-medium">{workflow.executionCount.toLocaleString()}</div>
+                    <div className="font-medium">
+                      {workflow.executionCount.toLocaleString()}
+                    </div>
                   </div>
                 </div>
 
@@ -373,7 +406,10 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   <div className="flex items-center gap-1">
                     <Avatar className="h-4 w-4">
                       <AvatarFallback className="text-xs">
-                        {workflow.creator.split(' ').map(n => n[0]).join('')}
+                        {workflow.creator
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </AvatarFallback>
                     </Avatar>
                     <span>{workflow.creator}</span>
@@ -381,10 +417,9 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     <span>
-                      {workflow.lastRun ?
-                        `Last run ${workflow.lastRun.toLocaleDateString()}` :
-                        'Never run'
-                      }
+                      {workflow.lastRun
+                        ? `Last run ${workflow.lastRun.toLocaleDateString()}`
+                        : "Never run"}
                     </span>
                   </div>
                 </div>
@@ -401,11 +436,13 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
                     Edit
                   </Button>
                   <Button
-                    variant={workflow.status === 'active' ? 'destructive' : 'default'}
+                    variant={
+                      workflow.status === "active" ? "destructive" : "default"
+                    }
                     size="sm"
                     className="flex-1"
                   >
-                    {workflow.status === 'active' ? (
+                    {workflow.status === "active" ? (
                       <>
                         <Pause className="h-3 w-3 mr-1" />
                         Pause
@@ -430,17 +467,18 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ onCreateNew, onEditWorkflow
           <Zap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No workflows found</h3>
           <p className="text-muted-foreground mb-4">
-            {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all'
-              ? 'Try adjusting your filters or search terms'
-              : 'Create your first workflow to get started'
-            }
+            {searchTerm || statusFilter !== "all" || categoryFilter !== "all"
+              ? "Try adjusting your filters or search terms"
+              : "Create your first workflow to get started"}
           </p>
-          {(!searchTerm && statusFilter === 'all' && categoryFilter === 'all') && (
-            <Button onClick={onCreateNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Workflow
-            </Button>
-          )}
+          {!searchTerm &&
+            statusFilter === "all" &&
+            categoryFilter === "all" && (
+              <Button onClick={onCreateNew}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Your First Workflow
+              </Button>
+            )}
         </div>
       )}
     </div>

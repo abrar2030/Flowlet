@@ -11,6 +11,7 @@ This document provides comprehensive information about the Flowlet embedded fina
 Flowlet follows a domain-driven microservices architecture with clear service boundaries:
 
 #### Core Financial Services
+
 - **Wallet Service**: Manages digital wallets, balances, and account operations
 - **Payments Service**: Handles payment processing, transfers, and settlement
 - **Card Service**: Manages card issuance, controls, and transaction processing
@@ -18,40 +19,47 @@ Flowlet follows a domain-driven microservices architecture with clear service bo
 - **KYC/AML Service**: Handles identity verification and compliance workflows
 
 #### Platform Services
+
 - **API Gateway**: Provides unified API access, authentication, and rate limiting
 - **Auth Service**: Manages user authentication, authorization, and session handling
 - **Notification Service**: Handles multi-channel notifications (email, SMS, push)
 - **Developer Portal**: Provides documentation, SDKs, and developer tools
 
 #### AI Services
+
 - **Fraud Detection**: ML-powered transaction monitoring and fraud prevention
 - **AI Chatbot**: Intelligent customer support and developer assistance
 
 ### Data Architecture
 
 #### Primary Databases
+
 - **PostgreSQL**: ACID-compliant transactional data for core services
 - **MongoDB**: Flexible document storage for analytics and unstructured data
 - **Redis**: High-performance caching and session management
 - **InfluxDB**: Time-series data for metrics, monitoring, and analytics
 
 #### Messaging Systems
+
 - **Apache Kafka**: Event streaming for service communication and event sourcing
 - **RabbitMQ**: Message queuing for specific synchronous messaging needs
 
 ### Infrastructure Components
 
 #### Container Orchestration
+
 - **Kubernetes**: Container orchestration and service management
 - **Docker**: Containerization of all services and dependencies
 - **Helm**: Package management for complex Kubernetes deployments
 
 #### Monitoring and Observability
+
 - **Prometheus**: Metrics collection, alerting, and monitoring
 - **Grafana**: Visualization, dashboards, and reporting
 - **Jaeger**: Distributed tracing for performance analysis
 
 #### Security
+
 - **Istio Service Mesh**: Secure service-to-service communication
 - **Cert-Manager**: Automated TLS certificate management
 - **Vault**: Secrets management and encryption key storage
@@ -61,12 +69,14 @@ Flowlet follows a domain-driven microservices architecture with clear service bo
 ### Prerequisites
 
 #### System Requirements
+
 - Kubernetes cluster (version 1.24 or higher)
 - Minimum 16 CPU cores and 32GB RAM for production deployment
 - 500GB+ storage for databases and persistent volumes
 - Load balancer support for external access
 
 #### Required Tools
+
 - `kubectl` - Kubernetes command-line tool
 - `helm` - Kubernetes package manager
 - `terraform` - Infrastructure as Code tool (optional)
@@ -140,6 +150,7 @@ curl http://localhost:8080/health
 ### Environment Variables
 
 #### Database Configuration
+
 ```yaml
 database:
   host: postgresql.flowlet-data.svc.cluster.local
@@ -154,6 +165,7 @@ database:
 ```
 
 #### Redis Configuration
+
 ```yaml
 redis:
   host: redis.flowlet-data.svc.cluster.local
@@ -165,6 +177,7 @@ redis:
 ```
 
 #### Kafka Configuration
+
 ```yaml
 kafka:
   brokers:
@@ -180,6 +193,7 @@ kafka:
 ### Service Configuration
 
 #### API Gateway
+
 ```yaml
 services:
   wallet:
@@ -197,6 +211,7 @@ rateLimit:
 ```
 
 #### Authentication Service
+
 ```yaml
 jwt:
   secret: ${JWT_SECRET}
@@ -214,6 +229,7 @@ oauth:
 ### Security Configuration
 
 #### TLS Configuration
+
 ```yaml
 tls:
   enabled: true
@@ -225,6 +241,7 @@ tls:
 ```
 
 #### Network Policies
+
 ```yaml
 networkPolicy:
   enabled: true
@@ -282,23 +299,23 @@ Critical alerts configured:
 
 ```yaml
 groups:
-- name: flowlet.critical
-  rules:
-  - alert: ServiceDown
-    expr: up{job="flowlet-services"} == 0
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Service {{ $labels.kubernetes_name }} is down"
+  - name: flowlet.critical
+    rules:
+      - alert: ServiceDown
+        expr: up{job="flowlet-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.kubernetes_name }} is down"
 
-  - alert: HighErrorRate
-    expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "High error rate on {{ $labels.kubernetes_name }}"
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.kubernetes_name }}"
 ```
 
 ### Scaling
@@ -318,23 +335,24 @@ spec:
   minReplicas: 3
   maxReplicas: 20
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 #### Database Scaling
 
 ##### PostgreSQL Read Replicas
+
 ```yaml
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -352,6 +370,7 @@ spec:
 ```
 
 ##### Redis Cluster
+
 ```yaml
 apiVersion: redis.redis.opstreelabs.in/v1beta1
 kind: RedisCluster
@@ -534,16 +553,16 @@ CONFIG SET appendfsync everysec
 
 ```yaml
 env:
-- name: JAVA_OPTS
-  value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+  - name: JAVA_OPTS
+    value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 ```
 
 #### Node.js Tuning
 
 ```yaml
 env:
-- name: NODE_OPTIONS
-  value: "--max-old-space-size=1024 --max-semi-space-size=128"
+  - name: NODE_OPTIONS
+    value: "--max-old-space-size=1024 --max-semi-space-size=128"
 ```
 
 ### Network Optimization
@@ -658,7 +677,7 @@ Flowlet sends webhook events for important platform events:
   "created": "2023-01-01T00:00:00Z",
   "data": {
     "paymentId": "pay_123",
-    "amount": 100.00,
+    "amount": 100.0,
     "currency": "USD",
     "status": "completed"
   }
@@ -674,25 +693,25 @@ npm install @flowlet/sdk
 ```
 
 ```typescript
-import { FlowletClient } from '@flowlet/sdk';
+import { FlowletClient } from "@flowlet/sdk";
 
 const client = new FlowletClient({
-  apiKey: 'your-api-key',
-  environment: 'production' // or 'sandbox'
+  apiKey: "your-api-key",
+  environment: "production", // or 'sandbox'
 });
 
 // Create a wallet
 const wallet = await client.wallets.create({
-  userId: 'user123',
-  currency: 'USD'
+  userId: "user123",
+  currency: "USD",
 });
 
 // Process a payment
 const payment = await client.payments.create({
   fromWalletId: wallet.id,
-  toWalletId: 'wallet456',
-  amount: 100.00,
-  currency: 'USD'
+  toWalletId: "wallet456",
+  amount: 100.0,
+  currency: "USD",
 });
 ```
 

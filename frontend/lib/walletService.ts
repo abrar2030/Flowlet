@@ -1,16 +1,16 @@
 // Wallet Service for Flowlet Frontend
-import { api, ApiError, PaginatedResponse } from './api';
+import { api, ApiError, PaginatedResponse } from "./api";
 
 // Types
 export interface Account {
   id: string;
   user_id: string;
   account_number: string;
-  account_type: 'checking' | 'savings' | 'business';
+  account_type: "checking" | "savings" | "business";
   balance: number;
   available_balance: number;
   currency: string;
-  status: 'active' | 'inactive' | 'frozen' | 'closed';
+  status: "active" | "inactive" | "frozen" | "closed";
   created_at: string;
   updated_at: string;
 }
@@ -18,12 +18,17 @@ export interface Account {
 export interface Transaction {
   id: string;
   account_id: string;
-  transaction_type: 'deposit' | 'withdrawal' | 'transfer' | 'payment' | 'refund';
+  transaction_type:
+    | "deposit"
+    | "withdrawal"
+    | "transfer"
+    | "payment"
+    | "refund";
   amount: number;
   currency: string;
   description: string;
   reference_number: string;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "completed" | "failed" | "cancelled";
   metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
@@ -39,12 +44,12 @@ export interface Card {
   user_id: string;
   account_id: string;
   card_number: string; // Masked
-  card_type: 'debit' | 'credit' | 'prepaid';
-  card_brand: 'visa' | 'mastercard' | 'amex';
+  card_type: "debit" | "credit" | "prepaid";
+  card_brand: "visa" | "mastercard" | "amex";
   expiry_month: number;
   expiry_year: number;
   cardholder_name: string;
-  status: 'active' | 'inactive' | 'blocked' | 'expired';
+  status: "active" | "inactive" | "blocked" | "expired";
   daily_limit: number;
   monthly_limit: number;
   created_at: string;
@@ -75,7 +80,7 @@ export interface WithdrawalRequest {
 
 export interface CardRequest {
   account_id: string;
-  card_type: 'debit' | 'credit' | 'prepaid';
+  card_type: "debit" | "credit" | "prepaid";
   daily_limit?: number;
   monthly_limit?: number;
 }
@@ -100,7 +105,7 @@ class WalletService {
    */
   async getAccounts(): Promise<Account[]> {
     try {
-      return await api.get<Account[]>('/api/v1/accounts');
+      return await api.get<Account[]>("/api/v1/accounts");
     } catch (error) {
       throw error;
     }
@@ -121,11 +126,11 @@ class WalletService {
    * Create new account
    */
   async createAccount(accountData: {
-    account_type: 'checking' | 'savings' | 'business';
+    account_type: "checking" | "savings" | "business";
     currency?: string;
   }): Promise<Account> {
     try {
-      return await api.post<Account>('/api/v1/accounts', accountData);
+      return await api.post<Account>("/api/v1/accounts", accountData);
     } catch (error) {
       throw error;
     }
@@ -153,7 +158,7 @@ class WalletService {
     try {
       return await api.post<Transaction>(
         `/api/v1/accounts/${depositData.account_id}/deposit`,
-        depositData
+        depositData,
       );
     } catch (error) {
       throw error;
@@ -167,7 +172,7 @@ class WalletService {
     try {
       return await api.post<Transaction>(
         `/api/v1/accounts/${withdrawalData.account_id}/withdraw`,
-        withdrawalData
+        withdrawalData,
       );
     } catch (error) {
       throw error;
@@ -179,7 +184,7 @@ class WalletService {
    */
   async transferFunds(transferData: TransferRequest): Promise<Transaction> {
     try {
-      return await api.post<Transaction>('/api/v1/transfers', transferData);
+      return await api.post<Transaction>("/api/v1/transfers", transferData);
     } catch (error) {
       throw error;
     }
@@ -190,7 +195,7 @@ class WalletService {
    */
   async getTransactions(
     accountId: string,
-    filters?: TransactionFilters
+    filters?: TransactionFilters,
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams();
@@ -205,7 +210,7 @@ class WalletService {
 
       const queryString = params.toString();
       const url = `/api/v1/accounts/${accountId}/transactions${
-        queryString ? `?${queryString}` : ''
+        queryString ? `?${queryString}` : ""
       }`;
 
       return await api.get<Transaction[]>(url);
@@ -219,7 +224,9 @@ class WalletService {
    */
   async getTransaction(transactionId: string): Promise<Transaction> {
     try {
-      return await api.get<Transaction>(`/api/v1/transactions/${transactionId}`);
+      return await api.get<Transaction>(
+        `/api/v1/transactions/${transactionId}`,
+      );
     } catch (error) {
       throw error;
     }
@@ -241,7 +248,7 @@ class WalletService {
    */
   async getCards(): Promise<Card[]> {
     try {
-      return await api.get<Card[]>('/api/v1/cards');
+      return await api.get<Card[]>("/api/v1/cards");
     } catch (error) {
       throw error;
     }
@@ -263,7 +270,7 @@ class WalletService {
    */
   async issueCard(cardData: CardRequest): Promise<Card> {
     try {
-      return await api.post<Card>('/api/v1/cards', cardData);
+      return await api.post<Card>("/api/v1/cards", cardData);
     } catch (error) {
       throw error;
     }
@@ -285,7 +292,10 @@ class WalletService {
   /**
    * Block/Unblock card
    */
-  async toggleCardStatus(cardId: string, action: 'block' | 'unblock'): Promise<void> {
+  async toggleCardStatus(
+    cardId: string,
+    action: "block" | "unblock",
+  ): Promise<void> {
     try {
       await api.post(`/api/v1/cards/${cardId}/${action}`);
     } catch (error) {
@@ -298,7 +308,7 @@ class WalletService {
    */
   async updateCardLimits(
     cardId: string,
-    limits: { daily_limit?: number; monthly_limit?: number }
+    limits: { daily_limit?: number; monthly_limit?: number },
   ): Promise<Card> {
     try {
       return await api.put<Card>(`/api/v1/cards/${cardId}/limits`, limits);
@@ -312,7 +322,7 @@ class WalletService {
    */
   async getCardTransactions(
     cardId: string,
-    filters?: TransactionFilters
+    filters?: TransactionFilters,
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams();
@@ -327,7 +337,7 @@ class WalletService {
 
       const queryString = params.toString();
       const url = `/api/v1/cards/${cardId}/transactions${
-        queryString ? `?${queryString}` : ''
+        queryString ? `?${queryString}` : ""
       }`;
 
       return await api.get<Transaction[]>(url);
@@ -339,7 +349,11 @@ class WalletService {
   /**
    * Request card PIN change
    */
-  async changeCardPin(cardId: string, currentPin: string, newPin: string): Promise<void> {
+  async changeCardPin(
+    cardId: string,
+    currentPin: string,
+    newPin: string,
+  ): Promise<void> {
     try {
       await api.post(`/api/v1/cards/${cardId}/change-pin`, {
         current_pin: currentPin,
@@ -355,7 +369,7 @@ class WalletService {
    */
   async getSpendingAnalytics(
     accountId?: string,
-    period?: 'week' | 'month' | 'quarter' | 'year'
+    period?: "week" | "month" | "quarter" | "year",
   ): Promise<{
     total_spent: number;
     categories: Array<{ category: string; amount: number; percentage: number }>;
@@ -363,11 +377,11 @@ class WalletService {
   }> {
     try {
       const params = new URLSearchParams();
-      if (accountId) params.append('account_id', accountId);
-      if (period) params.append('period', period);
+      if (accountId) params.append("account_id", accountId);
+      if (period) params.append("period", period);
 
       const queryString = params.toString();
-      const url = `/api/v1/analytics/spending${queryString ? `?${queryString}` : ''}`;
+      const url = `/api/v1/analytics/spending${queryString ? `?${queryString}` : ""}`;
 
       return await api.get(url);
     } catch (error) {
@@ -387,7 +401,7 @@ class WalletService {
     monthly_income: number;
   }> {
     try {
-      return await api.get('/api/v1/dashboard/summary');
+      return await api.get("/api/v1/dashboard/summary");
     } catch (error) {
       throw error;
     }
@@ -398,20 +412,22 @@ class WalletService {
    */
   async searchTransactions(
     query: string,
-    filters?: TransactionFilters
+    filters?: TransactionFilters,
   ): Promise<PaginatedResponse<Transaction>> {
     try {
       const params = new URLSearchParams({ search: query });
 
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && key !== 'search') {
+          if (value !== undefined && value !== null && key !== "search") {
             params.append(key, value.toString());
           }
         });
       }
 
-      return await api.get<Transaction[]>(`/api/v1/transactions/search?${params.toString()}`);
+      return await api.get<Transaction[]>(
+        `/api/v1/transactions/search?${params.toString()}`,
+      );
     } catch (error) {
       throw error;
     }
@@ -422,8 +438,8 @@ class WalletService {
    */
   async exportTransactions(
     accountId: string,
-    format: 'csv' | 'pdf',
-    filters?: TransactionFilters
+    format: "csv" | "pdf",
+    filters?: TransactionFilters,
   ): Promise<Blob> {
     try {
       const params = new URLSearchParams({ format });
@@ -438,7 +454,7 @@ class WalletService {
 
       const response = await api.get(
         `/api/v1/accounts/${accountId}/transactions/export?${params.toString()}`,
-        { responseType: 'blob' }
+        { responseType: "blob" },
       );
 
       return response as unknown as Blob;

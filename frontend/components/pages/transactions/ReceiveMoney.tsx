@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   QrCode,
   Copy,
@@ -13,8 +13,8 @@ import {
   CreditCard,
   Building,
   Globe,
-  CheckCircle
-} from 'lucide-react';
+  CheckCircle,
+} from "lucide-react";
 
 interface AccountDetails {
   bankName: string;
@@ -31,16 +31,16 @@ interface ReceiveMoneyProps {
 
 const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
   accountDetails = {
-    bankName: 'Flowlet Bank',
-    accountNumber: '1234 5678 9012 3456',
-    accountName: 'John Doe',
-    routingNumber: '021000021',
-    swiftCode: 'FLOWLTXX'
+    bankName: "Flowlet Bank",
+    accountNumber: "1234 5678 9012 3456",
+    accountName: "John Doe",
+    routingNumber: "021000021",
+    swiftCode: "FLOWLTXX",
   },
-  qrCodeUrl = 'https://via.placeholder.com/200x200/4F46E5/FFFFFF?text=QR+Code'
+  qrCodeUrl = "https://via.placeholder.com/200x200/4F46E5/FFFFFF?text=QR+Code",
 }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [customAmount, setCustomAmount] = useState<string>('');
+  const [customAmount, setCustomAmount] = useState<string>("");
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
@@ -48,13 +48,13 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
       setCopiedField(fieldName);
       setTimeout(() => setCopiedField(null), 2000);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      console.error("Failed to copy to clipboard:", error);
     }
   };
 
   const shareAccountDetails = async () => {
     const shareData = {
-      title: 'My Account Details',
+      title: "My Account Details",
       text: `Send money to: ${accountDetails.accountName}\nAccount: ${accountDetails.accountNumber}\nBank: ${accountDetails.bankName}`,
     };
 
@@ -63,19 +63,22 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
         await navigator.share(shareData);
       } else {
         // Fallback: copy to clipboard
-        await copyToClipboard(shareData.text, 'share');
+        await copyToClipboard(shareData.text, "share");
       }
     } catch (error) {
-      console.error('Failed to share:', error);
+      console.error("Failed to share:", error);
     }
   };
 
   const generatePaymentLink = () => {
-    const amount = customAmount ? `?amount=${customAmount}` : '';
+    const amount = customAmount ? `?amount=${customAmount}` : "";
     return `https://flowlet.app/pay/${accountDetails.accountNumber}${amount}`;
   };
 
-  const CopyButton: React.FC<{ text: string; fieldName: string }> = ({ text, fieldName }) => (
+  const CopyButton: React.FC<{ text: string; fieldName: string }> = ({
+    text,
+    fieldName,
+  }) => (
     <Button
       variant="ghost"
       size="sm"
@@ -120,7 +123,9 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
 
             {/* Custom Amount */}
             <div className="space-y-2">
-              <Label htmlFor="customAmount">Request Specific Amount (Optional)</Label>
+              <Label htmlFor="customAmount">
+                Request Specific Amount (Optional)
+              </Label>
               <div className="flex gap-2">
                 <Input
                   id="customAmount"
@@ -132,9 +137,11 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                 />
                 <Button
                   variant="outline"
-                  onClick={() => copyToClipboard(generatePaymentLink(), 'paymentLink')}
+                  onClick={() =>
+                    copyToClipboard(generatePaymentLink(), "paymentLink")
+                  }
                 >
-                  {copiedField === 'paymentLink' ? (
+                  {copiedField === "paymentLink" ? (
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   ) : (
                     <Copy className="h-4 w-4" />
@@ -149,7 +156,11 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={shareAccountDetails} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={shareAccountDetails}
+                className="flex-1"
+              >
                 <Share className="h-4 w-4 mr-2" />
                 Share
               </Button>
@@ -169,7 +180,8 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
           <CardContent className="space-y-4">
             <Alert>
               <AlertDescription>
-                Share these details with anyone who wants to send you money via bank transfer.
+                Share these details with anyone who wants to send you money via
+                bank transfer.
               </AlertDescription>
             </Alert>
 
@@ -180,10 +192,15 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   <Building className="h-5 w-5 text-gray-600" />
                   <div>
                     <p className="font-medium">Bank Name</p>
-                    <p className="text-sm text-gray-600">{accountDetails.bankName}</p>
+                    <p className="text-sm text-gray-600">
+                      {accountDetails.bankName}
+                    </p>
                   </div>
                 </div>
-                <CopyButton text={accountDetails.bankName} fieldName="bankName" />
+                <CopyButton
+                  text={accountDetails.bankName}
+                  fieldName="bankName"
+                />
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -191,10 +208,15 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   <CreditCard className="h-5 w-5 text-gray-600" />
                   <div>
                     <p className="font-medium">Account Number</p>
-                    <p className="text-sm text-gray-600 font-mono">{accountDetails.accountNumber}</p>
+                    <p className="text-sm text-gray-600 font-mono">
+                      {accountDetails.accountNumber}
+                    </p>
                   </div>
                 </div>
-                <CopyButton text={accountDetails.accountNumber} fieldName="accountNumber" />
+                <CopyButton
+                  text={accountDetails.accountNumber}
+                  fieldName="accountNumber"
+                />
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -204,10 +226,15 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   </div>
                   <div>
                     <p className="font-medium">Account Name</p>
-                    <p className="text-sm text-gray-600">{accountDetails.accountName}</p>
+                    <p className="text-sm text-gray-600">
+                      {accountDetails.accountName}
+                    </p>
                   </div>
                 </div>
-                <CopyButton text={accountDetails.accountName} fieldName="accountName" />
+                <CopyButton
+                  text={accountDetails.accountName}
+                  fieldName="accountName"
+                />
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -217,10 +244,15 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   </div>
                   <div>
                     <p className="font-medium">Routing Number</p>
-                    <p className="text-sm text-gray-600 font-mono">{accountDetails.routingNumber}</p>
+                    <p className="text-sm text-gray-600 font-mono">
+                      {accountDetails.routingNumber}
+                    </p>
                   </div>
                 </div>
-                <CopyButton text={accountDetails.routingNumber} fieldName="routingNumber" />
+                <CopyButton
+                  text={accountDetails.routingNumber}
+                  fieldName="routingNumber"
+                />
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -228,11 +260,18 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
                   <Globe className="h-5 w-5 text-gray-600" />
                   <div>
                     <p className="font-medium">SWIFT/BIC Code</p>
-                    <p className="text-sm text-gray-600 font-mono">{accountDetails.swiftCode}</p>
-                    <Badge variant="secondary" className="mt-1">International Transfers</Badge>
+                    <p className="text-sm text-gray-600 font-mono">
+                      {accountDetails.swiftCode}
+                    </p>
+                    <Badge variant="secondary" className="mt-1">
+                      International Transfers
+                    </Badge>
                   </div>
                 </div>
-                <CopyButton text={accountDetails.swiftCode} fieldName="swiftCode" />
+                <CopyButton
+                  text={accountDetails.swiftCode}
+                  fieldName="swiftCode"
+                />
               </div>
             </div>
 
@@ -242,10 +281,10 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
               className="w-full"
               onClick={() => {
                 const allDetails = `Bank: ${accountDetails.bankName}\nAccount: ${accountDetails.accountNumber}\nName: ${accountDetails.accountName}\nRouting: ${accountDetails.routingNumber}\nSWIFT: ${accountDetails.swiftCode}`;
-                copyToClipboard(allDetails, 'allDetails');
+                copyToClipboard(allDetails, "allDetails");
               }}
             >
-              {copiedField === 'allDetails' ? (
+              {copiedField === "allDetails" ? (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                   Copied All Details
@@ -266,8 +305,9 @@ const ReceiveMoney: React.FC<ReceiveMoneyProps> = ({
         <CardContent className="pt-6">
           <Alert>
             <AlertDescription>
-              <strong>Security Notice:</strong> Only share your account details with trusted parties.
-              Never share your login credentials, PIN, or passwords with anyone.
+              <strong>Security Notice:</strong> Only share your account details
+              with trusted parties. Never share your login credentials, PIN, or
+              passwords with anyone.
             </AlertDescription>
           </Alert>
         </CardContent>

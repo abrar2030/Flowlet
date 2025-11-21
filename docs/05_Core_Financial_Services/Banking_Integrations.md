@@ -27,6 +27,7 @@ Retrieves a list of all banking integrations currently registered with the Flowl
 **Permissions**: None (requires internal authentication/authorization, typically for administrative or system-level access)
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved the list of integrations.
   ```json
   {
@@ -60,6 +61,7 @@ Registers a new banking integration with the Flowlet system. This involves provi
 **Permissions**: None (requires internal authentication/authorization, typically for administrative or system-level access)
 
 **Request Body**:
+
 ```json
 {
   "name": "string" (required): A unique name for the integration (e.g., "Plaid_US", "Swift_EU").
@@ -69,6 +71,7 @@ Registers a new banking integration with the Flowlet system. This involves provi
 ```
 
 **Responses**:
+
 - `201 Created`: Integration registered successfully.
   ```json
   {
@@ -88,6 +91,7 @@ Initiates the authentication process for all currently registered banking integr
 **Permissions**: None (requires internal authentication/authorization)
 
 **Responses**:
+
 - `200 OK`: Authentication process initiated successfully.
   ```json
   {
@@ -108,9 +112,11 @@ Retrieves all bank accounts associated with a specific customer across all integ
 **Permissions**: None (requires internal authentication/authorization, or user-specific token)
 
 **Path Parameters**:
+
 - `customer_id` (string, required): The unique identifier of the customer.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved customer accounts.
   ```json
   {
@@ -146,6 +152,7 @@ Retrieves transaction history for specified accounts across multiple banking int
 **Permissions**: None (requires internal authentication/authorization, or user-specific token)
 
 **Request Body**:
+
 ```json
 {
   "account_mappings": {
@@ -160,6 +167,7 @@ Retrieves transaction history for specified accounts across multiple banking int
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved transactions.
   ```json
   {
@@ -198,6 +206,7 @@ Initiates a payment through one of the integrated banking services. The system c
 **Permissions**: None (requires internal authentication/authorization, or user-specific token)
 
 **Request Body**:
+
 ```json
 {
   "amount": "float" (required): The amount of the payment.
@@ -215,6 +224,7 @@ Initiates a payment through one of the integrated banking services. The system c
 ```
 
 **Responses**:
+
 - `201 Created`: Payment initiated successfully.
   ```json
   {
@@ -243,6 +253,7 @@ Retrieves the status of one or more payments across different banking integratio
 **Permissions**: None (requires internal authentication/authorization, or user-specific token)
 
 **Request Body**:
+
 ```json
 {
   "transaction_mappings": {
@@ -254,6 +265,7 @@ Retrieves the status of one or more payments across different banking integratio
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved payment status.
   ```json
   {
@@ -275,6 +287,7 @@ Provides a health check endpoint for all banking integrations, indicating their 
 **Permissions**: None (publicly accessible, or requires basic monitoring authentication)
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved health status.
   ```json
   {

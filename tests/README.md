@@ -1,4 +1,3 @@
-
 # Flowlet Test Suite Documentation
 
 This directory contains the comprehensive test suite for the Flowlet application, designed to ensure its robustness, security, compliance, and performance in a financial context.
@@ -77,10 +76,10 @@ Test results will be displayed in the console. For more detailed reports, additi
 
 When adding new tests or modifying existing ones, please adhere to the following guidelines:
 
-*   **Follow the Test Architecture:** Place tests in the appropriate category and directory.
-*   **Descriptive Naming:** Use clear and concise names for test files and test cases.
-*   **Comprehensive Coverage:** Aim for high code coverage, especially for critical financial logic.
-*   **Maintainability:** Write clean, readable, and maintainable test code.
-*   **Performance:** Ensure tests run efficiently and do not significantly slow down the development cycle.
+- **Follow the Test Architecture:** Place tests in the appropriate category and directory.
+- **Descriptive Naming:** Use clear and concise names for test files and test cases.
+- **Comprehensive Coverage:** Aim for high code coverage, especially for critical financial logic.
+- **Maintainability:** Write clean, readable, and maintainable test code.
+- **Performance:** Ensure tests run efficiently and do not significantly slow down the development cycle.
 
 By following these guidelines, we can ensure the continued quality and reliability of the Flowlet application.

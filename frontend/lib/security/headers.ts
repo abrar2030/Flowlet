@@ -10,7 +10,7 @@ export interface SecurityHeadersConfig {
     includeSubDomains: boolean;
     preload: boolean;
   };
-  frameOptions?: 'DENY' | 'SAMEORIGIN' | string;
+  frameOptions?: "DENY" | "SAMEORIGIN" | string;
   contentTypeOptions?: boolean;
   xssProtection?: boolean;
   referrerPolicy?: string;
@@ -28,27 +28,27 @@ export class SecurityHeadersService {
     hsts: {
       maxAge: 31536000, // 1 year
       includeSubDomains: true,
-      preload: true
+      preload: true,
     },
-    frameOptions: 'DENY',
+    frameOptions: "DENY",
     contentTypeOptions: true,
     xssProtection: true,
-    referrerPolicy: 'strict-origin-when-cross-origin',
+    referrerPolicy: "strict-origin-when-cross-origin",
     permissionsPolicy: [
-      'camera=()',
-      'microphone=()',
-      'geolocation=()',
-      'payment=(self)',
-      'usb=()',
-      'magnetometer=()',
-      'accelerometer=()',
-      'gyroscope=()',
-      'fullscreen=(self)',
-      'picture-in-picture=()'
+      "camera=()",
+      "microphone=()",
+      "geolocation=()",
+      "payment=(self)",
+      "usb=()",
+      "magnetometer=()",
+      "accelerometer=()",
+      "gyroscope=()",
+      "fullscreen=(self)",
+      "picture-in-picture=()",
     ],
-    crossOriginEmbedderPolicy: 'require-corp',
-    crossOriginOpenerPolicy: 'same-origin',
-    crossOriginResourcePolicy: 'same-origin'
+    crossOriginEmbedderPolicy: "require-corp",
+    crossOriginOpenerPolicy: "same-origin",
+    crossOriginResourcePolicy: "same-origin",
   };
 
   /**
@@ -56,62 +56,67 @@ export class SecurityHeadersService {
    * @param config - Custom configuration
    * @returns Headers object
    */
-  static generateHeaders(config: Partial<SecurityHeadersConfig> = {}): Record<string, string> {
+  static generateHeaders(
+    config: Partial<SecurityHeadersConfig> = {},
+  ): Record<string, string> {
     const mergedConfig = { ...this.DEFAULT_CONFIG, ...config };
     const headers: Record<string, string> = {};
 
     // Content Security Policy
     if (mergedConfig.csp) {
-      headers['Content-Security-Policy'] = mergedConfig.csp;
+      headers["Content-Security-Policy"] = mergedConfig.csp;
     }
 
     // HTTP Strict Transport Security
     if (mergedConfig.hsts) {
       const { maxAge, includeSubDomains, preload } = mergedConfig.hsts;
       let hstsValue = `max-age=${maxAge}`;
-      if (includeSubDomains) hstsValue += '; includeSubDomains';
-      if (preload) hstsValue += '; preload';
-      headers['Strict-Transport-Security'] = hstsValue;
+      if (includeSubDomains) hstsValue += "; includeSubDomains";
+      if (preload) hstsValue += "; preload";
+      headers["Strict-Transport-Security"] = hstsValue;
     }
 
     // X-Frame-Options
     if (mergedConfig.frameOptions) {
-      headers['X-Frame-Options'] = mergedConfig.frameOptions;
+      headers["X-Frame-Options"] = mergedConfig.frameOptions;
     }
 
     // X-Content-Type-Options
     if (mergedConfig.contentTypeOptions) {
-      headers['X-Content-Type-Options'] = 'nosniff';
+      headers["X-Content-Type-Options"] = "nosniff";
     }
 
     // X-XSS-Protection
     if (mergedConfig.xssProtection) {
-      headers['X-XSS-Protection'] = '1; mode=block';
+      headers["X-XSS-Protection"] = "1; mode=block";
     }
 
     // Referrer-Policy
     if (mergedConfig.referrerPolicy) {
-      headers['Referrer-Policy'] = mergedConfig.referrerPolicy;
+      headers["Referrer-Policy"] = mergedConfig.referrerPolicy;
     }
 
     // Permissions-Policy
     if (mergedConfig.permissionsPolicy) {
-      headers['Permissions-Policy'] = mergedConfig.permissionsPolicy.join(', ');
+      headers["Permissions-Policy"] = mergedConfig.permissionsPolicy.join(", ");
     }
 
     // Cross-Origin Embedder Policy
     if (mergedConfig.crossOriginEmbedderPolicy) {
-      headers['Cross-Origin-Embedder-Policy'] = mergedConfig.crossOriginEmbedderPolicy;
+      headers["Cross-Origin-Embedder-Policy"] =
+        mergedConfig.crossOriginEmbedderPolicy;
     }
 
     // Cross-Origin Opener Policy
     if (mergedConfig.crossOriginOpenerPolicy) {
-      headers['Cross-Origin-Opener-Policy'] = mergedConfig.crossOriginOpenerPolicy;
+      headers["Cross-Origin-Opener-Policy"] =
+        mergedConfig.crossOriginOpenerPolicy;
     }
 
     // Cross-Origin Resource Policy
     if (mergedConfig.crossOriginResourcePolicy) {
-      headers['Cross-Origin-Resource-Policy'] = mergedConfig.crossOriginResourcePolicy;
+      headers["Cross-Origin-Resource-Policy"] =
+        mergedConfig.crossOriginResourcePolicy;
     }
 
     return headers;
@@ -125,7 +130,7 @@ export class SecurityHeadersService {
    */
   static applyToRequest(
     headers: Record<string, string> = {},
-    config: Partial<SecurityHeadersConfig> = {}
+    config: Partial<SecurityHeadersConfig> = {},
   ): Record<string, string> {
     const securityHeaders = this.generateHeaders(config);
     return { ...headers, ...securityHeaders };
@@ -145,55 +150,60 @@ export class SecurityHeadersService {
     const warnings: string[] = [];
 
     const requiredHeaders = [
-      'Content-Security-Policy',
-      'X-Content-Type-Options',
-      'X-Frame-Options',
-      'Referrer-Policy'
+      "Content-Security-Policy",
+      "X-Content-Type-Options",
+      "X-Frame-Options",
+      "Referrer-Policy",
     ];
 
     const recommendedHeaders = [
-      'Strict-Transport-Security',
-      'X-XSS-Protection',
-      'Permissions-Policy'
+      "Strict-Transport-Security",
+      "X-XSS-Protection",
+      "Permissions-Policy",
     ];
 
     // Check required headers
-    requiredHeaders.forEach(header => {
+    requiredHeaders.forEach((header) => {
       if (!response.headers.get(header)) {
         missingHeaders.push(header);
       }
     });
 
     // Check recommended headers
-    recommendedHeaders.forEach(header => {
+    recommendedHeaders.forEach((header) => {
       if (!response.headers.get(header)) {
         warnings.push(`Missing recommended header: ${header}`);
       }
     });
 
     // Validate CSP
-    const csp = response.headers.get('Content-Security-Policy');
+    const csp = response.headers.get("Content-Security-Policy");
     if (csp) {
-      if (!csp.includes("'unsafe-inline'") && !csp.includes("'strict-dynamic'")) {
+      if (
+        !csp.includes("'unsafe-inline'") &&
+        !csp.includes("'strict-dynamic'")
+      ) {
         // Good - no unsafe inline
       } else if (csp.includes("'unsafe-inline'")) {
-        warnings.push('CSP allows unsafe-inline which may be risky');
+        warnings.push("CSP allows unsafe-inline which may be risky");
       }
     }
 
     // Validate HSTS
-    const hsts = response.headers.get('Strict-Transport-Security');
+    const hsts = response.headers.get("Strict-Transport-Security");
     if (hsts) {
       const maxAge = hsts.match(/max-age=(\d+)/);
       if (maxAge && parseInt(maxAge[1]) < 31536000) {
-        warnings.push('HSTS max-age should be at least 1 year (31536000 seconds)');
+        warnings.push(
+          "HSTS max-age should be at least 1 year (31536000 seconds)",
+        );
       }
     }
 
     return {
       isSecure: missingHeaders.length === 0,
       missingHeaders,
-      warnings
+      warnings,
     };
   }
 
@@ -203,10 +213,13 @@ export class SecurityHeadersService {
    * @returns Enhanced fetch function
    */
   static createSecureFetch(config: Partial<SecurityHeadersConfig> = {}) {
-    return async (url: string, options: RequestInit = {}): Promise<Response> => {
+    return async (
+      url: string,
+      options: RequestInit = {},
+    ): Promise<Response> => {
       const secureHeaders = this.applyToRequest(
         options.headers as Record<string, string>,
-        config
+        config,
       );
 
       const secureOptions: RequestInit = {
@@ -214,16 +227,16 @@ export class SecurityHeadersService {
         headers: {
           ...secureHeaders,
           // Add CSRF protection
-          'X-Requested-With': 'XMLHttpRequest',
+          "X-Requested-With": "XMLHttpRequest",
           // Add timestamp for request freshness
-          'X-Request-Timestamp': Date.now().toString()
+          "X-Request-Timestamp": Date.now().toString(),
         },
         // Ensure credentials are handled securely
-        credentials: options.credentials || 'same-origin',
+        credentials: options.credentials || "same-origin",
         // Set secure mode
-        mode: options.mode || 'cors',
+        mode: options.mode || "cors",
         // Set cache policy
-        cache: options.cache || 'no-cache'
+        cache: options.cache || "no-cache",
       };
 
       try {
@@ -232,16 +245,19 @@ export class SecurityHeadersService {
         // Validate response security headers
         const validation = this.validateResponse(response);
         if (!validation.isSecure) {
-          console.warn('Response missing security headers:', validation.missingHeaders);
+          console.warn(
+            "Response missing security headers:",
+            validation.missingHeaders,
+          );
         }
 
         if (validation.warnings.length > 0) {
-          console.warn('Security warnings:', validation.warnings);
+          console.warn("Security warnings:", validation.warnings);
         }
 
         return response;
       } catch (error) {
-        console.error('Secure fetch failed:', error);
+        console.error("Secure fetch failed:", error);
         throw error;
       }
     };
@@ -263,7 +279,7 @@ export class SecurityHeadersService {
     headers: Record<string, string>;
   }> {
     try {
-      const response = await fetch(url, { method: 'HEAD' });
+      const response = await fetch(url, { method: "HEAD" });
       const compliance = this.validateResponse(response);
 
       const headers: Record<string, string> = {};
@@ -275,7 +291,7 @@ export class SecurityHeadersService {
         url,
         timestamp: new Date().toISOString(),
         compliance,
-        headers
+        headers,
       };
     } catch (error) {
       throw new Error(`Failed to monitor compliance for ${url}: ${error}`);
@@ -306,46 +322,50 @@ export class SecurityHeadersService {
             url,
             isSecure: monitoring.compliance.isSecure,
             missingHeaders: monitoring.compliance.missingHeaders,
-            warnings: monitoring.compliance.warnings
+            warnings: monitoring.compliance.warnings,
           };
         } catch (error) {
           return {
             url,
             isSecure: false,
-            missingHeaders: ['Failed to check'],
-            warnings: [`Error: ${error}`]
+            missingHeaders: ["Failed to check"],
+            warnings: [`Error: ${error}`],
           };
         }
-      })
+      }),
     );
 
-    const overallCompliance = results.every(result => result.isSecure);
+    const overallCompliance = results.every((result) => result.isSecure);
 
     // Generate recommendations
     const recommendations: string[] = [];
     const allMissingHeaders = new Set<string>();
 
-    results.forEach(result => {
-      result.missingHeaders.forEach(header => allMissingHeaders.add(header));
+    results.forEach((result) => {
+      result.missingHeaders.forEach((header) => allMissingHeaders.add(header));
     });
 
-    if (allMissingHeaders.has('Content-Security-Policy')) {
-      recommendations.push('Implement Content Security Policy to prevent XSS attacks');
+    if (allMissingHeaders.has("Content-Security-Policy")) {
+      recommendations.push(
+        "Implement Content Security Policy to prevent XSS attacks",
+      );
     }
 
-    if (allMissingHeaders.has('Strict-Transport-Security')) {
-      recommendations.push('Enable HSTS to enforce HTTPS connections');
+    if (allMissingHeaders.has("Strict-Transport-Security")) {
+      recommendations.push("Enable HSTS to enforce HTTPS connections");
     }
 
-    if (allMissingHeaders.has('X-Frame-Options')) {
-      recommendations.push('Set X-Frame-Options to prevent clickjacking attacks');
+    if (allMissingHeaders.has("X-Frame-Options")) {
+      recommendations.push(
+        "Set X-Frame-Options to prevent clickjacking attacks",
+      );
     }
 
     return {
       timestamp: new Date().toISOString(),
       overallCompliance,
       results,
-      recommendations
+      recommendations,
     };
   }
 }
@@ -354,8 +374,8 @@ export class SecurityHeadersService {
  * CSRF Protection Service
  */
 export class CSRFService {
-  private static readonly TOKEN_HEADER = 'X-CSRF-Token';
-  private static readonly TOKEN_STORAGE_KEY = 'csrf_token';
+  private static readonly TOKEN_HEADER = "X-CSRF-Token";
+  private static readonly TOKEN_STORAGE_KEY = "csrf_token";
 
   /**
    * Generate CSRF token
@@ -365,9 +385,9 @@ export class CSRFService {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     return btoa(String.fromCharCode.apply(null, Array.from(array)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
   }
 
   /**
@@ -391,7 +411,9 @@ export class CSRFService {
    * @param headers - Existing headers
    * @returns Headers with CSRF token
    */
-  static addTokenToHeaders(headers: Record<string, string> = {}): Record<string, string> {
+  static addTokenToHeaders(
+    headers: Record<string, string> = {},
+  ): Record<string, string> {
     const token = this.getToken();
     if (token) {
       headers[this.TOKEN_HEADER] = token;

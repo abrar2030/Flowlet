@@ -5,11 +5,11 @@ metadata:
 webhooks:
   - name: image-policy.flowlet.com
     rules:
-      - apiGroups:   [""]
+      - apiGroups: [""]
         apiVersions: ["v1"]
-        operations:  ["CREATE"]
-        resources:   ["pods"]
-        scope:       "*"
+        operations: ["CREATE"]
+        resources: ["pods"]
+        scope: "*"
     clientConfig:
       service:
         namespace: flowlet-system

@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 import { loginUser, registerUser } from "@/lib/authService";
 
 describe("Authentication API Integration", () => {
@@ -10,8 +10,9 @@ describe("Authentication API Integration", () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ message: "User registered successfully" }),
-      })
+        json: () =>
+          Promise.resolve({ message: "User registered successfully" }),
+      }),
     ) as any;
 
     const result = await registerUser("test@example.com", "password123");
@@ -21,8 +22,11 @@ describe("Authentication API Integration", () => {
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "test@example.com", password: "password123" }),
-      })
+        body: JSON.stringify({
+          email: "test@example.com",
+          password: "password123",
+        }),
+      }),
     );
   });
 
@@ -31,18 +35,24 @@ describe("Authentication API Integration", () => {
       Promise.resolve({
         ok: false,
         json: () => Promise.resolve({ message: "User already exists" }),
-      })
+      }),
     ) as any;
 
-    await expect(registerUser("test@example.com", "password123")).rejects.toThrow("User already exists");
+    await expect(
+      registerUser("test@example.com", "password123"),
+    ).rejects.toThrow("User already exists");
   });
 
   it("should successfully log in an existing user", async () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ token: "mock_token", user: { email: "test@example.com" } }),
-      })
+        json: () =>
+          Promise.resolve({
+            token: "mock_token",
+            user: { email: "test@example.com" },
+          }),
+      }),
     ) as any;
 
     const result = await loginUser("test@example.com", "password123");
@@ -53,8 +63,11 @@ describe("Authentication API Integration", () => {
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "test@example.com", password: "password123" }),
-      })
+        body: JSON.stringify({
+          email: "test@example.com",
+          password: "password123",
+        }),
+      }),
     );
   });
 
@@ -63,9 +76,11 @@ describe("Authentication API Integration", () => {
       Promise.resolve({
         ok: false,
         json: () => Promise.resolve({ message: "Invalid credentials" }),
-      })
+      }),
     ) as any;
 
-    await expect(loginUser("test@example.com", "wrong_password")).rejects.toThrow("Invalid credentials");
+    await expect(
+      loginUser("test@example.com", "wrong_password"),
+    ).rejects.toThrow("Invalid credentials");
   });
 });

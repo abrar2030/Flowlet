@@ -1,4 +1,3 @@
-
 # Payment API Documentation
 
 The Payment API handles various financial transactions, including deposits, withdrawals, bank transfers, and card payments. It also includes functionality for managing transaction statuses and creating ledger entries.
@@ -17,22 +16,22 @@ Deposits a specified amount of funds into a user's wallet.
 
 #### Request Body
 
-| Field               | Type     | Description                                     | Required |
-| :------------------ | :------- | :---------------------------------------------- | :------- |
-| `wallet_id`         | `string` | The unique ID of the target wallet.             | Yes      |
-| `amount`            | `number` | The amount to deposit.                          | Yes      |
-| `payment_method`    | `string` | The method of payment (e.g., `bank_transfer`, `credit_card`). | Yes      |
-| `description`       | `string` | A description for the deposit.                  | Yes      |
-| `external_transaction_id` | `string` | Optional: An ID from an external payment system. | No       |
+| Field                     | Type     | Description                                                   | Required |
+| :------------------------ | :------- | :------------------------------------------------------------ | :------- |
+| `wallet_id`               | `string` | The unique ID of the target wallet.                           | Yes      |
+| `amount`                  | `number` | The amount to deposit.                                        | Yes      |
+| `payment_method`          | `string` | The method of payment (e.g., `bank_transfer`, `credit_card`). | Yes      |
+| `description`             | `string` | A description for the deposit.                                | Yes      |
+| `external_transaction_id` | `string` | Optional: An ID from an external payment system.              | No       |
 
 #### Example Request
 
 ```json
 {
-    "wallet_id": "wallet_abc",
-    "amount": 500.00,
-    "payment_method": "bank_transfer",
-    "description": "Initial funding"
+  "wallet_id": "wallet_abc",
+  "amount": 500.0,
+  "payment_method": "bank_transfer",
+  "description": "Initial funding"
 }
 ```
 
@@ -40,15 +39,15 @@ Deposits a specified amount of funds into a user's wallet.
 
 ```json
 {
-    "transaction_id": "<generated_transaction_id>",
-    "wallet_id": "wallet_abc",
-    "amount": "500.00",
-    "currency": "USD",
-    "status": "completed",
-    "reference_id": "PAY_ABC123DEF456",
-    "payment_method": "bank_transfer",
-    "new_balance": "500.00",
-    "created_at": "2024-01-16T09:00:00.000Z"
+  "transaction_id": "<generated_transaction_id>",
+  "wallet_id": "wallet_abc",
+  "amount": "500.00",
+  "currency": "USD",
+  "status": "completed",
+  "reference_id": "PAY_ABC123DEF456",
+  "payment_method": "bank_transfer",
+  "new_balance": "500.00",
+  "created_at": "2024-01-16T09:00:00.000Z"
 }
 ```
 
@@ -56,7 +55,7 @@ Deposits a specified amount of funds into a user's wallet.
 
 ```json
 {
-    "error": "Missing required field: amount"
+  "error": "Missing required field: amount"
 }
 ```
 
@@ -64,7 +63,7 @@ Deposits a specified amount of funds into a user's wallet.
 
 ```json
 {
-    "error": "Wallet not found"
+  "error": "Wallet not found"
 }
 ```
 
@@ -76,22 +75,22 @@ Withdraws a specified amount of funds from a user's wallet.
 
 #### Request Body
 
-| Field               | Type     | Description                                     | Required |
-| :------------------ | :------- | :---------------------------------------------- | :------- |
-| `wallet_id`         | `string` | The unique ID of the source wallet.             | Yes      |
-| `amount`            | `number` | The amount to withdraw.                         | Yes      |
-| `payment_method`    | `string` | The method of withdrawal (e.g., `bank_transfer`, `paypal`). | Yes      |
-| `description`       | `string` | A description for the withdrawal.               | Yes      |
-| `external_transaction_id` | `string` | Optional: An ID from an external payment system. | No       |
+| Field                     | Type     | Description                                                 | Required |
+| :------------------------ | :------- | :---------------------------------------------------------- | :------- |
+| `wallet_id`               | `string` | The unique ID of the source wallet.                         | Yes      |
+| `amount`                  | `number` | The amount to withdraw.                                     | Yes      |
+| `payment_method`          | `string` | The method of withdrawal (e.g., `bank_transfer`, `paypal`). | Yes      |
+| `description`             | `string` | A description for the withdrawal.                           | Yes      |
+| `external_transaction_id` | `string` | Optional: An ID from an external payment system.            | No       |
 
 #### Example Request
 
 ```json
 {
-    "wallet_id": "wallet_abc",
-    "amount": 100.00,
-    "payment_method": "paypal",
-    "description": "Withdrawal to PayPal"
+  "wallet_id": "wallet_abc",
+  "amount": 100.0,
+  "payment_method": "paypal",
+  "description": "Withdrawal to PayPal"
 }
 ```
 
@@ -99,15 +98,15 @@ Withdraws a specified amount of funds from a user's wallet.
 
 ```json
 {
-    "transaction_id": "<generated_transaction_id>",
-    "wallet_id": "wallet_abc",
-    "amount": "100.00",
-    "currency": "USD",
-    "status": "completed",
-    "reference_id": "PAY_XYZ789UVW012",
-    "payment_method": "paypal",
-    "new_balance": "400.00",
-    "created_at": "2024-01-16T10:30:00.000Z"
+  "transaction_id": "<generated_transaction_id>",
+  "wallet_id": "wallet_abc",
+  "amount": "100.00",
+  "currency": "USD",
+  "status": "completed",
+  "reference_id": "PAY_XYZ789UVW012",
+  "payment_method": "paypal",
+  "new_balance": "400.00",
+  "created_at": "2024-01-16T10:30:00.000Z"
 }
 ```
 
@@ -115,7 +114,7 @@ Withdraws a specified amount of funds from a user's wallet.
 
 ```json
 {
-    "error": "Insufficient balance"
+  "error": "Insufficient balance"
 }
 ```
 
@@ -127,39 +126,39 @@ Initiates a bank transfer (ACH, SEPA, or Wire) to or from a wallet.
 
 #### Request Body
 
-| Field             | Type     | Description                                     | Required |
-| :---------------- | :------- | :---------------------------------------------- | :------- |
-| `wallet_id`       | `string` | The unique ID of the wallet involved.           | Yes      |
-| `amount`          | `number` | The amount to transfer.                         | Yes      |
-| `transfer_type`   | `string` | Type of bank transfer (`ACH`, `SEPA`, `WIRE`). | Yes      |
-| `bank_details`    | `object` | Details of the recipient/sender bank account.   | Yes      |
-| `description`     | `string` | A description for the bank transfer.            | Yes      |
-| `direction`       | `string` | Optional: `incoming` or `outgoing`. Defaults to `outgoing`. | No       |
-| `external_transaction_id` | `string` | Optional: An ID from an external payment system. | No       |
+| Field                     | Type     | Description                                                 | Required |
+| :------------------------ | :------- | :---------------------------------------------------------- | :------- |
+| `wallet_id`               | `string` | The unique ID of the wallet involved.                       | Yes      |
+| `amount`                  | `number` | The amount to transfer.                                     | Yes      |
+| `transfer_type`           | `string` | Type of bank transfer (`ACH`, `SEPA`, `WIRE`).              | Yes      |
+| `bank_details`            | `object` | Details of the recipient/sender bank account.               | Yes      |
+| `description`             | `string` | A description for the bank transfer.                        | Yes      |
+| `direction`               | `string` | Optional: `incoming` or `outgoing`. Defaults to `outgoing`. | No       |
+| `external_transaction_id` | `string` | Optional: An ID from an external payment system.            | No       |
 
 #### `bank_details` Object Structure
 
-| Field             | Type     | Description                                     | Required |
-| :---------------- | :------- | :---------------------------------------------- | :------- |
-| `account_number`  | `string` | Bank account number.                            | Yes      |
-| `routing_number`  | `string` | Bank routing number (e.g., ABA for ACH, BIC/SWIFT for SEPA/WIRE). | Yes      |
-| `account_holder_name` | `string` | Name of the account holder.                     | Yes      |
-| `bank_name`       | `string` | Name of the bank.                               | Yes      |
+| Field                 | Type     | Description                                                       | Required |
+| :-------------------- | :------- | :---------------------------------------------------------------- | :------- |
+| `account_number`      | `string` | Bank account number.                                              | Yes      |
+| `routing_number`      | `string` | Bank routing number (e.g., ABA for ACH, BIC/SWIFT for SEPA/WIRE). | Yes      |
+| `account_holder_name` | `string` | Name of the account holder.                                       | Yes      |
+| `bank_name`           | `string` | Name of the bank.                                                 | Yes      |
 
 #### Example Request (Outgoing ACH)
 
 ```json
 {
-    "wallet_id": "wallet_abc",
-    "amount": 250.00,
-    "transfer_type": "ACH",
-    "bank_details": {
-        "account_number": "1234567890",
-        "routing_number": "012345678",
-        "account_holder_name": "John Doe",
-        "bank_name": "Example Bank"
-    },
-    "description": "Payment for vendor services"
+  "wallet_id": "wallet_abc",
+  "amount": 250.0,
+  "transfer_type": "ACH",
+  "bank_details": {
+    "account_number": "1234567890",
+    "routing_number": "012345678",
+    "account_holder_name": "John Doe",
+    "bank_name": "Example Bank"
+  },
+  "description": "Payment for vendor services"
 }
 ```
 
@@ -167,15 +166,15 @@ Initiates a bank transfer (ACH, SEPA, or Wire) to or from a wallet.
 
 ```json
 {
-    "transaction_id": "<generated_transaction_id>",
-    "wallet_id": "wallet_abc",
-    "amount": "250.00",
-    "currency": "USD",
-    "transfer_type": "ACH",
-    "status": "pending",
-    "reference_id": "PAY_MNO345PQR678",
-    "estimated_completion": "1-3 business days",
-    "created_at": "2024-01-16T11:00:00.000Z"
+  "transaction_id": "<generated_transaction_id>",
+  "wallet_id": "wallet_abc",
+  "amount": "250.00",
+  "currency": "USD",
+  "transfer_type": "ACH",
+  "status": "pending",
+  "reference_id": "PAY_MNO345PQR678",
+  "estimated_completion": "1-3 business days",
+  "created_at": "2024-01-16T11:00:00.000Z"
 }
 ```
 
@@ -183,7 +182,7 @@ Initiates a bank transfer (ACH, SEPA, or Wire) to or from a wallet.
 
 ```json
 {
-    "error": "Invalid transfer type"
+  "error": "Invalid transfer type"
 }
 ```
 
@@ -195,38 +194,38 @@ Processes a payment using a card associated with a wallet.
 
 #### Request Body
 
-| Field             | Type     | Description                                     | Required |
-| :---------------- | :------- | :---------------------------------------------- | :------- |
-| `wallet_id`       | `string` | The unique ID of the wallet.                    | Yes      |
-| `amount`          | `number` | The amount of the payment.                      | Yes      |
-| `card_token`      | `string` | A token representing the card (e.g., from a payment gateway). | Yes      |
-| `merchant_info`   | `object` | Details about the merchant.                     | Yes      |
-| `description`     | `string` | A description for the card payment.             | Yes      |
-| `external_transaction_id` | `string` | Optional: An ID from an external payment system. | No       |
+| Field                     | Type     | Description                                                   | Required |
+| :------------------------ | :------- | :------------------------------------------------------------ | :------- |
+| `wallet_id`               | `string` | The unique ID of the wallet.                                  | Yes      |
+| `amount`                  | `number` | The amount of the payment.                                    | Yes      |
+| `card_token`              | `string` | A token representing the card (e.g., from a payment gateway). | Yes      |
+| `merchant_info`           | `object` | Details about the merchant.                                   | Yes      |
+| `description`             | `string` | A description for the card payment.                           | Yes      |
+| `external_transaction_id` | `string` | Optional: An ID from an external payment system.              | No       |
 
 #### `merchant_info` Object Structure
 
-| Field             | Type     | Description                                     | Required |
-| :---------------- | :------- | :---------------------------------------------- | :------- |
-| `name`            | `string` | Name of the merchant.                           | Yes      |
-| `category`        | `string` | Merchant category (e.g., `retail`, `food`).     | Yes      |
-| `city`            | `string` | City of the merchant.                           | No       |
-| `country`         | `string` | Country of the merchant.                        | No       |
+| Field      | Type     | Description                                 | Required |
+| :--------- | :------- | :------------------------------------------ | :------- |
+| `name`     | `string` | Name of the merchant.                       | Yes      |
+| `category` | `string` | Merchant category (e.g., `retail`, `food`). | Yes      |
+| `city`     | `string` | City of the merchant.                       | No       |
+| `country`  | `string` | Country of the merchant.                    | No       |
 
 #### Example Request
 
 ```json
 {
-    "wallet_id": "wallet_abc",
-    "amount": 45.50,
-    "card_token": "CTK_ABCDEFGHIJKLMNO",
-    "merchant_info": {
-        "name": "Online Store XYZ",
-        "category": "online_retail",
-        "city": "New York",
-        "country": "USA"
-    },
-    "description": "Online purchase of electronics"
+  "wallet_id": "wallet_abc",
+  "amount": 45.5,
+  "card_token": "CTK_ABCDEFGHIJKLMNO",
+  "merchant_info": {
+    "name": "Online Store XYZ",
+    "category": "online_retail",
+    "city": "New York",
+    "country": "USA"
+  },
+  "description": "Online purchase of electronics"
 }
 ```
 
@@ -234,20 +233,20 @@ Processes a payment using a card associated with a wallet.
 
 ```json
 {
-    "transaction_id": "<generated_transaction_id>",
-    "wallet_id": "wallet_abc",
-    "amount": "45.50",
-    "currency": "USD",
-    "status": "completed",
-    "reference_id": "PAY_STU901VWX234",
-    "merchant_info": {
-        "name": "Online Store XYZ",
-        "category": "online_retail",
-        "city": "New York",
-        "country": "USA"
-    },
-    "new_balance": "354.50",
-    "created_at": "2024-01-16T12:00:00.000Z"
+  "transaction_id": "<generated_transaction_id>",
+  "wallet_id": "wallet_abc",
+  "amount": "45.50",
+  "currency": "USD",
+  "status": "completed",
+  "reference_id": "PAY_STU901VWX234",
+  "merchant_info": {
+    "name": "Online Store XYZ",
+    "category": "online_retail",
+    "city": "New York",
+    "country": "USA"
+  },
+  "new_balance": "354.50",
+  "created_at": "2024-01-16T12:00:00.000Z"
 }
 ```
 
@@ -255,7 +254,7 @@ Processes a payment using a card associated with a wallet.
 
 ```json
 {
-    "error": "Insufficient balance"
+  "error": "Insufficient balance"
 }
 ```
 
@@ -281,18 +280,18 @@ GET /api/v1/payment/transaction/txn_001
 
 ```json
 {
-    "transaction_id": "txn_001",
-    "wallet_id": "wallet_abc",
-    "type": "credit",
-    "amount": "100.00",
-    "currency": "USD",
-    "description": "Initial deposit",
-    "status": "completed",
-    "payment_method": "bank_transfer",
-    "reference_id": "REF12345",
-    "external_transaction_id": null,
-    "created_at": "2024-01-01T12:00:00.000Z",
-    "updated_at": "2024-01-01T12:00:00.000Z"
+  "transaction_id": "txn_001",
+  "wallet_id": "wallet_abc",
+  "type": "credit",
+  "amount": "100.00",
+  "currency": "USD",
+  "description": "Initial deposit",
+  "status": "completed",
+  "payment_method": "bank_transfer",
+  "reference_id": "REF12345",
+  "external_transaction_id": null,
+  "created_at": "2024-01-01T12:00:00.000Z",
+  "updated_at": "2024-01-01T12:00:00.000Z"
 }
 ```
 
@@ -300,7 +299,7 @@ GET /api/v1/payment/transaction/txn_001
 
 ```json
 {
-    "error": "Transaction not found"
+  "error": "Transaction not found"
 }
 ```
 
@@ -318,15 +317,15 @@ Updates the status of a transaction. This is typically used for external system 
 
 #### Request Body
 
-| Field    | Type     | Description                                     | Required |
-| :------- | :------- | :---------------------------------------------- | :------- |
+| Field    | Type     | Description                                                                        | Required |
+| :------- | :------- | :--------------------------------------------------------------------------------- | :------- |
 | `status` | `string` | The new status of the transaction (`pending`, `completed`, `failed`, `cancelled`). | Yes      |
 
 #### Example Request
 
 ```json
 {
-    "status": "completed"
+  "status": "completed"
 }
 ```
 
@@ -334,10 +333,10 @@ Updates the status of a transaction. This is typically used for external system 
 
 ```json
 {
-    "transaction_id": "txn_001",
-    "old_status": "pending",
-    "new_status": "completed",
-    "updated_at": "2024-01-16T13:00:00.000Z"
+  "transaction_id": "txn_001",
+  "old_status": "pending",
+  "new_status": "completed",
+  "updated_at": "2024-01-16T13:00:00.000Z"
 }
 ```
 
@@ -345,7 +344,7 @@ Updates the status of a transaction. This is typically used for external system 
 
 ```json
 {
-    "error": "Invalid status"
+  "error": "Invalid status"
 }
 ```
 
@@ -357,10 +356,10 @@ Retrieves the current exchange rate between two currencies.
 
 #### Path Parameters
 
-| Parameter     | Type     | Description                               |
-| :------------ | :------- | :---------------------------------------- |
-| `from_currency` | `string` | The currency to convert from (e.g., `USD`). | Yes      |
-| `to_currency` | `string` | The currency to convert to (e.g., `EUR`).   | Yes      |
+| Parameter       | Type     | Description                                 |
+| :-------------- | :------- | :------------------------------------------ | --- |
+| `from_currency` | `string` | The currency to convert from (e.g., `USD`). | Yes |
+| `to_currency`   | `string` | The currency to convert to (e.g., `EUR`).   | Yes |
 
 #### Example Request
 
@@ -372,10 +371,10 @@ GET /api/v1/payment/exchange-rate/USD/EUR
 
 ```json
 {
-    "from_currency": "USD",
-    "to_currency": "EUR",
-    "rate": "0.92",
-    "last_updated": "2024-01-16T14:00:00.000Z"
+  "from_currency": "USD",
+  "to_currency": "EUR",
+  "rate": "0.92",
+  "last_updated": "2024-01-16T14:00:00.000Z"
 }
 ```
 
@@ -383,13 +382,9 @@ GET /api/v1/payment/exchange-rate/USD/EUR
 
 ```json
 {
-    "error": "Invalid currency codes"
+  "error": "Invalid currency codes"
 }
 ```
-
-
-
-
 
 ### 8. Convert Amount Between Currencies
 
@@ -399,19 +394,19 @@ Converts a specified amount between two different currencies, transferring funds
 
 #### Request Body
 
-| Field            | Type     | Description                                     | Required |
-| :--------------- | :------- | :---------------------------------------------- | :------- |
-| `from_wallet_id` | `string` | The unique ID of the source wallet.             | Yes      |
-| `to_wallet_id`   | `string` | The unique ID of the destination wallet.        | Yes      |
-| `amount`         | `number` | The amount to convert from the source wallet.   | Yes      |
+| Field            | Type     | Description                                   | Required |
+| :--------------- | :------- | :-------------------------------------------- | :------- |
+| `from_wallet_id` | `string` | The unique ID of the source wallet.           | Yes      |
+| `to_wallet_id`   | `string` | The unique ID of the destination wallet.      | Yes      |
+| `amount`         | `number` | The amount to convert from the source wallet. | Yes      |
 
 #### Example Request
 
 ```json
 {
-    "from_wallet_id": "wallet_abc",
-    "to_wallet_id": "wallet_xyz",
-    "amount": 100.00
+  "from_wallet_id": "wallet_abc",
+  "to_wallet_id": "wallet_xyz",
+  "amount": 100.0
 }
 ```
 
@@ -419,16 +414,16 @@ Converts a specified amount between two different currencies, transferring funds
 
 ```json
 {
-    "conversion_id": "<generated_transaction_id>",
-    "from_wallet_id": "wallet_abc",
-    "to_wallet_id": "wallet_xyz",
-    "original_amount": "100.00",
-    "original_currency": "USD",
-    "converted_amount": "92.00",
-    "converted_currency": "EUR",
-    "exchange_rate": "0.92",
-    "status": "completed",
-    "created_at": "2024-01-16T15:00:00.000Z"
+  "conversion_id": "<generated_transaction_id>",
+  "from_wallet_id": "wallet_abc",
+  "to_wallet_id": "wallet_xyz",
+  "original_amount": "100.00",
+  "original_currency": "USD",
+  "converted_amount": "92.00",
+  "converted_currency": "EUR",
+  "exchange_rate": "0.92",
+  "status": "completed",
+  "created_at": "2024-01-16T15:00:00.000Z"
 }
 ```
 
@@ -436,7 +431,7 @@ Converts a specified amount between two different currencies, transferring funds
 
 ```json
 {
-    "error": "Insufficient balance"
+  "error": "Insufficient balance"
 }
 ```
 
@@ -444,12 +439,9 @@ Converts a specified amount between two different currencies, transferring funds
 
 ```json
 {
-    "error": "One or both wallets not found"
+  "error": "One or both wallets not found"
 }
 ```
-
-
-
 
 ## Financial Industry Standards and Considerations
 

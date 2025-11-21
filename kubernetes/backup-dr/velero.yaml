@@ -20,16 +20,16 @@ spec:
     spec:
       serviceAccountName: velero
       containers:
-      - name: velero
-        image: velero/velero:v1.13.0
-        args:
-          - server
-        volumeMounts:
-          - name: plugins
-            mountPath: /target/plugins
-        env:
-          - name: VELERO_SCRATCH_DIR
-            value: /tmp
+        - name: velero
+          image: velero/velero:v1.13.0
+          args:
+            - server
+          volumeMounts:
+            - name: plugins
+              mountPath: /target/plugins
+          env:
+            - name: VELERO_SCRATCH_DIR
+              value: /tmp
       volumes:
         - name: plugins
           emptyDir: {}
@@ -49,6 +49,6 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin # For simplicity, using cluster-admin. In production, use a more restricted role.
 subjects:
-- kind: ServiceAccount
-  name: velero
-  namespace: velero
+  - kind: ServiceAccount
+    name: velero
+    namespace: velero

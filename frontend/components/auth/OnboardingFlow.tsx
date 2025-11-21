@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const OnboardingFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -11,43 +17,46 @@ const OnboardingFlow: React.FC = () => {
 
   const steps = [
     {
-      title: 'Welcome to Flowlet',
-      description: 'Your comprehensive financial management platform',
+      title: "Welcome to Flowlet",
+      description: "Your comprehensive financial management platform",
       content: (
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-primary" />
           </div>
           <p className="text-muted-foreground">
-            Manage your finances, track expenses, and grow your wealth all in one place.
+            Manage your finances, track expenses, and grow your wealth all in
+            one place.
           </p>
         </div>
       ),
     },
     {
-      title: 'Secure & Trusted',
-      description: 'Bank-level security for your peace of mind',
+      title: "Secure & Trusted",
+      description: "Bank-level security for your peace of mind",
       content: (
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <p className="text-muted-foreground">
-            Your data is protected with enterprise-grade encryption and security measures.
+            Your data is protected with enterprise-grade encryption and security
+            measures.
           </p>
         </div>
       ),
     },
     {
-      title: 'Smart Analytics',
-      description: 'AI-powered insights for better financial decisions',
+      title: "Smart Analytics",
+      description: "AI-powered insights for better financial decisions",
       content: (
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-blue-600" />
           </div>
           <p className="text-muted-foreground">
-            Get personalized insights and recommendations to optimize your financial health.
+            Get personalized insights and recommendations to optimize your
+            financial health.
           </p>
         </div>
       ),
@@ -58,7 +67,7 @@ const OnboardingFlow: React.FC = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
 
@@ -69,7 +78,7 @@ const OnboardingFlow: React.FC = () => {
   };
 
   const handleSkip = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -81,14 +90,18 @@ const OnboardingFlow: React.FC = () => {
           <div className="space-y-2">
             <Progress value={progress} className="w-full" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Step {currentStep + 1} of {steps.length}</span>
+              <span>
+                Step {currentStep + 1} of {steps.length}
+              </span>
               <span>{Math.round(progress)}% complete</span>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center space-y-2">
-            <CardTitle className="text-xl">{steps[currentStep].title}</CardTitle>
+            <CardTitle className="text-xl">
+              {steps[currentStep].title}
+            </CardTitle>
             <CardDescription>{steps[currentStep].description}</CardDescription>
           </div>
 
@@ -109,7 +122,7 @@ const OnboardingFlow: React.FC = () => {
                 Skip
               </Button>
               <Button onClick={handleNext}>
-                {currentStep === steps.length - 1 ? 'Get Started' : 'Next'}
+                {currentStep === steps.length - 1 ? "Get Started" : "Next"}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>

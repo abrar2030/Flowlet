@@ -1,91 +1,91 @@
 groups:
   - name: general.rules
     rules:
-    - alert: InstanceDown
-      expr: up == 0
-      for: 1m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Instance {{ $labels.instance }} down"
-        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
 
   - name: kubernetes.rules
     rules:
-    - alert: KubePodCrashLooping
-      expr: sum(increase(kube_pod_container_status_restarts_total[5m])) by (namespace, pod, container) > 0
-      for: 5m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crashlooping"
-        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted {{ $value }} times in the last 5 minutes."
+      - alert: KubePodCrashLooping
+        expr: sum(increase(kube_pod_container_status_restarts_total[5m])) by (namespace, pod, container) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crashlooping"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted {{ $value }} times in the last 5 minutes."
 
-    - alert: KubeDeploymentReplicasMismatch
-      expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has replica mismatch"
-        description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has {{ $value }} available replicas, but {{ $labels.expected }} are expected."
+      - alert: KubeDeploymentReplicasMismatch
+        expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has replica mismatch"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has {{ $value }} available replicas, but {{ $labels.expected }} are expected."
 
   - name: application.rules
     rules:
-    - alert: HighErrorRate
-      expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (service) / sum(rate(http_requests_total[5m])) by (service) > 0.05
-      for: 5m
-      labels:
-        severity: major
-      annotations:
-        summary: "High error rate for service {{ $labels.service }}"
-        description: "Service {{ $labels.service }} has an error rate of {{ $value | humanizePercentage }} for the last 5 minutes."
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (service) / sum(rate(http_requests_total[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: major
+        annotations:
+          summary: "High error rate for service {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has an error rate of {{ $value | humanizePercentage }} for the last 5 minutes."
 
-    - alert: HighLatency
-      expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 0.5
-      for: 5m
-      labels:
-        severity: major
-      annotations:
-        summary: "High latency for service {{ $labels.service }}"
-        description: "Service {{ $labels.service }} 99th percentile request duration is {{ $value }} seconds for the last 5 minutes."
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 0.5
+        for: 5m
+        labels:
+          severity: major
+        annotations:
+          summary: "High latency for service {{ $labels.service }}"
+          description: "Service {{ $labels.service }} 99th percentile request duration is {{ $value }} seconds for the last 5 minutes."
 
   - name: database.rules
     rules:
-    - alert: HighDatabaseConnections
-      expr: pg_stat_activity_count > 100 # Example threshold
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "High number of active database connections"
-        description: "PostgreSQL database has {{ $value }} active connections, exceeding the threshold of 100."
+      - alert: HighDatabaseConnections
+        expr: pg_stat_activity_count > 100 # Example threshold
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of active database connections"
+          description: "PostgreSQL database has {{ $value }} active connections, exceeding the threshold of 100."
 
-    - alert: DatabaseDiskFull
-      expr: (node_filesystem_avail_bytes{mountpoint="/var/lib/postgresql/data"} / node_filesystem_size_bytes{mountpoint="/var/lib/postgresql/data"}) * 100 < 10
-      for: 15m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Database disk space is low"
-        description: "PostgreSQL data disk is {{ $value | humanizePercentage }} full."
+      - alert: DatabaseDiskFull
+        expr: (node_filesystem_avail_bytes{mountpoint="/var/lib/postgresql/data"} / node_filesystem_size_bytes{mountpoint="/var/lib/postgresql/data"}) * 100 < 10
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database disk space is low"
+          description: "PostgreSQL data disk is {{ $value | humanizePercentage }} full."
 
   - name: security.rules
     rules:
-    - alert: FailedLoginAttempts
-      expr: sum(rate(auth_login_attempts_total{status="failed"}[5m])) by (user) > 5
-      for: 1m
-      labels:
-        severity: high
-      annotations:
-        summary: "Multiple failed login attempts for user {{ $labels.user }}"
-        description: "User {{ $labels.user }} has had {{ $value }} failed login attempts in the last 1 minute."
+      - alert: FailedLoginAttempts
+        expr: sum(rate(auth_login_attempts_total{status="failed"}[5m])) by (user) > 5
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "Multiple failed login attempts for user {{ $labels.user }}"
+          description: "User {{ $labels.user }} has had {{ $value }} failed login attempts in the last 1 minute."
 
-    - alert: UnauthorizedAccessAttempt
-      expr: sum(rate(security_access_denied_total[5m])) by (resource, user) > 0
-      for: 1m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Unauthorized access attempt to {{ $labels.resource }} by user {{ $labels.user }}"
-        description: "User {{ $labels.user }} attempted to access {{ $labels.resource }} without authorization."
+      - alert: UnauthorizedAccessAttempt
+        expr: sum(rate(security_access_denied_total[5m])) by (resource, user) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Unauthorized access attempt to {{ $labels.resource }} by user {{ $labels.user }}"
+          description: "User {{ $labels.user }} attempted to access {{ $labels.resource }} without authorization."

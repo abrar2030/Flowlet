@@ -12,15 +12,15 @@
 
 ## 📚 Table of Contents
 
-| Section | Description |
-| :--- | :--- |
-| [Executive Summary](#-executive-summary) | High-level overview and key platform highlights. |
-| [Key Features Implemented](#-key-features-implemented) | Detailed breakdown of core financial capabilities. |
-| [Architecture Overview](#️-architecture-overview) | Insight into the cloud-agnostic microservices design. |
-| [Component Breakdown](#-component-breakdown-detailed-codebase-analysis) | Granular analysis of the codebase structure and purpose. |
-| [Getting Started](#-getting-started) | **Updated** instructions for setting up and running the platform using Docker Compose. |
-| [Contributing](#-contributing) | Guidelines for community contributions. |
-| [License](#-license) | Licensing information. |
+| Section                                                                 | Description                                                                            |
+| :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| [Executive Summary](#-executive-summary)                                | High-level overview and key platform highlights.                                       |
+| [Key Features Implemented](#-key-features-implemented)                  | Detailed breakdown of core financial capabilities.                                     |
+| [Architecture Overview](#️-architecture-overview)                       | Insight into the cloud-agnostic microservices design.                                  |
+| [Component Breakdown](#-component-breakdown-detailed-codebase-analysis) | Granular analysis of the codebase structure and purpose.                               |
+| [Getting Started](#-getting-started)                                    | **Updated** instructions for setting up and running the platform using Docker Compose. |
+| [Contributing](#-contributing)                                          | Guidelines for community contributions.                                                |
+| [License](#-license)                                                    | Licensing information.                                                                 |
 
 ---
 
@@ -34,15 +34,15 @@ Flowlet maintains a **developer-first approach**, providing comprehensive docume
 
 ### Key Highlights
 
-| Highlight | Description |
-| :--- | :--- |
-| **Complete Embedded Finance Stack** | Provides a full range of services, including digital wallets, payment processing, card issuance, KYC/AML, and ledger management. |
-| **Cloud-Agnostic Microservices** | Utilizes a Kubernetes-based infrastructure for high availability and horizontal scalability across any major cloud provider. |
-| **Developer-Friendly Integration** | Features a comprehensive API gateway, detailed SDKs, and a dedicated developer portal to ensure seamless and rapid integration. |
-| **Bank-Grade Security** | Implements end-to-end encryption, tokenization, and comprehensive audit trails to safeguard all sensitive data and transactions. |
-| **Regulatory Compliance** | Offers built-in workflows for adherence to critical regulatory frameworks, including GDPR, PSD2, and FinCEN. |
-| **AI-Enhanced Capabilities** | Incorporates artificial intelligence for advanced fraud detection, intelligent support chatbots, and developer assistance. |
-| **Operational Excellence** | Achieved through robust DevOps automation, advanced observability tools (Prometheus & Grafana), and managed services for reliable operation. |
+| Highlight                           | Description                                                                                                                                  |
+| :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Complete Embedded Finance Stack** | Provides a full range of services, including digital wallets, payment processing, card issuance, KYC/AML, and ledger management.             |
+| **Cloud-Agnostic Microservices**    | Utilizes a Kubernetes-based infrastructure for high availability and horizontal scalability across any major cloud provider.                 |
+| **Developer-Friendly Integration**  | Features a comprehensive API gateway, detailed SDKs, and a dedicated developer portal to ensure seamless and rapid integration.              |
+| **Bank-Grade Security**             | Implements end-to-end encryption, tokenization, and comprehensive audit trails to safeguard all sensitive data and transactions.             |
+| **Regulatory Compliance**           | Offers built-in workflows for adherence to critical regulatory frameworks, including GDPR, PSD2, and FinCEN.                                 |
+| **AI-Enhanced Capabilities**        | Incorporates artificial intelligence for advanced fraud detection, intelligent support chatbots, and developer assistance.                   |
+| **Operational Excellence**          | Achieved through robust DevOps automation, advanced observability tools (Prometheus & Grafana), and managed services for reliable operation. |
 
 ---
 
@@ -52,51 +52,51 @@ Flowlet's strength lies in its comprehensive suite of embedded finance capabilit
 
 ### 💰 Digital Wallet Management
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                                                                                                                                               | Purpose                                                                                                                                                                    |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend Implementation** | `backend/src/routes/wallet.py`, `backend/src/routes/wallet_mvp.py`, `backend/src/models/account.py`, `backend/src/models/transaction.py`, `backend/src/currency/multi_currency_system.py`, `backend/src/utils/notifications.py` | Core logic for wallet creation, management, and transaction processing; defines API endpoints, business logic, data models, multi-currency support, and real-time updates. |
-| **Frontend Integration** | `frontend/src/components/wallet/Dashboard.tsx`, `frontend/src/lib/walletService.ts`, `frontend/src/store/walletSlice.ts` | User interface for viewing balances and transaction history, integrating with the backend and managing state for real-time display. |
+| **Frontend Integration**   | `frontend/src/components/wallet/Dashboard.tsx`, `frontend/src/lib/walletService.ts`, `frontend/src/store/walletSlice.ts`                                                                                                        | User interface for viewing balances and transaction history, integrating with the backend and managing state for real-time display.                                        |
 
 ### 💳 Payment Processing
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                                                                                                                                                              | Purpose                                                                                                                                                          |
+| :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend Implementation** | `backend/src/routes/payment.py`, `backend/src/routes/payment_mvp.py`, `backend/src/integrations/payments/stripe_integration.py`, `backend/src/integrations/banking/`, `backend/src/utils/validators.py`, `backend/src/utils/error_handlers.py` | Central modules for payment routing and processing, external payment gateway integration, support for bank transfers, and transaction validation/error handling. |
 
 ### 💳 Card Issuance and Management
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                  | Purpose                                                                                                                                                                       |
+| :------------------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend Implementation** | `backend/src/routes/card.py`, `backend/src/routes/enhanced_cards.py`, `backend/src/models/card.py` | Encapsulates logic for card issuance, lifecycle events, creation, activation, transaction authorization, advanced controls, and defining the fundamental card data structure. |
 
 ### ⚖️ KYC/AML Compliance
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                                                                           | Purpose                                                                                                                                                                                         |
+| :------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend Implementation** | `backend/src/routes/kyc_aml.py`, `backend/src/routes/enhanced_kyc.py`, `backend/src/compliance/regulatory_compliance.py`, `backend/src/models/audit_log.py` | Implements core compliance workflows, orchestrates complex verification processes (identity/sanctions screening), manages overarching regulatory logic, and ensures comprehensive audit trails. |
 
 ### 📊 Ledger and Accounting
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                                                                                                                                     | Purpose                                                                                                                                                                  |
+| :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend Implementation** | `backend/src/routes/ledger.py`, `backend/src/routes/enhanced_ledger.py`, `backend/src/models/audit_log.py`, `backend/src/models/transaction.py`, `backend/src/utils/audit.py`, `backend/src/security/audit_logger.py` | Manages the meticulous recording of all financial transactions, reinforces the integrity of audit trails for double-entry accounting, and provides further auditability. |
 
 ### 🌐 Developer Portal and API Gateway
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                   | Purpose                                                                                                                                                       |
+| :------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Backend Implementation** | `backend/src/gateway/optimized_gateway.py`, `docs/03_API_Reference` | Implements gateway functionality (authentication, rate limiting, intelligent routing) and supports the developer experience with comprehensive documentation. |
 
 ### 🧠 AI-Enhanced Capabilities
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                                                                                                                                       | Purpose                                                                                                                                                               |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Implementation Details** | `backend/src/ai/enhanced_fraud_detection.py`, `backend/src/ai/risk_assessment.py`, `backend/src/ml/fraud_detection/`, `backend/src/ai/support_chatbot.py`, `backend/src/ai/transaction_intelligence.py` | Implements AI-driven fraud analysis, risk assessment, and machine learning models; provides AI-powered support and derives deeper insights from transaction patterns. |
 
 ### 🔒 Security Infrastructure
 
-| Component | Key Files/Modules | Purpose |
-| :--- | :--- | :--- |
+| Component                  | Key Files/Modules                                                                              | Purpose                                                                                                                                                                                                                                     |
+| :------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Implementation Details** | `backend/src/security/`, `backend/src/routes/auth.py`, `backend/src/security/token_manager.py` | Dedicated to security, featuring modules for data protection (encryption), secure password hashing, API abuse prevention (rate limiting), comprehensive logging (audit), input validation, and managing authentication/authorization flows. |
 
 ---
@@ -109,14 +109,14 @@ The infrastructure leverages **containerization (Docker)** for application packa
 
 ### System Components and Implementation Layers
 
-| Layer | Primary Role | Key Implementation Details |
-| :--- | :--- | :--- |
-| **API Layer** | Primary entry point for all external interactions. | Implemented by the API Gateway (`backend/src/gateway/optimized_gateway.py`), handling authentication, rate limiting, and intelligent routing. |
-| **Core Services Layer** | Encapsulates the fundamental financial services. | Distinct, independently deployable microservices found in `backend/src/routes` (e.g., Wallet, Payment, KYC/AML). |
-| **Integration Layer** | Securely connects Flowlet with external financial systems. | Integrations for banking partners (`backend/src/integrations/banking`) and payment processors (`backend/src/integrations/payments`). |
-| **Data Layer** | Manages system state and analytics. | Polyglot persistence model with Kubernetes configurations for various databases (`infrastructure/kubernetes/databases`) and SQLAlchemy ORM models (`backend/src/models`). |
-| **AI/ML Layer** | Provides intelligent automation and enhanced decision-making. | Modules for fraud detection, risk assessment, and transaction intelligence (`backend/src/ai/`, `backend/src/ml/`). |
-| **Presentation Layer** | User-facing applications and interfaces. | React-based frontend (`frontend/`) and dedicated developer documentation (`docs/`). |
+| Layer                   | Primary Role                                                  | Key Implementation Details                                                                                                                                                |
+| :---------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **API Layer**           | Primary entry point for all external interactions.            | Implemented by the API Gateway (`backend/src/gateway/optimized_gateway.py`), handling authentication, rate limiting, and intelligent routing.                             |
+| **Core Services Layer** | Encapsulates the fundamental financial services.              | Distinct, independently deployable microservices found in `backend/src/routes` (e.g., Wallet, Payment, KYC/AML).                                                          |
+| **Integration Layer**   | Securely connects Flowlet with external financial systems.    | Integrations for banking partners (`backend/src/integrations/banking`) and payment processors (`backend/src/integrations/payments`).                                      |
+| **Data Layer**          | Manages system state and analytics.                           | Polyglot persistence model with Kubernetes configurations for various databases (`infrastructure/kubernetes/databases`) and SQLAlchemy ORM models (`backend/src/models`). |
+| **AI/ML Layer**         | Provides intelligent automation and enhanced decision-making. | Modules for fraud detection, risk assessment, and transaction intelligence (`backend/src/ai/`, `backend/src/ml/`).                                                        |
+| **Presentation Layer**  | User-facing applications and interfaces.                      | React-based frontend (`frontend/`) and dedicated developer documentation (`docs/`).                                                                                       |
 
 ---
 
@@ -128,69 +128,69 @@ This section provides a granular, file-by-file and directory-by-directory analys
 
 The `backend` directory is the central hub for Flowlet's server-side logic, implemented using the **Flask** framework and structured for a microservices paradigm.
 
-| Directory/File | Description | Key Components and Files |
-| :--- | :--- | :--- |
-| `backend/src/ai/` | Houses modules for Artificial Intelligence capabilities. | `enhanced_fraud_detection.py`, `risk_assessment.py`, `support_chatbot.py`, `transaction_intelligence.py` |
-| `backend/src/compliance/` | Dedicated to ensuring strict adherence to financial regulations. | `regulatory_compliance.py` (Manages GDPR, PSD2, FinCEN adherence) |
-| `backend/src/config/` | Manages application-wide configurations and settings. | `security.py` (JWT secrets, encryption), `settings.py` (DB connections, logging) |
-| `backend/src/currency/` | Manages multi-currency operations for a global platform. | `multi_currency_system.py` (Conversion, exchange rate application) |
-| `backend/src/gateway/` | Implements the API Gateway functionality. | `optimized_gateway.py` (Routing, authentication, rate limiting) |
+| Directory/File              | Description                                                                | Key Components and Files                                                                                      |
+| :-------------------------- | :------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `backend/src/ai/`           | Houses modules for Artificial Intelligence capabilities.                   | `enhanced_fraud_detection.py`, `risk_assessment.py`, `support_chatbot.py`, `transaction_intelligence.py`      |
+| `backend/src/compliance/`   | Dedicated to ensuring strict adherence to financial regulations.           | `regulatory_compliance.py` (Manages GDPR, PSD2, FinCEN adherence)                                             |
+| `backend/src/config/`       | Manages application-wide configurations and settings.                      | `security.py` (JWT secrets, encryption), `settings.py` (DB connections, logging)                              |
+| `backend/src/currency/`     | Manages multi-currency operations for a global platform.                   | `multi_currency_system.py` (Conversion, exchange rate application)                                            |
+| `backend/src/gateway/`      | Implements the API Gateway functionality.                                  | `optimized_gateway.py` (Routing, authentication, rate limiting)                                               |
 | `backend/src/integrations/` | Manages connections with external financial services and third-party APIs. | `banking/` (`plaid_integration.py`), `currency/` (`exchange_rates.py`), `payments/` (`stripe_integration.py`) |
-| `backend/src/ml/` | Contains Machine Learning specific components. | `fraud_detection/` (`anomaly_models.py`, `ensemble_model.py`, `supervised_models.py`) |
-| `backend/src/models/` | Defines the **SQLAlchemy ORM** models for database mapping. | `account.py`, `audit_log.py`, `card.py`, `transaction.py`, `user.py` |
-| `backend/src/routes/` | Contains Flask blueprints and API endpoint definitions. | `auth.py`, `card.py`, `kyc_aml.py`, `ledger.py`, `payment.py`, `wallet.py` |
-| `backend/src/security/` | Implements application-level security measures. | `encryption.py`, `password_security.py`, `rate_limiter.py`, `token_manager.py`, `input_validator.py` |
-| `backend/src/utils/` | General utility functions and helper modules. | `error_handlers.py`, `notifications.py`, `validators.py` |
-| **Root Files** | Main application entry points and configuration. | **`main.py`** (Primary entry point), `requirements.txt`, `run_tests.sh`, `wsgi.py` |
+| `backend/src/ml/`           | Contains Machine Learning specific components.                             | `fraud_detection/` (`anomaly_models.py`, `ensemble_model.py`, `supervised_models.py`)                         |
+| `backend/src/models/`       | Defines the **SQLAlchemy ORM** models for database mapping.                | `account.py`, `audit_log.py`, `card.py`, `transaction.py`, `user.py`                                          |
+| `backend/src/routes/`       | Contains Flask blueprints and API endpoint definitions.                    | `auth.py`, `card.py`, `kyc_aml.py`, `ledger.py`, `payment.py`, `wallet.py`                                    |
+| `backend/src/security/`     | Implements application-level security measures.                            | `encryption.py`, `password_security.py`, `rate_limiter.py`, `token_manager.py`, `input_validator.py`          |
+| `backend/src/utils/`        | General utility functions and helper modules.                              | `error_handlers.py`, `notifications.py`, `validators.py`                                                      |
+| **Root Files**              | Main application entry points and configuration.                           | **`main.py`** (Primary entry point), `requirements.txt`, `run_tests.sh`, `wsgi.py`                            |
 
 ### Frontend (`frontend/`)
 
 This directory contains the **React-based Single-Page Application (SPA)** built with **TypeScript**, leveraging **Vite** for the build system, and **pnpm** for package management.
 
-| Directory/File | Description | Key Components and Files |
-| :--- | :--- | :--- |
-| `frontend/src/components/` | Reusable UI components. | `auth/` (Login, Register, Onboarding), `ui/` (Generic components), `wallet/` (`Dashboard.tsx`) |
-| `frontend/src/hooks/` | Custom React hooks for encapsulating and reusing stateful logic. | `useAuth.ts` (Authentication state), `use-mobile.js` (Responsive design logic) |
-| `frontend/src/lib/` | Utility functions and service integrations. | `api.ts` (Centralized API calls), `authService.ts`, `walletService.ts`, `utils.js` |
-| `frontend/src/store/` | Client-side state management using **Redux Toolkit**. | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration) |
-| `frontend/src/types/` | **TypeScript** type definitions for type safety. | `index.ts` (Centralized custom type definitions) |
-| **Root Files** | Main application files and configuration. | `main.tsx` (Entry point), `package.json`, `tsconfig.json`, `vite.config.ts` |
+| Directory/File             | Description                                                      | Key Components and Files                                                                       |
+| :------------------------- | :--------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `frontend/src/components/` | Reusable UI components.                                          | `auth/` (Login, Register, Onboarding), `ui/` (Generic components), `wallet/` (`Dashboard.tsx`) |
+| `frontend/src/hooks/`      | Custom React hooks for encapsulating and reusing stateful logic. | `useAuth.ts` (Authentication state), `use-mobile.js` (Responsive design logic)                 |
+| `frontend/src/lib/`        | Utility functions and service integrations.                      | `api.ts` (Centralized API calls), `authService.ts`, `walletService.ts`, `utils.js`             |
+| `frontend/src/store/`      | Client-side state management using **Redux Toolkit**.            | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration)      |
+| `frontend/src/types/`      | **TypeScript** type definitions for type safety.                 | `index.ts` (Centralized custom type definitions)                                               |
+| **Root Files**             | Main application files and configuration.                        | `main.tsx` (Entry point), `package.json`, `tsconfig.json`, `vite.config.ts`                    |
 
 ### Documentation (`docs/`)
 
 The `docs/` directory is a comprehensive repository of documentation catering to various audiences.
 
-| Directory | Description | Key Documents |
-| :--- | :--- | :--- |
-| `01_Introduction/` | High-level overview of the platform's vision and mission. | `Introduction.md` |
-| `02_Architecture/` | Detailed explanation of the microservices design and principles. | `Architecture_Overview.md`, `Microservices_Design.md` |
-| `03_API_Reference/` | Exhaustive documentation for all exposed APIs. | `API_Documentation.md`, `Backend_API.md`, `API_Gateway.md` |
-| `04_Compliance_and_Regulatory/` | Details on adherence to financial regulations. | `Compliance_Overview.md`, `KYC_AML.md` |
-| `05_Core_Financial_Services/` | In-depth documentation on each core financial service. | `Banking_Integrations.md`, `Card_Services.md`, `Ledger.md`, `Payment_Processing.md` |
-| `06_Developer_Guides/` | Practical, hands-on guides for developers. | `Setup_Guide.md`, `Authentication.md`, `Frontend_Development.md` |
-| `07_Security/` | Details on robust security measures and architecture. | `Security_Overview.md` |
-| `08_Infrastructure/` | Documentation for DevOps and operations teams. | `Deployment_Guide.md`, `Monitoring_and_Observability.md` |
+| Directory                       | Description                                                      | Key Documents                                                                       |
+| :------------------------------ | :--------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| `01_Introduction/`              | High-level overview of the platform's vision and mission.        | `Introduction.md`                                                                   |
+| `02_Architecture/`              | Detailed explanation of the microservices design and principles. | `Architecture_Overview.md`, `Microservices_Design.md`                               |
+| `03_API_Reference/`             | Exhaustive documentation for all exposed APIs.                   | `API_Documentation.md`, `Backend_API.md`, `API_Gateway.md`                          |
+| `04_Compliance_and_Regulatory/` | Details on adherence to financial regulations.                   | `Compliance_Overview.md`, `KYC_AML.md`                                              |
+| `05_Core_Financial_Services/`   | In-depth documentation on each core financial service.           | `Banking_Integrations.md`, `Card_Services.md`, `Ledger.md`, `Payment_Processing.md` |
+| `06_Developer_Guides/`          | Practical, hands-on guides for developers.                       | `Setup_Guide.md`, `Authentication.md`, `Frontend_Development.md`                    |
+| `07_Security/`                  | Details on robust security measures and architecture.            | `Security_Overview.md`                                                              |
+| `08_Infrastructure/`            | Documentation for DevOps and operations teams.                   | `Deployment_Guide.md`, `Monitoring_and_Observability.md`                            |
 
 ### Infrastructure (`infrastructure/`)
 
 This directory contains all the Infrastructure-as-Code (IaC) definitions for deploying and managing the Flowlet platform.
 
-| Directory/File | Description | Key Components and Files |
-| :--- | :--- | :--- |
-| `infrastructure/docker/` | Dockerfiles and configuration for local environment. | **`docker-compose.yml`** (Full stack local environment), `Dockerfile.backend`, `Dockerfile.frontend`, `nginx-lb.conf` |
+| Directory/File               | Description                                                              | Key Components and Files                                                                                                                    |
+| :--------------------------- | :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `infrastructure/docker/`     | Dockerfiles and configuration for local environment.                     | **`docker-compose.yml`** (Full stack local environment), `Dockerfile.backend`, `Dockerfile.frontend`, `nginx-lb.conf`                       |
 | `infrastructure/kubernetes/` | Kubernetes manifests for deploying the application and its dependencies. | `databases/` (`postgresql.yaml`, `mongodb.yaml`, `redis.yaml`), `monitoring/` (Prometheus, Grafana), `services/` (Core service deployments) |
-| `infrastructure/helm/` | Helm charts for templating and managing Kubernetes deployments. | `flowlet-chart/` (Main application chart) |
-| `infrastructure/terraform/` | Terraform configurations for provisioning cloud resources. | `aws/`, `gcp/` (Provider-specific resource definitions) |
+| `infrastructure/helm/`       | Helm charts for templating and managing Kubernetes deployments.          | `flowlet-chart/` (Main application chart)                                                                                                   |
+| `infrastructure/terraform/`  | Terraform configurations for provisioning cloud resources.               | `aws/`, `gcp/` (Provider-specific resource definitions)                                                                                     |
 
 ### GitHub Actions Workflows (`.github/workflows/`)
 
 Contains the CI/CD pipeline definitions, automating the software delivery lifecycle.
 
-| Workflow File | Description | Key Stages |
-| :--- | :--- | :--- |
-| `backend-ci-cd.yml` | Continuous Integration and Deployment for the backend services. | Testing, Linting, Building Docker Images, Pushing to Registry, Deploying to Staging/Production |
-| `nodejs-frontend-ci-cd.yml` | CI/CD for the frontend application. | Testing, Linting, Building Static Assets, Deployment to CDN/Web Server |
-| `infrastructure-ci.yml` | Continuous Integration for Infrastructure-as-Code (Terraform/Helm). | Plan/Validate Infrastructure Changes |
+| Workflow File               | Description                                                         | Key Stages                                                                                     |
+| :-------------------------- | :------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
+| `backend-ci-cd.yml`         | Continuous Integration and Deployment for the backend services.     | Testing, Linting, Building Docker Images, Pushing to Registry, Deploying to Staging/Production |
+| `nodejs-frontend-ci-cd.yml` | CI/CD for the frontend application.                                 | Testing, Linting, Building Static Assets, Deployment to CDN/Web Server                         |
+| `infrastructure-ci.yml`     | Continuous Integration for Infrastructure-as-Code (Terraform/Helm). | Plan/Validate Infrastructure Changes                                                           |
 
 ---
 
@@ -200,32 +200,32 @@ The recommended way to run Flowlet locally is using **Docker Compose**, which se
 
 ### Prerequisites
 
-| Prerequisite | Version/Requirement |
-| :--- | :--- |
+| Prerequisite | Version/Requirement                                 |
+| :----------- | :-------------------------------------------------- |
 | **Software** | Git, Docker, and Docker Compose (or Docker Desktop) |
 
 ### Setup with Docker Compose (Recommended)
 
-| Step | Command | Description |
-| :--- | :--- | :--- |
-| **1. Clone Repository** | `git clone https://github.com/abrar2030/Flowlet && cd Flowlet` | Download the source code and navigate to the project directory. |
-| **2. Start the Services** | `cd infrastructure/docker && docker compose up --build -d` | Builds the images and runs all services (DB, Cache, Backend, Frontend, Load Balancer). |
-| **3. Access the Application** | See access points below. | |
+| Step                          | Command                                                        | Description                                                                            |
+| :---------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| **1. Clone Repository**       | `git clone https://github.com/abrar2030/Flowlet && cd Flowlet` | Download the source code and navigate to the project directory.                        |
+| **2. Start the Services**     | `cd infrastructure/docker && docker compose up --build -d`     | Builds the images and runs all services (DB, Cache, Backend, Frontend, Load Balancer). |
+| **3. Access the Application** | See access points below.                                       |                                                                                        |
 
 **Access the Development Environment:**
 
-| Component | Endpoint | Default Credentials |
-| :--- | :--- | :--- |
-| **Frontend Web App** | `http://localhost:80` | N/A |
-| **Backend API** | `http://localhost:8000` | N/A |
+| Component             | Endpoint                | Default Credentials                 |
+| :-------------------- | :---------------------- | :---------------------------------- |
+| **Frontend Web App**  | `http://localhost:80`   | N/A                                 |
+| **Backend API**       | `http://localhost:8000` | N/A                                 |
 | **Grafana Dashboard** | `http://localhost:3001` | User: `admin`, Password: `admin123` |
 
 ### Manual Setup (For Development)
 
-| Component | Prerequisites | Setup Steps |
-| :--- | :--- | :--- |
-| **Backend (Python/Flask)** | Python 3.11+, PostgreSQL, Redis | `cd backend`, `pip install -r requirements.txt`, `python main.py` (after setting DB env vars) |
-| **Frontend (React/TypeScript)** | Node.js (v18+), pnpm | `cd frontend`, `pnpm install`, `pnpm run dev` |
+| Component                       | Prerequisites                   | Setup Steps                                                                                   |
+| :------------------------------ | :------------------------------ | :-------------------------------------------------------------------------------------------- |
+| **Backend (Python/Flask)**      | Python 3.11+, PostgreSQL, Redis | `cd backend`, `pip install -r requirements.txt`, `python main.py` (after setting DB env vars) |
+| **Frontend (React/TypeScript)** | Node.js (v18+), pnpm            | `cd frontend`, `pnpm install`, `pnpm run dev`                                                 |
 
 ---
 

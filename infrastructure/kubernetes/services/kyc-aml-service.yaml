@@ -41,54 +41,54 @@ spec:
         app: kyc-aml-service
     spec:
       containers:
-      - name: kyc-aml-service
-        image: flowlet/kyc-aml-service:latest
-        ports:
-        - containerPort: 3003
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: password
-        - name: MONGODB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-credentials
-              key: password
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-credentials
-              key: password
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3003
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3003
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: kyc-aml-service
+          image: flowlet/kyc-aml-service:latest
+          ports:
+            - containerPort: 3003
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: config
-        configMap:
-          name: kyc-aml-service-config
+        - name: config
+          configMap:
+            name: kyc-aml-service-config
 ---
 apiVersion: v1
 kind: Service
@@ -99,6 +99,6 @@ spec:
   selector:
     app: kyc-aml-service
   ports:
-  - port: 80
-    targetPort: 3003
+    - port: 80
+      targetPort: 3003
   type: ClusterIP

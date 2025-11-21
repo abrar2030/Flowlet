@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 const MOBILE_BREAKPOINT = 768; // Standard tablet breakpoint
 
@@ -22,8 +22,12 @@ export function useResponsive(): ResponsiveState {
 
   useEffect(() => {
     // Define media queries
-    const mobileQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const tabletQuery = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT}px) and (max-width: 1023px)`);
+    const mobileQuery = window.matchMedia(
+      `(max-width: ${MOBILE_BREAKPOINT - 1}px)`,
+    );
+    const tabletQuery = window.matchMedia(
+      `(min-width: ${MOBILE_BREAKPOINT}px) and (max-width: 1023px)`,
+    );
     const desktopQuery = window.matchMedia(`(min-width: 1024px)`);
 
     const updateState = () => {
@@ -38,15 +42,15 @@ export function useResponsive(): ResponsiveState {
     updateState();
 
     // Add listeners
-    mobileQuery.addEventListener('change', updateState);
-    tabletQuery.addEventListener('change', updateState);
-    desktopQuery.addEventListener('change', updateState);
+    mobileQuery.addEventListener("change", updateState);
+    tabletQuery.addEventListener("change", updateState);
+    desktopQuery.addEventListener("change", updateState);
 
     // Cleanup listeners
     return () => {
-      mobileQuery.removeEventListener('change', updateState);
-      tabletQuery.removeEventListener('change', updateState);
-      desktopQuery.removeEventListener('change', updateState);
+      mobileQuery.removeEventListener("change", updateState);
+      tabletQuery.removeEventListener("change", updateState);
+      desktopQuery.removeEventListener("change", updateState);
     };
   }, []);
 

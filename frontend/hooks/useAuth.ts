@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from './redux';
-import { validateToken, refreshToken } from '@/store/authSlice';
-import { authService } from '@/lib/authService';
+import { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "./redux";
+import { validateToken, refreshToken } from "@/store/authSlice";
+import { authService } from "@/lib/authService";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
-  const { user, token, isAuthenticated, isLoading, error } = useAppSelector(state => state.auth);
+  const { user, token, isAuthenticated, isLoading, error } = useAppSelector(
+    (state) => state.auth,
+  );
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export const useAuth = () => {
         try {
           await dispatch(validateToken()).unwrap();
         } catch (error) {
-          console.error('Token validation failed:', error);
+          console.error("Token validation failed:", error);
           authService.logout();
         }
       }
@@ -31,7 +33,7 @@ export const useAuth = () => {
       await dispatch(refreshToken()).unwrap();
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       return false;
     }
   };

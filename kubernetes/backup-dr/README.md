@@ -4,22 +4,22 @@ This directory outlines the strategy for backing up Kubernetes cluster configura
 
 **Key Principles:**
 
-*   **Regular Backups:** Automated and frequent backups of Kubernetes cluster state (etcd), application configurations, and persistent volumes.
-*   **Offsite Storage:** Store backups in a geographically separate and secure location to protect against regional outages.
-*   **Encryption:** All backups must be encrypted at rest and in transit.
-*   **Testing:** Regularly test the backup and restore process to ensure its reliability and to validate RTO/RPO objectives.
-*   **Documentation:** Maintain clear and up-to-date documentation of the DR plan.
+- **Regular Backups:** Automated and frequent backups of Kubernetes cluster state (etcd), application configurations, and persistent volumes.
+- **Offsite Storage:** Store backups in a geographically separate and secure location to protect against regional outages.
+- **Encryption:** All backups must be encrypted at rest and in transit.
+- **Testing:** Regularly test the backup and restore process to ensure its reliability and to validate RTO/RPO objectives.
+- **Documentation:** Maintain clear and up-to-date documentation of the DR plan.
 
 **Recovery Time Objective (RTO) and Recovery Point Objective (RPO):**
 
-*   **RTO:** (Example: 4 hours) The maximum tolerable duration of time that a computer system, network, or application can be down after a disaster or disruption.
-*   **RPO:** (Example: 15 minutes) The maximum tolerable period in which data might be lost from an IT service due to a major incident.
+- **RTO:** (Example: 4 hours) The maximum tolerable duration of time that a computer system, network, or application can be down after a disaster or disruption.
+- **RPO:** (Example: 15 minutes) The maximum tolerable period in which data might be lost from an IT service due to a major incident.
 
 **Backup Components:**
 
-*   **Kubernetes Cluster State:** Back up `etcd` data to restore the cluster's control plane.
-*   **Application Configurations:** Version control all Kubernetes manifests, Helm charts, and configuration files in a Git repository (GitOps).
-*   **Persistent Volumes (PVs):** Use Velero (configured in `velero.yaml`) to backup and restore application data stored in Persistent Volumes. Velero integrates with cloud provider snapshot capabilities.
+- **Kubernetes Cluster State:** Back up `etcd` data to restore the cluster's control plane.
+- **Application Configurations:** Version control all Kubernetes manifests, Helm charts, and configuration files in a Git repository (GitOps).
+- **Persistent Volumes (PVs):** Use Velero (configured in `velero.yaml`) to backup and restore application data stored in Persistent Volumes. Velero integrates with cloud provider snapshot capabilities.
 
 **Disaster Recovery Steps (High-Level):**
 
@@ -35,7 +35,7 @@ This directory outlines the strategy for backing up Kubernetes cluster configura
 
 **Tools Used:**
 
-*   **Velero:** For Kubernetes cluster resource and persistent volume backups.
-*   **Git:** For version controlling all Kubernetes configurations (GitOps).
+- **Velero:** For Kubernetes cluster resource and persistent volume backups.
+- **Git:** For version controlling all Kubernetes configurations (GitOps).
 
 This strategy ensures that the Flowlet application can quickly recover from a disaster with minimal data loss, meeting the stringent requirements of financial standards.

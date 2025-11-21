@@ -1,49 +1,93 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownRight, Plus, Send, TrendingUp, Wallet, CreditCard } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  Plus,
+  Send,
+  TrendingUp,
+  Wallet,
+  CreditCard,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   const quickStats = [
     {
-      title: 'Total Balance',
-      value: '$12,345.67',
-      change: '+2.5%',
-      trend: 'up',
+      title: "Total Balance",
+      value: "$12,345.67",
+      change: "+2.5%",
+      trend: "up",
       icon: Wallet,
     },
     {
-      title: 'Monthly Income',
-      value: '$4,200.00',
-      change: '+8.1%',
-      trend: 'up',
+      title: "Monthly Income",
+      value: "$4,200.00",
+      change: "+8.1%",
+      trend: "up",
       icon: ArrowDownRight,
     },
     {
-      title: 'Monthly Expenses',
-      value: '$2,850.30',
-      change: '-3.2%',
-      trend: 'down',
+      title: "Monthly Expenses",
+      value: "$2,850.30",
+      change: "-3.2%",
+      trend: "down",
       icon: ArrowUpRight,
     },
     {
-      title: 'Savings Rate',
-      value: '32.1%',
-      change: '+5.4%',
-      trend: 'up',
+      title: "Savings Rate",
+      value: "32.1%",
+      change: "+5.4%",
+      trend: "up",
       icon: TrendingUp,
     },
   ];
 
   const recentTransactions = [
-    { id: 1, description: 'Grocery Store', amount: -85.32, date: '2024-01-15', category: 'Food' },
-    { id: 2, description: 'Salary Deposit', amount: 4200.00, date: '2024-01-15', category: 'Income' },
-    { id: 3, description: 'Electric Bill', amount: -120.45, date: '2024-01-14', category: 'Utilities' },
-    { id: 4, description: 'Coffee Shop', amount: -12.50, date: '2024-01-14', category: 'Food' },
-    { id: 5, description: 'Gas Station', amount: -65.00, date: '2024-01-13', category: 'Transport' },
+    {
+      id: 1,
+      description: "Grocery Store",
+      amount: -85.32,
+      date: "2024-01-15",
+      category: "Food",
+    },
+    {
+      id: 2,
+      description: "Salary Deposit",
+      amount: 4200.0,
+      date: "2024-01-15",
+      category: "Income",
+    },
+    {
+      id: 3,
+      description: "Electric Bill",
+      amount: -120.45,
+      date: "2024-01-14",
+      category: "Utilities",
+    },
+    {
+      id: 4,
+      description: "Coffee Shop",
+      amount: -12.5,
+      date: "2024-01-14",
+      category: "Food",
+    },
+    {
+      id: 5,
+      description: "Gas Station",
+      amount: -65.0,
+      date: "2024-01-13",
+      category: "Transport",
+    },
   ];
 
   return (
@@ -52,7 +96,7 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+            Welcome back, {user?.name?.split(" ")[0] || "User"}!
           </h1>
           <p className="text-muted-foreground">
             Here's what's happening with your finances today.
@@ -84,9 +128,11 @@ const Dashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <p className={`text-xs ${
-                  stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <p
+                  className={`text-xs ${
+                    stat.trend === "up" ? "text-green-600" : "text-red-600"
+                  }`}
+                >
                   {stat.change} from last month
                 </p>
               </CardContent>
@@ -101,30 +147,44 @@ const Dashboard: React.FC = () => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>
-              Your latest financial activity
-            </CardDescription>
+            <CardDescription>Your latest financial activity</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between">
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      transaction.amount > 0 ? 'bg-green-500' : 'bg-red-500'
-                    }`} />
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        transaction.amount > 0 ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
                     <div>
-                      <p className="text-sm font-medium">{transaction.description}</p>
-                      <p className="text-xs text-muted-foreground">{transaction.category}</p>
+                      <p className="text-sm font-medium">
+                        {transaction.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {transaction.category}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-medium ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                    <p
+                      className={`text-sm font-medium ${
+                        transaction.amount > 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {transaction.amount > 0 ? "+" : ""}$
+                      {Math.abs(transaction.amount).toFixed(2)}
                     </p>
-                    <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {transaction.date}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -139,9 +199,7 @@ const Dashboard: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common tasks and shortcuts
-            </CardDescription>
+            <CardDescription>Common tasks and shortcuts</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline">

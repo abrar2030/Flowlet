@@ -7,6 +7,7 @@ This is an MVP (Minimum Viable Product) implementation of the Flowlet financial 
 ## Features Implemented
 
 ### Core Wallet Functionality
+
 - **Wallet Creation**: Create new digital wallets for users
 - **Balance Inquiry**: Check current and available balances
 - **Fund Deposits**: Add money to wallets
@@ -14,6 +15,7 @@ This is an MVP (Minimum Viable Product) implementation of the Flowlet financial 
 - **Transaction History**: View detailed transaction records
 
 ### Payment Functionality
+
 - **Peer-to-Peer Transfers**: Transfer funds between wallets
 - **Payment Processing**: Send payments with reference tracking
 - **Multi-currency Support**: Support for USD, EUR, GBP, and other major currencies
@@ -38,10 +40,12 @@ The MVP includes two implementations:
 ## API Endpoints
 
 ### Health and Info
+
 - `GET /health` - Health check endpoint
 - `GET /api/v1/info` - API information and features
 
 ### Wallet Management
+
 - `POST /api/v1/wallet/create` - Create a new wallet
 - `GET /api/v1/wallet/{wallet_id}/balance` - Get wallet balance
 - `POST /api/v1/wallet/{wallet_id}/deposit` - Deposit funds
@@ -50,6 +54,7 @@ The MVP includes two implementations:
 - `GET /api/v1/wallet/user/{user_id}` - Get all wallets for a user
 
 ### Payment Processing
+
 - `POST /api/v1/payment/transfer` - Transfer funds between wallets
 - `POST /api/v1/payment/send` - Send payment to recipient
 - `POST /api/v1/payment/request` - Create payment request
@@ -58,6 +63,7 @@ The MVP includes two implementations:
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - pip3
 - Required packages (see requirements below)
@@ -65,16 +71,19 @@ The MVP includes two implementations:
 ### Installation
 
 1. **Install Dependencies**
+
    ```bash
    cd backend
    pip3 install flask flask-cors flask-sqlalchemy flask-migrate flask-limiter redis pyjwt async-timeout
    ```
 
 2. **Run Simple MVP (Recommended for Testing)**
+
    ```bash
    cd backend
    python3.11 simple_mvp_app.py
    ```
+
    The server will start on `http://localhost:5001`
 
 3. **Run Enhanced Implementation**
@@ -86,12 +95,14 @@ The MVP includes two implementations:
 ### Testing
 
 Run the included test script:
+
 ```bash
 cd backend
 python3.11 test_mvp.py
 ```
 
 This will test all major functionality including:
+
 - Wallet creation
 - Balance inquiries
 - Deposits and withdrawals
@@ -101,6 +112,7 @@ This will test all major functionality including:
 ## API Usage Examples
 
 ### Create a Wallet
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/wallet/create \
   -H "Content-Type: application/json" \
@@ -114,11 +126,13 @@ curl -X POST http://localhost:5001/api/v1/wallet/create \
 ```
 
 ### Check Balance
+
 ```bash
 curl http://localhost:5001/api/v1/wallet/{wallet_id}/balance
 ```
 
 ### Deposit Funds
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/wallet/{wallet_id}/deposit \
   -H "Content-Type: application/json" \
@@ -129,6 +143,7 @@ curl -X POST http://localhost:5001/api/v1/wallet/{wallet_id}/deposit \
 ```
 
 ### Transfer Funds
+
 ```bash
 curl -X POST http://localhost:5001/api/v1/payment/transfer \
   -H "Content-Type: application/json" \
@@ -143,11 +158,13 @@ curl -X POST http://localhost:5001/api/v1/payment/transfer \
 ## Database Schema
 
 ### Simple Implementation (SQLite)
+
 - **users**: User information
 - **accounts**: Wallet/account details
 - **transactions**: Transaction records
 
 ### Enhanced Implementation
+
 - **enhanced_accounts**: Advanced account management
 - **enhanced_transactions**: Comprehensive transaction tracking
 - **users**: User management with KYC support
@@ -164,6 +181,7 @@ curl -X POST http://localhost:5001/api/v1/payment/transfer \
 ## Error Handling
 
 The API returns standardized error responses:
+
 ```json
 {
   "error": "Error description",
@@ -173,6 +191,7 @@ The API returns standardized error responses:
 ```
 
 Common error codes:
+
 - `WALLET_NOT_FOUND`: Wallet doesn't exist
 - `INSUFFICIENT_FUNDS`: Not enough balance
 - `INVALID_AMOUNT`: Invalid amount format
@@ -182,6 +201,7 @@ Common error codes:
 ## Development Notes
 
 ### File Structure
+
 ```
 backend/
 ├── src/                          # Enhanced implementation
@@ -209,6 +229,7 @@ backend/
 ## Future Enhancements
 
 The MVP provides a solid foundation for additional features:
+
 - User authentication and authorization
 - Card management and tokenization
 - Fraud detection and prevention

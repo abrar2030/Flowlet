@@ -9,11 +9,11 @@ kind: ClusterRole
 metadata:
   name: fluent-bit-reader
 rules:
-- apiGroups: [""]
-  resources:
-  - pods
-  - namespaces
-  verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - pods
+      - namespaces
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -24,9 +24,9 @@ roleRef:
   kind: ClusterRole
   name: fluent-bit-reader
 subjects:
-- kind: ServiceAccount
-  name: fluent-bit
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: fluent-bit
+    namespace: kube-system
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -49,46 +49,46 @@ spec:
     spec:
       serviceAccountName: fluent-bit
       tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
-      - operator: Exists
-        effect: NoExecute
-      - operator: Exists
-        effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+        - operator: Exists
+          effect: NoSchedule
       containers:
-      - name: fluent-bit
-        image: fluent/fluent-bit:2.2.2
-        imagePullPolicy: Always
-        env:
-          - name: FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch-logging.logging.svc.cluster.local"
-          - name: FLUENT_ELASTICSEARCH_PORT
-            value: "9200"
-        resources:
-          limits:
-            memory: 200Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        volumeMounts:
-        - name: varlog
-          mountPath: /var/log
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: fluentbit-config
-          mountPath: /fluent-bit/etc/
+        - name: fluent-bit
+          image: fluent/fluent-bit:2.2.2
+          imagePullPolicy: Always
+          env:
+            - name: FLUENT_ELASTICSEARCH_HOST
+              value: "elasticsearch-logging.logging.svc.cluster.local"
+            - name: FLUENT_ELASTICSEARCH_PORT
+              value: "9200"
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: fluentbit-config
+              mountPath: /fluent-bit/etc/
       volumes:
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: fluentbit-config
-        configMap:
-          name: fluent-bit-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: fluentbit-config
+          configMap:
+            name: fluent-bit-config
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:

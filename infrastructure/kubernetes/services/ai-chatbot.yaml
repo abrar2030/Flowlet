@@ -45,55 +45,55 @@ spec:
         app: ai-chatbot
     spec:
       containers:
-      - name: ai-chatbot
-        image: flowlet/ai-chatbot:latest
-        ports:
-        - containerPort: 3009
-        - containerPort: 3010
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-credentials
-              key: password
-        - name: MONGODB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-credentials
-              key: password
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-credentials
-              key: password
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3009
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3009
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: ai-chatbot
+          image: flowlet/ai-chatbot:latest
+          ports:
+            - containerPort: 3009
+            - containerPort: 3010
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: password
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3009
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3009
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: config
-        configMap:
-          name: ai-chatbot-config
+        - name: config
+          configMap:
+            name: ai-chatbot-config
 ---
 apiVersion: v1
 kind: Service
@@ -104,10 +104,10 @@ spec:
   selector:
     app: ai-chatbot
   ports:
-  - port: 80
-    targetPort: 3009
-    name: http
-  - port: 3010
-    targetPort: 3010
-    name: websocket
+    - port: 80
+      targetPort: 3009
+      name: http
+    - port: 3010
+      targetPort: 3010
+      name: websocket
   type: ClusterIP

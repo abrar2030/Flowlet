@@ -1,5 +1,5 @@
 // Authentication Service for Flowlet Frontend
-import { api, TokenManager, ApiError } from './api';
+import { api, TokenManager, ApiError } from "./api";
 
 // Types
 export interface User {
@@ -9,7 +9,7 @@ export interface User {
   last_name: string;
   phone_number?: string;
   is_verified: boolean;
-  kyc_status: 'pending' | 'verified' | 'rejected';
+  kyc_status: "pending" | "verified" | "rejected";
   created_at: string;
   updated_at: string;
 }
@@ -50,7 +50,10 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
+      const response = await api.post<AuthResponse>(
+        "/api/v1/auth/login",
+        credentials,
+      );
 
       // Store tokens and user data
       TokenManager.setAccessToken(response.access_token);
@@ -62,7 +65,7 @@ class AuthService {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError('Login failed', 500);
+      throw new ApiError("Login failed", 500);
     }
   }
 
@@ -71,7 +74,10 @@ class AuthService {
    */
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/api/v1/auth/register', userData);
+      const response = await api.post<AuthResponse>(
+        "/api/v1/auth/register",
+        userData,
+      );
 
       // Store tokens and user data
       TokenManager.setAccessToken(response.access_token);
@@ -83,7 +89,7 @@ class AuthService {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError('Registration failed', 500);
+      throw new ApiError("Registration failed", 500);
     }
   }
 
@@ -93,10 +99,10 @@ class AuthService {
   async logout(): Promise<void> {
     try {
       // Call logout endpoint to invalidate tokens on server
-      await api.post('/api/v1/auth/logout');
+      await api.post("/api/v1/auth/logout");
     } catch (error) {
       // Even if server logout fails, clear local tokens
-      console.warn('Server logout failed:', error);
+      console.warn("Server logout failed:", error);
     } finally {
       // Always clear local storage
       TokenManager.clearTokens();
@@ -110,13 +116,16 @@ class AuthService {
     const refreshToken = TokenManager.getRefreshToken();
 
     if (!refreshToken) {
-      throw new ApiError('No refresh token available', 401);
+      throw new ApiError("No refresh token available", 401);
     }
 
     try {
-      const response = await api.post<{ access_token: string }>('/api/v1/auth/refresh', {
-        refresh_token: refreshToken,
-      });
+      const response = await api.post<{ access_token: string }>(
+        "/api/v1/auth/refresh",
+        {
+          refresh_token: refreshToken,
+        },
+      );
 
       TokenManager.setAccessToken(response.access_token);
       return response.access_token;
@@ -132,7 +141,7 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User> {
     try {
-      return await api.get<User>('/api/v1/auth/profile');
+      return await api.get<User>("/api/v1/auth/profile");
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         TokenManager.clearTokens();
@@ -146,7 +155,7 @@ class AuthService {
    */
   async updateProfile(userData: Partial<User>): Promise<User> {
     try {
-      return await api.put<User>('/api/v1/auth/profile', userData);
+      return await api.put<User>("/api/v1/auth/profile", userData);
     } catch (error) {
       throw error;
     }
@@ -155,9 +164,12 @@ class AuthService {
   /**
    * Change password
    */
-  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
     try {
-      await api.post('/api/v1/auth/change-password', {
+      await api.post("/api/v1/auth/change-password", {
         current_password: currentPassword,
         new_password: newPassword,
       });
@@ -171,7 +183,7 @@ class AuthService {
    */
   async requestPasswordReset(email: string): Promise<void> {
     try {
-      await api.post('/api/v1/auth/forgot-password', { email });
+      await api.post("/api/v1/auth/forgot-password", { email });
     } catch (error) {
       throw error;
     }
@@ -182,7 +194,7 @@ class AuthService {
    */
   async resetPassword(token: string, password: string): Promise<void> {
     try {
-      await api.post('/api/v1/auth/reset-password', {
+      await api.post("/api/v1/auth/reset-password", {
         token,
         password,
       });
@@ -196,7 +208,7 @@ class AuthService {
    */
   async verifyEmail(token: string): Promise<void> {
     try {
-      await api.post('/api/v1/auth/verify-email', { token });
+      await api.post("/api/v1/auth/verify-email", { token });
     } catch (error) {
       throw error;
     }
@@ -207,7 +219,7 @@ class AuthService {
    */
   async resendEmailVerification(): Promise<void> {
     try {
-      await api.post('/api/v1/auth/resend-verification');
+      await api.post("/api/v1/auth/resend-verification");
     } catch (error) {
       throw error;
     }
@@ -235,7 +247,7 @@ class AuthService {
    */
   async enableTwoFactor(): Promise<{ qr_code: string; secret: string }> {
     try {
-      return await api.post('/api/v1/auth/2fa/enable');
+      return await api.post("/api/v1/auth/2fa/enable");
     } catch (error) {
       throw error;
     }
@@ -246,7 +258,7 @@ class AuthService {
    */
   async verifyTwoFactor(code: string): Promise<void> {
     try {
-      await api.post('/api/v1/auth/2fa/verify', { code });
+      await api.post("/api/v1/auth/2fa/verify", { code });
     } catch (error) {
       throw error;
     }
@@ -257,7 +269,7 @@ class AuthService {
    */
   async disableTwoFactor(password: string): Promise<void> {
     try {
-      await api.post('/api/v1/auth/2fa/disable', { password });
+      await api.post("/api/v1/auth/2fa/disable", { password });
     } catch (error) {
       throw error;
     }
@@ -268,7 +280,7 @@ class AuthService {
    */
   async getSessions(): Promise<any[]> {
     try {
-      return await api.get('/api/v1/auth/sessions');
+      return await api.get("/api/v1/auth/sessions");
     } catch (error) {
       throw error;
     }
@@ -290,7 +302,7 @@ class AuthService {
    */
   async revokeAllOtherSessions(): Promise<void> {
     try {
-      await api.post('/api/v1/auth/sessions/revoke-all');
+      await api.post("/api/v1/auth/sessions/revoke-all");
     } catch (error) {
       throw error;
     }

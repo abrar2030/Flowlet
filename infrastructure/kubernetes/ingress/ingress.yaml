@@ -11,31 +11,31 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-  - hosts:
-    - api.flowlet.com
-    - portal.flowlet.com
-    secretName: flowlet-tls
+    - hosts:
+        - api.flowlet.com
+        - portal.flowlet.com
+      secretName: flowlet-tls
   rules:
-  - host: api.flowlet.com
-    http:
-      paths:
-      - path: /(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: api-gateway
-            port:
-              number: 80
-  - host: portal.flowlet.com
-    http:
-      paths:
-      - path: /(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: developer-portal
-            port:
-              number: 80
+    - host: api.flowlet.com
+      http:
+        paths:
+          - path: /(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80
+    - host: portal.flowlet.com
+      http:
+        paths:
+          - path: /(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: developer-portal
+                port:
+                  number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -45,38 +45,38 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-core
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-data
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-messaging
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-core
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-data
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-messaging
   egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-data
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-messaging
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 53
-    - protocol: UDP
-      port: 53
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-data
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-messaging
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -86,15 +86,15 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
+    - Ingress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-core
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-core
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-monitoring
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -104,12 +104,12 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
+    - Ingress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-core
-    - namespaceSelector:
-        matchLabels:
-          name: flowlet-monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-core
+        - namespaceSelector:
+            matchLabels:
+              name: flowlet-monitoring

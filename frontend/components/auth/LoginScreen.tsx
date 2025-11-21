@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAppDispatch } from '@/hooks/redux';
-import { loginUser } from '@/store/authSlice';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAppDispatch } from "@/hooks/redux";
+import { loginUser } from "@/store/authSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   rememberMe: z.boolean().optional(),
 });
 
@@ -36,8 +42,8 @@ const LoginScreen: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'demo@flowlet.com',
-      password: 'demo123',
+      email: "demo@flowlet.com",
+      password: "demo123",
       rememberMe: false,
     },
   });
@@ -46,11 +52,11 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
     try {
       await dispatch(loginUser(data)).unwrap();
-      toast.success('Welcome back!');
-      navigate('/dashboard');
+      toast.success("Welcome back!");
+      navigate("/dashboard");
     } catch (error: any) {
-      setError('root', { message: error || 'Login failed' });
-      toast.error('Login failed. Please check your credentials.');
+      setError("root", { message: error || "Login failed" });
+      toast.error("Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -79,11 +85,13 @@ const LoginScreen: React.FC = () => {
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                {...register('email')}
-                className={errors.email ? 'border-destructive' : ''}
+                {...register("email")}
+                className={errors.email ? "border-destructive" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -92,10 +100,12 @@ const LoginScreen: React.FC = () => {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  {...register('password')}
-                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                  {...register("password")}
+                  className={
+                    errors.password ? "border-destructive pr-10" : "pr-10"
+                  }
                 />
                 <Button
                   type="button"
@@ -112,13 +122,15 @@ const LoginScreen: React.FC = () => {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox id="rememberMe" {...register('rememberMe')} />
+                <Checkbox id="rememberMe" {...register("rememberMe")} />
                 <Label htmlFor="rememberMe" className="text-sm">
                   Remember me
                 </Label>
@@ -137,7 +149,7 @@ const LoginScreen: React.FC = () => {
             </Button>
 
             <div className="text-center text-sm">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <Link to="/register" className="text-primary hover:underline">
                 Sign up
               </Link>
@@ -145,7 +157,9 @@ const LoginScreen: React.FC = () => {
           </form>
 
           <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">Demo Credentials:</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Demo Credentials:
+            </p>
             <p className="text-xs">Email: demo@flowlet.com</p>
             <p className="text-xs">Password: demo123</p>
           </div>

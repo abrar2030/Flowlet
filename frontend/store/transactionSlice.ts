@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Transaction, TransactionType, TransactionStatus } from '@/types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Transaction, TransactionType, TransactionStatus } from "@/types";
 
 interface TransactionState {
   transactions: Transaction[];
@@ -38,7 +38,7 @@ const initialState: TransactionState = {
 };
 
 const transactionSlice = createSlice({
-  name: 'transaction',
+  name: "transaction",
   initialState,
   reducers: {
     setTransactions: (state, action: PayloadAction<Transaction[]>) => {
@@ -55,22 +55,32 @@ const transactionSlice = createSlice({
       }
     },
     updateTransaction: (state, action: PayloadAction<Transaction>) => {
-      const index = state.transactions.findIndex(t => t.id === action.payload.id);
+      const index = state.transactions.findIndex(
+        (t) => t.id === action.payload.id,
+      );
       if (index !== -1) {
         state.transactions[index] = action.payload;
       }
-      const recentIndex = state.recentTransactions.findIndex(t => t.id === action.payload.id);
+      const recentIndex = state.recentTransactions.findIndex(
+        (t) => t.id === action.payload.id,
+      );
       if (recentIndex !== -1) {
         state.recentTransactions[recentIndex] = action.payload;
       }
     },
-    setFilters: (state, action: PayloadAction<Partial<TransactionState['filters']>>) => {
+    setFilters: (
+      state,
+      action: PayloadAction<Partial<TransactionState["filters"]>>,
+    ) => {
       state.filters = { ...state.filters, ...action.payload };
     },
     clearFilters: (state) => {
       state.filters = {};
     },
-    setPagination: (state, action: PayloadAction<Partial<TransactionState['pagination']>>) => {
+    setPagination: (
+      state,
+      action: PayloadAction<Partial<TransactionState["pagination"]>>,
+    ) => {
       state.pagination = { ...state.pagination, ...action.payload };
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

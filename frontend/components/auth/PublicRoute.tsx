@@ -1,7 +1,7 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import LoadingScreen from '@/components/LoadingScreen';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface PublicRouteProps {
   children: React.ReactNode;

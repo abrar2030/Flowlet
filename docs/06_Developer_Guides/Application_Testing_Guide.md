@@ -62,7 +62,7 @@ pytest tests/integration/
 
 **Example Test Structure**:
 
-```python
+````python
 # Flowlet/backend/tests/integration/test_wallet_service_db.py
 
 import pytest
@@ -102,7 +102,7 @@ def test_create_wallet_integration(setup_db):
 
         wallet = Wallet.query.filter_by(userId="test_user_1").first()
         assert wallet is not None
-```
+````
 
 ### End-to-End (E2E) Tests
 
@@ -182,16 +182,16 @@ pnpm test
 ```jsx
 // Flowlet/frontend/web-frontend/src/components/Button.test.jsx
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Button from './Button';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Button from "./Button";
 
-test('renders button with correct text', () => {
+test("renders button with correct text", () => {
   render(<Button>Click Me</Button>);
   expect(screen.getByText(/Click Me/i)).toBeInTheDocument();
 });
 
-test('calls onClick prop when clicked', async () => {
+test("calls onClick prop when clicked", async () => {
   const handleClick = jest.fn();
   render(<Button onClick={handleClick}>Click Me</Button>);
   await userEvent.click(screen.getByText(/Click Me/i));

@@ -7,9 +7,9 @@ metadata:
     app: alertmanager
 spec:
   ports:
-  - name: web
-    port: 9093
-    targetPort: 9093
+    - name: web
+      port: 9093
+      targetPort: 9093
   selector:
     app: alertmanager
 ---
@@ -31,24 +31,24 @@ spec:
         app: alertmanager
     spec:
       containers:
-      - name: alertmanager
-        image: prom/alertmanager:v0.27.0
-        args:
-          - --config.file=/etc/alertmanager/config.yml
-          - --storage.path=/alertmanager
-        ports:
-        - containerPort: 9093
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/alertmanager
-        - name: storage-volume
-          mountPath: /alertmanager
+        - name: alertmanager
+          image: prom/alertmanager:v0.27.0
+          args:
+            - --config.file=/etc/alertmanager/config.yml
+            - --storage.path=/alertmanager
+          ports:
+            - containerPort: 9093
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/alertmanager
+            - name: storage-volume
+              mountPath: /alertmanager
       volumes:
-      - name: config-volume
-        configMap:
-          name: alertmanager-config
-      - name: storage-volume
-        emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: alertmanager-config
+        - name: storage-volume
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: ConfigMap

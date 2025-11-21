@@ -14,7 +14,7 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginationMeta {
@@ -49,11 +49,20 @@ export interface User extends BaseEntity {
   status: UserStatus;
 }
 
-export type UserRole = 'customer' | 'admin' | 'support' | 'compliance';
+export type UserRole = "customer" | "admin" | "support" | "compliance";
 
-export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending_verification';
+export type UserStatus =
+  | "active"
+  | "inactive"
+  | "suspended"
+  | "pending_verification";
 
-export type KYCStatus = 'not_started' | 'in_progress' | 'completed' | 'rejected' | 'expired';
+export type KYCStatus =
+  | "not_started"
+  | "in_progress"
+  | "completed"
+  | "rejected"
+  | "expired";
 
 export interface Permission {
   id: string;
@@ -122,9 +131,14 @@ export interface Account extends BaseEntity {
   iban?: string;
 }
 
-export type AccountType = 'checking' | 'savings' | 'credit' | 'investment' | 'business';
+export type AccountType =
+  | "checking"
+  | "savings"
+  | "credit"
+  | "investment"
+  | "business";
 
-export type AccountStatus = 'active' | 'inactive' | 'frozen' | 'closed';
+export type AccountStatus = "active" | "inactive" | "frozen" | "closed";
 
 export interface Money {
   amount: number;
@@ -132,7 +146,7 @@ export interface Money {
   formatted: string;
 }
 
-export type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'JPY' | 'AUD' | 'CHF';
+export type Currency = "USD" | "EUR" | "GBP" | "CAD" | "JPY" | "AUD" | "CHF";
 
 export interface Transaction extends BaseEntity {
   transactionId: string;
@@ -155,21 +169,34 @@ export interface Transaction extends BaseEntity {
   settledAt?: string;
 }
 
-export type TransactionType = 'debit' | 'credit' | 'transfer' | 'payment' | 'refund' | 'fee' | 'interest';
+export type TransactionType =
+  | "debit"
+  | "credit"
+  | "transfer"
+  | "payment"
+  | "refund"
+  | "fee"
+  | "interest";
 
-export type TransactionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'reversed';
+export type TransactionStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "reversed";
 
 export type TransactionCategory =
-  | 'food_dining'
-  | 'transportation'
-  | 'shopping'
-  | 'entertainment'
-  | 'healthcare'
-  | 'utilities'
-  | 'income'
-  | 'transfer'
-  | 'fees'
-  | 'other';
+  | "food_dining"
+  | "transportation"
+  | "shopping"
+  | "entertainment"
+  | "healthcare"
+  | "utilities"
+  | "income"
+  | "transfer"
+  | "fees"
+  | "other";
 
 export interface TransactionLocation {
   latitude: number;
@@ -192,7 +219,7 @@ export interface TransferRequest {
 }
 
 export interface RecurringTransferConfig {
-  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  frequency: "daily" | "weekly" | "monthly" | "yearly";
   interval: number;
   endDate?: string;
   maxOccurrences?: number;
@@ -217,11 +244,17 @@ export interface Card extends BaseEntity {
   lastUsedAt?: string;
 }
 
-export type CardType = 'debit' | 'credit' | 'prepaid' | 'virtual';
+export type CardType = "debit" | "credit" | "prepaid" | "virtual";
 
-export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'discover';
+export type CardBrand = "visa" | "mastercard" | "amex" | "discover";
 
-export type CardStatus = 'active' | 'inactive' | 'blocked' | 'expired' | 'lost' | 'stolen';
+export type CardStatus =
+  | "active"
+  | "inactive"
+  | "blocked"
+  | "expired"
+  | "lost"
+  | "stolen";
 
 export interface SpendingLimits {
   daily: Money;
@@ -231,7 +264,12 @@ export interface SpendingLimits {
   atmDaily: Money;
 }
 
-export type CardFeature = 'contactless' | 'chip' | 'magnetic_stripe' | 'virtual_numbers' | 'freeze_unfreeze';
+export type CardFeature =
+  | "contactless"
+  | "chip"
+  | "magnetic_stripe"
+  | "virtual_numbers"
+  | "freeze_unfreeze";
 
 export interface CardTransaction extends Transaction {
   cardId: string;
@@ -259,17 +297,17 @@ export interface SecurityEvent extends BaseEntity {
 }
 
 export type SecurityEventType =
-  | 'login_attempt'
-  | 'login_success'
-  | 'login_failure'
-  | 'password_change'
-  | 'mfa_enabled'
-  | 'mfa_disabled'
-  | 'suspicious_activity'
-  | 'account_locked'
-  | 'data_breach_attempt';
+  | "login_attempt"
+  | "login_success"
+  | "login_failure"
+  | "password_change"
+  | "mfa_enabled"
+  | "mfa_disabled"
+  | "suspicious_activity"
+  | "account_locked"
+  | "data_breach_attempt";
 
-export type SecuritySeverity = 'low' | 'medium' | 'high' | 'critical';
+export type SecuritySeverity = "low" | "medium" | "high" | "critical";
 
 export interface AuditLog extends BaseEntity {
   userId: string;
@@ -294,16 +332,16 @@ export interface ComplianceCheck extends BaseEntity {
   notes?: string;
 }
 
-export type ComplianceCheckType = 'kyc' | 'aml' | 'sanctions' | 'pep' | 'fraud';
+export type ComplianceCheckType = "kyc" | "aml" | "sanctions" | "pep" | "fraud";
 
-export type ComplianceStatus = 'pass' | 'fail' | 'review_required' | 'pending';
+export type ComplianceStatus = "pass" | "fail" | "review_required" | "pending";
 
 // ============================================================================
 // Analytics & Reporting Types
 // ============================================================================
 
 export interface SpendingAnalytics {
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  period: "daily" | "weekly" | "monthly" | "yearly";
   totalSpent: Money;
   totalIncome: Money;
   netFlow: Money;
@@ -339,7 +377,7 @@ export interface Budget extends BaseEntity {
   name: string;
   category: TransactionCategory;
   amount: Money;
-  period: 'monthly' | 'weekly' | 'yearly';
+  period: "monthly" | "weekly" | "yearly";
   startDate: string;
   endDate?: string;
   isActive: boolean;
@@ -357,10 +395,10 @@ export interface BudgetAlert {
 // ============================================================================
 
 export interface Theme {
-  mode: 'light' | 'dark' | 'system';
+  mode: "light" | "dark" | "system";
   primaryColor: string;
   accentColor: string;
-  fontSize: 'small' | 'medium' | 'large';
+  fontSize: "small" | "medium" | "large";
 }
 
 export interface NotificationPreferences {
@@ -421,7 +459,15 @@ export interface ApiError {
 export interface FormField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'checkbox' | 'radio';
+  type:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "select"
+    | "textarea"
+    | "checkbox"
+    | "radio";
   required: boolean;
   placeholder?: string;
   options?: { value: string; label: string }[];
@@ -468,7 +514,7 @@ export interface AppEvent {
 }
 
 export interface TransactionEvent extends AppEvent {
-  type: 'transaction:created' | 'transaction:updated' | 'transaction:failed';
+  type: "transaction:created" | "transaction:updated" | "transaction:failed";
   payload: {
     transactionId: string;
     userId: string;
@@ -478,7 +524,7 @@ export interface TransactionEvent extends AppEvent {
 }
 
 export interface SecurityEvent extends AppEvent {
-  type: 'security:login' | 'security:logout' | 'security:suspicious_activity';
+  type: "security:login" | "security:logout" | "security:suspicious_activity";
   payload: {
     userId: string;
     ipAddress: string;

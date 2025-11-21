@@ -4,19 +4,19 @@ For enhanced security and compliance, especially in financial environments, it i
 
 **Recommended External Secrets Solutions:**
 
-*   **HashiCorp Vault:** A widely adopted solution for managing secrets, providing a secure and auditable way to store and access sensitive data.
-*   **Cloud Provider Secret Managers:**
-    *   **AWS Secrets Manager:** For applications deployed on AWS.
-    *   **Azure Key Vault:** For applications deployed on Azure.
-    *   **Google Secret Manager:** For applications deployed on Google Cloud.
+- **HashiCorp Vault:** A widely adopted solution for managing secrets, providing a secure and auditable way to store and access sensitive data.
+- **Cloud Provider Secret Managers:**
+  - **AWS Secrets Manager:** For applications deployed on AWS.
+  - **Azure Key Vault:** For applications deployed on Azure.
+  - **Google Secret Manager:** For applications deployed on Google Cloud.
 
 These solutions offer advanced features such as:
 
-*   Centralized secrets management.
-*   Dynamic secret generation.
-*   Lease and revocation capabilities.
-*   Audit trails.
-*   Integration with Identity and Access Management (IAM) systems.
+- Centralized secrets management.
+- Dynamic secret generation.
+- Lease and revocation capabilities.
+- Audit trails.
+- Integration with Identity and Access Management (IAM) systems.
 
 **Implementation:**
 

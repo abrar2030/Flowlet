@@ -1,26 +1,29 @@
 // Improved API Client Configuration for Flowlet Frontend
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Utility function for safe base64 decoding (JWT payload)
 const safeB64Decode = (str: string): string => {
   try {
     // Replace characters that might be missing in a URL-safe base64 string
-    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
     // Pad with '=' until it's a multiple of 4
-    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "=",
+    );
     return atob(padded);
   } catch (e) {
-    console.error('Base64 decoding failed:', e);
-    return '{}'; // Return empty object string on failure
+    console.error("Base64 decoding failed:", e);
+    return "{}"; // Return empty object string on failure
   }
 };
 
 // API Configuration
 const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 };
 
@@ -29,21 +32,25 @@ const apiClient: AxiosInstance = axios.create(API_CONFIG);
 
 // Improved Token Manager with better security practices
 class TokenManager {
-  private static readonly ACCESS_TOKEN_KEY = 'flowlet_access_token';
-  private static readonly REFRESH_TOKEN_KEY = 'flowlet_refresh_token';
-  private static readonly USER_KEY = 'flowlet_user';
+  private static readonly ACCESS_TOKEN_KEY = "flowlet_access_token";
+  private static readonly REFRESH_TOKEN_KEY = "flowlet_refresh_token";
+  private static readonly USER_KEY = "flowlet_user";
   private static readonly TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes buffer
 
   // Check if secure storage is available (for sensitive tokens)
   private static isSecureStorageAvailable(): boolean {
-    return typeof window !== 'undefined' && 'crypto' in window && 'subtle' in window.crypto;
+    return (
+      typeof window !== "undefined" &&
+      "crypto" in window &&
+      "subtle" in window.crypto
+    );
   }
 
   static getAccessToken(): string | null {
     try {
       return localStorage.getItem(this.ACCESS_TOKEN_KEY);
     } catch (error) {
-      console.error('Failed to retrieve access token:', error);
+      console.error("Failed to retrieve access token:", error);
       return null;
     }
   }
@@ -52,7 +59,7 @@ class TokenManager {
     try {
       localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
     } catch (error) {
-      console.error('Failed to store access token:', error);
+      console.error("Failed to store access token:", error);
     }
   }
 
@@ -60,7 +67,7 @@ class TokenManager {
     try {
       return localStorage.getItem(this.REFRESH_TOKEN_KEY);
     } catch (error) {
-      console.error('Failed to retrieve refresh token:', error);
+      console.error("Failed to retrieve refresh token:", error);
       return null;
     }
   }
@@ -69,7 +76,7 @@ class TokenManager {
     try {
       localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
     } catch (error) {
-      console.error('Failed to store refresh token:', error);
+      console.error("Failed to store refresh token:", error);
     }
   }
 
@@ -78,7 +85,7 @@ class TokenManager {
       const user = localStorage.getItem(this.USER_KEY);
       return user ? JSON.parse(user) : null;
     } catch (error) {
-      console.error('Failed to retrieve user data:', error);
+      console.error("Failed to retrieve user data:", error);
       return null;
     }
   }
@@ -96,7 +103,7 @@ class TokenManager {
       };
       localStorage.setItem(this.USER_KEY, JSON.stringify(sanitizedUser));
     } catch (error) {
-      console.error('Failed to store user data:', error);
+      console.error("Failed to store user data:", error);
     }
   }
 
@@ -106,7 +113,7 @@ class TokenManager {
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
     } catch (error) {
-      console.error('Failed to clear tokens:', error);
+      console.error("Failed to clear tokens:", error);
     }
   }
 
@@ -114,13 +121,13 @@ class TokenManager {
     try {
       if (!token) return true;
 
-      const payload = JSON.parse(safeB64Decode(token.split('.')[1]));
+      const payload = JSON.parse(safeB64Decode(token.split(".")[1]));
       const currentTime = Date.now();
-      const expiryTime = (payload.exp * 1000) - this.TOKEN_EXPIRY_BUFFER;
+      const expiryTime = payload.exp * 1000 - this.TOKEN_EXPIRY_BUFFER;
 
       return currentTime >= expiryTime;
     } catch (error) {
-      console.error('Failed to parse token:', error);
+      console.error("Failed to parse token:", error);
       return true;
     }
   }
@@ -128,10 +135,10 @@ class TokenManager {
   static getTokenExpiryTime(token: string): number | null {
     try {
       if (!token) return null;
-      const payload = JSON.parse(safeB64Decode(token.split('.')[1]));
+      const payload = JSON.parse(safeB64Decode(token.split(".")[1]));
       return payload.exp * 1000;
     } catch (error) {
-      console.error('Failed to get token expiry:', error);
+      console.error("Failed to get token expiry:", error);
       return null;
     }
   }
@@ -146,21 +153,24 @@ apiClient.interceptors.request.use(
     }
 
     // Add security headers
-    config.headers['X-Requested-With'] = 'XMLHttpRequest';
-    config.headers['X-Client-Version'] = import.meta.env.VITE_APP_VERSION || '1.0.0';
+    config.headers["X-Requested-With"] = "XMLHttpRequest";
+    config.headers["X-Client-Version"] =
+      import.meta.env.VITE_APP_VERSION || "1.0.0";
 
     // Add CSRF token if available
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute("content");
     if (csrfToken) {
-      config.headers['X-CSRF-Token'] = csrfToken;
+      config.headers["X-CSRF-Token"] = csrfToken;
     }
 
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    console.error("Request interceptor error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for token refresh and error handling
@@ -176,11 +186,15 @@ apiClient.interceptors.response.use(
       const refreshToken = TokenManager.getRefreshToken();
       if (refreshToken && !TokenManager.isTokenExpired(refreshToken)) {
         try {
-          const response = await axios.post(`${API_CONFIG.baseURL}/api/v1/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
+          const response = await axios.post(
+            `${API_CONFIG.baseURL}/api/v1/auth/refresh`,
+            {
+              refresh_token: refreshToken,
+            },
+          );
 
-          const { access_token, refresh_token: newRefreshToken } = response.data.data;
+          const { access_token, refresh_token: newRefreshToken } =
+            response.data.data;
           TokenManager.setAccessToken(access_token);
 
           if (newRefreshToken) {
@@ -190,27 +204,31 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
           return apiClient(originalRequest);
         } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
+          console.error("Token refresh failed:", refreshError);
           TokenManager.clearTokens();
 
           // Dispatch custom event for auth failure
-          window.dispatchEvent(new CustomEvent('auth:logout', {
-            detail: { reason: 'token_refresh_failed' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent("auth:logout", {
+              detail: { reason: "token_refresh_failed" },
+            }),
+          );
 
           return Promise.reject(refreshError);
         }
       } else {
         TokenManager.clearTokens();
-        window.dispatchEvent(new CustomEvent('auth:logout', {
-          detail: { reason: 'no_valid_refresh_token' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent("auth:logout", {
+            detail: { reason: "no_valid_refresh_token" },
+          }),
+        );
       }
     }
 
     // Handle rate limiting
     if (error.response?.status === 429) {
-      const retryAfter = error.response.headers['retry-after'];
+      const retryAfter = error.response.headers["retry-after"];
       if (retryAfter && !originalRequest._retryCount) {
         originalRequest._retryCount = 1;
         const delay = parseInt(retryAfter) * 1000;
@@ -222,7 +240,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // API Response Types
@@ -259,7 +277,7 @@ export class ApiError extends Error {
 
   constructor(message: string, status: number, data?: any, requestId?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.data = data;
     this.requestId = requestId;
@@ -291,9 +309,9 @@ class ApiService {
     // In production, send to error reporting service
     if (import.meta.env.PROD) {
       // Example: Sentry, LogRocket, etc.
-      console.error('API Error:', errorLog);
+      console.error("API Error:", errorLog);
     } else {
-      console.error('API Error:', errorLog);
+      console.error("API Error:", errorLog);
     }
   }
 
@@ -302,12 +320,12 @@ class ApiService {
       return response.data.data;
     } else {
       const error = new ApiError(
-        response.data.message || 'API request failed',
+        response.data.message || "API request failed",
         response.status,
         response.data,
-        response.data.meta?.request_id
+        response.data.meta?.request_id,
       );
-      this.logError(error, 'API Response Error');
+      this.logError(error, "API Response Error");
       throw error;
     }
   }
@@ -321,22 +339,20 @@ class ApiService {
         error.response.data?.message || `HTTP ${error.response.status} Error`,
         error.response.status,
         error.response.data,
-        error.response.data?.meta?.request_id
+        error.response.data?.meta?.request_id,
       );
     } else if (error.request) {
       // Network error
       apiError = new ApiError(
-        'Network error - please check your connection',
+        "Network error - please check your connection",
         0,
-        { type: 'network_error' }
+        { type: "network_error" },
       );
     } else {
       // Other error
-      apiError = new ApiError(
-        error.message || 'Unknown error occurred',
-        0,
-        { type: 'unknown_error' }
-      );
+      apiError = new ApiError(error.message || "Unknown error occurred", 0, {
+        type: "unknown_error",
+      });
     }
 
     this.logError(apiError, context);
@@ -352,7 +368,11 @@ class ApiService {
     }
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await apiClient.post(url, data, config);
       return this.handleResponse<T>(response);
@@ -361,7 +381,11 @@ class ApiService {
     }
   }
 
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await apiClient.put(url, data, config);
       return this.handleResponse<T>(response);
@@ -370,7 +394,11 @@ class ApiService {
     }
   }
 
-  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     try {
       const response = await apiClient.patch(url, data, config);
       return this.handleResponse<T>(response);
@@ -389,17 +417,23 @@ class ApiService {
   }
 
   // Utility method for file uploads
-  async uploadFile<T>(url: string, file: File, onProgress?: (progress: number) => void): Promise<T> {
+  async uploadFile<T>(
+    url: string,
+    file: File,
+    onProgress?: (progress: number) => void,
+  ): Promise<T> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const config: AxiosRequestConfig = {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
           onProgress(progress);
         }
       },
@@ -412,7 +446,7 @@ class ApiService {
 // Health check utility
 export const healthCheck = async (): Promise<boolean> => {
   try {
-    await apiClient.get('/health');
+    await apiClient.get("/health");
     return true;
   } catch {
     return false;

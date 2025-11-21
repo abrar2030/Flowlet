@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Notification } from '@/types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Notification } from "@/types";
 
 interface UIState {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   sidebarOpen: boolean;
   mobileMenuOpen: boolean;
   notifications: Notification[];
@@ -17,7 +17,7 @@ interface UIState {
   };
   toasts: Array<{
     id: string;
-    type: 'success' | 'error' | 'warning' | 'info';
+    type: "success" | "error" | "warning" | "info";
     title: string;
     message: string;
     duration?: number;
@@ -25,7 +25,7 @@ interface UIState {
 }
 
 const initialState: UIState = {
-  theme: 'system',
+  theme: "system",
   sidebarOpen: true,
   mobileMenuOpen: false,
   notifications: [],
@@ -40,10 +40,10 @@ const initialState: UIState = {
 };
 
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
-    setTheme: (state, action: PayloadAction<'light' | 'dark' | 'system'>) => {
+    setTheme: (state, action: PayloadAction<"light" | "dark" | "system">) => {
       state.theme = action.payload;
     },
     toggleSidebar: (state) => {
@@ -65,22 +65,29 @@ const uiSlice = createSlice({
       }
     },
     markNotificationAsRead: (state, action: PayloadAction<string>) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        (n) => n.id === action.payload,
+      );
       if (notification && !notification.read) {
         notification.read = true;
         state.unreadNotifications = Math.max(0, state.unreadNotifications - 1);
       }
     },
     markAllNotificationsAsRead: (state) => {
-      state.notifications.forEach(n => n.read = true);
+      state.notifications.forEach((n) => (n.read = true));
       state.unreadNotifications = 0;
     },
     removeNotification: (state, action: PayloadAction<string>) => {
-      const index = state.notifications.findIndex(n => n.id === action.payload);
+      const index = state.notifications.findIndex(
+        (n) => n.id === action.payload,
+      );
       if (index !== -1) {
         const notification = state.notifications[index];
         if (!notification.read) {
-          state.unreadNotifications = Math.max(0, state.unreadNotifications - 1);
+          state.unreadNotifications = Math.max(
+            0,
+            state.unreadNotifications - 1,
+          );
         }
         state.notifications.splice(index, 1);
       }
@@ -91,8 +98,12 @@ const uiSlice = createSlice({
     setGlobalLoading: (state, action: PayloadAction<boolean>) => {
       state.loading.global = action.payload;
     },
-    setComponentLoading: (state, action: PayloadAction<{ component: string; loading: boolean }>) => {
-      state.loading.components[action.payload.component] = action.payload.loading;
+    setComponentLoading: (
+      state,
+      action: PayloadAction<{ component: string; loading: boolean }>,
+    ) => {
+      state.loading.components[action.payload.component] =
+        action.payload.loading;
     },
     openModal: (state, action: PayloadAction<string>) => {
       state.modals[action.payload] = true;
@@ -100,12 +111,15 @@ const uiSlice = createSlice({
     closeModal: (state, action: PayloadAction<string>) => {
       state.modals[action.payload] = false;
     },
-    addToast: (state, action: PayloadAction<Omit<UIState['toasts'][0], 'id'>>) => {
+    addToast: (
+      state,
+      action: PayloadAction<Omit<UIState["toasts"][0], "id">>,
+    ) => {
       const id = Date.now().toString();
       state.toasts.push({ ...action.payload, id });
     },
     removeToast: (state, action: PayloadAction<string>) => {
-      state.toasts = state.toasts.filter(t => t.id !== action.payload);
+      state.toasts = state.toasts.filter((t) => t.id !== action.payload);
     },
     clearToasts: (state) => {
       state.toasts = [];

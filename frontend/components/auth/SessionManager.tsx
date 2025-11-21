@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Progress } from '../ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Progress } from "../ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
   Clock,
   Shield,
@@ -22,14 +22,14 @@ import {
   Unlock,
   Activity,
   MapPin,
-  Wifi
-} from 'lucide-react';
+  Wifi,
+} from "lucide-react";
 
 interface Session {
   id: string;
   userId: string;
   deviceInfo: {
-    type: 'desktop' | 'mobile' | 'tablet';
+    type: "desktop" | "mobile" | "tablet";
     browser: string;
     os: string;
     userAgent: string;
@@ -48,7 +48,7 @@ interface Session {
   expiresAt: string;
   isActive: boolean;
   isCurrent: boolean;
-  securityLevel: 'low' | 'medium' | 'high';
+  securityLevel: "low" | "medium" | "high";
   mfaVerified: boolean;
   riskScore: number;
   activities: SessionActivity[];
@@ -56,7 +56,13 @@ interface Session {
 
 interface SessionActivity {
   id: string;
-  type: 'login' | 'logout' | 'page_view' | 'api_call' | 'permission_check' | 'security_event';
+  type:
+    | "login"
+    | "logout"
+    | "page_view"
+    | "api_call"
+    | "permission_check"
+    | "security_event";
   description: string;
   timestamp: string;
   metadata?: Record<string, any>;
@@ -81,7 +87,7 @@ interface SessionManagerProps {
   onSessionExtend?: (sessionId: string) => Promise<void>;
   onSessionTerminateAll?: () => Promise<void>;
   onConfigUpdate?: (config: Partial<SessionConfig>) => Promise<void>;
-  onActivityLog?: (activity: Omit<SessionActivity, 'id' | 'timestamp'>) => void;
+  onActivityLog?: (activity: Omit<SessionActivity, "id" | "timestamp">) => void;
   className?: string;
 }
 
@@ -110,17 +116,17 @@ export function SessionManager({
     requireMfaForSensitive: true,
     allowConcurrentSessions: true,
     trackLocation: true,
-    trackDeviceFingerprint: true
+    trackDeviceFingerprint: true,
   },
   onSessionTerminate,
   onSessionExtend,
   onSessionTerminateAll,
   onConfigUpdate,
   onActivityLog,
-  className = ''
+  className = "",
 }: SessionManagerProps) {
   const [state, setState] = useState<ComponentState>({
-    activeTab: 'current',
+    activeTab: "current",
     timeRemaining: 0,
     isIdle: false,
     idleTime: 0,
@@ -130,7 +136,7 @@ export function SessionManager({
     error: null,
     success: null,
     selectedSession: null,
-    showSessionDetails: false
+    showSessionDetails: false,
   });
 
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -146,18 +152,18 @@ export function SessionManager({
       const expiresAt = new Date(currentSession.expiresAt).getTime();
       const remaining = Math.max(0, expiresAt - now);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         timeRemaining: remaining,
-        showWarning: remaining < 300000 && remaining > 0 // Show warning when < 5 minutes
+        showWarning: remaining < 300000 && remaining > 0, // Show warning when < 5 minutes
       }));
 
       if (remaining === 0) {
         // Session expired
         if (onActivityLog) {
           onActivityLog({
-            type: 'security_event',
-            description: 'Session expired due to timeout'
+            type: "security_event",
+            description: "Session expired due to timeout",
           });
         }
       }
@@ -176,7 +182,7 @@ export function SessionManager({
   useEffect(() => {
     const handleActivity = () => {
       lastActivityRef.current = Date.now();
-      setState(prev => ({ ...prev, isIdle: false, idleTime: 0 }));
+      setState((prev) => ({ ...prev, isIdle: false, idleTime: 0 }));
 
       if (sessionConfig.extendOnActivity && currentSession && onSessionExtend) {
         // Auto-extend session on activity
@@ -185,8 +191,8 @@ export function SessionManager({
 
       if (onActivityLog) {
         onActivityLog({
-          type: 'page_view',
-          description: 'User activity detected'
+          type: "page_view",
+          description: "User activity detected",
         });
       }
     };
@@ -196,25 +202,32 @@ export function SessionManager({
       const idleTime = now - lastActivityRef.current;
       const idleMinutes = idleTime / (1000 * 60);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         idleTime: idleTime,
-        isIdle: idleMinutes >= sessionConfig.idleTimeout
+        isIdle: idleMinutes >= sessionConfig.idleTimeout,
       }));
 
       if (idleMinutes >= sessionConfig.idleTimeout) {
         if (onActivityLog) {
           onActivityLog({
-            type: 'security_event',
-            description: `User idle for ${Math.round(idleMinutes)} minutes`
+            type: "security_event",
+            description: `User idle for ${Math.round(idleMinutes)} minutes`,
           });
         }
       }
     };
 
     // Add activity listeners
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    events.forEach(event => {
+    const events = [
+      "mousedown",
+      "mousemove",
+      "keypress",
+      "scroll",
+      "touchstart",
+      "click",
+    ];
+    events.forEach((event) => {
       document.addEventListener(event, handleActivity, true);
     });
 
@@ -223,7 +236,7 @@ export function SessionManager({
     idleTimerRef.current = idleTimer;
 
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, handleActivity, true);
       });
       if (idleTimer) clearInterval(idleTimer);
@@ -234,69 +247,82 @@ export function SessionManager({
   const handleExtendSession = useCallback(async () => {
     if (!currentSession || !onSessionExtend) return;
 
-    setState(prev => ({ ...prev, isExtending: true, error: null }));
+    setState((prev) => ({ ...prev, isExtending: true, error: null }));
 
     try {
       await onSessionExtend(currentSession.id);
-      setState(prev => ({ ...prev, success: 'Session extended successfully' }));
+      setState((prev) => ({
+        ...prev,
+        success: "Session extended successfully",
+      }));
 
       if (onActivityLog) {
         onActivityLog({
-          type: 'security_event',
-          description: 'Session manually extended'
+          type: "security_event",
+          description: "Session manually extended",
         });
       }
     } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to extend session' }));
+      setState((prev) => ({ ...prev, error: "Failed to extend session" }));
     } finally {
-      setState(prev => ({ ...prev, isExtending: false }));
+      setState((prev) => ({ ...prev, isExtending: false }));
     }
   }, [currentSession, onSessionExtend, onActivityLog]);
 
   // Handle session termination
-  const handleTerminateSession = useCallback(async (sessionId: string) => {
-    if (!onSessionTerminate) return;
+  const handleTerminateSession = useCallback(
+    async (sessionId: string) => {
+      if (!onSessionTerminate) return;
 
-    setState(prev => ({ ...prev, isTerminating: true, error: null }));
+      setState((prev) => ({ ...prev, isTerminating: true, error: null }));
 
-    try {
-      await onSessionTerminate(sessionId);
-      setState(prev => ({ ...prev, success: 'Session terminated successfully' }));
+      try {
+        await onSessionTerminate(sessionId);
+        setState((prev) => ({
+          ...prev,
+          success: "Session terminated successfully",
+        }));
 
-      if (onActivityLog) {
-        onActivityLog({
-          type: 'logout',
-          description: `Session ${sessionId} terminated`
-        });
+        if (onActivityLog) {
+          onActivityLog({
+            type: "logout",
+            description: `Session ${sessionId} terminated`,
+          });
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to terminate session" }));
+      } finally {
+        setState((prev) => ({ ...prev, isTerminating: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to terminate session' }));
-    } finally {
-      setState(prev => ({ ...prev, isTerminating: false }));
-    }
-  }, [onSessionTerminate, onActivityLog]);
+    },
+    [onSessionTerminate, onActivityLog],
+  );
 
   // Handle terminate all sessions
   const handleTerminateAllSessions = useCallback(async () => {
     if (!onSessionTerminateAll) return;
-    if (!confirm('Are you sure you want to terminate all other sessions?')) return;
+    if (!confirm("Are you sure you want to terminate all other sessions?"))
+      return;
 
-    setState(prev => ({ ...prev, isTerminating: true, error: null }));
+    setState((prev) => ({ ...prev, isTerminating: true, error: null }));
 
     try {
       await onSessionTerminateAll();
-      setState(prev => ({ ...prev, success: 'All sessions terminated successfully' }));
+      setState((prev) => ({
+        ...prev,
+        success: "All sessions terminated successfully",
+      }));
 
       if (onActivityLog) {
         onActivityLog({
-          type: 'security_event',
-          description: 'All sessions terminated by user'
+          type: "security_event",
+          description: "All sessions terminated by user",
         });
       }
     } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to terminate sessions' }));
+      setState((prev) => ({ ...prev, error: "Failed to terminate sessions" }));
     } finally {
-      setState(prev => ({ ...prev, isTerminating: false }));
+      setState((prev) => ({ ...prev, isTerminating: false }));
     }
   }, [onSessionTerminateAll, onActivityLog]);
 
@@ -321,30 +347,38 @@ export function SessionManager({
 
   const getDeviceIcon = (type: string) => {
     switch (type) {
-      case 'desktop': return <Monitor className="w-4 h-4" />;
-      case 'mobile': return <Smartphone className="w-4 h-4" />;
-      case 'tablet': return <Monitor className="w-4 h-4" />;
-      default: return <Monitor className="w-4 h-4" />;
+      case "desktop":
+        return <Monitor className="w-4 h-4" />;
+      case "mobile":
+        return <Smartphone className="w-4 h-4" />;
+      case "tablet":
+        return <Monitor className="w-4 h-4" />;
+      default:
+        return <Monitor className="w-4 h-4" />;
     }
   };
 
   const getSecurityLevelColor = (level: string) => {
     switch (level) {
-      case 'high': return 'bg-green-100 text-green-600';
-      case 'medium': return 'bg-yellow-100 text-yellow-600';
-      case 'low': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "high":
+        return "bg-green-100 text-green-600";
+      case "medium":
+        return "bg-yellow-100 text-yellow-600";
+      case "low":
+        return "bg-red-100 text-red-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getRiskScoreColor = (score: number) => {
-    if (score < 30) return 'text-green-600';
-    if (score < 70) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score < 30) return "text-green-600";
+    if (score < 70) return "text-yellow-600";
+    return "text-red-600";
   };
 
-  const activeSessions = allSessions.filter(s => s.isActive);
-  const otherSessions = activeSessions.filter(s => !s.isCurrent);
+  const activeSessions = allSessions.filter((s) => s.isActive);
+  const otherSessions = activeSessions.filter((s) => !s.isCurrent);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -372,7 +406,8 @@ export function SessionManager({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            Monitor and manage your active sessions across all devices and locations.
+            Monitor and manage your active sessions across all devices and
+            locations.
           </p>
         </CardContent>
       </Card>
@@ -384,7 +419,8 @@ export function SessionManager({
           <AlertDescription className="text-amber-800">
             <div className="flex items-center justify-between">
               <span>
-                Your session will expire in {formatTimeRemaining(state.timeRemaining)}
+                Your session will expire in{" "}
+                {formatTimeRemaining(state.timeRemaining)}
               </span>
               <Button
                 onClick={handleExtendSession}
@@ -392,7 +428,7 @@ export function SessionManager({
                 size="sm"
                 className="ml-4"
               >
-                {state.isExtending ? 'Extending...' : 'Extend Session'}
+                {state.isExtending ? "Extending..." : "Extend Session"}
               </Button>
             </div>
           </AlertDescription>
@@ -403,8 +439,8 @@ export function SessionManager({
         <Alert className="border-yellow-200 bg-yellow-50">
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You have been idle for {formatIdleTime(state.idleTime)}.
-            Your session may be terminated for security.
+            You have been idle for {formatIdleTime(state.idleTime)}. Your
+            session may be terminated for security.
           </AlertDescription>
         </Alert>
       )}
@@ -413,19 +449,28 @@ export function SessionManager({
       {state.error && (
         <Alert className="border-red-200 bg-red-50">
           <XCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{state.error}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {state.error}
+          </AlertDescription>
         </Alert>
       )}
 
       {state.success && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{state.success}</AlertDescription>
+          <AlertDescription className="text-green-800">
+            {state.success}
+          </AlertDescription>
         </Alert>
       )}
 
       {/* Main Content */}
-      <Tabs value={state.activeTab} onValueChange={(value) => setState(prev => ({ ...prev, activeTab: value }))}>
+      <Tabs
+        value={state.activeTab}
+        onValueChange={(value) =>
+          setState((prev) => ({ ...prev, activeTab: value }))
+        }
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="current">Current Session</TabsTrigger>
           <TabsTrigger value="all">All Sessions</TabsTrigger>
@@ -439,7 +484,11 @@ export function SessionManager({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Current Session Details</span>
-                  <Badge className={getSecurityLevelColor(currentSession.securityLevel)}>
+                  <Badge
+                    className={getSecurityLevelColor(
+                      currentSession.securityLevel,
+                    )}
+                  >
                     <Shield className="w-3 h-3 mr-1" />
                     {currentSession.securityLevel} Security
                   </Badge>
@@ -454,19 +503,33 @@ export function SessionManager({
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Session ID:</span>
-                          <span className="font-mono">{currentSession.id.substring(0, 8)}...</span>
+                          <span className="font-mono">
+                            {currentSession.id.substring(0, 8)}...
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Created:</span>
-                          <span>{new Date(currentSession.createdAt).toLocaleString()}</span>
+                          <span>
+                            {new Date(
+                              currentSession.createdAt,
+                            ).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Last Activity:</span>
-                          <span>{new Date(currentSession.lastActivity).toLocaleString()}</span>
+                          <span>
+                            {new Date(
+                              currentSession.lastActivity,
+                            ).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Expires:</span>
-                          <span>{new Date(currentSession.expiresAt).toLocaleString()}</span>
+                          <span>
+                            {new Date(
+                              currentSession.expiresAt,
+                            ).toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -475,8 +538,16 @@ export function SessionManager({
                       <h4 className="font-medium mb-2">Security Status</h4>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">MFA Verified:</span>
-                          <Badge className={currentSession.mfaVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}>
+                          <span className="text-sm text-gray-600">
+                            MFA Verified:
+                          </span>
+                          <Badge
+                            className={
+                              currentSession.mfaVerified
+                                ? "bg-green-100 text-green-600"
+                                : "bg-red-100 text-red-600"
+                            }
+                          >
                             {currentSession.mfaVerified ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
@@ -491,8 +562,12 @@ export function SessionManager({
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Risk Score:</span>
-                          <span className={`font-medium ${getRiskScoreColor(currentSession.riskScore)}`}>
+                          <span className="text-sm text-gray-600">
+                            Risk Score:
+                          </span>
+                          <span
+                            className={`font-medium ${getRiskScoreColor(currentSession.riskScore)}`}
+                          >
                             {currentSession.riskScore}/100
                           </span>
                         </div>
@@ -506,7 +581,9 @@ export function SessionManager({
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center space-x-2">
                           {getDeviceIcon(currentSession.deviceInfo.type)}
-                          <span className="capitalize">{currentSession.deviceInfo.type}</span>
+                          <span className="capitalize">
+                            {currentSession.deviceInfo.type}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Browser:</span>
@@ -524,11 +601,16 @@ export function SessionManager({
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center space-x-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span>{currentSession.location.city}, {currentSession.location.country}</span>
+                          <span>
+                            {currentSession.location.city},{" "}
+                            {currentSession.location.country}
+                          </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Wifi className="w-4 h-4 text-gray-400" />
-                          <span className="font-mono">{currentSession.location.ip}</span>
+                          <span className="font-mono">
+                            {currentSession.location.ip}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -539,12 +621,22 @@ export function SessionManager({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Time Remaining</span>
-                    <span className={state.timeRemaining < 300000 ? 'text-red-600 font-medium' : ''}>
+                    <span
+                      className={
+                        state.timeRemaining < 300000
+                          ? "text-red-600 font-medium"
+                          : ""
+                      }
+                    >
                       {formatTimeRemaining(state.timeRemaining)}
                     </span>
                   </div>
                   <Progress
-                    value={(state.timeRemaining / (sessionConfig.sessionTimeout * 60 * 1000)) * 100}
+                    value={
+                      (state.timeRemaining /
+                        (sessionConfig.sessionTimeout * 60 * 1000)) *
+                      100
+                    }
                     className="h-2"
                   />
                 </div>
@@ -556,7 +648,9 @@ export function SessionManager({
                     disabled={state.isExtending}
                     variant="outline"
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${state.isExtending ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`w-4 h-4 mr-2 ${state.isExtending ? "animate-spin" : ""}`}
+                    />
                     Extend Session
                   </Button>
                   <Button
@@ -573,8 +667,11 @@ export function SessionManager({
                 <div>
                   <h4 className="font-medium mb-2">Recent Activities</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {currentSession.activities.slice(0, 10).map(activity => (
-                      <div key={activity.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                    {currentSession.activities.slice(0, 10).map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"
+                      >
                         <span>{activity.description}</span>
                         <span className="text-gray-500">
                           {new Date(activity.timestamp).toLocaleTimeString()}
@@ -589,8 +686,12 @@ export function SessionManager({
             <Card>
               <CardContent className="p-6 text-center">
                 <XCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Session</h3>
-                <p className="text-sm text-gray-600">Please log in to view session details.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Active Session
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Please log in to view session details.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -615,8 +716,11 @@ export function SessionManager({
             </div>
 
             <div className="grid gap-4">
-              {activeSessions.map(session => (
-                <Card key={session.id} className={session.isCurrent ? 'ring-2 ring-blue-500' : ''}>
+              {activeSessions.map((session) => (
+                <Card
+                  key={session.id}
+                  className={session.isCurrent ? "ring-2 ring-blue-500" : ""}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -624,38 +728,55 @@ export function SessionManager({
                         <div>
                           <div className="flex items-center space-x-2">
                             <h4 className="font-medium">
-                              {session.deviceInfo.browser} on {session.deviceInfo.os}
+                              {session.deviceInfo.browser} on{" "}
+                              {session.deviceInfo.os}
                             </h4>
                             {session.isCurrent && (
-                              <Badge className="bg-blue-100 text-blue-600">Current</Badge>
+                              <Badge className="bg-blue-100 text-blue-600">
+                                Current
+                              </Badge>
                             )}
                           </div>
                           <p className="text-sm text-gray-600">
-                            {session.location.city}, {session.location.country} • {session.location.ip}
+                            {session.location.city}, {session.location.country}{" "}
+                            • {session.location.ip}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <Badge className={getSecurityLevelColor(session.securityLevel)}>
+                            <Badge
+                              className={getSecurityLevelColor(
+                                session.securityLevel,
+                              )}
+                            >
                               {session.securityLevel}
                             </Badge>
-                            <Badge className={session.mfaVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}>
-                              {session.mfaVerified ? 'MFA' : 'No MFA'}
+                            <Badge
+                              className={
+                                session.mfaVerified
+                                  ? "bg-green-100 text-green-600"
+                                  : "bg-red-100 text-red-600"
+                              }
+                            >
+                              {session.mfaVerified ? "MFA" : "No MFA"}
                             </Badge>
                             <span className="text-xs text-gray-500">
                               Risk: {session.riskScore}/100
                             </span>
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
-                            Last activity: {new Date(session.lastActivity).toLocaleString()}
+                            Last activity:{" "}
+                            {new Date(session.lastActivity).toLocaleString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({
-                            ...prev,
-                            selectedSession: session,
-                            showSessionDetails: true
-                          }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedSession: session,
+                              showSessionDetails: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
@@ -684,8 +805,12 @@ export function SessionManager({
               <Card>
                 <CardContent className="p-6 text-center">
                   <Activity className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Sessions</h3>
-                  <p className="text-sm text-gray-600">No sessions are currently active.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Active Sessions
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    No sessions are currently active.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -702,23 +827,31 @@ export function SessionManager({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Maximum Sessions</Label>
+                    <Label className="text-sm font-medium">
+                      Maximum Sessions
+                    </Label>
                     <p className="text-xs text-gray-600 mb-2">
                       Maximum number of concurrent sessions allowed
                     </p>
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold">{sessionConfig.maxSessions}</span>
+                      <span className="text-2xl font-bold">
+                        {sessionConfig.maxSessions}
+                      </span>
                       <span className="text-sm text-gray-600">sessions</span>
                     </div>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium">Session Timeout</Label>
+                    <Label className="text-sm font-medium">
+                      Session Timeout
+                    </Label>
                     <p className="text-xs text-gray-600 mb-2">
                       Automatic session expiration time
                     </p>
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold">{sessionConfig.sessionTimeout}</span>
+                      <span className="text-2xl font-bold">
+                        {sessionConfig.sessionTimeout}
+                      </span>
                       <span className="text-sm text-gray-600">minutes</span>
                     </div>
                   </div>
@@ -729,7 +862,9 @@ export function SessionManager({
                       Time before session is considered idle
                     </p>
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold">{sessionConfig.idleTimeout}</span>
+                      <span className="text-2xl font-bold">
+                        {sessionConfig.idleTimeout}
+                      </span>
                       <span className="text-sm text-gray-600">minutes</span>
                     </div>
                   </div>
@@ -739,49 +874,87 @@ export function SessionManager({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">Extend on Activity</Label>
+                        <Label className="text-sm font-medium">
+                          Extend on Activity
+                        </Label>
                         <p className="text-xs text-gray-600">
                           Automatically extend session when user is active
                         </p>
                       </div>
-                      <Badge className={sessionConfig.extendOnActivity ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
-                        {sessionConfig.extendOnActivity ? 'Enabled' : 'Disabled'}
+                      <Badge
+                        className={
+                          sessionConfig.extendOnActivity
+                            ? "bg-green-100 text-green-600"
+                            : "bg-gray-100 text-gray-600"
+                        }
+                      >
+                        {sessionConfig.extendOnActivity
+                          ? "Enabled"
+                          : "Disabled"}
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">Require MFA for Sensitive</Label>
+                        <Label className="text-sm font-medium">
+                          Require MFA for Sensitive
+                        </Label>
                         <p className="text-xs text-gray-600">
                           Require MFA for sensitive operations
                         </p>
                       </div>
-                      <Badge className={sessionConfig.requireMfaForSensitive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
-                        {sessionConfig.requireMfaForSensitive ? 'Enabled' : 'Disabled'}
+                      <Badge
+                        className={
+                          sessionConfig.requireMfaForSensitive
+                            ? "bg-green-100 text-green-600"
+                            : "bg-gray-100 text-gray-600"
+                        }
+                      >
+                        {sessionConfig.requireMfaForSensitive
+                          ? "Enabled"
+                          : "Disabled"}
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">Allow Concurrent Sessions</Label>
+                        <Label className="text-sm font-medium">
+                          Allow Concurrent Sessions
+                        </Label>
                         <p className="text-xs text-gray-600">
                           Allow multiple sessions from different devices
                         </p>
                       </div>
-                      <Badge className={sessionConfig.allowConcurrentSessions ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
-                        {sessionConfig.allowConcurrentSessions ? 'Enabled' : 'Disabled'}
+                      <Badge
+                        className={
+                          sessionConfig.allowConcurrentSessions
+                            ? "bg-green-100 text-green-600"
+                            : "bg-gray-100 text-gray-600"
+                        }
+                      >
+                        {sessionConfig.allowConcurrentSessions
+                          ? "Enabled"
+                          : "Disabled"}
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">Track Location</Label>
+                        <Label className="text-sm font-medium">
+                          Track Location
+                        </Label>
                         <p className="text-xs text-gray-600">
                           Track and log session locations
                         </p>
                       </div>
-                      <Badge className={sessionConfig.trackLocation ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}>
-                        {sessionConfig.trackLocation ? 'Enabled' : 'Disabled'}
+                      <Badge
+                        className={
+                          sessionConfig.trackLocation
+                            ? "bg-green-100 text-green-600"
+                            : "bg-gray-100 text-gray-600"
+                        }
+                      >
+                        {sessionConfig.trackLocation ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
                   </div>

@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Settings, Share2, Download, Upload } from 'lucide-react';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Settings, Share2, Download, Upload } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import WorkflowList from './WorkflowList';
-import WorkflowDesigner from './WorkflowDesigner';
-import WorkflowAnalytics from './WorkflowAnalytics';
-import WorkflowTemplates from './WorkflowTemplates';
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import WorkflowList from "./WorkflowList";
+import WorkflowDesigner from "./WorkflowDesigner";
+import WorkflowAnalytics from "./WorkflowAnalytics";
+import WorkflowTemplates from "./WorkflowTemplates";
 
-type ViewMode = 'list' | 'designer' | 'analytics' | 'templates';
+type ViewMode = "list" | "designer" | "analytics" | "templates";
 
 const WorkflowMain: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewMode>('list');
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<ViewMode>("list");
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(
+    null,
+  );
 
   const handleCreateNew = () => {
-    setCurrentView('designer');
+    setCurrentView("designer");
     setSelectedWorkflowId(null);
   };
 
   const handleEditWorkflow = (workflowId: string) => {
     setSelectedWorkflowId(workflowId);
-    setCurrentView('designer');
+    setCurrentView("designer");
   };
 
   const handleBackToList = () => {
-    setCurrentView('list');
+    setCurrentView("list");
     setSelectedWorkflowId(null);
   };
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'list':
+      case "list":
         return (
           <WorkflowList
             onCreateNew={handleCreateNew}
@@ -40,7 +42,7 @@ const WorkflowMain: React.FC = () => {
           />
         );
 
-      case 'designer':
+      case "designer":
         return (
           <div className="h-full flex flex-col">
             <div className="border-b bg-card p-4">
@@ -72,15 +74,11 @@ const WorkflowMain: React.FC = () => {
           </div>
         );
 
-      case 'analytics':
+      case "analytics":
         return <WorkflowAnalytics />;
 
-      case 'templates':
-        return (
-          <WorkflowTemplates
-            onUseTemplate={handleCreateNew}
-          />
-        );
+      case "templates":
+        return <WorkflowTemplates onUseTemplate={handleCreateNew} />;
 
       default:
         return null;
@@ -89,9 +87,12 @@ const WorkflowMain: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {currentView === 'list' && (
+      {currentView === "list" && (
         <div className="border-b bg-card">
-          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as ViewMode)}>
+          <Tabs
+            value={currentView}
+            onValueChange={(value) => setCurrentView(value as ViewMode)}
+          >
             <div className="px-6 pt-4">
               <TabsList className="grid w-full grid-cols-4 max-w-md">
                 <TabsTrigger value="list">Workflows</TabsTrigger>

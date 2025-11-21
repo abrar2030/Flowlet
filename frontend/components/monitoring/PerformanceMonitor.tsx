@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Progress } from '../ui/progress';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Progress } from "../ui/progress";
 import {
   Activity,
   BarChart3,
@@ -41,21 +47,29 @@ import {
   MapPin,
   Smartphone,
   Laptop,
-  Tablet
-} from 'lucide-react';
+  Tablet,
+} from "lucide-react";
 
 interface PerformanceMetric {
   id: string;
   name: string;
-  category: 'cpu' | 'memory' | 'disk' | 'network' | 'application' | 'database' | 'api' | 'user_experience';
+  category:
+    | "cpu"
+    | "memory"
+    | "disk"
+    | "network"
+    | "application"
+    | "database"
+    | "api"
+    | "user_experience";
   value: number;
   unit: string;
   threshold: {
     warning: number;
     critical: number;
   };
-  status: 'normal' | 'warning' | 'critical';
-  trend: 'up' | 'down' | 'stable';
+  status: "normal" | "warning" | "critical";
+  trend: "up" | "down" | "stable";
   trendPercentage: number;
   timestamp: string;
   source: string;
@@ -66,10 +80,10 @@ interface PerformanceMetric {
 interface SystemResource {
   id: string;
   name: string;
-  type: 'server' | 'database' | 'application' | 'service' | 'endpoint';
-  status: 'healthy' | 'degraded' | 'down' | 'maintenance';
+  type: "server" | "database" | "application" | "service" | "endpoint";
+  status: "healthy" | "degraded" | "down" | "maintenance";
   location: string;
-  environment: 'production' | 'staging' | 'development';
+  environment: "production" | "staging" | "development";
   metrics: {
     cpu: { usage: number; cores: number };
     memory: { used: number; total: number; percentage: number };
@@ -87,8 +101,8 @@ interface SystemResource {
 
 interface SystemAlert {
   id: string;
-  type: 'performance' | 'availability' | 'error' | 'security' | 'capacity';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "performance" | "availability" | "error" | "security" | "capacity";
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   timestamp: string;
   acknowledged: boolean;
@@ -111,13 +125,13 @@ interface UserExperienceMetric {
     timeToInteractive: number;
   };
   device: {
-    type: 'desktop' | 'mobile' | 'tablet';
+    type: "desktop" | "mobile" | "tablet";
     os: string;
     browser: string;
     screenResolution: string;
   };
   network: {
-    type: 'wifi' | '4g' | '3g' | 'ethernet' | 'unknown';
+    type: "wifi" | "4g" | "3g" | "ethernet" | "unknown";
     speed: number; // Mbps
     latency: number; // milliseconds
   };
@@ -134,7 +148,7 @@ interface UserExperienceMetric {
 interface APIPerformance {
   id: string;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   responseTime: number; // milliseconds
   statusCode: number;
   requestSize: number; // bytes
@@ -156,7 +170,10 @@ interface PerformanceMonitorProps {
   onMetricRefresh?: (metricId?: string) => Promise<void>;
   onAlertAcknowledge?: (alertId: string) => Promise<void>;
   onResourceRestart?: (resourceId: string) => Promise<void>;
-  onExportReport?: (type: 'performance' | 'resources' | 'ux' | 'api', filters: any) => Promise<Blob>;
+  onExportReport?: (
+    type: "performance" | "resources" | "ux" | "api",
+    filters: any,
+  ) => Promise<Blob>;
   realTimeUpdates?: boolean;
   refreshInterval?: number; // seconds
   className?: string;
@@ -166,7 +183,7 @@ interface ComponentState {
   activeTab: string;
   selectedResource: SystemResource | null;
   selectedMetric: PerformanceMetric | null;
-  timeRange: '1h' | '6h' | '24h' | '7d' | '30d';
+  timeRange: "1h" | "6h" | "24h" | "7d" | "30d";
   filterCategory: string;
   filterStatus: string;
   filterEnvironment: string;
@@ -191,24 +208,24 @@ export function PerformanceMonitor({
   onExportReport,
   realTimeUpdates = true,
   refreshInterval = 30,
-  className = ''
+  className = "",
 }: PerformanceMonitorProps) {
   const [state, setState] = useState<ComponentState>({
-    activeTab: 'overview',
+    activeTab: "overview",
     selectedResource: null,
     selectedMetric: null,
-    timeRange: '24h',
-    filterCategory: 'all',
-    filterStatus: 'all',
-    filterEnvironment: 'all',
-    searchTerm: '',
+    timeRange: "24h",
+    filterCategory: "all",
+    filterStatus: "all",
+    filterEnvironment: "all",
+    searchTerm: "",
     showResourceDetails: false,
     showMetricDetails: false,
     isRefreshing: false,
     isExporting: false,
     error: null,
     success: null,
-    lastRefresh: new Date().toISOString()
+    lastRefresh: new Date().toISOString(),
   });
 
   // Auto-refresh functionality
@@ -216,7 +233,7 @@ export function PerformanceMonitor({
     if (!realTimeUpdates) return;
 
     const interval = setInterval(() => {
-      setState(prev => ({ ...prev, lastRefresh: new Date().toISOString() }));
+      setState((prev) => ({ ...prev, lastRefresh: new Date().toISOString() }));
     }, refreshInterval * 1000);
 
     return () => clearInterval(interval);
@@ -226,95 +243,147 @@ export function PerformanceMonitor({
   const performanceOverview = useMemo(() => {
     const now = new Date();
     const timeRangeMs = {
-      '1h': 60 * 60 * 1000,
-      '6h': 6 * 60 * 60 * 1000,
-      '24h': 24 * 60 * 60 * 1000,
-      '7d': 7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000
+      "1h": 60 * 60 * 1000,
+      "6h": 6 * 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
     }[state.timeRange];
 
     const cutoffTime = new Date(now.getTime() - timeRangeMs);
 
     // Filter data by time range
-    const recentUX = userExperience.filter(ux => new Date(ux.timestamp) > cutoffTime);
-    const recentAPI = apiPerformance.filter(api => new Date(api.timestamp) > cutoffTime);
+    const recentUX = userExperience.filter(
+      (ux) => new Date(ux.timestamp) > cutoffTime,
+    );
+    const recentAPI = apiPerformance.filter(
+      (api) => new Date(api.timestamp) > cutoffTime,
+    );
 
     // System health
-    const healthyResources = resources.filter(r => r.status === 'healthy').length;
-    const degradedResources = resources.filter(r => r.status === 'degraded').length;
-    const downResources = resources.filter(r => r.status === 'down').length;
+    const healthyResources = resources.filter(
+      (r) => r.status === "healthy",
+    ).length;
+    const degradedResources = resources.filter(
+      (r) => r.status === "degraded",
+    ).length;
+    const downResources = resources.filter((r) => r.status === "down").length;
     const totalResources = resources.length;
 
-    const systemHealthScore = totalResources > 0 ? (healthyResources / totalResources) * 100 : 100;
+    const systemHealthScore =
+      totalResources > 0 ? (healthyResources / totalResources) * 100 : 100;
 
     // Average metrics
-    const avgCpuUsage = resources.length > 0
-      ? resources.reduce((sum, r) => sum + r.metrics.cpu.usage, 0) / resources.length
-      : 0;
+    const avgCpuUsage =
+      resources.length > 0
+        ? resources.reduce((sum, r) => sum + r.metrics.cpu.usage, 0) /
+          resources.length
+        : 0;
 
-    const avgMemoryUsage = resources.length > 0
-      ? resources.reduce((sum, r) => sum + r.metrics.memory.percentage, 0) / resources.length
-      : 0;
+    const avgMemoryUsage =
+      resources.length > 0
+        ? resources.reduce((sum, r) => sum + r.metrics.memory.percentage, 0) /
+          resources.length
+        : 0;
 
-    const avgDiskUsage = resources.length > 0
-      ? resources.reduce((sum, r) => sum + r.metrics.disk.percentage, 0) / resources.length
-      : 0;
+    const avgDiskUsage =
+      resources.length > 0
+        ? resources.reduce((sum, r) => sum + r.metrics.disk.percentage, 0) /
+          resources.length
+        : 0;
 
-    const avgResponseTime = resources.length > 0
-      ? resources.reduce((sum, r) => sum + r.responseTime, 0) / resources.length
-      : 0;
+    const avgResponseTime =
+      resources.length > 0
+        ? resources.reduce((sum, r) => sum + r.responseTime, 0) /
+          resources.length
+        : 0;
 
     // User experience metrics
-    const avgLoadTime = recentUX.length > 0
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.loadTime, 0) / recentUX.length
-      : 0;
+    const avgLoadTime =
+      recentUX.length > 0
+        ? recentUX.reduce((sum, ux) => sum + ux.metrics.loadTime, 0) /
+          recentUX.length
+        : 0;
 
-    const avgFCP = recentUX.length > 0
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.firstContentfulPaint, 0) / recentUX.length
-      : 0;
+    const avgFCP =
+      recentUX.length > 0
+        ? recentUX.reduce(
+            (sum, ux) => sum + ux.metrics.firstContentfulPaint,
+            0,
+          ) / recentUX.length
+        : 0;
 
-    const avgLCP = recentUX.length > 0
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.largestContentfulPaint, 0) / recentUX.length
-      : 0;
+    const avgLCP =
+      recentUX.length > 0
+        ? recentUX.reduce(
+            (sum, ux) => sum + ux.metrics.largestContentfulPaint,
+            0,
+          ) / recentUX.length
+        : 0;
 
-    const avgCLS = recentUX.length > 0
-      ? recentUX.reduce((sum, ux) => sum + ux.metrics.cumulativeLayoutShift, 0) / recentUX.length
-      : 0;
+    const avgCLS =
+      recentUX.length > 0
+        ? recentUX.reduce(
+            (sum, ux) => sum + ux.metrics.cumulativeLayoutShift,
+            0,
+          ) / recentUX.length
+        : 0;
 
     // API performance
-    const avgAPIResponseTime = recentAPI.length > 0
-      ? recentAPI.reduce((sum, api) => sum + api.responseTime, 0) / recentAPI.length
-      : 0;
+    const avgAPIResponseTime =
+      recentAPI.length > 0
+        ? recentAPI.reduce((sum, api) => sum + api.responseTime, 0) /
+          recentAPI.length
+        : 0;
 
-    const apiErrorRate = recentAPI.length > 0
-      ? (recentAPI.filter(api => api.statusCode >= 400).length / recentAPI.length) * 100
-      : 0;
+    const apiErrorRate =
+      recentAPI.length > 0
+        ? (recentAPI.filter((api) => api.statusCode >= 400).length /
+            recentAPI.length) *
+          100
+        : 0;
 
     const totalAPIRequests = recentAPI.length;
 
     // Alerts
     const totalAlerts = resources.reduce((sum, r) => sum + r.alerts.length, 0);
-    const criticalAlerts = resources.reduce((sum, r) => sum + r.alerts.filter(a => a.severity === 'critical').length, 0);
-    const unacknowledgedAlerts = resources.reduce((sum, r) => sum + r.alerts.filter(a => !a.acknowledged).length, 0);
+    const criticalAlerts = resources.reduce(
+      (sum, r) =>
+        sum + r.alerts.filter((a) => a.severity === "critical").length,
+      0,
+    );
+    const unacknowledgedAlerts = resources.reduce(
+      (sum, r) => sum + r.alerts.filter((a) => !a.acknowledged).length,
+      0,
+    );
 
     // Device breakdown
-    const deviceBreakdown = recentUX.reduce((acc, ux) => {
-      acc[ux.device.type] = (acc[ux.device.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const deviceBreakdown = recentUX.reduce(
+      (acc, ux) => {
+        acc[ux.device.type] = (acc[ux.device.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     // Network breakdown
-    const networkBreakdown = recentUX.reduce((acc, ux) => {
-      acc[ux.network.type] = (acc[ux.network.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const networkBreakdown = recentUX.reduce(
+      (acc, ux) => {
+        acc[ux.network.type] = (acc[ux.network.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     // Performance by category
-    const metricsByCategory = metrics.reduce((acc, metric) => {
-      acc[metric.category] = acc[metric.category] || [];
-      acc[metric.category].push(metric);
-      return acc;
-    }, {} as Record<string, PerformanceMetric[]>);
+    const metricsByCategory = metrics.reduce(
+      (acc, metric) => {
+        acc[metric.category] = acc[metric.category] || [];
+        acc[metric.category].push(metric);
+        return acc;
+      },
+      {} as Record<string, PerformanceMetric[]>,
+    );
 
     return {
       systemHealthScore,
@@ -338,168 +407,240 @@ export function PerformanceMonitor({
       unacknowledgedAlerts,
       deviceBreakdown,
       networkBreakdown,
-      metricsByCategory
+      metricsByCategory,
     };
   }, [metrics, resources, userExperience, apiPerformance, state.timeRange]);
 
   // Filter resources
   const filteredResources = useMemo(() => {
-    return resources.filter(resource => {
-      const matchesSearch = resource.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           resource.location.toLowerCase().includes(state.searchTerm.toLowerCase());
+    return resources.filter((resource) => {
+      const matchesSearch =
+        resource.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        resource.location
+          .toLowerCase()
+          .includes(state.searchTerm.toLowerCase());
 
-      const matchesStatus = state.filterStatus === 'all' || resource.status === state.filterStatus;
-      const matchesEnvironment = state.filterEnvironment === 'all' || resource.environment === state.filterEnvironment;
+      const matchesStatus =
+        state.filterStatus === "all" || resource.status === state.filterStatus;
+      const matchesEnvironment =
+        state.filterEnvironment === "all" ||
+        resource.environment === state.filterEnvironment;
 
       return matchesSearch && matchesStatus && matchesEnvironment;
     });
-  }, [resources, state.searchTerm, state.filterStatus, state.filterEnvironment]);
+  }, [
+    resources,
+    state.searchTerm,
+    state.filterStatus,
+    state.filterEnvironment,
+  ]);
 
   // Handle metric refresh
-  const handleMetricRefresh = useCallback(async (metricId?: string) => {
-    setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+  const handleMetricRefresh = useCallback(
+    async (metricId?: string) => {
+      setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
 
-    try {
-      if (onMetricRefresh) {
-        await onMetricRefresh(metricId);
+      try {
+        if (onMetricRefresh) {
+          await onMetricRefresh(metricId);
+        }
+        setState((prev) => ({
+          ...prev,
+          success: "Metrics refreshed successfully",
+          lastRefresh: new Date().toISOString(),
+        }));
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to refresh metrics" }));
+      } finally {
+        setState((prev) => ({ ...prev, isRefreshing: false }));
       }
-      setState(prev => ({
-        ...prev,
-        success: 'Metrics refreshed successfully',
-        lastRefresh: new Date().toISOString()
-      }));
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to refresh metrics' }));
-    } finally {
-      setState(prev => ({ ...prev, isRefreshing: false }));
-    }
-  }, [onMetricRefresh]);
+    },
+    [onMetricRefresh],
+  );
 
   // Handle alert acknowledgment
-  const handleAlertAcknowledge = useCallback(async (alertId: string) => {
-    try {
-      if (onAlertAcknowledge) {
-        await onAlertAcknowledge(alertId);
-        setState(prev => ({ ...prev, success: 'Alert acknowledged' }));
+  const handleAlertAcknowledge = useCallback(
+    async (alertId: string) => {
+      try {
+        if (onAlertAcknowledge) {
+          await onAlertAcknowledge(alertId);
+          setState((prev) => ({ ...prev, success: "Alert acknowledged" }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to acknowledge alert" }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to acknowledge alert' }));
-    }
-  }, [onAlertAcknowledge]);
+    },
+    [onAlertAcknowledge],
+  );
 
   // Handle resource restart
-  const handleResourceRestart = useCallback(async (resourceId: string) => {
-    setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+  const handleResourceRestart = useCallback(
+    async (resourceId: string) => {
+      setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
 
-    try {
-      if (onResourceRestart) {
-        await onResourceRestart(resourceId);
-        setState(prev => ({ ...prev, success: 'Resource restart initiated' }));
+      try {
+        if (onResourceRestart) {
+          await onResourceRestart(resourceId);
+          setState((prev) => ({
+            ...prev,
+            success: "Resource restart initiated",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to restart resource" }));
+      } finally {
+        setState((prev) => ({ ...prev, isRefreshing: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to restart resource' }));
-    } finally {
-      setState(prev => ({ ...prev, isRefreshing: false }));
-    }
-  }, [onResourceRestart]);
+    },
+    [onResourceRestart],
+  );
 
   // Handle export
-  const handleExport = useCallback(async (type: 'performance' | 'resources' | 'ux' | 'api') => {
-    setState(prev => ({ ...prev, isExporting: true, error: null }));
+  const handleExport = useCallback(
+    async (type: "performance" | "resources" | "ux" | "api") => {
+      setState((prev) => ({ ...prev, isExporting: true, error: null }));
 
-    try {
-      if (onExportReport) {
-        const filters = {
-          timeRange: state.timeRange,
-          category: state.filterCategory,
-          status: state.filterStatus,
-          environment: state.filterEnvironment,
-          search: state.searchTerm
-        };
+      try {
+        if (onExportReport) {
+          const filters = {
+            timeRange: state.timeRange,
+            category: state.filterCategory,
+            status: state.filterStatus,
+            environment: state.filterEnvironment,
+            search: state.searchTerm,
+          };
 
-        const blob = await onExportReport(type, filters);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+          const blob = await onExportReport(type, filters);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${type}-report-${new Date().toISOString().split("T")[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
 
-        setState(prev => ({ ...prev, success: 'Report exported successfully' }));
+          setState((prev) => ({
+            ...prev,
+            success: "Report exported successfully",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to export report" }));
+      } finally {
+        setState((prev) => ({ ...prev, isExporting: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to export report' }));
-    } finally {
-      setState(prev => ({ ...prev, isExporting: false }));
-    }
-  }, [onExportReport, state.timeRange, state.filterCategory, state.filterStatus, state.filterEnvironment, state.searchTerm]);
+    },
+    [
+      onExportReport,
+      state.timeRange,
+      state.filterCategory,
+      state.filterStatus,
+      state.filterEnvironment,
+      state.searchTerm,
+    ],
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': case 'normal': return 'bg-green-100 text-green-600';
-      case 'degraded': case 'warning': return 'bg-yellow-100 text-yellow-600';
-      case 'down': case 'critical': return 'bg-red-100 text-red-600';
-      case 'maintenance': return 'bg-blue-100 text-blue-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "healthy":
+      case "normal":
+        return "bg-green-100 text-green-600";
+      case "degraded":
+      case "warning":
+        return "bg-yellow-100 text-yellow-600";
+      case "down":
+      case "critical":
+        return "bg-red-100 text-red-600";
+      case "maintenance":
+        return "bg-blue-100 text-blue-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'low': return 'bg-green-100 text-green-600';
-      case 'medium': return 'bg-yellow-100 text-yellow-600';
-      case 'high': return 'bg-orange-100 text-orange-600';
-      case 'critical': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "low":
+        return "bg-green-100 text-green-600";
+      case "medium":
+        return "bg-yellow-100 text-yellow-600";
+      case "high":
+        return "bg-orange-100 text-orange-600";
+      case "critical":
+        return "bg-red-100 text-red-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getResourceIcon = (type: string) => {
     switch (type) {
-      case 'server': return <Server className="w-4 h-4" />;
-      case 'database': return <Database className="w-4 h-4" />;
-      case 'application': return <Monitor className="w-4 h-4" />;
-      case 'service': return <Globe className="w-4 h-4" />;
-      case 'endpoint': return <Network className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
+      case "server":
+        return <Server className="w-4 h-4" />;
+      case "database":
+        return <Database className="w-4 h-4" />;
+      case "application":
+        return <Monitor className="w-4 h-4" />;
+      case "service":
+        return <Globe className="w-4 h-4" />;
+      case "endpoint":
+        return <Network className="w-4 h-4" />;
+      default:
+        return <Activity className="w-4 h-4" />;
     }
   };
 
   const getDeviceIcon = (type: string) => {
     switch (type) {
-      case 'desktop': return <Laptop className="w-4 h-4" />;
-      case 'mobile': return <Smartphone className="w-4 h-4" />;
-      case 'tablet': return <Tablet className="w-4 h-4" />;
-      default: return <Monitor className="w-4 h-4" />;
+      case "desktop":
+        return <Laptop className="w-4 h-4" />;
+      case "mobile":
+        return <Smartphone className="w-4 h-4" />;
+      case "tablet":
+        return <Tablet className="w-4 h-4" />;
+      default:
+        return <Monitor className="w-4 h-4" />;
     }
   };
 
   const getNetworkIcon = (type: string) => {
     switch (type) {
-      case 'wifi': return <Wifi className="w-4 h-4" />;
-      case 'ethernet': return <Network className="w-4 h-4" />;
-      case '4g': case '3g': return <Smartphone className="w-4 h-4" />;
-      default: return <WifiOff className="w-4 h-4" />;
+      case "wifi":
+        return <Wifi className="w-4 h-4" />;
+      case "ethernet":
+        return <Network className="w-4 h-4" />;
+      case "4g":
+      case "3g":
+        return <Smartphone className="w-4 h-4" />;
+      default:
+        return <WifiOff className="w-4 h-4" />;
     }
   };
 
   const getTrendIcon = (trend: string, percentage: number) => {
-    if (trend === 'up') {
-      return <TrendingUp className={`w-4 h-4 ${percentage > 0 ? 'text-red-500' : 'text-green-500'}`} />;
-    } else if (trend === 'down') {
-      return <TrendingDown className={`w-4 h-4 ${percentage > 0 ? 'text-green-500' : 'text-red-500'}`} />;
+    if (trend === "up") {
+      return (
+        <TrendingUp
+          className={`w-4 h-4 ${percentage > 0 ? "text-red-500" : "text-green-500"}`}
+        />
+      );
+    } else if (trend === "down") {
+      return (
+        <TrendingDown
+          className={`w-4 h-4 ${percentage > 0 ? "text-green-500" : "text-red-500"}`}
+        />
+      );
     }
     return <Activity className="w-4 h-4 text-gray-500" />;
   };
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDuration = (ms: number) => {
@@ -519,7 +660,12 @@ export function PerformanceMonitor({
               Performance Monitoring
             </div>
             <div className="flex items-center space-x-2">
-              <Select value={state.timeRange} onValueChange={(value) => setState(prev => ({ ...prev, timeRange: value as any }))}>
+              <Select
+                value={state.timeRange}
+                onValueChange={(value) =>
+                  setState((prev) => ({ ...prev, timeRange: value as any }))
+                }
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -537,7 +683,9 @@ export function PerformanceMonitor({
                 size="sm"
                 variant="outline"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${state.isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${state.isRefreshing ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
               {realTimeUpdates && (
@@ -565,14 +713,18 @@ export function PerformanceMonitor({
       {state.error && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{state.error}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {state.error}
+          </AlertDescription>
         </Alert>
       )}
 
       {state.success && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{state.success}</AlertDescription>
+          <AlertDescription className="text-green-800">
+            {state.success}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -580,7 +732,9 @@ export function PerformanceMonitor({
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>Critical Alerts:</strong> {performanceOverview.criticalAlerts} critical performance alerts require attention.
+            <strong>Critical Alerts:</strong>{" "}
+            {performanceOverview.criticalAlerts} critical performance alerts
+            require attention.
           </AlertDescription>
         </Alert>
       )}
@@ -589,13 +743,19 @@ export function PerformanceMonitor({
         <Alert className="border-red-200 bg-red-50">
           <XCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>System Down:</strong> {performanceOverview.downResources} system resources are currently down.
+            <strong>System Down:</strong> {performanceOverview.downResources}{" "}
+            system resources are currently down.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Main Content */}
-      <Tabs value={state.activeTab} onValueChange={(value) => setState(prev => ({ ...prev, activeTab: value }))}>
+      <Tabs
+        value={state.activeTab}
+        onValueChange={(value) =>
+          setState((prev) => ({ ...prev, activeTab: value }))
+        }
+      >
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
@@ -613,9 +773,16 @@ export function PerformanceMonitor({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">System Health</p>
-                      <p className="text-2xl font-bold text-green-600">{performanceOverview.systemHealthScore.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500">{performanceOverview.healthyResources}/{performanceOverview.totalResources} healthy</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        System Health
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {performanceOverview.systemHealthScore.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {performanceOverview.healthyResources}/
+                        {performanceOverview.totalResources} healthy
+                      </p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-500" />
                   </div>
@@ -626,9 +793,15 @@ export function PerformanceMonitor({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-                      <p className="text-2xl font-bold">{performanceOverview.avgResponseTime.toFixed(0)}ms</p>
-                      <p className="text-xs text-gray-500">across all services</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Avg Response Time
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {performanceOverview.avgResponseTime.toFixed(0)}ms
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        across all services
+                      </p>
                     </div>
                     <Timer className="w-8 h-8 text-blue-500" />
                   </div>
@@ -639,9 +812,15 @@ export function PerformanceMonitor({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Page Load Time</p>
-                      <p className="text-2xl font-bold">{formatDuration(performanceOverview.avgLoadTime)}</p>
-                      <p className="text-xs text-gray-500">average user experience</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Page Load Time
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {formatDuration(performanceOverview.avgLoadTime)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        average user experience
+                      </p>
                     </div>
                     <Globe className="w-8 h-8 text-purple-500" />
                   </div>
@@ -652,9 +831,15 @@ export function PerformanceMonitor({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">API Error Rate</p>
-                      <p className="text-2xl font-bold text-red-600">{performanceOverview.apiErrorRate.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500">{performanceOverview.totalAPIRequests} requests</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        API Error Rate
+                      </p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {performanceOverview.apiErrorRate.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {performanceOverview.totalAPIRequests} requests
+                      </p>
                     </div>
                     <AlertTriangle className="w-8 h-8 text-red-500" />
                   </div>
@@ -671,9 +856,14 @@ export function PerformanceMonitor({
                       <Cpu className="w-4 h-4 text-blue-500" />
                       <span className="text-sm font-medium">CPU Usage</span>
                     </div>
-                    <span className="text-lg font-bold">{performanceOverview.avgCpuUsage.toFixed(1)}%</span>
+                    <span className="text-lg font-bold">
+                      {performanceOverview.avgCpuUsage.toFixed(1)}%
+                    </span>
                   </div>
-                  <Progress value={performanceOverview.avgCpuUsage} className="h-2" />
+                  <Progress
+                    value={performanceOverview.avgCpuUsage}
+                    className="h-2"
+                  />
                 </CardContent>
               </Card>
 
@@ -684,9 +874,14 @@ export function PerformanceMonitor({
                       <MemoryStick className="w-4 h-4 text-green-500" />
                       <span className="text-sm font-medium">Memory Usage</span>
                     </div>
-                    <span className="text-lg font-bold">{performanceOverview.avgMemoryUsage.toFixed(1)}%</span>
+                    <span className="text-lg font-bold">
+                      {performanceOverview.avgMemoryUsage.toFixed(1)}%
+                    </span>
                   </div>
-                  <Progress value={performanceOverview.avgMemoryUsage} className="h-2" />
+                  <Progress
+                    value={performanceOverview.avgMemoryUsage}
+                    className="h-2"
+                  />
                 </CardContent>
               </Card>
 
@@ -697,9 +892,14 @@ export function PerformanceMonitor({
                       <HardDrive className="w-4 h-4 text-orange-500" />
                       <span className="text-sm font-medium">Disk Usage</span>
                     </div>
-                    <span className="text-lg font-bold">{performanceOverview.avgDiskUsage.toFixed(1)}%</span>
+                    <span className="text-lg font-bold">
+                      {performanceOverview.avgDiskUsage.toFixed(1)}%
+                    </span>
                   </div>
-                  <Progress value={performanceOverview.avgDiskUsage} className="h-2" />
+                  <Progress
+                    value={performanceOverview.avgDiskUsage}
+                    className="h-2"
+                  />
                 </CardContent>
               </Card>
 
@@ -727,23 +927,39 @@ export function PerformanceMonitor({
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">First Contentful Paint</p>
-                    <p className="text-2xl font-bold text-blue-600">{formatDuration(performanceOverview.avgFCP)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      First Contentful Paint
+                    </p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {formatDuration(performanceOverview.avgFCP)}
+                    </p>
                     <p className="text-xs text-gray-500">Good: &lt; 1.8s</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Largest Contentful Paint</p>
-                    <p className="text-2xl font-bold text-green-600">{formatDuration(performanceOverview.avgLCP)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Largest Contentful Paint
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {formatDuration(performanceOverview.avgLCP)}
+                    </p>
                     <p className="text-xs text-gray-500">Good: &lt; 2.5s</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Cumulative Layout Shift</p>
-                    <p className="text-2xl font-bold text-yellow-600">{performanceOverview.avgCLS.toFixed(3)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Cumulative Layout Shift
+                    </p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {performanceOverview.avgCLS.toFixed(3)}
+                    </p>
                     <p className="text-xs text-gray-500">Good: &lt; 0.1</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Page Load Time</p>
-                    <p className="text-2xl font-bold text-purple-600">{formatDuration(performanceOverview.avgLoadTime)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Page Load Time
+                    </p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {formatDuration(performanceOverview.avgLoadTime)}
+                    </p>
                     <p className="text-xs text-gray-500">Target: &lt; 3s</p>
                   </div>
                 </div>
@@ -758,17 +974,24 @@ export function PerformanceMonitor({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(performanceOverview.deviceBreakdown).map(([device, count]) => (
-                      <div key={device} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          {getDeviceIcon(device)}
-                          <span className="font-medium capitalize">{device}</span>
+                    {Object.entries(performanceOverview.deviceBreakdown).map(
+                      ([device, count]) => (
+                        <div
+                          key={device}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getDeviceIcon(device)}
+                            <span className="font-medium capitalize">
+                              {device}
+                            </span>
+                          </div>
+                          <Badge className="bg-blue-100 text-blue-600">
+                            {count} sessions
+                          </Badge>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-600">
-                          {count} sessions
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -779,17 +1002,24 @@ export function PerformanceMonitor({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(performanceOverview.networkBreakdown).map(([network, count]) => (
-                      <div key={network} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          {getNetworkIcon(network)}
-                          <span className="font-medium uppercase">{network}</span>
+                    {Object.entries(performanceOverview.networkBreakdown).map(
+                      ([network, count]) => (
+                        <div
+                          key={network}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getNetworkIcon(network)}
+                            <span className="font-medium uppercase">
+                              {network}
+                            </span>
+                          </div>
+                          <Badge className="bg-green-100 text-green-600">
+                            {count} sessions
+                          </Badge>
                         </div>
-                        <Badge className="bg-green-100 text-green-600">
-                          {count} sessions
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -808,10 +1038,20 @@ export function PerformanceMonitor({
                     <Input
                       placeholder="Search resources..."
                       value={state.searchTerm}
-                      onChange={(e) => setState(prev => ({ ...prev, searchTerm: e.target.value }))}
+                      onChange={(e) =>
+                        setState((prev) => ({
+                          ...prev,
+                          searchTerm: e.target.value,
+                        }))
+                      }
                     />
                   </div>
-                  <Select value={state.filterStatus} onValueChange={(value) => setState(prev => ({ ...prev, filterStatus: value }))}>
+                  <Select
+                    value={state.filterStatus}
+                    onValueChange={(value) =>
+                      setState((prev) => ({ ...prev, filterStatus: value }))
+                    }
+                  >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -823,7 +1063,15 @@ export function PerformanceMonitor({
                       <SelectItem value="maintenance">Maintenance</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={state.filterEnvironment} onValueChange={(value) => setState(prev => ({ ...prev, filterEnvironment: value }))}>
+                  <Select
+                    value={state.filterEnvironment}
+                    onValueChange={(value) =>
+                      setState((prev) => ({
+                        ...prev,
+                        filterEnvironment: value,
+                      }))
+                    }
+                  >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Environment" />
                     </SelectTrigger>
@@ -838,10 +1086,11 @@ export function PerformanceMonitor({
 
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    Showing {filteredResources.length} of {resources.length} resources
+                    Showing {filteredResources.length} of {resources.length}{" "}
+                    resources
                   </p>
                   <Button
-                    onClick={() => handleExport('resources')}
+                    onClick={() => handleExport("resources")}
                     disabled={state.isExporting}
                     size="sm"
                     variant="outline"
@@ -855,8 +1104,11 @@ export function PerformanceMonitor({
 
             {/* Resources List */}
             <div className="grid gap-4">
-              {filteredResources.map(resource => (
-                <Card key={resource.id} className="hover:shadow-md transition-shadow">
+              {filteredResources.map((resource) => (
+                <Card
+                  key={resource.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
@@ -875,53 +1127,88 @@ export function PerformanceMonitor({
                             </Badge>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-3">
-                            <span>CPU: {resource.metrics.cpu.usage.toFixed(1)}%</span>
-                            <span>Memory: {resource.metrics.memory.percentage.toFixed(1)}%</span>
-                            <span>Disk: {resource.metrics.disk.percentage.toFixed(1)}%</span>
+                            <span>
+                              CPU: {resource.metrics.cpu.usage.toFixed(1)}%
+                            </span>
+                            <span>
+                              Memory:{" "}
+                              {resource.metrics.memory.percentage.toFixed(1)}%
+                            </span>
+                            <span>
+                              Disk:{" "}
+                              {resource.metrics.disk.percentage.toFixed(1)}%
+                            </span>
                             <span>Uptime: {resource.uptime.toFixed(1)}%</span>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div>
                               <div className="flex justify-between text-xs mb-1">
                                 <span>CPU</span>
-                                <span>{resource.metrics.cpu.usage.toFixed(1)}%</span>
+                                <span>
+                                  {resource.metrics.cpu.usage.toFixed(1)}%
+                                </span>
                               </div>
-                              <Progress value={resource.metrics.cpu.usage} className="h-1" />
+                              <Progress
+                                value={resource.metrics.cpu.usage}
+                                className="h-1"
+                              />
                             </div>
                             <div>
                               <div className="flex justify-between text-xs mb-1">
                                 <span>Memory</span>
-                                <span>{resource.metrics.memory.percentage.toFixed(1)}%</span>
+                                <span>
+                                  {resource.metrics.memory.percentage.toFixed(
+                                    1,
+                                  )}
+                                  %
+                                </span>
                               </div>
-                              <Progress value={resource.metrics.memory.percentage} className="h-1" />
+                              <Progress
+                                value={resource.metrics.memory.percentage}
+                                className="h-1"
+                              />
                             </div>
                             <div>
                               <div className="flex justify-between text-xs mb-1">
                                 <span>Disk</span>
-                                <span>{resource.metrics.disk.percentage.toFixed(1)}%</span>
+                                <span>
+                                  {resource.metrics.disk.percentage.toFixed(1)}%
+                                </span>
                               </div>
-                              <Progress value={resource.metrics.disk.percentage} className="h-1" />
+                              <Progress
+                                value={resource.metrics.disk.percentage}
+                                className="h-1"
+                              />
                             </div>
                             <div>
                               <div className="flex justify-between text-xs mb-1">
                                 <span>Uptime</span>
                                 <span>{resource.uptime.toFixed(1)}%</span>
                               </div>
-                              <Progress value={resource.uptime} className="h-1" />
+                              <Progress
+                                value={resource.uptime}
+                                className="h-1"
+                              />
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedResource: resource, showResourceDetails: true }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedResource: resource,
+                              showResourceDetails: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           Details
                         </Button>
-                        {resource.status === 'down' && (
+                        {resource.status === "down" && (
                           <Button
                             onClick={() => handleResourceRestart(resource.id)}
                             disabled={state.isRefreshing}
@@ -946,7 +1233,7 @@ export function PerformanceMonitor({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">User Experience Metrics</h3>
               <Button
-                onClick={() => handleExport('ux')}
+                onClick={() => handleExport("ux")}
                 disabled={state.isExporting}
                 size="sm"
                 variant="outline"
@@ -961,8 +1248,12 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Average Load Time</p>
-                    <p className="text-3xl font-bold text-blue-600">{formatDuration(performanceOverview.avgLoadTime)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Average Load Time
+                    </p>
+                    <p className="text-3xl font-bold text-blue-600">
+                      {formatDuration(performanceOverview.avgLoadTime)}
+                    </p>
                     <p className="text-xs text-gray-500">Target: &lt; 3s</p>
                   </div>
                 </CardContent>
@@ -971,8 +1262,12 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">First Contentful Paint</p>
-                    <p className="text-3xl font-bold text-green-600">{formatDuration(performanceOverview.avgFCP)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      First Contentful Paint
+                    </p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {formatDuration(performanceOverview.avgFCP)}
+                    </p>
                     <p className="text-xs text-gray-500">Target: &lt; 1.8s</p>
                   </div>
                 </CardContent>
@@ -981,8 +1276,12 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Cumulative Layout Shift</p>
-                    <p className="text-3xl font-bold text-yellow-600">{performanceOverview.avgCLS.toFixed(3)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Cumulative Layout Shift
+                    </p>
+                    <p className="text-3xl font-bold text-yellow-600">
+                      {performanceOverview.avgCLS.toFixed(3)}
+                    </p>
                     <p className="text-xs text-gray-500">Target: &lt; 0.1</p>
                   </div>
                 </CardContent>
@@ -996,33 +1295,45 @@ export function PerformanceMonitor({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {userExperience.slice(0, 10).map(ux => (
-                    <div key={ux.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  {userExperience.slice(0, 10).map((ux) => (
+                    <div
+                      key={ux.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                    >
                       <div className="flex items-center space-x-3">
                         {getDeviceIcon(ux.device.type)}
                         <div>
                           <p className="font-medium text-sm">{ux.page}</p>
                           <p className="text-xs text-gray-600">
-                            {ux.device.browser} on {ux.device.os} • {ux.location.city}, {ux.location.country}
+                            {ux.device.browser} on {ux.device.os} •{" "}
+                            {ux.location.city}, {ux.location.country}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 text-xs">
                         <div className="text-center">
                           <p className="font-medium">Load Time</p>
-                          <p className="text-gray-600">{formatDuration(ux.metrics.loadTime)}</p>
+                          <p className="text-gray-600">
+                            {formatDuration(ux.metrics.loadTime)}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="font-medium">FCP</p>
-                          <p className="text-gray-600">{formatDuration(ux.metrics.firstContentfulPaint)}</p>
+                          <p className="text-gray-600">
+                            {formatDuration(ux.metrics.firstContentfulPaint)}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="font-medium">CLS</p>
-                          <p className="text-gray-600">{ux.metrics.cumulativeLayoutShift.toFixed(3)}</p>
+                          <p className="text-gray-600">
+                            {ux.metrics.cumulativeLayoutShift.toFixed(3)}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="font-medium">Network</p>
-                          <p className="text-gray-600 uppercase">{ux.network.type}</p>
+                          <p className="text-gray-600 uppercase">
+                            {ux.network.type}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1039,7 +1350,7 @@ export function PerformanceMonitor({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">API Performance</h3>
               <Button
-                onClick={() => handleExport('api')}
+                onClick={() => handleExport("api")}
                 disabled={state.isExporting}
                 size="sm"
                 variant="outline"
@@ -1054,9 +1365,15 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                    <p className="text-2xl font-bold">{performanceOverview.totalAPIRequests}</p>
-                    <p className="text-xs text-gray-500">in selected timeframe</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Total Requests
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {performanceOverview.totalAPIRequests}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      in selected timeframe
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -1064,9 +1381,15 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-                    <p className="text-2xl font-bold text-blue-600">{performanceOverview.avgAPIResponseTime.toFixed(0)}ms</p>
-                    <p className="text-xs text-gray-500">across all endpoints</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Avg Response Time
+                    </p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {performanceOverview.avgAPIResponseTime.toFixed(0)}ms
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      across all endpoints
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -1074,9 +1397,15 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Error Rate</p>
-                    <p className="text-2xl font-bold text-red-600">{performanceOverview.apiErrorRate.toFixed(1)}%</p>
-                    <p className="text-xs text-gray-500">4xx and 5xx responses</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Error Rate
+                    </p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {performanceOverview.apiErrorRate.toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      4xx and 5xx responses
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -1084,11 +1413,18 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Cache Hit Rate</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Cache Hit Rate
+                    </p>
                     <p className="text-2xl font-bold text-green-600">
                       {apiPerformance.length > 0
-                        ? ((apiPerformance.filter(api => api.cached).length / apiPerformance.length) * 100).toFixed(1)
-                        : 0}%
+                        ? (
+                            (apiPerformance.filter((api) => api.cached).length /
+                              apiPerformance.length) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
                     </p>
                     <p className="text-xs text-gray-500">cached responses</p>
                   </div>
@@ -1103,23 +1439,39 @@ export function PerformanceMonitor({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {apiPerformance.slice(0, 10).map(api => (
-                    <div key={api.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  {apiPerformance.slice(0, 10).map((api) => (
+                    <div
+                      key={api.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                    >
                       <div className="flex items-center space-x-3">
-                        <Badge className={api.statusCode >= 400 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}>
+                        <Badge
+                          className={
+                            api.statusCode >= 400
+                              ? "bg-red-100 text-red-600"
+                              : "bg-green-100 text-green-600"
+                          }
+                        >
                           {api.method}
                         </Badge>
                         <div>
                           <p className="font-medium text-sm">{api.endpoint}</p>
                           <p className="text-xs text-gray-600">
-                            {api.ipAddress} • {api.region} • {new Date(api.timestamp).toLocaleTimeString()}
+                            {api.ipAddress} • {api.region} •{" "}
+                            {new Date(api.timestamp).toLocaleTimeString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 text-xs">
                         <div className="text-center">
                           <p className="font-medium">Status</p>
-                          <Badge className={api.statusCode >= 400 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}>
+                          <Badge
+                            className={
+                              api.statusCode >= 400
+                                ? "bg-red-100 text-red-600"
+                                : "bg-green-100 text-green-600"
+                            }
+                          >
                             {api.statusCode}
                           </Badge>
                         </div>
@@ -1129,7 +1481,9 @@ export function PerformanceMonitor({
                         </div>
                         <div className="text-center">
                           <p className="font-medium">Size</p>
-                          <p className="text-gray-600">{formatBytes(api.responseSize)}</p>
+                          <p className="text-gray-600">
+                            {formatBytes(api.responseSize)}
+                          </p>
                         </div>
                         {api.cached && (
                           <Badge className="bg-blue-100 text-blue-600">
@@ -1149,7 +1503,9 @@ export function PerformanceMonitor({
         <TabsContent value="alerts">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Performance Alerts ({performanceOverview.totalAlerts})</h3>
+              <h3 className="text-lg font-medium">
+                Performance Alerts ({performanceOverview.totalAlerts})
+              </h3>
               <div className="flex space-x-2">
                 <Badge className="bg-red-100 text-red-600">
                   {performanceOverview.criticalAlerts} Critical
@@ -1161,8 +1517,8 @@ export function PerformanceMonitor({
             </div>
 
             <div className="grid gap-4">
-              {resources.flatMap(resource =>
-                resource.alerts.map(alert => (
+              {resources.flatMap((resource) =>
+                resource.alerts.map((alert) => (
                   <Card key={alert.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
@@ -1171,7 +1527,9 @@ export function PerformanceMonitor({
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <h4 className="font-medium">{alert.message}</h4>
-                              <Badge className={getSeverityColor(alert.severity)}>
+                              <Badge
+                                className={getSeverityColor(alert.severity)}
+                              >
                                 {alert.severity}
                               </Badge>
                               <Badge className="bg-blue-100 text-blue-600">
@@ -1184,7 +1542,8 @@ export function PerformanceMonitor({
                               )}
                             </div>
                             <div className="text-sm text-gray-600 mb-2">
-                              <strong>Resource:</strong> {resource.name} ({resource.type})
+                              <strong>Resource:</strong> {resource.name} (
+                              {resource.type})
                             </div>
                             <div className="text-xs text-gray-500">
                               <Clock className="w-3 h-3 inline mr-1" />
@@ -1192,7 +1551,12 @@ export function PerformanceMonitor({
                               {alert.resolvedAt && (
                                 <>
                                   <span className="mx-2">•</span>
-                                  <span>Resolved: {new Date(alert.resolvedAt).toLocaleString()}</span>
+                                  <span>
+                                    Resolved:{" "}
+                                    {new Date(
+                                      alert.resolvedAt,
+                                    ).toLocaleString()}
+                                  </span>
                                 </>
                               )}
                             </div>
@@ -1213,7 +1577,7 @@ export function PerformanceMonitor({
                       </div>
                     </CardContent>
                   </Card>
-                ))
+                )),
               )}
             </div>
 
@@ -1221,9 +1585,12 @@ export function PerformanceMonitor({
               <Card>
                 <CardContent className="p-6 text-center">
                   <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Alerts</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Active Alerts
+                  </h3>
                   <p className="text-sm text-gray-600">
-                    All systems are operating normally with no performance alerts.
+                    All systems are operating normally with no performance
+                    alerts.
                   </p>
                 </CardContent>
               </Card>

@@ -21,37 +21,37 @@ spec:
         app: kubernetes-dashboard
     spec:
       containers:
-      - name: kubernetes-dashboard
-        image: kubernetesui/dashboard:v2.7.0
-        ports:
-        - containerPort: 8443
-          protocol: TCP
-        args:
-          - --auto-generate-certificates
-          - --namespace=kubernetes-dashboard
-        volumeMounts:
-        - name: kubernetes-dashboard-certs
-          mountPath: /certs
-          # Create an empty dir for certs, if you use your own certs, you can mount a secret here
-        - name: tmp-volume
-          mountPath: /tmp
-        livenessProbe:
-          httpGet:
-            scheme: HTTPS
-            path: /
-            port: 8443
-          initialDelaySeconds: 30
-          timeoutSeconds: 30
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsUser: 1001
-          runAsGroup: 2001
+        - name: kubernetes-dashboard
+          image: kubernetesui/dashboard:v2.7.0
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+          args:
+            - --auto-generate-certificates
+            - --namespace=kubernetes-dashboard
+          volumeMounts:
+            - name: kubernetes-dashboard-certs
+              mountPath: /certs
+              # Create an empty dir for certs, if you use your own certs, you can mount a secret here
+            - name: tmp-volume
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /
+              port: 8443
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsGroup: 2001
       volumes:
-      - name: kubernetes-dashboard-certs
-        emptyDir: {}
-      - name: tmp-volume
-        emptyDir: {}
+        - name: kubernetes-dashboard-certs
+          emptyDir: {}
+        - name: tmp-volume
+          emptyDir: {}
       serviceAccountName: kubernetes-dashboard
       nodeSelector:
         "kubernetes.io/os": linux
@@ -87,9 +87,9 @@ roleRef:
   kind: Role
   name: kubernetes-dashboard-minimal
 subjects:
-- kind: ServiceAccount
-  name: kubernetes-dashboard
-  namespace: kubernetes-dashboard
+  - kind: ServiceAccount
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

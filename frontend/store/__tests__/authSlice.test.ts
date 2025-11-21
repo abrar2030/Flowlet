@@ -1,17 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
-import { configureStore } from '@reduxjs/toolkit';
+import { describe, it, expect, vi } from "vitest";
+import { configureStore } from "@reduxjs/toolkit";
 import authReducer, {
   loginUser,
   registerUser,
   logoutUser,
   validateToken,
   clearError,
-  updateUser
-} from '@/store/authSlice';
-import { authApi } from '@/lib/api';
+  updateUser,
+} from "@/store/authSlice";
+import { authApi } from "@/lib/api";
 
 // Mock the API
-vi.mock('@/lib/api', () => ({
+vi.mock("@/lib/api", () => ({
   authApi: {
     login: vi.fn(),
     register: vi.fn(),
@@ -39,20 +39,20 @@ const createTestStore = (initialState = {}) => {
   });
 };
 
-describe('authSlice', () => {
+describe("authSlice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  describe('reducers', () => {
-    it('should handle clearError', () => {
+  describe("reducers", () => {
+    it("should handle clearError", () => {
       const initialState = {
         user: null,
         token: null,
         isAuthenticated: false,
         isLoading: false,
-        error: 'Some error',
+        error: "Some error",
       };
 
       const action = clearError();
@@ -61,17 +61,17 @@ describe('authSlice', () => {
       expect(newState.error).toBeNull();
     });
 
-    it('should handle updateUser', () => {
+    it("should handle updateUser", () => {
       const mockUser = {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        avatar: '',
-        role: 'user' as const,
+        id: "1",
+        email: "test@example.com",
+        name: "Test User",
+        avatar: "",
+        role: "user" as const,
         preferences: {
-          theme: 'light' as const,
-          language: 'en',
-          currency: 'USD',
+          theme: "light" as const,
+          language: "en",
+          currency: "USD",
           notifications: {
             email: true,
             push: true,
@@ -81,42 +81,42 @@ describe('authSlice', () => {
             marketingEmails: false,
           },
         },
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2023-01-01T00:00:00Z',
+        createdAt: "2023-01-01T00:00:00Z",
+        updatedAt: "2023-01-01T00:00:00Z",
       };
 
       const initialState = {
         user: mockUser,
-        token: 'token',
+        token: "token",
         isAuthenticated: true,
         isLoading: false,
         error: null,
       };
 
-      const updates = { name: 'Updated Name' };
+      const updates = { name: "Updated Name" };
       const action = updateUser(updates);
       const newState = authReducer(initialState, action);
 
-      expect(newState.user?.name).toBe('Updated Name');
-      expect(newState.user?.email).toBe('test@example.com'); // Other fields unchanged
+      expect(newState.user?.name).toBe("Updated Name");
+      expect(newState.user?.email).toBe("test@example.com"); // Other fields unchanged
     });
   });
 
-  describe('async thunks', () => {
-    it('should handle successful login', async () => {
+  describe("async thunks", () => {
+    it("should handle successful login", async () => {
       const mockResponse = {
         success: true,
         data: {
           user: {
-            id: '1',
-            email: 'test@example.com',
-            name: 'Test User',
-            avatar: '',
-            role: 'user' as const,
+            id: "1",
+            email: "test@example.com",
+            name: "Test User",
+            avatar: "",
+            role: "user" as const,
             preferences: {
-              theme: 'light' as const,
-              language: 'en',
-              currency: 'USD',
+              theme: "light" as const,
+              language: "en",
+              currency: "USD",
               notifications: {
                 email: true,
                 push: true,
@@ -126,33 +126,35 @@ describe('authSlice', () => {
                 marketingEmails: false,
               },
             },
-            createdAt: '2023-01-01T00:00:00Z',
-            updatedAt: '2023-01-01T00:00:00Z',
+            createdAt: "2023-01-01T00:00:00Z",
+            updatedAt: "2023-01-01T00:00:00Z",
           },
-          token: 'test-token',
+          token: "test-token",
         },
-        timestamp: '2023-01-01T00:00:00Z',
+        timestamp: "2023-01-01T00:00:00Z",
       };
 
       vi.mocked(authApi.login).mockResolvedValue(mockResponse);
 
       const store = createTestStore();
-      const credentials = { email: 'test@example.com', password: 'password' };
+      const credentials = { email: "test@example.com", password: "password" };
 
       await store.dispatch(loginUser(credentials));
 
       const state = store.getState().auth;
       expect(state.isAuthenticated).toBe(true);
-      expect(state.user?.email).toBe('test@example.com');
-      expect(state.token).toBe('test-token');
+      expect(state.user?.email).toBe("test@example.com");
+      expect(state.token).toBe("test-token");
       expect(state.error).toBeNull();
     });
 
-    it('should handle failed login', async () => {
-      vi.mocked(authApi.login).mockRejectedValue(new Error('Invalid credentials'));
+    it("should handle failed login", async () => {
+      vi.mocked(authApi.login).mockRejectedValue(
+        new Error("Invalid credentials"),
+      );
 
       const store = createTestStore();
-      const credentials = { email: 'test@example.com', password: 'wrong' };
+      const credentials = { email: "test@example.com", password: "wrong" };
 
       await store.dispatch(loginUser(credentials));
 
@@ -160,19 +162,19 @@ describe('authSlice', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
       expect(state.token).toBeNull();
-      expect(state.error).toBe('Invalid credentials');
+      expect(state.error).toBe("Invalid credentials");
     });
 
-    it('should handle successful logout', async () => {
+    it("should handle successful logout", async () => {
       vi.mocked(authApi.logout).mockResolvedValue({
         success: true,
-        message: 'Logged out successfully',
-        timestamp: '2023-01-01T00:00:00Z',
+        message: "Logged out successfully",
+        timestamp: "2023-01-01T00:00:00Z",
       });
 
       const initialState = {
-        user: { id: '1', email: 'test@example.com' } as any,
-        token: 'test-token',
+        user: { id: "1", email: "test@example.com" } as any,
+        token: "test-token",
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -188,20 +190,20 @@ describe('authSlice', () => {
       expect(state.token).toBeNull();
     });
 
-    it('should handle successful token validation', async () => {
+    it("should handle successful token validation", async () => {
       const mockResponse = {
         success: true,
         data: {
           user: {
-            id: '1',
-            email: 'test@example.com',
-            name: 'Test User',
-            avatar: '',
-            role: 'user' as const,
+            id: "1",
+            email: "test@example.com",
+            name: "Test User",
+            avatar: "",
+            role: "user" as const,
             preferences: {
-              theme: 'light' as const,
-              language: 'en',
-              currency: 'USD',
+              theme: "light" as const,
+              language: "en",
+              currency: "USD",
               notifications: {
                 email: true,
                 push: true,
@@ -211,12 +213,12 @@ describe('authSlice', () => {
                 marketingEmails: false,
               },
             },
-            createdAt: '2023-01-01T00:00:00Z',
-            updatedAt: '2023-01-01T00:00:00Z',
+            createdAt: "2023-01-01T00:00:00Z",
+            updatedAt: "2023-01-01T00:00:00Z",
           },
-          token: 'valid-token',
+          token: "valid-token",
         },
-        timestamp: '2023-01-01T00:00:00Z',
+        timestamp: "2023-01-01T00:00:00Z",
       };
 
       vi.mocked(authApi.validateToken).mockResolvedValue(mockResponse);
@@ -227,12 +229,14 @@ describe('authSlice', () => {
 
       const state = store.getState().auth;
       expect(state.isAuthenticated).toBe(true);
-      expect(state.user?.email).toBe('test@example.com');
-      expect(state.token).toBe('valid-token');
+      expect(state.user?.email).toBe("test@example.com");
+      expect(state.token).toBe("valid-token");
     });
 
-    it('should handle failed token validation', async () => {
-      vi.mocked(authApi.validateToken).mockRejectedValue(new Error('Invalid token'));
+    it("should handle failed token validation", async () => {
+      vi.mocked(authApi.validateToken).mockRejectedValue(
+        new Error("Invalid token"),
+      );
 
       const store = createTestStore();
 
@@ -242,7 +246,7 @@ describe('authSlice', () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
       expect(state.token).toBeNull();
-      expect(state.error).toBe('Invalid token');
+      expect(state.error).toBe("Invalid token");
     });
   });
 });

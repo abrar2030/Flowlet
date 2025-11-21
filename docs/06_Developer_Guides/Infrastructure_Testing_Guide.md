@@ -403,18 +403,22 @@ kubectl get clusterrolebindings | grep flowlet
 ### Common Issues and Solutions
 
 #### Pod Startup Issues
+
 - **Symptom**: Pods stuck in Pending or CrashLoopBackOff
 - **Solution**: Check resource constraints, image availability, and configuration
 
 #### Database Connection Issues
+
 - **Symptom**: Services cannot connect to databases
 - **Solution**: Verify network policies, service discovery, and credentials
 
 #### Performance Issues
+
 - **Symptom**: High response times or resource usage
 - **Solution**: Check resource limits, database performance, and network latency
 
 #### Security Issues
+
 - **Symptom**: Unauthorized access or policy violations
 - **Solution**: Review RBAC, network policies, and secret management
 
@@ -428,9 +432,9 @@ name: Infrastructure Testing
 on:
   push:
     paths:
-      - 'kubernetes/**'
-      - 'terraform/**'
-      - 'scripts/**'
+      - "kubernetes/**"
+      - "terraform/**"
+      - "scripts/**"
 
 jobs:
   validate:

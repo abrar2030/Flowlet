@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, User, LoginCredentials, RegisterData } from '@/types';
-import { authService, AuthResponse } from '@/lib/authService';
-import { ApiError } from '@/lib/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { AuthState, User, LoginCredentials, RegisterData } from "@/types";
+import { authService, AuthResponse } from "@/lib/authService";
+import { ApiError } from "@/lib/api";
 
 const initialState: AuthState = {
   user: null,
@@ -13,7 +13,7 @@ const initialState: AuthState = {
 
 // Async thunks for authentication
 export const loginUser = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
@@ -22,13 +22,13 @@ export const loginUser = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Login failed');
+      return rejectWithValue(error.message || "Login failed");
     }
-  }
+  },
 );
 
 export const registerUser = createAsyncThunk(
-  'auth/register',
+  "auth/register",
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
@@ -37,13 +37,13 @@ export const registerUser = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Registration failed');
+      return rejectWithValue(error.message || "Registration failed");
     }
-  }
+  },
 );
 
 export const logoutUser = createAsyncThunk(
-  'auth/logout',
+  "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
@@ -51,30 +51,30 @@ export const logoutUser = createAsyncThunk(
     } catch (error: unknown) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const validateToken = createAsyncThunk(
-  'auth/validateToken',
+  "auth/validateToken",
   async (_, { rejectWithValue }) => {
     try {
       if (!authService.isAuthenticated()) {
-        throw new Error('No valid token found');
+        throw new Error("No valid token found");
       }
 
       const user = await authService.getCurrentUser();
-      return { user, token: 'validated' }; // Token is managed by TokenManager
+      return { user, token: "validated" }; // Token is managed by TokenManager
     } catch (error: unknown) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Token validation failed');
+      return rejectWithValue(error.message || "Token validation failed");
     }
-  }
+  },
 );
 
 export const refreshToken = createAsyncThunk(
-  'auth/refreshToken',
+  "auth/refreshToken",
   async (_, { rejectWithValue }) => {
     try {
       const token = await authService.refreshToken();
@@ -84,13 +84,13 @@ export const refreshToken = createAsyncThunk(
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
       }
-      return rejectWithValue(error.message || 'Token refresh failed');
+      return rejectWithValue(error.message || "Token refresh failed");
     }
-  }
+  },
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {

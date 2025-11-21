@@ -27,6 +27,7 @@ Retrieves a paginated list of all ledger entries, with options for filtering by 
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `finance` role).
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number for pagination. Default is `1`.
 - `per_page` (integer, optional): Number of items per page. Default is `50`.
 - `account_type` (string, optional): Filter by account type (e.g., `asset`, `liability`, `equity`, `revenue`, `expense`).
@@ -36,6 +37,7 @@ Retrieves a paginated list of all ledger entries, with options for filtering by 
 - `end_date` (string, optional): End date for filtering entries (YYYY-MM-DD).
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved ledger entries.
   ```json
   {
@@ -80,10 +82,12 @@ Generates a trial balance report as of a specified date. The trial balance is a 
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `finance` role).
 
 **Query Parameters**:
+
 - `as_of_date` (string, optional): The date for which to generate the trial balance (YYYY-MM-DD). Defaults to current UTC date.
 - `currency` (string, optional): The currency for the report. Default is `USD`.
 
 **Responses**:
+
 - `200 OK`: Successfully generated trial balance report.
   ```json
   {
@@ -118,10 +122,12 @@ Generates a balance sheet report as of a specified date. The balance sheet provi
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `finance` role).
 
 **Query Parameters**:
+
 - `as_of_date` (string, optional): The date for which to generate the balance sheet (YYYY-MM-DD). Defaults to current UTC date.
 - `currency` (string, optional): The currency for the report. Default is `USD`.
 
 **Responses**:
+
 - `200 OK`: Successfully generated balance sheet report.
   ```json
   {
@@ -175,11 +181,13 @@ Generates an income statement (Profit & Loss report) for a specified period. Thi
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `finance` role).
 
 **Query Parameters**:
+
 - `start_date` (string, required): The start date for the income statement (YYYY-MM-DD). Defaults to the first day of the current month.
 - `end_date` (string, required): The end date for the income statement (YYYY-MM-DD). Defaults to the current date.
 - `currency` (string, optional): The currency for the report. Default is `USD`.
 
 **Responses**:
+
 - `200 OK`: Successfully generated income statement report.
   ```json
   {
@@ -223,11 +231,13 @@ Generates a cash flow statement for a specified period. This report provides a d
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `finance` role).
 
 **Query Parameters**:
+
 - `start_date` (string, required): The start date for the cash flow statement (YYYY-MM-DD). Defaults to the first day of the current month.
 - `end_date` (string, required): The end date for the cash flow statement (YYYY-MM-DD). Defaults to the current date.
 - `currency` (string, optional): The currency for the report. Default is `USD`.
 
 **Responses**:
+
 - `200 OK`: Successfully generated cash flow statement report.
   ```json
   {

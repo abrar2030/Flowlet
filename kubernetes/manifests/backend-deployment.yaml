@@ -22,47 +22,47 @@ spec:
         runAsUser: 1000
         fsGroup: 2000
       containers:
-      - name: flowlet-backend
-        image: flowlet/backend:latest  # Replace with your actual image
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: flowlet-secrets
-              key: database_url
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: flowlet-secrets
-              key: api_key
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "250m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-          seccompProfile:
-            type: RuntimeDefault
+        - name: flowlet-backend
+          image: flowlet/backend:latest # Replace with your actual image
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: flowlet-secrets
+                  key: database_url
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: flowlet-secrets
+                  key: api_key
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
       imagePullSecrets:
-      - name: regcred
+        - name: regcred

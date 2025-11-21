@@ -1,103 +1,103 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@/test/utils';
-import Header from '@/components/Header';
-import { mockUser } from '@/test/utils';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@/test/utils";
+import Header from "@/components/Header";
+import { mockUser } from "@/test/utils";
 
 // Mock the hooks
-vi.mock('@/hooks/redux', () => ({
+vi.mock("@/hooks/redux", () => ({
   useAppDispatch: () => vi.fn(),
   useAppSelector: () => ({
-    theme: 'system',
+    theme: "system",
     unreadNotifications: 3,
   }),
 }));
 
-vi.mock('@/hooks/useAuth', () => ({
+vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({
     user: mockUser,
     isAuthenticated: true,
   }),
 }));
 
-vi.mock('@/store/authSlice', () => ({
+vi.mock("@/store/authSlice", () => ({
   logoutUser: vi.fn(),
 }));
 
-vi.mock('@/store/uiSlice', () => ({
+vi.mock("@/store/uiSlice", () => ({
   setTheme: vi.fn(),
 }));
 
-describe('Header', () => {
+describe("Header", () => {
   const mockOnMenuClick = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders header with Flowlet branding', () => {
+  it("renders header with Flowlet branding", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    expect(screen.getByText('Flowlet')).toBeInTheDocument();
+    expect(screen.getByText("Flowlet")).toBeInTheDocument();
   });
 
-  it('shows mobile badge when on mobile', () => {
+  it("shows mobile badge when on mobile", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={true} />);
 
-    expect(screen.getByText('Mobile')).toBeInTheDocument();
+    expect(screen.getByText("Mobile")).toBeInTheDocument();
   });
 
-  it('does not show mobile badge on desktop', () => {
+  it("does not show mobile badge on desktop", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    expect(screen.queryByText('Mobile')).not.toBeInTheDocument();
+    expect(screen.queryByText("Mobile")).not.toBeInTheDocument();
   });
 
-  it('calls onMenuClick when menu button is clicked', () => {
+  it("calls onMenuClick when menu button is clicked", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    const menuButton = screen.getByRole('button', { name: '' }); // Menu icon button
+    const menuButton = screen.getByRole("button", { name: "" }); // Menu icon button
     fireEvent.click(menuButton);
 
     expect(mockOnMenuClick).toHaveBeenCalledTimes(1);
   });
 
-  it('displays notification badge with count', () => {
+  it("displays notification badge with count", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
   });
 
-  it('displays user avatar with initials', () => {
+  it("displays user avatar with initials", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    expect(screen.getByText('TU')).toBeInTheDocument(); // Test User initials
+    expect(screen.getByText("TU")).toBeInTheDocument(); // Test User initials
   });
 
-  it('opens user menu when avatar is clicked', () => {
+  it("opens user menu when avatar is clicked", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    const avatarButton = screen.getByRole('button', { name: '' }); // Avatar button
+    const avatarButton = screen.getByRole("button", { name: "" }); // Avatar button
     fireEvent.click(avatarButton);
 
-    expect(screen.getByText('Test User')).toBeInTheDocument();
-    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    expect(screen.getByText("Test User")).toBeInTheDocument();
+    expect(screen.getByText("test@example.com")).toBeInTheDocument();
   });
 
-  it('shows theme options in user menu', () => {
+  it("shows theme options in user menu", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    const avatarButton = screen.getByRole('button', { name: '' });
+    const avatarButton = screen.getByRole("button", { name: "" });
     fireEvent.click(avatarButton);
 
-    expect(screen.getByText('Theme')).toBeInTheDocument();
+    expect(screen.getByText("Theme")).toBeInTheDocument();
   });
 
-  it('shows logout option in user menu', () => {
+  it("shows logout option in user menu", () => {
     render(<Header onMenuClick={mockOnMenuClick} isMobile={false} />);
 
-    const avatarButton = screen.getByRole('button', { name: '' });
+    const avatarButton = screen.getByRole("button", { name: "" });
     fireEvent.click(avatarButton);
 
-    expect(screen.getByText('Log out')).toBeInTheDocument();
+    expect(screen.getByText("Log out")).toBeInTheDocument();
   });
 });

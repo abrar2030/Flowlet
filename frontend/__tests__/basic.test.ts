@@ -1,29 +1,29 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('Basic Test Suite', () => {
-  it('should pass basic test', () => {
+describe("Basic Test Suite", () => {
+  it("should pass basic test", () => {
     expect(1 + 1).toBe(2);
   });
 
-  it('should handle string operations', () => {
-    expect('hello'.toUpperCase()).toBe('HELLO');
+  it("should handle string operations", () => {
+    expect("hello".toUpperCase()).toBe("HELLO");
   });
 
-  it('should handle array operations', () => {
+  it("should handle array operations", () => {
     const arr = [1, 2, 3];
     expect(arr.length).toBe(3);
     expect(arr.includes(2)).toBe(true);
   });
 
-  it('should handle object operations', () => {
-    const obj = { name: 'test', value: 42 };
-    expect(obj.name).toBe('test');
+  it("should handle object operations", () => {
+    const obj = { name: "test", value: 42 };
+    expect(obj.name).toBe("test");
     expect(obj.value).toBe(42);
   });
 
-  it('should handle async operations', async () => {
-    const promise = Promise.resolve('success');
+  it("should handle async operations", async () => {
+    const promise = Promise.resolve("success");
     const result = await promise;
-    expect(result).toBe('success');
+    expect(result).toBe("success");
   });
 });

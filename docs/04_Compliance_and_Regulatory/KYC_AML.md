@@ -1,4 +1,3 @@
-
 # KYC/AML API Documentation
 
 The KYC/AML API facilitates the Know Your Customer (KYC) and Anti-Money Laundering (AML) verification processes. It allows for user creation, information updates, and managing verification workflows with different levels of scrutiny.
@@ -17,25 +16,25 @@ Creates a new user record with basic information. This is typically the first st
 
 #### Request Body
 
-| Field         | Type     | Description                                     | Required |
-| :------------ | :------- | :---------------------------------------------- | :------- |
-| `email`       | `string` | The user's email address (must be unique).      | Yes      |
-| `first_name`  | `string` | The user's first name.                          | Yes      |
-| `last_name`   | `string` | The user's last name.                           | Yes      |
-| `phone`       | `string` | Optional: The user's phone number.              | No       |
+| Field           | Type     | Description                                                | Required |
+| :-------------- | :------- | :--------------------------------------------------------- | :------- |
+| `email`         | `string` | The user's email address (must be unique).                 | Yes      |
+| `first_name`    | `string` | The user's first name.                                     | Yes      |
+| `last_name`     | `string` | The user's last name.                                      | Yes      |
+| `phone`         | `string` | Optional: The user's phone number.                         | No       |
 | `date_of_birth` | `string` | Optional: The user's date of birth in `YYYY-MM-DD` format. | No       |
-| `address`     | `string` | Optional: The user's residential address.       | No       |
+| `address`       | `string` | Optional: The user's residential address.                  | No       |
 
 #### Example Request
 
 ```json
 {
-    "email": "john.doe@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "phone": "+15551234567",
-    "date_of_birth": "1990-05-15",
-    "address": "123 Main St, Anytown, USA"
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "+15551234567",
+  "date_of_birth": "1990-05-15",
+  "address": "123 Main St, Anytown, USA"
 }
 ```
 
@@ -43,12 +42,12 @@ Creates a new user record with basic information. This is typically the first st
 
 ```json
 {
-    "user_id": "<generated_user_id>",
-    "email": "john.doe@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "kyc_status": "pending",
-    "created_at": "2024-01-18T09:00:00.000Z"
+  "user_id": "<generated_user_id>",
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "kyc_status": "pending",
+  "created_at": "2024-01-18T09:00:00.000Z"
 }
 ```
 
@@ -56,7 +55,7 @@ Creates a new user record with basic information. This is typically the first st
 
 ```json
 {
-    "error": "Invalid email format"
+  "error": "Invalid email format"
 }
 ```
 
@@ -64,7 +63,7 @@ Creates a new user record with basic information. This is typically the first st
 
 ```json
 {
-    "error": "User with this email already exists"
+  "error": "User with this email already exists"
 }
 ```
 
@@ -76,9 +75,9 @@ Retrieves detailed information about a specific user.
 
 #### Path Parameters
 
-| Parameter | Type     | Description                            |
-| :-------- | :------- | :------------------------------------- |
-| `user_id` | `string` | The unique identifier of the user.     |
+| Parameter | Type     | Description                        |
+| :-------- | :------- | :--------------------------------- |
+| `user_id` | `string` | The unique identifier of the user. |
 
 #### Example Request
 
@@ -90,16 +89,16 @@ GET /api/v1/kyc/user/user_123
 
 ```json
 {
-    "user_id": "user_123",
-    "email": "john.doe@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "phone": "+15551234567",
-    "date_of_birth": "1990-05-15",
-    "address": "123 Main St, Anytown, USA",
-    "kyc_status": "pending",
-    "created_at": "2024-01-18T09:00:00.000Z",
-    "updated_at": "2024-01-18T09:00:00.000Z"
+  "user_id": "user_123",
+  "email": "john.doe@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "+15551234567",
+  "date_of_birth": "1990-05-15",
+  "address": "123 Main St, Anytown, USA",
+  "kyc_status": "pending",
+  "created_at": "2024-01-18T09:00:00.000Z",
+  "updated_at": "2024-01-18T09:00:00.000Z"
 }
 ```
 
@@ -107,7 +106,7 @@ GET /api/v1/kyc/user/user_123
 
 ```json
 {
-    "error": "User not found"
+  "error": "User not found"
 }
 ```
 
@@ -119,26 +118,26 @@ Updates existing user information.
 
 #### Path Parameters
 
-| Parameter | Type     | Description                            |
-| :-------- | :------- | :------------------------------------- |
-| `user_id` | `string` | The unique identifier of the user.     |
+| Parameter | Type     | Description                        |
+| :-------- | :------- | :--------------------------------- |
+| `user_id` | `string` | The unique identifier of the user. |
 
 #### Request Body
 
-| Field         | Type     | Description                                     | Required |
-| :------------ | :------- | :---------------------------------------------- | :------- |
-| `first_name`  | `string` | Optional: The user's updated first name.        | No       |
-| `last_name`   | `string` | Optional: The user's updated last name.         | No       |
-| `phone`       | `string` | Optional: The user's updated phone number.      | No       |
+| Field           | Type     | Description                                                        | Required |
+| :-------------- | :------- | :----------------------------------------------------------------- | :------- |
+| `first_name`    | `string` | Optional: The user's updated first name.                           | No       |
+| `last_name`     | `string` | Optional: The user's updated last name.                            | No       |
+| `phone`         | `string` | Optional: The user's updated phone number.                         | No       |
 | `date_of_birth` | `string` | Optional: The user's updated date of birth in `YYYY-MM-DD` format. | No       |
-| `address`     | `string` | Optional: The user's updated residential address. | No       |
+| `address`       | `string` | Optional: The user's updated residential address.                  | No       |
 
 #### Example Request
 
 ```json
 {
-    "phone": "+15559876543",
-    "address": "456 Oak Ave, Othertown, USA"
+  "phone": "+15559876543",
+  "address": "456 Oak Ave, Othertown, USA"
 }
 ```
 
@@ -146,9 +145,9 @@ Updates existing user information.
 
 ```json
 {
-    "user_id": "user_123",
-    "message": "User updated successfully",
-    "updated_at": "2024-01-18T10:00:00.000Z"
+  "user_id": "user_123",
+  "message": "User updated successfully",
+  "updated_at": "2024-01-18T10:00:00.000Z"
 }
 ```
 
@@ -156,7 +155,7 @@ Updates existing user information.
 
 ```json
 {
-    "error": "Invalid phone format"
+  "error": "Invalid phone format"
 }
 ```
 
@@ -168,18 +167,18 @@ Initiates a new KYC verification process for a user at a specified level.
 
 #### Request Body
 
-| Field              | Type     | Description                                     | Required |
-| :----------------- | :------- | :---------------------------------------------- | :------- |
-| `user_id`          | `string` | The unique ID of the user to verify.            | Yes      |
-| `verification_level` | `string` | The desired level of verification (`basic`, `enhanced`, `premium`). | Yes      |
-| `provider`         | `string` | Optional: The verification provider (e.g., `Flowlet_Internal`, `ThirdParty_KYC`). | No       |
+| Field                | Type     | Description                                                                       | Required |
+| :------------------- | :------- | :-------------------------------------------------------------------------------- | :------- |
+| `user_id`            | `string` | The unique ID of the user to verify.                                              | Yes      |
+| `verification_level` | `string` | The desired level of verification (`basic`, `enhanced`, `premium`).               | Yes      |
+| `provider`           | `string` | Optional: The verification provider (e.g., `Flowlet_Internal`, `ThirdParty_KYC`). | No       |
 
 #### Example Request
 
 ```json
 {
-    "user_id": "user_123",
-    "verification_level": "enhanced"
+  "user_id": "user_123",
+  "verification_level": "enhanced"
 }
 ```
 
@@ -187,17 +186,17 @@ Initiates a new KYC verification process for a user at a specified level.
 
 ```json
 {
-    "verification_id": "<generated_verification_id>",
-    "user_id": "user_123",
-    "verification_level": "enhanced",
-    "status": "pending",
-    "next_steps": [
-        "email_verification",
-        "phone_verification",
-        "document_upload",
-        "address_verification"
-    ],
-    "created_at": "2024-01-18T11:00:00.000Z"
+  "verification_id": "<generated_verification_id>",
+  "user_id": "user_123",
+  "verification_level": "enhanced",
+  "status": "pending",
+  "next_steps": [
+    "email_verification",
+    "phone_verification",
+    "document_upload",
+    "address_verification"
+  ],
+  "created_at": "2024-01-18T11:00:00.000Z"
 }
 ```
 
@@ -205,7 +204,7 @@ Initiates a new KYC verification process for a user at a specified level.
 
 ```json
 {
-    "error": "Invalid verification level"
+  "error": "Invalid verification level"
 }
 ```
 
@@ -213,7 +212,7 @@ Initiates a new KYC verification process for a user at a specified level.
 
 ```json
 {
-    "error": "User already has a pending verification"
+  "error": "User already has a pending verification"
 }
 ```
 
@@ -225,23 +224,23 @@ Submits identity document details for a pending KYC verification.
 
 #### Path Parameters
 
-| Parameter        | Type     | Description                       |
-| :--------------- | :------- | :-------------------------------- |
+| Parameter         | Type     | Description                      |
+| :---------------- | :------- | :------------------------------- |
 | `verification_id` | `string` | The unique ID of the KYC record. |
 
 #### Request Body
 
-| Field           | Type     | Description                                     | Required |
-| :-------------- | :------- | :---------------------------------------------- | :------- |
-| `document_type` | `string` | The type of document (`passport`, `drivers_license`, `national_id`). | Yes      |
-| `document_number` | `string` | The document's identification number.           | Yes      |
+| Field             | Type     | Description                                                          | Required |
+| :---------------- | :------- | :------------------------------------------------------------------- | :------- |
+| `document_type`   | `string` | The type of document (`passport`, `drivers_license`, `national_id`). | Yes      |
+| `document_number` | `string` | The document's identification number.                                | Yes      |
 
 #### Example Request
 
 ```json
 {
-    "document_type": "passport",
-    "document_number": "P12345678"
+  "document_type": "passport",
+  "document_number": "P12345678"
 }
 ```
 
@@ -249,11 +248,11 @@ Submits identity document details for a pending KYC verification.
 
 ```json
 {
-    "verification_id": "<verification_id>",
-    "document_type": "passport",
-    "status": "document_submitted",
-    "message": "Document submitted successfully for verification",
-    "estimated_processing_time": "1-2 business days"
+  "verification_id": "<verification_id>",
+  "document_type": "passport",
+  "status": "document_submitted",
+  "message": "Document submitted successfully for verification",
+  "estimated_processing_time": "1-2 business days"
 }
 ```
 
@@ -261,7 +260,7 @@ Submits identity document details for a pending KYC verification.
 
 ```json
 {
-    "error": "Invalid document type"
+  "error": "Invalid document type"
 }
 ```
 
@@ -273,25 +272,25 @@ Simulates the completion of a KYC verification process, typically triggered by a
 
 #### Path Parameters
 
-| Parameter        | Type     | Description                       |
-| :--------------- | :------- | :-------------------------------- |
+| Parameter         | Type     | Description                      |
+| :---------------- | :------- | :------------------------------- |
 | `verification_id` | `string` | The unique ID of the KYC record. |
 
 #### Request Body (Optional - for simulating specific outcomes)
 
-| Field                  | Type      | Description                                     | Required |
-| :--------------------- | :-------- | :---------------------------------------------- | :------- |
-| `document_verified`    | `boolean` | Optional: Simulate document verification result. | No       |
-| `biometric_verified`   | `boolean` | Optional: Simulate biometric verification result. | No       |
-| `watchlist_match`      | `boolean` | Optional: Simulate a watchlist match.           | No       |
-| `address_verified`     | `boolean` | Optional: Simulate address verification result. | No       |
+| Field                | Type      | Description                                       | Required |
+| :------------------- | :-------- | :------------------------------------------------ | :------- |
+| `document_verified`  | `boolean` | Optional: Simulate document verification result.  | No       |
+| `biometric_verified` | `boolean` | Optional: Simulate biometric verification result. | No       |
+| `watchlist_match`    | `boolean` | Optional: Simulate a watchlist match.             | No       |
+| `address_verified`   | `boolean` | Optional: Simulate address verification result.   | No       |
 
 #### Example Request
 
 ```json
 {
-    "document_verified": true,
-    "watchlist_match": false
+  "document_verified": true,
+  "watchlist_match": false
 }
 ```
 
@@ -299,19 +298,19 @@ Simulates the completion of a KYC verification process, typically triggered by a
 
 ```json
 {
-    "verification_id": "<verification_id>",
-    "user_id": "user_123",
-    "verification_status": "verified",
-    "risk_score": 25,
-    "verification_level": "enhanced",
-    "verification_results": {
-        "document_verified": true,
-        "biometric_verified": true,
-        "watchlist_match": false,
-        "address_verified": true
-    },
-    "completed_at": "2024-01-18T12:00:00.000Z",
-    "notes": "Automated verification completed. Risk score: 25"
+  "verification_id": "<verification_id>",
+  "user_id": "user_123",
+  "verification_status": "verified",
+  "risk_score": 25,
+  "verification_level": "enhanced",
+  "verification_results": {
+    "document_verified": true,
+    "biometric_verified": true,
+    "watchlist_match": false,
+    "address_verified": true
+  },
+  "completed_at": "2024-01-18T12:00:00.000Z",
+  "notes": "Automated verification completed. Risk score: 25"
 }
 ```
 
@@ -319,7 +318,7 @@ Simulates the completion of a KYC verification process, typically triggered by a
 
 ```json
 {
-    "error": "Verification is not in pending status"
+  "error": "Verification is not in pending status"
 }
 ```
 
@@ -331,8 +330,8 @@ Retrieves the current status and details of a specific KYC verification record.
 
 #### Path Parameters
 
-| Parameter        | Type     | Description                       |
-| :--------------- | :------- | :-------------------------------- |
+| Parameter         | Type     | Description                      |
+| :---------------- | :------- | :------------------------------- |
 | `verification_id` | `string` | The unique ID of the KYC record. |
 
 #### Example Request
@@ -345,17 +344,17 @@ GET /api/v1/kyc/verification/verification_xyz
 
 ```json
 {
-    "verification_id": "verification_xyz",
-    "user_id": "user_123",
-    "verification_level": "enhanced",
-    "document_type": "passport",
-    "verification_status": "verified",
-    "verification_provider": "Flowlet_Internal",
-    "verification_date": "2024-01-18T12:00:00.000Z",
-    "risk_score": 25,
-    "notes": "Automated verification completed. Risk score: 25",
-    "created_at": "2024-01-18T11:00:00.000Z",
-    "updated_at": "2024-01-18T12:00:00.000Z"
+  "verification_id": "verification_xyz",
+  "user_id": "user_123",
+  "verification_level": "enhanced",
+  "document_type": "passport",
+  "verification_status": "verified",
+  "verification_provider": "Flowlet_Internal",
+  "verification_date": "2024-01-18T12:00:00.000Z",
+  "risk_score": 25,
+  "notes": "Automated verification completed. Risk score: 25",
+  "created_at": "2024-01-18T11:00:00.000Z",
+  "updated_at": "2024-01-18T12:00:00.000Z"
 }
 ```
 
@@ -363,7 +362,7 @@ GET /api/v1/kyc/verification/verification_xyz
 
 ```json
 {
-    "error": "Verification record not found"
+  "error": "Verification record not found"
 }
 ```
 
@@ -375,9 +374,9 @@ Retrieves a list of all KYC verification records associated with a given user ID
 
 #### Path Parameters
 
-| Parameter | Type     | Description                            |
-| :-------- | :------- | :------------------------------------- |
-| `user_id` | `string` | The unique identifier of the user.     |
+| Parameter | Type     | Description                        |
+| :-------- | :------- | :--------------------------------- |
+| `user_id` | `string` | The unique identifier of the user. |
 
 #### Example Request
 
@@ -389,27 +388,27 @@ GET /api/v1/kyc/user/user_123/verifications
 
 ```json
 {
-    "user_id": "user_123",
-    "current_kyc_status": "verified",
-    "verifications": [
-        {
-            "verification_id": "verification_xyz",
-            "verification_level": "enhanced",
-            "verification_status": "verified",
-            "verification_date": "2024-01-18T12:00:00.000Z",
-            "risk_score": 25,
-            "created_at": "2024-01-18T11:00:00.000Z"
-        },
-        {
-            "verification_id": "verification_abc",
-            "verification_level": "basic",
-            "verification_status": "rejected",
-            "verification_date": "2024-01-10T10:00:00.000Z",
-            "risk_score": 70,
-            "created_at": "2024-01-10T09:00:00.000Z"
-        }
-    ],
-    "total_verifications": 2
+  "user_id": "user_123",
+  "current_kyc_status": "verified",
+  "verifications": [
+    {
+      "verification_id": "verification_xyz",
+      "verification_level": "enhanced",
+      "verification_status": "verified",
+      "verification_date": "2024-01-18T12:00:00.000Z",
+      "risk_score": 25,
+      "created_at": "2024-01-18T11:00:00.000Z"
+    },
+    {
+      "verification_id": "verification_abc",
+      "verification_level": "basic",
+      "verification_status": "rejected",
+      "verification_date": "2024-01-10T10:00:00.000Z",
+      "risk_score": 70,
+      "created_at": "2024-01-10T09:00:00.000Z"
+    }
+  ],
+  "total_verifications": 2
 }
 ```
 
@@ -417,7 +416,7 @@ GET /api/v1/kyc/user/user_123/verifications
 
 ```json
 {
-    "error": "User not found"
+  "error": "User not found"
 }
 ```
 
@@ -429,21 +428,21 @@ Performs an AML (Anti-Money Laundering) screening on a user based on provided da
 
 #### Request Body
 
-| Field         | Type     | Description                                     | Required |
-| :------------ | :------- | :---------------------------------------------- | :------- |
-| `user_id`     | `string` | The unique ID of the user to screen.            | Yes      |
-| `full_name`   | `string` | The full name of the individual to screen.      | Yes      |
+| Field           | Type     | Description                                     | Required |
+| :-------------- | :------- | :---------------------------------------------- | :------- |
+| `user_id`       | `string` | The unique ID of the user to screen.            | Yes      |
+| `full_name`     | `string` | The full name of the individual to screen.      | Yes      |
 | `date_of_birth` | `string` | Optional: Date of birth in `YYYY-MM-DD` format. | No       |
-| `country`     | `string` | Optional: Country of residence/citizenship.     | No       |
+| `country`       | `string` | Optional: Country of residence/citizenship.     | No       |
 
 #### Example Request
 
 ```json
 {
-    "user_id": "user_123",
-    "full_name": "John Doe",
-    "date_of_birth": "1990-05-15",
-    "country": "USA"
+  "user_id": "user_123",
+  "full_name": "John Doe",
+  "date_of_birth": "1990-05-15",
+  "country": "USA"
 }
 ```
 
@@ -451,13 +450,13 @@ Performs an AML (Anti-Money Laundering) screening on a user based on provided da
 
 ```json
 {
-    "user_id": "user_123",
-    "screening_id": "<generated_screening_id>",
-    "status": "completed",
-    "match_found": false,
-    "risk_score": 10,
-    "details": "No adverse media or watchlist matches found.",
-    "screened_at": "2024-01-18T13:00:00.000Z"
+  "user_id": "user_123",
+  "screening_id": "<generated_screening_id>",
+  "status": "completed",
+  "match_found": false,
+  "risk_score": 10,
+  "details": "No adverse media or watchlist matches found.",
+  "screened_at": "2024-01-18T13:00:00.000Z"
 }
 ```
 
@@ -465,7 +464,7 @@ Performs an AML (Anti-Money Laundering) screening on a user based on provided da
 
 ```json
 {
-    "error": "Missing required field: full_name"
+  "error": "Missing required field: full_name"
 }
 ```
 
@@ -477,8 +476,8 @@ Retrieves the results of a specific AML screening.
 
 #### Path Parameters
 
-| Parameter      | Type     | Description                       |
-| :------------- | :------- | :-------------------------------- |
+| Parameter      | Type     | Description                                |
+| :------------- | :------- | :----------------------------------------- |
 | `screening_id` | `string` | The unique ID of the AML screening record. |
 
 #### Example Request
@@ -491,13 +490,13 @@ GET /api/v1/kyc/aml/screen/aml_screen_abc
 
 ```json
 {
-    "screening_id": "aml_screen_abc",
-    "user_id": "user_123",
-    "status": "completed",
-    "match_found": false,
-    "risk_score": 10,
-    "details": "No adverse media or watchlist matches found.",
-    "screened_at": "2024-01-18T13:00:00.000Z"
+  "screening_id": "aml_screen_abc",
+  "user_id": "user_123",
+  "status": "completed",
+  "match_found": false,
+  "risk_score": 10,
+  "details": "No adverse media or watchlist matches found.",
+  "screened_at": "2024-01-18T13:00:00.000Z"
 }
 ```
 
@@ -505,6 +504,6 @@ GET /api/v1/kyc/aml/screen/aml_screen_abc
 
 ```json
 {
-    "error": "AML screening record not found"
+  "error": "AML screening record not found"
 }
 ```

@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Progress } from '../ui/progress';
-import { Checkbox } from '../ui/checkbox';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Progress } from "../ui/progress";
+import { Checkbox } from "../ui/checkbox";
 import {
   Shield,
   AlertTriangle,
@@ -51,16 +57,22 @@ import {
   Trash2,
   Edit,
   Plus,
-  RefreshCw
-} from 'lucide-react';
+  RefreshCw,
+} from "lucide-react";
 
 interface DLPRule {
   id: string;
   name: string;
   description: string;
-  category: 'pii' | 'financial' | 'health' | 'intellectual_property' | 'confidential' | 'custom';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'active' | 'inactive' | 'testing';
+  category:
+    | "pii"
+    | "financial"
+    | "health"
+    | "intellectual_property"
+    | "confidential"
+    | "custom";
+  severity: "low" | "medium" | "high" | "critical";
+  status: "active" | "inactive" | "testing";
   patterns: DLPPattern[];
   actions: DLPAction[];
   conditions: DLPCondition[];
@@ -85,7 +97,7 @@ interface DLPRule {
 
 interface DLPPattern {
   id: string;
-  type: 'regex' | 'keyword' | 'ml_model' | 'checksum' | 'fingerprint';
+  type: "regex" | "keyword" | "ml_model" | "checksum" | "fingerprint";
   pattern: string;
   confidence: number; // 0-100
   context?: string;
@@ -93,14 +105,21 @@ interface DLPPattern {
 }
 
 interface DLPAction {
-  type: 'block' | 'quarantine' | 'encrypt' | 'redact' | 'alert' | 'log' | 'require_approval';
+  type:
+    | "block"
+    | "quarantine"
+    | "encrypt"
+    | "redact"
+    | "alert"
+    | "log"
+    | "require_approval";
   parameters: Record<string, any>;
   priority: number;
 }
 
 interface DLPCondition {
   field: string;
-  operator: 'equals' | 'contains' | 'regex' | 'greater_than' | 'less_than';
+  operator: "equals" | "contains" | "regex" | "greater_than" | "less_than";
   value: string;
   caseSensitive: boolean;
 }
@@ -109,8 +128,13 @@ interface DLPIncident {
   id: string;
   ruleId: string;
   ruleName: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'investigating' | 'resolved' | 'false_positive' | 'suppressed';
+  severity: "low" | "medium" | "high" | "critical";
+  status:
+    | "open"
+    | "investigating"
+    | "resolved"
+    | "false_positive"
+    | "suppressed";
   timestamp: string;
   userId: string;
   userName: string;
@@ -133,15 +157,15 @@ interface DLPIncident {
     escalated: boolean;
   };
   riskScore: number;
-  businessImpact: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  businessImpact: "none" | "low" | "medium" | "high" | "critical";
 }
 
 interface DLPScanResult {
   id: string;
-  scanType: 'real_time' | 'scheduled' | 'on_demand';
+  scanType: "real_time" | "scheduled" | "on_demand";
   startTime: string;
   endTime?: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "running" | "completed" | "failed" | "cancelled";
   scope: {
     locations: string[];
     fileTypes: string[];
@@ -162,11 +186,22 @@ interface DataLossPreventionProps {
   rules?: DLPRule[];
   incidents?: DLPIncident[];
   scanResults?: DLPScanResult[];
-  onRuleCreate?: (rule: Omit<DLPRule, 'id' | 'createdAt' | 'triggerCount' | 'falsePositiveCount'>) => Promise<void>;
+  onRuleCreate?: (
+    rule: Omit<
+      DLPRule,
+      "id" | "createdAt" | "triggerCount" | "falsePositiveCount"
+    >,
+  ) => Promise<void>;
   onRuleUpdate?: (ruleId: string, updates: Partial<DLPRule>) => Promise<void>;
   onRuleDelete?: (ruleId: string) => Promise<void>;
-  onRuleTest?: (ruleId: string, testData: string) => Promise<{ matches: boolean; confidence: number; patterns: string[] }>;
-  onIncidentUpdate?: (incidentId: string, updates: Partial<DLPIncident>) => Promise<void>;
+  onRuleTest?: (
+    ruleId: string,
+    testData: string,
+  ) => Promise<{ matches: boolean; confidence: number; patterns: string[] }>;
+  onIncidentUpdate?: (
+    incidentId: string,
+    updates: Partial<DLPIncident>,
+  ) => Promise<void>;
   onScanStart?: (config: { scope: any; rules: string[] }) => Promise<void>;
   onScanStop?: (scanId: string) => Promise<void>;
   onExportReport?: (filters: any) => Promise<Blob>;
@@ -220,18 +255,18 @@ export function DataLossPrevention({
   onScanStop,
   onExportReport,
   realTimeMonitoring = true,
-  className = ''
+  className = "",
 }: DataLossPreventionProps) {
   const [state, setState] = useState<ComponentState>({
-    activeTab: 'overview',
+    activeTab: "overview",
     selectedRule: null,
     selectedIncident: null,
     selectedScan: null,
-    searchTerm: '',
-    filterSeverity: 'all',
-    filterStatus: 'all',
-    filterCategory: 'all',
-    filterChannel: 'all',
+    searchTerm: "",
+    filterSeverity: "all",
+    filterStatus: "all",
+    filterCategory: "all",
+    filterChannel: "all",
     showRuleEditor: false,
     showIncidentDetails: false,
     showScanConfig: false,
@@ -243,11 +278,11 @@ export function DataLossPrevention({
     error: null,
     success: null,
     newRule: {
-      name: '',
-      description: '',
-      category: 'pii',
-      severity: 'medium',
-      status: 'active',
+      name: "",
+      description: "",
+      category: "pii",
+      severity: "medium",
+      status: "active",
       patterns: [],
       actions: [],
       conditions: [],
@@ -255,59 +290,73 @@ export function DataLossPrevention({
         channels: [],
         locations: [],
         users: [],
-        timeWindows: []
+        timeWindows: [],
       },
       exceptions: {
         users: [],
         locations: [],
-        justifications: []
+        justifications: [],
       },
-      createdBy: 'current-user'
+      createdBy: "current-user",
     },
-    testData: '',
+    testData: "",
     testResults: null,
     scanConfig: {
       scope: {
         locations: [],
-        fileTypes: ['*'],
-        sizeLimit: 100 * 1024 * 1024 // 100MB
+        fileTypes: ["*"],
+        sizeLimit: 100 * 1024 * 1024, // 100MB
       },
-      rules: []
-    }
+      rules: [],
+    },
   });
 
   // Calculate DLP metrics
   const dlpMetrics = useMemo(() => {
     const totalRules = rules.length;
-    const activeRules = rules.filter(r => r.status === 'active').length;
+    const activeRules = rules.filter((r) => r.status === "active").length;
     const totalIncidents = incidents.length;
-    const openIncidents = incidents.filter(i => i.status === 'open').length;
-    const criticalIncidents = incidents.filter(i => i.severity === 'critical').length;
-    const falsePositives = incidents.filter(i => i.status === 'false_positive').length;
+    const openIncidents = incidents.filter((i) => i.status === "open").length;
+    const criticalIncidents = incidents.filter(
+      (i) => i.severity === "critical",
+    ).length;
+    const falsePositives = incidents.filter(
+      (i) => i.status === "false_positive",
+    ).length;
 
-    const incidentsByCategory = incidents.reduce((acc, incident) => {
-      const rule = rules.find(r => r.id === incident.ruleId);
-      if (rule) {
-        acc[rule.category] = (acc[rule.category] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const incidentsByCategory = incidents.reduce(
+      (acc, incident) => {
+        const rule = rules.find((r) => r.id === incident.ruleId);
+        if (rule) {
+          acc[rule.category] = (acc[rule.category] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const incidentsBySeverity = incidents.reduce((acc, incident) => {
-      acc[incident.severity] = (acc[incident.severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const incidentsBySeverity = incidents.reduce(
+      (acc, incident) => {
+        acc[incident.severity] = (acc[incident.severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const incidentsByChannel = incidents.reduce((acc, incident) => {
-      acc[incident.channel] = (acc[incident.channel] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const incidentsByChannel = incidents.reduce(
+      (acc, incident) => {
+        acc[incident.channel] = (acc[incident.channel] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const averageRiskScore = incidents.length > 0
-      ? incidents.reduce((sum, i) => sum + i.riskScore, 0) / incidents.length
-      : 0;
+    const averageRiskScore =
+      incidents.length > 0
+        ? incidents.reduce((sum, i) => sum + i.riskScore, 0) / incidents.length
+        : 0;
 
-    const recentIncidents = incidents.filter(i => {
+    const recentIncidents = incidents.filter((i) => {
       const incidentDate = new Date(i.timestamp);
       const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       return incidentDate > dayAgo;
@@ -320,55 +369,92 @@ export function DataLossPrevention({
       openIncidents,
       criticalIncidents,
       falsePositives,
-      falsePositiveRate: totalIncidents > 0 ? (falsePositives / totalIncidents) * 100 : 0,
+      falsePositiveRate:
+        totalIncidents > 0 ? (falsePositives / totalIncidents) * 100 : 0,
       incidentsByCategory,
       incidentsBySeverity,
       incidentsByChannel,
       averageRiskScore,
-      recentIncidents
+      recentIncidents,
     };
   }, [rules, incidents]);
 
   // Filter incidents
   const filteredIncidents = useMemo(() => {
-    return incidents.filter(incident => {
-      const matchesSearch = incident.ruleName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           incident.userName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           incident.dataType.toLowerCase().includes(state.searchTerm.toLowerCase());
+    return incidents.filter((incident) => {
+      const matchesSearch =
+        incident.ruleName
+          .toLowerCase()
+          .includes(state.searchTerm.toLowerCase()) ||
+        incident.userName
+          .toLowerCase()
+          .includes(state.searchTerm.toLowerCase()) ||
+        incident.dataType
+          .toLowerCase()
+          .includes(state.searchTerm.toLowerCase());
 
-      const matchesSeverity = state.filterSeverity === 'all' || incident.severity === state.filterSeverity;
-      const matchesStatus = state.filterStatus === 'all' || incident.status === state.filterStatus;
-      const matchesChannel = state.filterChannel === 'all' || incident.channel === state.filterChannel;
+      const matchesSeverity =
+        state.filterSeverity === "all" ||
+        incident.severity === state.filterSeverity;
+      const matchesStatus =
+        state.filterStatus === "all" || incident.status === state.filterStatus;
+      const matchesChannel =
+        state.filterChannel === "all" ||
+        incident.channel === state.filterChannel;
 
-      const rule = rules.find(r => r.id === incident.ruleId);
-      const matchesCategory = state.filterCategory === 'all' || (rule && rule.category === state.filterCategory);
+      const rule = rules.find((r) => r.id === incident.ruleId);
+      const matchesCategory =
+        state.filterCategory === "all" ||
+        (rule && rule.category === state.filterCategory);
 
-      return matchesSearch && matchesSeverity && matchesStatus && matchesChannel && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesSeverity &&
+        matchesStatus &&
+        matchesChannel &&
+        matchesCategory
+      );
     });
-  }, [incidents, rules, state.searchTerm, state.filterSeverity, state.filterStatus, state.filterChannel, state.filterCategory]);
+  }, [
+    incidents,
+    rules,
+    state.searchTerm,
+    state.filterSeverity,
+    state.filterStatus,
+    state.filterChannel,
+    state.filterCategory,
+  ]);
 
   // Handle rule creation
   const handleRuleCreate = useCallback(async () => {
     if (!state.newRule.name || !state.newRule.description) {
-      setState(prev => ({ ...prev, error: 'Name and description are required' }));
+      setState((prev) => ({
+        ...prev,
+        error: "Name and description are required",
+      }));
       return;
     }
 
-    setState(prev => ({ ...prev, isCreating: true, error: null }));
+    setState((prev) => ({ ...prev, isCreating: true, error: null }));
 
     try {
       if (onRuleCreate) {
-        await onRuleCreate(state.newRule as Omit<DLPRule, 'id' | 'createdAt' | 'triggerCount' | 'falsePositiveCount'>);
-        setState(prev => ({
+        await onRuleCreate(
+          state.newRule as Omit<
+            DLPRule,
+            "id" | "createdAt" | "triggerCount" | "falsePositiveCount"
+          >,
+        );
+        setState((prev) => ({
           ...prev,
-          success: 'DLP rule created successfully',
+          success: "DLP rule created successfully",
           showRuleEditor: false,
           newRule: {
-            name: '',
-            description: '',
-            category: 'pii',
-            severity: 'medium',
-            status: 'active',
+            name: "",
+            description: "",
+            category: "pii",
+            severity: "medium",
+            status: "active",
             patterns: [],
             actions: [],
             conditions: [],
@@ -376,89 +462,105 @@ export function DataLossPrevention({
               channels: [],
               locations: [],
               users: [],
-              timeWindows: []
+              timeWindows: [],
             },
             exceptions: {
               users: [],
               locations: [],
-              justifications: []
+              justifications: [],
             },
-            createdBy: 'current-user'
-          }
+            createdBy: "current-user",
+          },
         }));
       }
     } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to create DLP rule' }));
+      setState((prev) => ({ ...prev, error: "Failed to create DLP rule" }));
     } finally {
-      setState(prev => ({ ...prev, isCreating: false }));
+      setState((prev) => ({ ...prev, isCreating: false }));
     }
   }, [onRuleCreate, state.newRule]);
 
   // Handle rule testing
-  const handleRuleTest = useCallback(async (ruleId: string) => {
-    if (!state.testData.trim()) {
-      setState(prev => ({ ...prev, error: 'Test data is required' }));
-      return;
-    }
-
-    setState(prev => ({ ...prev, isTesting: true, error: null }));
-
-    try {
-      if (onRuleTest) {
-        const results = await onRuleTest(ruleId, state.testData);
-        setState(prev => ({ ...prev, testResults: results, success: 'Rule test completed' }));
+  const handleRuleTest = useCallback(
+    async (ruleId: string) => {
+      if (!state.testData.trim()) {
+        setState((prev) => ({ ...prev, error: "Test data is required" }));
+        return;
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to test rule' }));
-    } finally {
-      setState(prev => ({ ...prev, isTesting: false }));
-    }
-  }, [onRuleTest, state.testData]);
+
+      setState((prev) => ({ ...prev, isTesting: true, error: null }));
+
+      try {
+        if (onRuleTest) {
+          const results = await onRuleTest(ruleId, state.testData);
+          setState((prev) => ({
+            ...prev,
+            testResults: results,
+            success: "Rule test completed",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to test rule" }));
+      } finally {
+        setState((prev) => ({ ...prev, isTesting: false }));
+      }
+    },
+    [onRuleTest, state.testData],
+  );
 
   // Handle scan start
   const handleScanStart = useCallback(async () => {
     if (state.scanConfig.rules.length === 0) {
-      setState(prev => ({ ...prev, error: 'Please select at least one rule for scanning' }));
+      setState((prev) => ({
+        ...prev,
+        error: "Please select at least one rule for scanning",
+      }));
       return;
     }
 
-    setState(prev => ({ ...prev, isScanning: true, error: null }));
+    setState((prev) => ({ ...prev, isScanning: true, error: null }));
 
     try {
       if (onScanStart) {
         await onScanStart(state.scanConfig);
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          success: 'Data scan started successfully',
-          showScanConfig: false
+          success: "Data scan started successfully",
+          showScanConfig: false,
         }));
       }
     } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to start scan' }));
+      setState((prev) => ({ ...prev, error: "Failed to start scan" }));
     } finally {
-      setState(prev => ({ ...prev, isScanning: false }));
+      setState((prev) => ({ ...prev, isScanning: false }));
     }
   }, [onScanStart, state.scanConfig]);
 
   // Handle incident update
-  const handleIncidentUpdate = useCallback(async (incidentId: string, updates: Partial<DLPIncident>) => {
-    setState(prev => ({ ...prev, isCreating: true, error: null }));
+  const handleIncidentUpdate = useCallback(
+    async (incidentId: string, updates: Partial<DLPIncident>) => {
+      setState((prev) => ({ ...prev, isCreating: true, error: null }));
 
-    try {
-      if (onIncidentUpdate) {
-        await onIncidentUpdate(incidentId, updates);
-        setState(prev => ({ ...prev, success: 'Incident updated successfully' }));
+      try {
+        if (onIncidentUpdate) {
+          await onIncidentUpdate(incidentId, updates);
+          setState((prev) => ({
+            ...prev,
+            success: "Incident updated successfully",
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: "Failed to update incident" }));
+      } finally {
+        setState((prev) => ({ ...prev, isCreating: false }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to update incident' }));
-    } finally {
-      setState(prev => ({ ...prev, isCreating: false }));
-    }
-  }, [onIncidentUpdate]);
+    },
+    [onIncidentUpdate],
+  );
 
   // Handle export
   const handleExport = useCallback(async () => {
-    setState(prev => ({ ...prev, isExporting: true, error: null }));
+    setState((prev) => ({ ...prev, isExporting: true, error: null }));
 
     try {
       if (onExportReport) {
@@ -467,72 +569,109 @@ export function DataLossPrevention({
           status: state.filterStatus,
           category: state.filterCategory,
           channel: state.filterChannel,
-          search: state.searchTerm
+          search: state.searchTerm,
         };
 
         const blob = await onExportReport(filters);
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = `dlp-report-${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `dlp-report-${new Date().toISOString().split("T")[0]}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        setState(prev => ({ ...prev, success: 'Report exported successfully' }));
+        setState((prev) => ({
+          ...prev,
+          success: "Report exported successfully",
+        }));
       }
     } catch (error) {
-      setState(prev => ({ ...prev, error: 'Failed to export report' }));
+      setState((prev) => ({ ...prev, error: "Failed to export report" }));
     } finally {
-      setState(prev => ({ ...prev, isExporting: false }));
+      setState((prev) => ({ ...prev, isExporting: false }));
     }
-  }, [onExportReport, state.filterSeverity, state.filterStatus, state.filterCategory, state.filterChannel, state.searchTerm]);
+  }, [
+    onExportReport,
+    state.filterSeverity,
+    state.filterStatus,
+    state.filterCategory,
+    state.filterChannel,
+    state.searchTerm,
+  ]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'low': return 'bg-green-100 text-green-600';
-      case 'medium': return 'bg-yellow-100 text-yellow-600';
-      case 'high': return 'bg-orange-100 text-orange-600';
-      case 'critical': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "low":
+        return "bg-green-100 text-green-600";
+      case "medium":
+        return "bg-yellow-100 text-yellow-600";
+      case "high":
+        return "bg-orange-100 text-orange-600";
+      case "critical":
+        return "bg-red-100 text-red-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-600';
-      case 'inactive': return 'bg-gray-100 text-gray-600';
-      case 'testing': return 'bg-blue-100 text-blue-600';
-      case 'open': return 'bg-red-100 text-red-600';
-      case 'investigating': return 'bg-yellow-100 text-yellow-600';
-      case 'resolved': return 'bg-green-100 text-green-600';
-      case 'false_positive': return 'bg-gray-100 text-gray-600';
-      case 'suppressed': return 'bg-gray-100 text-gray-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case "active":
+        return "bg-green-100 text-green-600";
+      case "inactive":
+        return "bg-gray-100 text-gray-600";
+      case "testing":
+        return "bg-blue-100 text-blue-600";
+      case "open":
+        return "bg-red-100 text-red-600";
+      case "investigating":
+        return "bg-yellow-100 text-yellow-600";
+      case "resolved":
+        return "bg-green-100 text-green-600";
+      case "false_positive":
+        return "bg-gray-100 text-gray-600";
+      case "suppressed":
+        return "bg-gray-100 text-gray-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'pii': return <User className="w-4 h-4" />;
-      case 'financial': return <CreditCard className="w-4 h-4" />;
-      case 'health': return <Activity className="w-4 h-4" />;
-      case 'intellectual_property': return <FileText className="w-4 h-4" />;
-      case 'confidential': return <Lock className="w-4 h-4" />;
-      case 'custom': return <Settings className="w-4 h-4" />;
-      default: return <Shield className="w-4 h-4" />;
+      case "pii":
+        return <User className="w-4 h-4" />;
+      case "financial":
+        return <CreditCard className="w-4 h-4" />;
+      case "health":
+        return <Activity className="w-4 h-4" />;
+      case "intellectual_property":
+        return <FileText className="w-4 h-4" />;
+      case "confidential":
+        return <Lock className="w-4 h-4" />;
+      case "custom":
+        return <Settings className="w-4 h-4" />;
+      default:
+        return <Shield className="w-4 h-4" />;
     }
   };
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
-      case 'email': return <Mail className="w-4 h-4" />;
-      case 'file_upload': return <Upload className="w-4 h-4" />;
-      case 'web_form': return <Globe className="w-4 h-4" />;
-      case 'api': return <Database className="w-4 h-4" />;
-      case 'chat': return <MessageCircle className="w-4 h-4" />;
-      default: return <Globe className="w-4 h-4" />;
+      case "email":
+        return <Mail className="w-4 h-4" />;
+      case "file_upload":
+        return <Upload className="w-4 h-4" />;
+      case "web_form":
+        return <Globe className="w-4 h-4" />;
+      case "api":
+        return <Database className="w-4 h-4" />;
+      case "chat":
+        return <MessageCircle className="w-4 h-4" />;
+      default:
+        return <Globe className="w-4 h-4" />;
     }
   };
 
@@ -551,7 +690,13 @@ export function DataLossPrevention({
                 <Target className="w-3 h-3 mr-1" />
                 {dlpMetrics.activeRules} Active Rules
               </Badge>
-              <Badge className={dlpMetrics.openIncidents > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}>
+              <Badge
+                className={
+                  dlpMetrics.openIncidents > 0
+                    ? "bg-red-100 text-red-600"
+                    : "bg-green-100 text-green-600"
+                }
+              >
                 <AlertTriangle className="w-3 h-3 mr-1" />
                 {dlpMetrics.openIncidents} Open Incidents
               </Badge>
@@ -566,7 +711,8 @@ export function DataLossPrevention({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            Monitor, detect, and prevent unauthorized data access, sharing, and exfiltration across all channels.
+            Monitor, detect, and prevent unauthorized data access, sharing, and
+            exfiltration across all channels.
           </p>
         </CardContent>
       </Card>
@@ -575,14 +721,18 @@ export function DataLossPrevention({
       {state.error && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">{state.error}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {state.error}
+          </AlertDescription>
         </Alert>
       )}
 
       {state.success && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{state.success}</AlertDescription>
+          <AlertDescription className="text-green-800">
+            {state.success}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -590,7 +740,8 @@ export function DataLossPrevention({
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>Critical Alert:</strong> {dlpMetrics.criticalIncidents} critical data loss incidents require immediate attention.
+            <strong>Critical Alert:</strong> {dlpMetrics.criticalIncidents}{" "}
+            critical data loss incidents require immediate attention.
           </AlertDescription>
         </Alert>
       )}
@@ -599,7 +750,8 @@ export function DataLossPrevention({
         <Alert className="border-amber-200 bg-amber-50">
           <Bell className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
-            <strong>Recent Activity:</strong> {dlpMetrics.recentIncidents} new incidents detected in the last 24 hours.
+            <strong>Recent Activity:</strong> {dlpMetrics.recentIncidents} new
+            incidents detected in the last 24 hours.
           </AlertDescription>
         </Alert>
       )}
@@ -614,12 +766,22 @@ export function DataLossPrevention({
                 <Input
                   placeholder="Search incidents, rules, users..."
                   value={state.searchTerm}
-                  onChange={(e) => setState(prev => ({ ...prev, searchTerm: e.target.value }))}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      searchTerm: e.target.value,
+                    }))
+                  }
                   className="pl-10"
                 />
               </div>
             </div>
-            <Select value={state.filterSeverity} onValueChange={(value) => setState(prev => ({ ...prev, filterSeverity: value }))}>
+            <Select
+              value={state.filterSeverity}
+              onValueChange={(value) =>
+                setState((prev) => ({ ...prev, filterSeverity: value }))
+              }
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>
@@ -631,7 +793,12 @@ export function DataLossPrevention({
                 <SelectItem value="critical">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={state.filterStatus} onValueChange={(value) => setState(prev => ({ ...prev, filterStatus: value }))}>
+            <Select
+              value={state.filterStatus}
+              onValueChange={(value) =>
+                setState((prev) => ({ ...prev, filterStatus: value }))
+              }
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -643,7 +810,12 @@ export function DataLossPrevention({
                 <SelectItem value="false_positive">False Positive</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={state.filterCategory} onValueChange={(value) => setState(prev => ({ ...prev, filterCategory: value }))}>
+            <Select
+              value={state.filterCategory}
+              onValueChange={(value) =>
+                setState((prev) => ({ ...prev, filterCategory: value }))
+              }
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -661,7 +833,9 @@ export function DataLossPrevention({
           <div className="flex justify-between items-center">
             <div className="flex space-x-2">
               <Button
-                onClick={() => setState(prev => ({ ...prev, showScanConfig: true }))}
+                onClick={() =>
+                  setState((prev) => ({ ...prev, showScanConfig: true }))
+                }
                 size="sm"
                 variant="outline"
               >
@@ -685,7 +859,12 @@ export function DataLossPrevention({
       </Card>
 
       {/* Main Content */}
-      <Tabs value={state.activeTab} onValueChange={(value) => setState(prev => ({ ...prev, activeTab: value }))}>
+      <Tabs
+        value={state.activeTab}
+        onValueChange={(value) =>
+          setState((prev) => ({ ...prev, activeTab: value }))
+        }
+      >
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="incidents">Incidents</TabsTrigger>
@@ -702,9 +881,15 @@ export function DataLossPrevention({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Incidents</p>
-                      <p className="text-2xl font-bold">{dlpMetrics.totalIncidents}</p>
-                      <p className="text-xs text-gray-500">+{dlpMetrics.recentIncidents} today</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Total Incidents
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {dlpMetrics.totalIncidents}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        +{dlpMetrics.recentIncidents} today
+                      </p>
                     </div>
                     <AlertTriangle className="w-8 h-8 text-orange-500" />
                   </div>
@@ -715,9 +900,15 @@ export function DataLossPrevention({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Open Incidents</p>
-                      <p className="text-2xl font-bold text-red-600">{dlpMetrics.openIncidents}</p>
-                      <p className="text-xs text-gray-500">{dlpMetrics.criticalIncidents} critical</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Open Incidents
+                      </p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {dlpMetrics.openIncidents}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {dlpMetrics.criticalIncidents} critical
+                      </p>
                     </div>
                     <Flag className="w-8 h-8 text-red-500" />
                   </div>
@@ -728,9 +919,15 @@ export function DataLossPrevention({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Active Rules</p>
-                      <p className="text-2xl font-bold text-blue-600">{dlpMetrics.activeRules}</p>
-                      <p className="text-xs text-gray-500">of {dlpMetrics.totalRules} total</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Active Rules
+                      </p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {dlpMetrics.activeRules}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        of {dlpMetrics.totalRules} total
+                      </p>
                     </div>
                     <Target className="w-8 h-8 text-blue-500" />
                   </div>
@@ -741,9 +938,15 @@ export function DataLossPrevention({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">False Positive Rate</p>
-                      <p className="text-2xl font-bold text-green-600">{dlpMetrics.falsePositiveRate.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500">{dlpMetrics.falsePositives} incidents</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        False Positive Rate
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {dlpMetrics.falsePositiveRate.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {dlpMetrics.falsePositives} incidents
+                      </p>
                     </div>
                     <TrendingDown className="w-8 h-8 text-green-500" />
                   </div>
@@ -759,23 +962,37 @@ export function DataLossPrevention({
               <CardContent>
                 <div className="space-y-3">
                   {filteredIncidents
-                    .filter(i => i.severity === 'critical' || i.severity === 'high')
+                    .filter(
+                      (i) => i.severity === "critical" || i.severity === "high",
+                    )
                     .slice(0, 5)
-                    .map(incident => (
-                      <div key={incident.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    .map((incident) => (
+                      <div
+                        key={incident.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                      >
                         <div className="flex items-center space-x-3">
-                          {getCategoryIcon(rules.find(r => r.id === incident.ruleId)?.category || 'custom')}
+                          {getCategoryIcon(
+                            rules.find((r) => r.id === incident.ruleId)
+                              ?.category || "custom",
+                          )}
                           <div>
-                            <p className="font-medium text-sm">{incident.ruleName}</p>
-                            <p className="text-xs text-gray-600">{incident.userName} • {incident.channel}</p>
+                            <p className="font-medium text-sm">
+                              {incident.ruleName}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {incident.userName} • {incident.channel}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className={getSeverityColor(incident.severity)}>
+                          <Badge
+                            className={getSeverityColor(incident.severity)}
+                          >
                             {incident.severity}
                           </Badge>
                           <Badge className={getStatusColor(incident.status)}>
-                            {incident.status.replace('_', ' ')}
+                            {incident.status.replace("_", " ")}
                           </Badge>
                           <span className="text-xs text-gray-500">
                             {new Date(incident.timestamp).toLocaleDateString()}
@@ -795,17 +1012,24 @@ export function DataLossPrevention({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(dlpMetrics.incidentsByCategory).map(([category, count]) => (
-                      <div key={category} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          {getCategoryIcon(category)}
-                          <span className="font-medium capitalize">{category.replace('_', ' ')}</span>
+                    {Object.entries(dlpMetrics.incidentsByCategory).map(
+                      ([category, count]) => (
+                        <div
+                          key={category}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getCategoryIcon(category)}
+                            <span className="font-medium capitalize">
+                              {category.replace("_", " ")}
+                            </span>
+                          </div>
+                          <Badge className="bg-blue-100 text-blue-600">
+                            {count} incidents
+                          </Badge>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-600">
-                          {count} incidents
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -816,17 +1040,24 @@ export function DataLossPrevention({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(dlpMetrics.incidentsByChannel).map(([channel, count]) => (
-                      <div key={channel} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          {getChannelIcon(channel)}
-                          <span className="font-medium capitalize">{channel.replace('_', ' ')}</span>
+                    {Object.entries(dlpMetrics.incidentsByChannel).map(
+                      ([channel, count]) => (
+                        <div
+                          key={channel}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getChannelIcon(channel)}
+                            <span className="font-medium capitalize">
+                              {channel.replace("_", " ")}
+                            </span>
+                          </div>
+                          <Badge className="bg-green-100 text-green-600">
+                            {count} incidents
+                          </Badge>
                         </div>
-                        <Badge className="bg-green-100 text-green-600">
-                          {count} incidents
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -838,24 +1069,36 @@ export function DataLossPrevention({
         <TabsContent value="incidents">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">DLP Incidents ({filteredIncidents.length})</h3>
+              <h3 className="text-lg font-medium">
+                DLP Incidents ({filteredIncidents.length})
+              </h3>
             </div>
 
             <div className="grid gap-4">
-              {filteredIncidents.map(incident => (
-                <Card key={incident.id} className="hover:shadow-md transition-shadow">
+              {filteredIncidents.map((incident) => (
+                <Card
+                  key={incident.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
-                        {getCategoryIcon(rules.find(r => r.id === incident.ruleId)?.category || 'custom')}
+                        {getCategoryIcon(
+                          rules.find((r) => r.id === incident.ruleId)
+                            ?.category || "custom",
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-medium truncate">{incident.ruleName}</h4>
-                            <Badge className={getSeverityColor(incident.severity)}>
+                            <h4 className="font-medium truncate">
+                              {incident.ruleName}
+                            </h4>
+                            <Badge
+                              className={getSeverityColor(incident.severity)}
+                            >
                               {incident.severity}
                             </Badge>
                             <Badge className={getStatusColor(incident.status)}>
-                              {incident.status.replace('_', ' ')}
+                              {incident.status.replace("_", " ")}
                             </Badge>
                             <Badge className="bg-purple-100 text-purple-600">
                               Risk: {incident.riskScore}/100
@@ -865,29 +1108,46 @@ export function DataLossPrevention({
                             <span>User: {incident.userName}</span>
                             <span>Channel: {incident.channel}</span>
                             <span>Location: {incident.location}</span>
-                            <span>Time: {new Date(incident.timestamp).toLocaleString()}</span>
+                            <span>
+                              Time:{" "}
+                              {new Date(incident.timestamp).toLocaleString()}
+                            </span>
                           </div>
                           <div className="flex items-center space-x-2 text-xs text-gray-600">
-                            <span>Patterns: {incident.matchedPatterns.length}</span>
+                            <span>
+                              Patterns: {incident.matchedPatterns.length}
+                            </span>
                             <span>•</span>
                             <span>Confidence: {incident.confidence}%</span>
                             <span>•</span>
-                            <span>Actions: {incident.actionsTaken.join(', ')}</span>
+                            <span>
+                              Actions: {incident.actionsTaken.join(", ")}
+                            </span>
                           </div>
                         </div>
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedIncident: incident, showIncidentDetails: true }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedIncident: incident,
+                              showIncidentDetails: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           Details
                         </Button>
-                        {incident.status === 'open' && (
+                        {incident.status === "open" && (
                           <Button
-                            onClick={() => handleIncidentUpdate(incident.id, { status: 'investigating' })}
+                            onClick={() =>
+                              handleIncidentUpdate(incident.id, {
+                                status: "investigating",
+                              })
+                            }
                             size="sm"
                           >
                             <Play className="w-3 h-3 mr-1" />
@@ -905,9 +1165,12 @@ export function DataLossPrevention({
               <Card>
                 <CardContent className="p-6 text-center">
                   <Shield className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Incidents Found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Incidents Found
+                  </h3>
                   <p className="text-sm text-gray-600">
-                    No DLP incidents match your current filters. Try adjusting your search criteria.
+                    No DLP incidents match your current filters. Try adjusting
+                    your search criteria.
                   </p>
                 </CardContent>
               </Card>
@@ -919,9 +1182,13 @@ export function DataLossPrevention({
         <TabsContent value="rules">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">DLP Rules ({rules.length})</h3>
+              <h3 className="text-lg font-medium">
+                DLP Rules ({rules.length})
+              </h3>
               <Button
-                onClick={() => setState(prev => ({ ...prev, showRuleEditor: true }))}
+                onClick={() =>
+                  setState((prev) => ({ ...prev, showRuleEditor: true }))
+                }
                 size="sm"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -930,7 +1197,7 @@ export function DataLossPrevention({
             </div>
 
             <div className="grid gap-4">
-              {rules.map(rule => (
+              {rules.map((rule) => (
                 <Card key={rule.id}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -946,19 +1213,26 @@ export function DataLossPrevention({
                               {rule.severity}
                             </Badge>
                             <Badge className="bg-blue-100 text-blue-600">
-                              {rule.category.replace('_', ' ')}
+                              {rule.category.replace("_", " ")}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{rule.description}</p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {rule.description}
+                          </p>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-2">
                             <span>Patterns: {rule.patterns.length}</span>
                             <span>Actions: {rule.actions.length}</span>
                             <span>Triggered: {rule.triggerCount}</span>
-                            <span>False Positives: {rule.falsePositiveCount}</span>
+                            <span>
+                              False Positives: {rule.falsePositiveCount}
+                            </span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {rule.scope.channels.map(channel => (
-                              <Badge key={channel} className="bg-gray-100 text-gray-600 text-xs">
+                            {rule.scope.channels.map((channel) => (
+                              <Badge
+                                key={channel}
+                                className="bg-gray-100 text-gray-600 text-xs"
+                              >
                                 {channel}
                               </Badge>
                             ))}
@@ -967,7 +1241,13 @@ export function DataLossPrevention({
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedRule: rule, showTestDialog: true }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedRule: rule,
+                              showTestDialog: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
@@ -975,7 +1255,13 @@ export function DataLossPrevention({
                           Test
                         </Button>
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedRule: rule, showRuleEditor: true }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedRule: rule,
+                              showRuleEditor: true,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
@@ -1009,7 +1295,9 @@ export function DataLossPrevention({
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Data Scans</h3>
               <Button
-                onClick={() => setState(prev => ({ ...prev, showScanConfig: true }))}
+                onClick={() =>
+                  setState((prev) => ({ ...prev, showScanConfig: true }))
+                }
                 size="sm"
               >
                 <Play className="w-4 h-4 mr-2" />
@@ -1018,7 +1306,7 @@ export function DataLossPrevention({
             </div>
 
             <div className="grid gap-4">
-              {scanResults.map(scan => (
+              {scanResults.map((scan) => (
                 <Card key={scan.id}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -1029,16 +1317,22 @@ export function DataLossPrevention({
                             {scan.status}
                           </Badge>
                           <Badge className="bg-blue-100 text-blue-600">
-                            {scan.scanType.replace('_', ' ')}
+                            {scan.scanType.replace("_", " ")}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-500 mb-3">
-                          <span>Files: {scan.results.filesScanned.toLocaleString()}</span>
-                          <span>Violations: {scan.results.violationsFound}</span>
+                          <span>
+                            Files: {scan.results.filesScanned.toLocaleString()}
+                          </span>
+                          <span>
+                            Violations: {scan.results.violationsFound}
+                          </span>
                           <span>Risk Score: {scan.results.riskScore}/100</span>
-                          <span>Started: {new Date(scan.startTime).toLocaleString()}</span>
+                          <span>
+                            Started: {new Date(scan.startTime).toLocaleString()}
+                          </span>
                         </div>
-                        {scan.status === 'running' && (
+                        {scan.status === "running" && (
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span>Progress</span>
@@ -1049,7 +1343,7 @@ export function DataLossPrevention({
                         )}
                       </div>
                       <div className="flex space-x-2">
-                        {scan.status === 'running' && (
+                        {scan.status === "running" && (
                           <Button
                             onClick={() => {
                               if (onScanStop) {
@@ -1064,7 +1358,12 @@ export function DataLossPrevention({
                           </Button>
                         )}
                         <Button
-                          onClick={() => setState(prev => ({ ...prev, selectedScan: scan }))}
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              selectedScan: scan,
+                            }))
+                          }
                           size="sm"
                           variant="outline"
                         >
@@ -1090,17 +1389,24 @@ export function DataLossPrevention({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(dlpMetrics.incidentsBySeverity).map(([severity, count]) => (
-                      <div key={severity} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-2">
-                          <AlertTriangle className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium capitalize">{severity}</span>
+                    {Object.entries(dlpMetrics.incidentsBySeverity).map(
+                      ([severity, count]) => (
+                        <div
+                          key={severity}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <AlertTriangle className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium capitalize">
+                              {severity}
+                            </span>
+                          </div>
+                          <Badge className={getSeverityColor(severity)}>
+                            {count} incidents
+                          </Badge>
                         </div>
-                        <Badge className={getSeverityColor(severity)}>
-                          {count} incidents
-                        </Badge>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1112,16 +1418,28 @@ export function DataLossPrevention({
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Average Risk Score</span>
-                      <span className="text-lg font-bold">{dlpMetrics.averageRiskScore.toFixed(1)}/100</span>
+                      <span className="text-sm font-medium">
+                        Average Risk Score
+                      </span>
+                      <span className="text-lg font-bold">
+                        {dlpMetrics.averageRiskScore.toFixed(1)}/100
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">False Positive Rate</span>
-                      <span className="text-lg font-bold text-green-600">{dlpMetrics.falsePositiveRate.toFixed(1)}%</span>
+                      <span className="text-sm font-medium">
+                        False Positive Rate
+                      </span>
+                      <span className="text-lg font-bold text-green-600">
+                        {dlpMetrics.falsePositiveRate.toFixed(1)}%
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Detection Accuracy</span>
-                      <span className="text-lg font-bold text-blue-600">{(100 - dlpMetrics.falsePositiveRate).toFixed(1)}%</span>
+                      <span className="text-sm font-medium">
+                        Detection Accuracy
+                      </span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {(100 - dlpMetrics.falsePositiveRate).toFixed(1)}%
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -1143,7 +1461,9 @@ export function DataLossPrevention({
                 <Label>Test Data</Label>
                 <Textarea
                   value={state.testData}
-                  onChange={(e) => setState(prev => ({ ...prev, testData: e.target.value }))}
+                  onChange={(e) =>
+                    setState((prev) => ({ ...prev, testData: e.target.value }))
+                  }
                   placeholder="Enter test data to check against this rule..."
                   rows={6}
                 />
@@ -1155,8 +1475,14 @@ export function DataLossPrevention({
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Match Found:</span>
-                      <Badge className={state.testResults.matches ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}>
-                        {state.testResults.matches ? 'Yes' : 'No'}
+                      <Badge
+                        className={
+                          state.testResults.matches
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }
+                      >
+                        {state.testResults.matches ? "Yes" : "No"}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -1165,7 +1491,9 @@ export function DataLossPrevention({
                     </div>
                     <div className="flex justify-between">
                       <span>Matched Patterns:</span>
-                      <span>{state.testResults.patterns.join(', ') || 'None'}</span>
+                      <span>
+                        {state.testResults.patterns.join(", ") || "None"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1176,16 +1504,18 @@ export function DataLossPrevention({
                   onClick={() => handleRuleTest(state.selectedRule!.id)}
                   disabled={state.isTesting || !state.testData.trim()}
                 >
-                  {state.isTesting ? 'Testing...' : 'Test Rule'}
+                  {state.isTesting ? "Testing..." : "Test Rule"}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({
-                    ...prev,
-                    showTestDialog: false,
-                    selectedRule: null,
-                    testData: '',
-                    testResults: null
-                  }))}
+                  onClick={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      showTestDialog: false,
+                      selectedRule: null,
+                      testData: "",
+                      testResults: null,
+                    }))
+                  }
                   variant="outline"
                 >
                   Close
@@ -1207,17 +1537,21 @@ export function DataLossPrevention({
               <div>
                 <Label>Scan Locations</Label>
                 <Textarea
-                  value={state.scanConfig.scope.locations.join('\n')}
-                  onChange={(e) => setState(prev => ({
-                    ...prev,
-                    scanConfig: {
-                      ...prev.scanConfig,
-                      scope: {
-                        ...prev.scanConfig.scope,
-                        locations: e.target.value.split('\n').filter(l => l.trim())
-                      }
-                    }
-                  }))}
+                  value={state.scanConfig.scope.locations.join("\n")}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      scanConfig: {
+                        ...prev.scanConfig,
+                        scope: {
+                          ...prev.scanConfig.scope,
+                          locations: e.target.value
+                            .split("\n")
+                            .filter((l) => l.trim()),
+                        },
+                      },
+                    }))
+                  }
                   placeholder="Enter file paths or URLs to scan (one per line)"
                   rows={4}
                 />
@@ -1226,40 +1560,54 @@ export function DataLossPrevention({
               <div>
                 <Label>Rules to Apply</Label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {rules.filter(r => r.status === 'active').map(rule => (
-                    <div key={rule.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={state.scanConfig.rules.includes(rule.id)}
-                        onCheckedChange={(checked) => {
-                          setState(prev => ({
-                            ...prev,
-                            scanConfig: {
-                              ...prev.scanConfig,
-                              rules: checked
-                                ? [...prev.scanConfig.rules, rule.id]
-                                : prev.scanConfig.rules.filter(id => id !== rule.id)
-                            }
-                          }));
-                        }}
-                      />
-                      <span className="text-sm">{rule.name}</span>
-                      <Badge className={getSeverityColor(rule.severity)} size="sm">
-                        {rule.severity}
-                      </Badge>
-                    </div>
-                  ))}
+                  {rules
+                    .filter((r) => r.status === "active")
+                    .map((rule) => (
+                      <div
+                        key={rule.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          checked={state.scanConfig.rules.includes(rule.id)}
+                          onCheckedChange={(checked) => {
+                            setState((prev) => ({
+                              ...prev,
+                              scanConfig: {
+                                ...prev.scanConfig,
+                                rules: checked
+                                  ? [...prev.scanConfig.rules, rule.id]
+                                  : prev.scanConfig.rules.filter(
+                                      (id) => id !== rule.id,
+                                    ),
+                              },
+                            }));
+                          }}
+                        />
+                        <span className="text-sm">{rule.name}</span>
+                        <Badge
+                          className={getSeverityColor(rule.severity)}
+                          size="sm"
+                        >
+                          {rule.severity}
+                        </Badge>
+                      </div>
+                    ))}
                 </div>
               </div>
 
               <div className="flex space-x-2">
                 <Button
                   onClick={handleScanStart}
-                  disabled={state.isScanning || state.scanConfig.rules.length === 0}
+                  disabled={
+                    state.isScanning || state.scanConfig.rules.length === 0
+                  }
                 >
-                  {state.isScanning ? 'Starting...' : 'Start Scan'}
+                  {state.isScanning ? "Starting..." : "Start Scan"}
                 </Button>
                 <Button
-                  onClick={() => setState(prev => ({ ...prev, showScanConfig: false }))}
+                  onClick={() =>
+                    setState((prev) => ({ ...prev, showScanConfig: false }))
+                  }
                   variant="outline"
                 >
                   Cancel

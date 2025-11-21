@@ -27,63 +27,63 @@ spec:
         app: influxdb
     spec:
       containers:
-      - name: influxdb
-        image: influxdb:2.7-alpine
-        ports:
-        - containerPort: 8086
-          name: influxdb
-        env:
-        - name: DOCKER_INFLUXDB_INIT_MODE
-          value: "setup"
-        - name: DOCKER_INFLUXDB_INIT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: influxdb-credentials
-              key: username
-        - name: DOCKER_INFLUXDB_INIT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: influxdb-credentials
-              key: password
-        - name: DOCKER_INFLUXDB_INIT_ORG
-          value: "flowlet"
-        - name: DOCKER_INFLUXDB_INIT_BUCKET
-          value: "flowlet-metrics"
-        - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: influxdb-credentials
-              key: token
-        volumeMounts:
-        - name: influxdb-storage
-          mountPath: /var/lib/influxdb2
+        - name: influxdb
+          image: influxdb:2.7-alpine
+          ports:
+            - containerPort: 8086
+              name: influxdb
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-credentials
+                  key: username
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-credentials
+                  key: password
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "flowlet"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "flowlet-metrics"
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-credentials
+                  key: token
+          volumeMounts:
+            - name: influxdb-storage
+              mountPath: /var/lib/influxdb2
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8086
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: influxdb-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /ping
-            port: 8086
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ping
-            port: 8086
-          initialDelaySeconds: 5
-          periodSeconds: 5
-  volumeClaimTemplates:
-  - metadata:
-      name: influxdb-storage
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 20Gi
+            storage: 20Gi
 ---
 apiVersion: v1
 kind: Service
@@ -94,6 +94,6 @@ spec:
   selector:
     app: influxdb
   ports:
-  - port: 8086
-    targetPort: 8086
+    - port: 8086
+      targetPort: 8086
   type: ClusterIP

@@ -27,6 +27,7 @@ Generates a new API key with specified permissions and an optional expiration da
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `developer_access` role).
 
 **Request Body**:
+
 ```json
 {
   "key_name": "string" (required): A descriptive name for the API key.
@@ -39,6 +40,7 @@ Generates a new API key with specified permissions and an optional expiration da
 ```
 
 **Responses**:
+
 - `201 Created`: API key created successfully.
   ```json
   {
@@ -66,10 +68,12 @@ Retrieves a paginated list of all API keys registered in the system, without exp
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `developer_access` role).
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number for pagination. Default is `1`.
 - `per_page` (integer, optional): Number of items per page. Default is `20`.
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved API key list.
   ```json
   {
@@ -108,9 +112,11 @@ Revokes an existing API key, rendering it inactive and preventing further use. T
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `developer_access` role).
 
 **Path Parameters**:
+
 - `key_id` (string, required): The unique identifier of the API key to revoke.
 
 **Responses**:
+
 - `200 OK`: API key revoked successfully.
   ```json
   {
@@ -131,9 +137,11 @@ Updates the permissions and optionally the rate limit for an existing API key. T
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `developer_access` role).
 
 **Path Parameters**:
+
 - `key_id` (string, required): The unique identifier of the API key to update.
 
 **Request Body**:
+
 ```json
 {
   "permissions": [
@@ -144,13 +152,12 @@ Updates the permissions and optionally the rate limit for an existing API key. T
 ```
 
 **Responses**:
+
 - `200 OK`: API key permissions updated successfully.
   ```json
   {
     "key_id": "string",
-    "permissions": [
-      "string"
-    ],
+    "permissions": ["string"],
     "rate_limit": "integer",
     "updated_at": "string (ISO 8601 datetime)"
   }
@@ -168,6 +175,7 @@ Retrieves a paginated list of audit logs, with filtering options. This endpoint 
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or specific `auditor` role).
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number for pagination. Default is `1`.
 - `per_page` (integer, optional): Number of items per page. Default is `50`.
 - `user_id` (string, optional): Filter logs by the user ID who performed the action.
@@ -177,6 +185,7 @@ Retrieves a paginated list of audit logs, with filtering options. This endpoint 
 - `end_date` (string, optional): End date for filtering logs (YYYY-MM-DD).
 
 **Responses**:
+
 - `200 OK`: Successfully retrieved audit logs.
   ```json
   {
@@ -222,6 +231,7 @@ Tokenizes sensitive data (e.g., credit card numbers, bank account details) by re
 **Permissions**: Requires appropriate authentication and authorization.
 
 **Request Body**:
+
 ```json
 {
   "sensitive_data": "string" (required): The sensitive data to tokenize.
@@ -231,6 +241,7 @@ Tokenizes sensitive data (e.g., credit card numbers, bank account details) by re
 ```
 
 **Responses**:
+
 - `200 OK`: Data tokenized successfully.
   ```json
   {
@@ -252,6 +263,7 @@ Retrieves the original sensitive data associated with a given token. This operat
 **Permissions**: Requires highly privileged authentication and authorization (e.g., `admin_required` or specific `data_access` role).
 
 **Request Body**:
+
 ```json
 {
   "token": "string" (required): The token to detokenize.
@@ -260,6 +272,7 @@ Retrieves the original sensitive data associated with a given token. This operat
 ```
 
 **Responses**:
+
 - `200 OK`: Data detokenized successfully.
   ```json
   {
@@ -281,6 +294,7 @@ Initiates a security scan on a specified target (e.g., user account, transaction
 **Permissions**: Requires appropriate authentication and authorization (e.g., `admin_required` or `security_analyst` role).
 
 **Request Body**:
+
 ```json
 {
   "scan_type": "string" (optional, default: "account"): The type of scan to perform (e.g., "account", "transaction").
@@ -289,6 +303,7 @@ Initiates a security scan on a specified target (e.g., user account, transaction
 ```
 
 **Responses**:
+
 - `200 OK`: Security scan initiated successfully.
   ```json
   {

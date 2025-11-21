@@ -11,20 +11,20 @@ alerting:
         - targets: ["alertmanager:9093"]
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'kubernetes-nodes'
+  - job_name: "kubernetes-nodes"
     kubernetes_sd_configs:
       - role: node
     relabel_configs:
       - source_labels: [__address__]
-        regex: '(.*):10250'
-        replacement: '${1}:10255'
+        regex: "(.*):10250"
+        replacement: "${1}:10255"
         target_label: __address__
 
-  - job_name: 'kubernetes-pods'
+  - job_name: "kubernetes-pods"
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
@@ -35,7 +35,8 @@ scrape_configs:
         action: replace
         target_label: __metrics_path__
         regex: (.+)
-      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      - source_labels:
+          [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         target_label: __address__
@@ -49,13 +50,13 @@ scrape_configs:
         action: replace
         target_label: kubernetes_pod_name
 
-  - job_name: 'kubernetes-cadvisor'
+  - job_name: "kubernetes-cadvisor"
     kubernetes_sd_configs:
       - role: cadvisor
     relabel_configs:
       - source_labels: [__address__]
-        regex: '(.*):8080'
-        replacement: '${1}:4194'
+        regex: "(.*):8080"
+        replacement: "${1}:4194"
         target_label: __address__
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
@@ -66,14 +67,16 @@ scrape_configs:
         action: replace
         target_label: kubernetes_pod_name
 
-  - job_name: 'kubernetes-service-endpoints'
+  - job_name: "kubernetes-service-endpoints"
     kubernetes_sd_configs:
       - role: endpoints
     relabel_configs:
-      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+      - source_labels:
+          [__meta_kubernetes_service_annotation_prometheus_io_scrape]
         action: keep
         regex: true
-      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+      - source_labels:
+          [__meta_kubernetes_service_annotation_prometheus_io_scheme]
         action: replace
         target_label: __scheme__
         regex: (.+)
@@ -81,7 +84,8 @@ scrape_configs:
         action: replace
         target_label: __metrics_path__
         regex: (.+)
-      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+      - source_labels:
+          [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         target_label: __address__
@@ -95,7 +99,7 @@ scrape_configs:
         action: replace
         target_label: kubernetes_name
 
-  - job_name: 'blackbox'
+  - job_name: "blackbox"
     metrics_path: /probe
     params:
       module: [http_2xx]
@@ -111,38 +115,38 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115 # Replace with your blackbox exporter service address
 
-  - job_name: 'node-exporter'
+  - job_name: "node-exporter"
     static_configs:
-      - targets: ['node-exporter:9100'] # Assuming node-exporter is deployed as a service
+      - targets: ["node-exporter:9100"] # Assuming node-exporter is deployed as a service
 
-  - job_name: 'kube-state-metrics'
+  - job_name: "kube-state-metrics"
     static_configs:
-      - targets: ['kube-state-metrics:8080'] # Assuming kube-state-metrics is deployed as a service
+      - targets: ["kube-state-metrics:8080"] # Assuming kube-state-metrics is deployed as a service
 
-  - job_name: 'grafana'
+  - job_name: "grafana"
     static_configs:
-      - targets: ['grafana:3000']
+      - targets: ["grafana:3000"]
 
-  - job_name: 'influxdb'
+  - job_name: "influxdb"
     static_configs:
-      - targets: ['influxdb:8086']
+      - targets: ["influxdb:8086"]
 
-  - job_name: 'mongodb'
+  - job_name: "mongodb"
     static_configs:
-      - targets: ['mongodb:27017']
+      - targets: ["mongodb:27017"]
 
-  - job_name: 'postgresql'
+  - job_name: "postgresql"
     static_configs:
-      - targets: ['postgresql:5432']
+      - targets: ["postgresql:5432"]
 
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ["redis:6379"]
 
-  - job_name: 'kafka'
+  - job_name: "kafka"
     static_configs:
-      - targets: ['kafka:9092']
+      - targets: ["kafka:9092"]
 
-  - job_name: 'rabbitmq'
+  - job_name: "rabbitmq"
     static_configs:
-      - targets: ['rabbitmq:15672']
+      - targets: ["rabbitmq:15672"]

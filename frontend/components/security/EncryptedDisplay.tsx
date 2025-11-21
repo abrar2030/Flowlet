@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { EncryptionService } from '../../lib/security/encryption';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
+import React, { useState, useCallback, useEffect } from "react";
+import { EncryptionService } from "../../lib/security/encryption";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
 import {
   Eye,
   EyeOff,
@@ -14,8 +14,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Key
-} from 'lucide-react';
+  Key,
+} from "lucide-react";
 
 interface EncryptedData {
   encrypted: string;
@@ -29,7 +29,7 @@ interface EncryptedData {
 interface EncryptedDisplayProps {
   data: EncryptedData | string;
   label?: string;
-  type?: 'text' | 'email' | 'phone' | 'ssn' | 'card' | 'custom';
+  type?: "text" | "email" | "phone" | "ssn" | "card" | "custom";
   maskPattern?: string;
   allowDecryption?: boolean;
   autoHideDelay?: number;
@@ -51,14 +51,14 @@ interface DisplayState {
 export function EncryptedDisplay({
   data,
   label,
-  type = 'text',
+  type = "text",
   maskPattern,
   allowDecryption = true,
   autoHideDelay = 30000, // 30 seconds
   showMetadata = false,
   onDecrypt,
   onCopy,
-  className = ''
+  className = "",
 }: EncryptedDisplayProps) {
   const [state, setState] = useState<DisplayState>({
     isDecrypted: false,
@@ -66,13 +66,12 @@ export function EncryptedDisplay({
     isDecrypting: false,
     error: null,
     showCopied: false,
-    autoHideTimer: null
+    autoHideTimer: null,
   });
 
   // Parse encrypted data
-  const encryptedData: EncryptedData = typeof data === 'string'
-    ? JSON.parse(data)
-    : data;
+  const encryptedData: EncryptedData =
+    typeof data === "string" ? JSON.parse(data) : data;
 
   // Clear auto-hide timer on unmount
   useEffect(() => {
@@ -86,40 +85,40 @@ export function EncryptedDisplay({
   const handleDecrypt = useCallback(async () => {
     if (!allowDecryption) return;
 
-    setState(prev => ({ ...prev, isDecrypting: true, error: null }));
+    setState((prev) => ({ ...prev, isDecrypting: true, error: null }));
 
     try {
       const decrypted = EncryptionService.decrypt(encryptedData);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isDecrypted: true,
         decryptedData: decrypted,
-        isDecrypting: false
+        isDecrypting: false,
       }));
 
       // Set auto-hide timer
       if (autoHideDelay > 0) {
         const timer = setTimeout(() => {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             isDecrypted: false,
             decryptedData: null,
-            autoHideTimer: null
+            autoHideTimer: null,
           }));
         }, autoHideDelay);
 
-        setState(prev => ({ ...prev, autoHideTimer: timer }));
+        setState((prev) => ({ ...prev, autoHideTimer: timer }));
       }
 
       if (onDecrypt) {
         onDecrypt(decrypted);
       }
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        error: 'Failed to decrypt data',
-        isDecrypting: false
+        error: "Failed to decrypt data",
+        isDecrypting: false,
       }));
     }
   }, [encryptedData, allowDecryption, autoHideDelay, onDecrypt]);
@@ -129,80 +128,97 @@ export function EncryptedDisplay({
       clearTimeout(state.autoHideTimer);
     }
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isDecrypted: false,
       decryptedData: null,
-      autoHideTimer: null
+      autoHideTimer: null,
     }));
   }, [state.autoHideTimer]);
 
-  const handleCopy = useCallback(async (dataToCopy: string) => {
-    try {
-      await navigator.clipboard.writeText(dataToCopy);
-      setState(prev => ({ ...prev, showCopied: true }));
+  const handleCopy = useCallback(
+    async (dataToCopy: string) => {
+      try {
+        await navigator.clipboard.writeText(dataToCopy);
+        setState((prev) => ({ ...prev, showCopied: true }));
 
-      setTimeout(() => {
-        setState(prev => ({ ...prev, showCopied: false }));
-      }, 2000);
+        setTimeout(() => {
+          setState((prev) => ({ ...prev, showCopied: false }));
+        }, 2000);
 
-      if (onCopy) {
-        onCopy(dataToCopy);
+        if (onCopy) {
+          onCopy(dataToCopy);
+        }
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
       }
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-    }
-  }, [onCopy]);
+    },
+    [onCopy],
+  );
 
-  const getMaskedDisplay = useCallback((decryptedData: string): string => {
-    if (!decryptedData) return '';
+  const getMaskedDisplay = useCallback(
+    (decryptedData: string): string => {
+      if (!decryptedData) return "";
 
-    switch (type) {
-      case 'email':
-        const [localPart, domain] = decryptedData.split('@');
-        if (localPart && domain) {
-          const maskedLocal = localPart.length > 2
-            ? localPart[0] + '*'.repeat(localPart.length - 2) + localPart.slice(-1)
-            : '*'.repeat(localPart.length);
-          return `${maskedLocal}@${domain}`;
-        }
-        return decryptedData;
+      switch (type) {
+        case "email":
+          const [localPart, domain] = decryptedData.split("@");
+          if (localPart && domain) {
+            const maskedLocal =
+              localPart.length > 2
+                ? localPart[0] +
+                  "*".repeat(localPart.length - 2) +
+                  localPart.slice(-1)
+                : "*".repeat(localPart.length);
+            return `${maskedLocal}@${domain}`;
+          }
+          return decryptedData;
 
-      case 'phone':
-        const digits = decryptedData.replace(/\D/g, '');
-        if (digits.length === 10) {
-          return `(***) ***-${digits.slice(-4)}`;
-        }
-        return `***-***-${digits.slice(-4)}`;
+        case "phone":
+          const digits = decryptedData.replace(/\D/g, "");
+          if (digits.length === 10) {
+            return `(***) ***-${digits.slice(-4)}`;
+          }
+          return `***-***-${digits.slice(-4)}`;
 
-      case 'ssn':
-        const ssnDigits = decryptedData.replace(/\D/g, '');
-        return `***-**-${ssnDigits.slice(-4)}`;
+        case "ssn":
+          const ssnDigits = decryptedData.replace(/\D/g, "");
+          return `***-**-${ssnDigits.slice(-4)}`;
 
-      case 'card':
-        const cardDigits = decryptedData.replace(/\D/g, '');
-        return `**** **** **** ${cardDigits.slice(-4)}`;
+        case "card":
+          const cardDigits = decryptedData.replace(/\D/g, "");
+          return `**** **** **** ${cardDigits.slice(-4)}`;
 
-      case 'custom':
-        if (maskPattern) {
-          return maskPattern.replace(/\*/g, () => '*');
-        }
-        return '*'.repeat(Math.max(4, decryptedData.length - 4)) + decryptedData.slice(-4);
+        case "custom":
+          if (maskPattern) {
+            return maskPattern.replace(/\*/g, () => "*");
+          }
+          return (
+            "*".repeat(Math.max(4, decryptedData.length - 4)) +
+            decryptedData.slice(-4)
+          );
 
-      default:
-        return decryptedData.length > 8
-          ? '*'.repeat(decryptedData.length - 4) + decryptedData.slice(-4)
-          : '*'.repeat(decryptedData.length);
-    }
-  }, [type, maskPattern]);
+        default:
+          return decryptedData.length > 8
+            ? "*".repeat(decryptedData.length - 4) + decryptedData.slice(-4)
+            : "*".repeat(decryptedData.length);
+      }
+    },
+    [type, maskPattern],
+  );
 
   const getTypeIcon = () => {
     switch (type) {
-      case 'email': return '📧';
-      case 'phone': return '📱';
-      case 'ssn': return '🆔';
-      case 'card': return '💳';
-      default: return '🔒';
+      case "email":
+        return "📧";
+      case "phone":
+        return "📱";
+      case "ssn":
+        return "🆔";
+      case "card":
+        return "💳";
+      default:
+        return "🔒";
     }
   };
 
@@ -217,7 +233,7 @@ export function EncryptedDisplay({
         <CardTitle className="flex items-center justify-between text-sm">
           <span className="flex items-center">
             <Shield className="w-4 h-4 mr-2 text-blue-600" />
-            {label || 'Encrypted Data'}
+            {label || "Encrypted Data"}
             <span className="ml-2">{getTypeIcon()}</span>
           </span>
           <Badge variant="secondary" className="text-xs">
@@ -242,7 +258,7 @@ export function EncryptedDisplay({
           <div className="p-3 bg-gray-50 rounded-md border">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-gray-600">
-                {state.isDecrypted ? 'Decrypted Data' : 'Encrypted Data'}
+                {state.isDecrypted ? "Decrypted Data" : "Encrypted Data"}
               </span>
               {state.isDecrypted && (
                 <Badge variant="outline" className="text-xs">
@@ -324,7 +340,8 @@ export function EncryptedDisplay({
           {state.isDecrypted && autoHideDelay > 0 && (
             <div className="text-xs text-amber-600 flex items-center">
               <Clock className="w-3 h-3 mr-1" />
-              Data will be hidden automatically in {Math.ceil(autoHideDelay / 1000)} seconds
+              Data will be hidden automatically in{" "}
+              {Math.ceil(autoHideDelay / 1000)} seconds
             </div>
           )}
 
@@ -341,7 +358,8 @@ export function EncryptedDisplay({
                   </div>
                   {encryptedData.timestamp && (
                     <div className="col-span-2">
-                      <span className="font-medium">Encrypted:</span> {formatTimestamp(encryptedData.timestamp)}
+                      <span className="font-medium">Encrypted:</span>{" "}
+                      {formatTimestamp(encryptedData.timestamp)}
                     </div>
                   )}
                 </div>
@@ -366,7 +384,8 @@ export function EncryptedDisplay({
             <span className="font-medium text-blue-800">Security Notice:</span>
           </div>
           <p className="mt-1 text-blue-700">
-            This data is encrypted using AES-256-GCM. Decryption occurs client-side only.
+            This data is encrypted using AES-256-GCM. Decryption occurs
+            client-side only.
           </p>
         </div>
       </CardContent>

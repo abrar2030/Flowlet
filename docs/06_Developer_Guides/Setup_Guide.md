@@ -1,4 +1,3 @@
-
 # Setup Guide for Flowlet
 
 This guide provides instructions on how to set up the Flowlet development environment, including both the backend and frontend components.
@@ -7,9 +6,9 @@ This guide provides instructions on how to set up the Flowlet development enviro
 
 Before you begin, ensure you have the following installed on your system:
 
-*   **Python 3.8+:** For the Flask backend.
-*   **Node.js 14+ & npm/yarn:** For the React frontend applications.
-*   **Git:** For cloning the repository.
+- **Python 3.8+:** For the Flask backend.
+- **Node.js 14+ & npm/yarn:** For the React frontend applications.
+- **Git:** For cloning the repository.
 
 ## 1. Clone the Repository
 
@@ -114,4 +113,4 @@ npm test
 
 ## Troubleshooting
 
-*   **Port Conflicts:** If you encounter
+- **Port Conflicts:** If you encounter

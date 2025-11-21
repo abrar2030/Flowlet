@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 import { loginUser, registerUser } from "@/lib/authService";
 
 describe("Authentication Security Tests", () => {
@@ -23,7 +23,9 @@ describe("Authentication Security Tests", () => {
 
     const maxAttempts = 5;
     for (let i = 0; i < maxAttempts; i++) {
-      await expect(loginUser("test@example.com", "wrong_password")).rejects.toThrow("Invalid credentials");
+      await expect(
+        loginUser("test@example.com", "wrong_password"),
+      ).rejects.toThrow("Invalid credentials");
     }
 
     // After multiple failed attempts, expect a lockout or CAPTCHA challenge (simulated by a different error message or status)
@@ -32,7 +34,10 @@ describe("Authentication Security Tests", () => {
         return Promise.resolve({
           ok: false,
           status: 429, // Too Many Requests
-          json: () => Promise.resolve({ message: "Account locked due to too many failed attempts" }),
+          json: () =>
+            Promise.resolve({
+              message: "Account locked due to too many failed attempts",
+            }),
         });
       }
       return Promise.resolve({
@@ -41,7 +46,9 @@ describe("Authentication Security Tests", () => {
       });
     }) as any;
 
-    await expect(loginUser("test@example.com", "wrong_password")).rejects.toThrow("Account locked due to too many failed attempts");
+    await expect(
+      loginUser("test@example.com", "wrong_password"),
+    ).rejects.toThrow("Account locked due to too many failed attempts");
   });
 
   it("should enforce strong password policies during registration", async () => {
@@ -50,21 +57,30 @@ describe("Authentication Security Tests", () => {
       Promise.resolve({
         ok: false,
         status: 400,
-        json: () => Promise.resolve({ message: "Password does not meet complexity requirements" }),
-      })
+        json: () =>
+          Promise.resolve({
+            message: "Password does not meet complexity requirements",
+          }),
+      }),
     ) as any;
 
-    await expect(registerUser("newuser@example.com", "short")).rejects.toThrow("Password does not meet complexity requirements");
+    await expect(registerUser("newuser@example.com", "short")).rejects.toThrow(
+      "Password does not meet complexity requirements",
+    );
 
     // Simulate successful registration with a strong password
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ message: "User registered successfully" }),
-      })
+        json: () =>
+          Promise.resolve({ message: "User registered successfully" }),
+      }),
     ) as any;
 
-    const result = await registerUser("anotheruser@example.com", "StrongP@ssw0rd123!");
+    const result = await registerUser(
+      "anotheruser@example.com",
+      "StrongP@ssw0rd123!",
+    );
     expect(result.message).toBe("User registered successfully");
   });
 
@@ -94,7 +110,11 @@ describe("Authentication Security Tests", () => {
     }) as any;
 
     // Both existing and non-existent users should receive the same generic error message
-    await expect(loginUser("nonexistent@example.com", "any_password")).rejects.toThrow("Invalid credentials");
-    await expect(loginUser("existing@example.com", "any_password")).rejects.toThrow("Invalid credentials");
+    await expect(
+      loginUser("nonexistent@example.com", "any_password"),
+    ).rejects.toThrow("Invalid credentials");
+    await expect(
+      loginUser("existing@example.com", "any_password"),
+    ).rejects.toThrow("Invalid credentials");
   });
 });

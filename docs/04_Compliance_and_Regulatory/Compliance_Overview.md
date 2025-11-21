@@ -27,6 +27,7 @@ Screens a user against various predefined watchlists (e.g., OFAC, UN sanctions, 
 **Permissions**: `enhanced_token_required`, `require_permissions(['compliance'])`, `rate_limit('50 per hour')`
 
 **Request Body**:
+
 ```json
 {
   "user_id": "string" (required): The unique identifier of the user to screen.
@@ -37,6 +38,7 @@ Screens a user against various predefined watchlists (e.g., OFAC, UN sanctions, 
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully performed watchlist screening.
   ```json
   {
@@ -79,6 +81,7 @@ Generates a Suspicious Activity Report (SAR) based on identified suspicious user
 **Permissions**: `enhanced_token_required`, `require_permissions(['compliance'])`, `rate_limit('10 per hour')`
 
 **Request Body**:
+
 ```json
 {
   "user_id": "string" (required): The unique identifier of the user associated with the suspicious activity.
@@ -90,6 +93,7 @@ Generates a Suspicious Activity Report (SAR) based on identified suspicious user
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully generated SAR.
   ```json
   {
@@ -144,6 +148,7 @@ Generates a Currency Transaction Report (CTR) for transactions exceeding a speci
 **Permissions**: `enhanced_token_required`, `require_permissions(['compliance'])`, `rate_limit('10 per hour')`
 
 **Request Body**:
+
 ```json
 {
   "transaction_ids": [
@@ -153,6 +158,7 @@ Generates a Currency Transaction Report (CTR) for transactions exceeding a speci
 ```
 
 **Responses**:
+
 - `200 OK`: Successfully generated CTR(s).
   ```json
   {
@@ -205,12 +211,15 @@ Analyzes a user's transaction patterns over a specified period to identify poten
 **Permissions**: `enhanced_token_required`, `require_permissions(['compliance'])`
 
 **Path Parameters**:
+
 - `user_id` (string, required): The unique identifier of the user whose transactions are to be analyzed.
 
 **Query Parameters**:
+
 - `days` (integer, optional): The number of past days to include in the analysis. Default is `90`.
 
 **Responses**:
+
 - `200 OK`: Successfully performed transaction pattern analysis.
   ```json
   {
