@@ -2,8 +2,8 @@ from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from src.integrations.banking import BankAccount  # Banking Integration Tests
 from src.integrations.banking import (
-    BankAccount,  # Banking Integration Tests
     Banking,
     BankingIntegrationManager,
     Comprehensive,
