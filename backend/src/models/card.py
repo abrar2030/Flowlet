@@ -7,14 +7,6 @@ from decimal import Decimal
 from enum import Enum as PyEnum
 
 from sqlalchemy import password_security  # Use internal security module
-from sqlalchemy import (  # Import Base and db from the local database setup
-    Base, Boolean, Card, Column, DateTime, ForeignKey, Index, Integer, Numeric,
-    String, Text, """, ..security., .database, card, db, for, from, import,
-    management, model, relationship, secure, sqlalchemy.orm)
-
-    check_password,
-    hash_password,
-)
 
 
 class CardType(PyEnum):

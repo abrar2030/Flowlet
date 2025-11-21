@@ -2,14 +2,23 @@ from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from src.integrations.banking import (  # Banking Integration Tests
-    BankAccount, Banking, BankingIntegrationManager, Comprehensive,
-    FDXIntegration, Integrations, IntegrationType, OpenBankingIntegration,
-    PaymentRequest, PlaidIntegration, Suite, Test, Transaction,
-    TransactionStatus, TransactionType, """, for, from, import,
-    src.integrations.banking.fdx_integration, src.integrations.banking.manager,
-    src.integrations.banking.open_banking_integration,
-    src.integrations.banking.plaid_integration)
+from src.integrations.banking import (
+    BankAccount,  # Banking Integration Tests
+    Banking,
+    BankingIntegrationManager,
+    Comprehensive,
+    FDXIntegration,
+    Integrations,
+    IntegrationType,
+    OpenBankingIntegration,
+    PaymentRequest,
+    PlaidIntegration,
+    Suite,
+    Test,
+    Transaction,
+    TransactionStatus,
+    TransactionType,
+)
 
 
 class TestBankingIntegrations:

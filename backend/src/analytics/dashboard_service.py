@@ -7,13 +7,14 @@ from typing import Any, Dict, List
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (AlertConfiguration, CustomerAnalytics, Dashboard,
-                          PerformanceMetrics, Provides, Real-time,
-                          ReportingEngine, Service, TransactionAnalytics, """,
-                          .reporting_engine, ================, analytics, and,
-                          business, customizable, dashboard, dashboards, data,
-                          financial, for, from, import, intelligence.,
-                          interactive, live, service, updates, widgets., with)
+from .data_models import (
+    AlertConfiguration,
+    CustomerAnalytics,
+    Dashboard,
+    PerformanceMetrics,
+    ReportingEngine,
+    TransactionAnalytics,
+)
 
 
 class WidgetType(Enum):

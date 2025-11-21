@@ -5,11 +5,7 @@ from app.models.user import User, UserStatus
 from app.utils.security import log_security_event
 from app.utils.validators import validate_password_strength
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import (API, Authentication, Schema, ValidationError,
-                                """, create_access_token, create_refresh_token,
-                                endpoints, fields, from, get_jwt,
-                                get_jwt_identity, import, improved,
-                                jwt_required, marshmallow, security, with)
+from flask_jwt_extended import Schema, ValidationError
 
 logger = structlog.get_logger()
 

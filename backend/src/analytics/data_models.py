@@ -1,23 +1,24 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (JSONB, UUID, Analytics, Boolean, Column, Comprehensive,
-                        Data, DateTime, Decimal, Designed, ForeignKey, Index,
-                        Integer, Models, String, Text, """,
-                        ====================, analytics, and, business,
-                        compliance., data, declarative_base, financial, for,
-                        from, high-performance, import, intelligence., models,
-                        querying, regulatory, sqlalchemy.dialects.postgresql,
-                        sqlalchemy.ext.declarative)
+from sqlalchemy import (
+    JSONB,
+    UUID,
+    Boolean,
+    Column,
+    DateTime,
+    Decimal,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+)
 
 Base = declarative_base()
 
 
 class TransactionAnalytics(Base):
-    """
-    Aggregated transaction analytics for business intelligence.
-    Optimized for fast querying and reporting.
-    """
 
     __tablename__ = "transaction_analytics"
 
@@ -78,9 +79,6 @@ class TransactionAnalytics(Base):
 
 
 class CustomerAnalytics(Base):
-    """
-    Customer behavior and lifecycle analytics.
-    """
 
     __tablename__ = "customer_analytics"
 
@@ -137,9 +135,6 @@ class CustomerAnalytics(Base):
 
 
 class BusinessMetrics(Base):
-    """
-    High-level business metrics and KPIs.
-    """
 
     __tablename__ = "business_metrics"
 
@@ -176,9 +171,6 @@ class BusinessMetrics(Base):
 
 
 class RegulatoryReport(Base):
-    """
-    Regulatory reporting data and audit trails.
-    """
 
     __tablename__ = "regulatory_reports"
 
@@ -224,9 +216,6 @@ class RegulatoryReport(Base):
 
 
 class PerformanceMetrics(Base):
-    """
-    System and application performance metrics.
-    """
 
     __tablename__ = "performance_metrics"
 
@@ -264,9 +253,6 @@ class PerformanceMetrics(Base):
 
 
 class AlertConfiguration(Base):
-    """
-    Configuration for automated alerts and notifications.
-    """
 
     __tablename__ = "alert_configurations"
 

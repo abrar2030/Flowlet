@@ -4,12 +4,6 @@ from dotenv import load_dotenv
 from src.app import create_app
 from src.models.database import db, init_db
 
-"""
-Flowlet Financial Backend - Main Application Entry Point
-Production-ready Flask application with improved architecture
-"""
-
-
 # Load environment variables from .env file
 load_dotenv()
 
@@ -19,7 +13,6 @@ app = create_app()
 
 @app.cli.command()
 def init_db_cli():
-    """Initialize the database"""
     with app.app_context():
         init_db(app)
         print("Database initialized successfully")
@@ -27,7 +20,6 @@ def init_db_cli():
 
 @app.cli.command()
 def create_admin():
-    """Create admin user"""
     from src.models.user import User, UserRole, UserStatus
     from src.security.password_security import hash_password
 

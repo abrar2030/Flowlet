@@ -5,20 +5,12 @@ from datetime import datetime
 
 import requests
 
-#!/usr/bin/env python3.11
-"""
-Comprehensive Production Test Suite for Flowlet Financial Backend
-Tests all implemented features with enterprise-grade validation
-"""
-
-
 # Configuration
 BASE_URL = "http://localhost:5001"
 API_BASE = f"{BASE_URL}/api/v1"
 
 
 class FlowletProductionTester:
-    """Comprehensive test suite for production Flowlet backend"""
 
     def __init__(self):
         self.test_results = []
@@ -28,7 +20,6 @@ class FlowletProductionTester:
         self.test_transactions = []
 
     def log_test(self, test_name, success, message="", data=None):
-        """Log test results with detailed information"""
         status = "✅ PASS" if success else "❌ FAIL"
         print(f"{status} {test_name}: {message}")
 
@@ -46,7 +37,6 @@ class FlowletProductionTester:
             print(f"   Error details: {data}")
 
     def make_request(self, method, endpoint, data=None, auth=True):
-        """Make HTTP request with proper headers"""
         headers = {"Content-Type": "application/json"}
 
         if auth and self.access_token:
@@ -71,7 +61,6 @@ class FlowletProductionTester:
             return None
 
     def test_health_and_info(self):
-        """Test basic connectivity and API information"""
         print("\n🏥 Testing Health and API Information...")
 
         # Health check
@@ -104,7 +93,6 @@ class FlowletProductionTester:
         return True
 
     def test_user_registration(self):
-        """Test user registration functionality"""
         print("\n👤 Testing User Registration...")
 
         test_email = f"test_{uuid.uuid4().hex[:8]}@flowlet.com"
@@ -146,7 +134,6 @@ class FlowletProductionTester:
             return False
 
     def test_user_login(self):
-        """Test user login functionality"""
         print("\n🔐 Testing User Authentication...")
 
         # For this test, we'll use the registered user
@@ -170,7 +157,6 @@ class FlowletProductionTester:
             return False
 
     def test_account_creation(self):
-        """Test account creation functionality"""
         print("\n🏦 Testing Account Management...")
 
         account_data = {
@@ -207,7 +193,6 @@ class FlowletProductionTester:
             return None
 
     def test_balance_operations(self, account_id):
-        """Test balance inquiry and operations"""
         print("\n💰 Testing Balance Operations...")
 
         if not account_id:
@@ -304,7 +289,6 @@ class FlowletProductionTester:
         return True
 
     def test_transfers(self):
-        """Test fund transfer functionality"""
         print("\n💸 Testing Fund Transfers...")
 
         if len(self.test_accounts) < 2:
@@ -369,7 +353,6 @@ class FlowletProductionTester:
         return True
 
     def test_transaction_history(self):
-        """Test transaction history functionality"""
         print("\n📊 Testing Transaction History...")
 
         if not self.test_accounts:
@@ -406,7 +389,6 @@ class FlowletProductionTester:
             return False
 
     def test_error_handling(self):
-        """Test error handling and validation"""
         print("\n🛡️ Testing Error Handling...")
 
         # Test invalid account access
@@ -500,7 +482,6 @@ class FlowletProductionTester:
         return True
 
     def test_security_features(self):
-        """Test security features and headers"""
         print("\n🔒 Testing Security Features...")
 
         # Test security headers
@@ -538,7 +519,6 @@ class FlowletProductionTester:
         return True
 
     def run_comprehensive_test_suite(self):
-        """Run the complete production test suite"""
         print("🚀 Starting Flowlet Production Test Suite")
         print("=" * 70)
         print("Testing enterprise-grade financial backend implementation")
@@ -611,7 +591,6 @@ class FlowletProductionTester:
 
 
 def main():
-    """Main test execution function"""
     print("Flowlet Production Test Suite")
     print("Enterprise Financial Backend Validation")
     print("Testing comprehensive functionality and security")

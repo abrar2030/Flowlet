@@ -7,15 +7,6 @@ from sqlalchemy import select
 
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..models.kyc import .auth  # Assuming decorators are defined here for now
-from ..models.kyc import (KYC/AML, Compliance,  # Import refactored modules
-                          Enhanced, KYCRecord, KYCStatus, Routes, System, User,
-                          VerificationLevel, """, ..models.user,
-                          ..security.audit_logger, audit_logger, from, import)
-
-    admin_required,
-    token_required,
-)
 
 # Create blueprint
 kyc_aml_bp = Blueprint("kyc_aml", __name__, url_prefix="/api/v1/kyc")

@@ -1,17 +1,8 @@
 import asyncio
-import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
-
-from . import (API, AuthenticationError, BankAccount, Banking,
-               BankingIntegrationBase, BankingIntegrationError, Implements,
-               Integration, InvalidAccountError, PaymentRequest, Plaid,
-               Transaction, TransactionStatus, TransactionType, """, account,
-               aggregation, and, data, for, transaction)
-
-logger = logging.getLogger(__name__)
 
 
 class PlaidIntegration(BankingIntegrationBase):

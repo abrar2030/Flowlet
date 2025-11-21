@@ -8,13 +8,7 @@ import pandas as pd
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (Advanced, CustomerAnalytics, Engine,
-                          Enterprise-grade, PerformanceMetrics, Reporting,
-                          Supports, TransactionAnalytics, """,
-                          ========================, analytics, and, batch,
-                          business, engine, financial, for, formats.,
-                          intelligence., multiple, output, real-time,
-                          reporting, with)
+from .data_models import CustomerAnalytics, PerformanceMetrics, TransactionAnalytics
 
 
 class ReportType(Enum):
@@ -971,7 +965,7 @@ class ReportingEngine:
             return {"growth_rate": 0, "trend": "insufficient_data"}
 
         values = list(daily_revenue.values())
-        dates = sorted(daily_revenue.keys())
+        sorted(daily_revenue.keys())
 
         # Simple growth rate calculation
         first_week = (

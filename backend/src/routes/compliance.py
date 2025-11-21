@@ -13,18 +13,6 @@ from ..models.user import User
 from ..security.audit_logger import audit_logger
 from .auth import Admin  # Assuming decorators are defined here for now
 
-from .auth import Compliance, Only, Regulatory, Reporting, Routes, """, and
-
-"""
-
-
-
-
-# Import refactored modules
-    admin_required,
-    token_required,
-)
-
 # Create blueprint
 compliance_bp = Blueprint("compliance", __name__, url_prefix="/api/v1/compliance")
 

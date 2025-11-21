@@ -4,14 +4,20 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import (  # Import Base and db from the local database setup
-    Account, Backend, Base, Column, DateTime, Financial, Flowlet, ForeignKey,
-    Index, Integer, Model, Numeric, String, """, .database, db, for, from,
-    import, relationship, sqlalchemy.orm)
+from sqlalchemy import (
+    Account,
+    Base,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+)
 
 
 class AccountType(PyEnum):
-    """Types of financial accounts"""
 
     CHECKING = "checking"
     SAVINGS = "savings"
@@ -21,7 +27,6 @@ class AccountType(PyEnum):
 
 
 class AccountStatus(PyEnum):
-    """Account status options"""
 
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -31,7 +36,6 @@ class AccountStatus(PyEnum):
 
 
 class Account(Base):
-    """Financial account model with enhanced security and compliance features"""
 
     __tablename__ = (
         "accounts"  # Changed from 'enhanced_accounts' to 'accounts' for simplicity
@@ -113,12 +117,10 @@ class Account(Base):
 
     @staticmethod
     def generate_account_number():
-        """Generate a unique account number (simplified for now)"""
         # In a real system, this would require a database check loop
         return "".join([str(random.randint(0, 9)) for _ in range(16)])
 
     def to_dict(self, include_sensitive=False):
-        """Convert account to dictionary for API responses"""
         data = {
             "id": self.id,
             "account_number": (

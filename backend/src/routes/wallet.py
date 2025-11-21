@@ -6,11 +6,6 @@ from sqlalchemy import select
 from ..models.account import Account, AccountStatus
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..models.transaction import (  # Assuming decorators are defined here for now; Import refactored modules
-    Account/Wallet, Enhanced, Features, Financial-Grade, InputValidator,
-    Management, System, Transaction, TransactionCategory, TransactionStatus,
-    TransactionType, """, ..security.audit_logger, ..utils.validators, .auth,
-    audit_logger, from, import, token_required, with)
 
 # Create blueprint
 account_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")

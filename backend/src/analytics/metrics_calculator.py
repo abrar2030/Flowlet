@@ -9,12 +9,7 @@ import numpy as np
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (Advanced, Calculator, CustomerAnalytics, KPIs,
-                          Metrics, PerformanceMetrics, Provides,
-                          TransactionAnalytics, """, =================,
-                          analytics., and, batch, business, calculation,
-                          engine, financial, for, indicators., metrics, of,
-                          performance, real-time)
+from .data_models import CustomerAnalytics, PerformanceMetrics, TransactionAnalytics
 
 
 class MetricType(Enum):

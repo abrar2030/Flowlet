@@ -6,12 +6,6 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 
-from . import (APIs, AuthenticationError, BankAccount, Banking,
-               BankingIntegrationBase, BankingIntegrationError, European,
-               Implements, Integration, Open, OpenBankingBase, PaymentRequest,
-               PSD2-compliant, PSD2ComplianceBase, Transaction,
-               TransactionStatus, TransactionType, """, banks, for)
-
 logger = logging.getLogger(__name__)
 
 

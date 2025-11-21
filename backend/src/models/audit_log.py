@@ -4,9 +4,17 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum as PyEnum
 
 from sqlalchemy import (  # Import Base and db from the local database setup
-    Audit, Base, Boolean, Column, DateTime, ForeignKey, Index, Integer, String,
-    Text, """, .database, activity, and, compliance, comprehensive, db, for,
-    from, import, log, model, relationship, sqlalchemy.orm, tracking)
+    Audit,
+    Base,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+)
 
 
 class AuditEventType(PyEnum):

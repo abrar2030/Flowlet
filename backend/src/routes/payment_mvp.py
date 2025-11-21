@@ -7,11 +7,12 @@ from functools import wraps
 from flask import Blueprint, g, jsonify, request
 from src.models.account import Account, AccountStatus
 from src.models.database import User, db
-from src.models.transaction import MVP, Payment
 from src.models.transaction import Transaction as EnhancedTransaction
-from src.models.transaction import (TransactionCategory, TransactionStatus,
-                                    TransactionType, """, for, functionality,
-                                    routes)
+from src.models.transaction import (
+    TransactionCategory,
+    TransactionStatus,
+    TransactionType,
+)
 
 # Create blueprint
 payment_mvp_bp = Blueprint("payment_mvp", __name__, url_prefix="/api/v1/payment")

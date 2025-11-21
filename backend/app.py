@@ -13,10 +13,6 @@ from src.models import db
 from src.routes import api_bp
 from src.utils.error_handlers import register_error_handlers
 
-"""
-Flowlet Integrated Application - Production Deployment
-"""
-
 
 def create_app():
     # Initialize Flask app

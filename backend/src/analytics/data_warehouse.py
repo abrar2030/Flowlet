@@ -7,11 +7,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
-from .data_models import (ETL, CustomerAnalytics, Data, Enterprise, Provides,
-                          TransactionAnalytics, Warehouse, """, =============,
-                          analytics., and, business, data, financial, for,
-                          implementation, intelligence., modeling, optimized,
-                          processes, querying, warehouse)
+from .data_models import CustomerAnalytics, TransactionAnalytics
 
 
 class DataSourceType(Enum):
@@ -280,7 +276,7 @@ class DataWarehouse:
         source_config = job.source_config
 
         # Get incremental data
-        incremental_column = source_config.get("incremental_column", "created_at")
+        source_config.get("incremental_column", "created_at")
         batch_size = source_config.get("batch_size", 10000)
 
         # Get last processed timestamp
@@ -850,7 +846,7 @@ class DataWarehouse:
 
         try:
             # Execute the query to create/populate the data mart
-            result = self.db.execute(text(query))
+            self.db.execute(text(query))
 
             return {
                 "mart_name": mart_name,

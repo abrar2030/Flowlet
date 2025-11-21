@@ -4,10 +4,17 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from app import db
-from sqlalchemy import (UUID, Account, BigInteger, Boolean, Column, DateTime,
-                        Enum, ForeignKey, String, """, .mixins, data,
-                        financial, from, handling, import, improved, model,
-                        relationship, sqlalchemy.orm, with)
+from sqlalchemy import (
+    UUID,
+    Account,
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    String,
+)
 
 
 class AccountType(enum.Enum):
