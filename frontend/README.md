@@ -22,17 +22,17 @@ The frontend is built on a modern stack, leveraging key libraries for state mana
 
 The application follows a modular and feature-driven architecture for clear separation of concerns.
 
-| Directory        | Primary Function                                 | Key Contents                                                                                          |
-| :--------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| **components/**  | Reusable UI and feature-specific components.     | Organized into sub-directories like `auth/`, `security/`, `compliance/`, and `ui/` (base components). |
-| **hooks/**       | Custom React hooks for reusable logic.           | Contains hooks like `useAuth`, `use-responsive`, and other utility hooks.                             |
-| **lib/**         | Utility functions and service wrappers.          | Includes API clients (`api.ts`), authentication services (`authService.ts`), and security utilities.  |
-| **store/**       | Redux store configuration and slices.            | Contains state slices for features like `auth`, `wallet`, and `transactions`.                         |
-| **types/**       | Global TypeScript type definitions.              | Centralized location for application-wide interfaces and types.                                       |
-| **assets/**      | Static assets like images and fonts.             | Visual resources used throughout the application.                                                     |
-| ****tests**/**   | Test files for various components and utilities. | Houses unit and integration tests.                                                                    |
-| `package.json`   | Project manifest.                                | Defines dependencies, scripts, and project metadata.                                                  |
-| `vite.config.ts` | Build configuration.                             | Configuration for the Vite development and build tool.                                                |
+| Directory          | Primary Function                                 | Key Contents                                                                                          |
+| :----------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| **components/**    | Reusable UI and feature-specific components.     | Organized into sub-directories like `auth/`, `security/`, `compliance/`, and `ui/` (base components). |
+| **hooks/**         | Custom React hooks for reusable logic.           | Contains hooks like `useAuth`, `use-responsive`, and other utility hooks.                             |
+| **lib/**           | Utility functions and service wrappers.          | Includes API clients (`api.ts`), authentication services (`authService.ts`), and security utilities.  |
+| **store/**         | Redux store configuration and slices.            | Contains state slices for features like `auth`, `wallet`, and `transactions`.                         |
+| **types/**         | Global TypeScript type definitions.              | Centralized location for application-wide interfaces and types.                                       |
+| **assets/**        | Static assets like images and fonts.             | Visual resources used throughout the application.                                                     |
+| \***\*tests**/\*\* | Test files for various components and utilities. | Houses unit and integration tests.                                                                    |
+| `package.json`     | Project manifest.                                | Defines dependencies, scripts, and project metadata.                                                  |
+| `vite.config.ts`   | Build configuration.                             | Configuration for the Vite development and build tool.                                                |
 
 ## 3. Specialized Component and Logic Modules
 

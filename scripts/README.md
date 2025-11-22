@@ -90,11 +90,13 @@ This modular structure facilitates easier navigation, maintenance, and auditing 
     - **Compliance and Audit Trails:** Centralized logging (Loki) and tracing (Jaeger) provide invaluable data for auditing purposes, incident investigations, and demonstrating compliance with operational standards.
     - **Proactive Alerting:** The setup of Prometheus and Grafana allows for the configuration of sophisticated alerts, notifying operations teams of critical issues before they escalate.
   - **Usage:**
+
     ```bash
     ./setup-monitoring.sh [--namespace <namespace>]
     ```
 
     - `--namespace <namespace>`: (Optional) Specifies the Kubernetes namespace where the monitoring components will be installed. Defaults to `flowlet`.
+
   - **Implementation Notes:**
     - This script assumes `helm` and `kubectl` are installed and configured.
     - The `prometheus-values.yaml` and `kubernetes/monitoring/dashboards/` paths suggest external configuration files for fine-tuning the monitoring setup, which is crucial for tailoring monitoring to specific financial application needs.
