@@ -30,7 +30,7 @@ The application follows a modular and feature-driven architecture for clear sepa
 | **store/**         | Redux store configuration and slices.            | Contains state slices for features like `auth`, `wallet`, and `transactions`.                         |
 | **types/**         | Global TypeScript type definitions.              | Centralized location for application-wide interfaces and types.                                       |
 | **assets/**        | Static assets like images and fonts.             | Visual resources used throughout the application.                                                     |
-| \***\*tests**/\*\* | Test files for various components and utilities. | Houses unit and integration tests.                                                                    |
+| **tests/**      | Test files for various components and utilities. | Houses unit and integration tests.                                                                    |
 | `package.json`     | Project manifest.                                | Defines dependencies, scripts, and project metadata.                                                  |
 | `vite.config.ts`   | Build configuration.                             | Configuration for the Vite development and build tool.                                                |
 
