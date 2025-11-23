@@ -95,8 +95,8 @@ Flowlet's strength lies in its comprehensive suite of embedded finance capabilit
 
 ### 🔒 Security Infrastructure
 
-| Component                  | Key Files/Modules                                                                              | Purpose                                                                                                                                                                                                                                     |
-| :------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Component                  | Key Files/Modules                                                                              | Purpose                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------------------- | :--------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Implementation Details** | `backend/src/security/`, `backend/src/routes/auth.py`, `backend/src/security/token_manager.py` | Dedicated to security, featuring modules for data protection (encryption), secure password hashing, API abuse prevention (rate limiting), comprehensive logging (audit), input validation, and managing authentication/authorization flows. **All sensitive configurations (API keys, secrets, database credentials) are loaded from environment variables for enhanced security.** |
 
 ---
@@ -198,7 +198,10 @@ Contains the CI/CD pipeline definitions, automating the software delivery lifecy
 
 The recommended way to run Flowlet locally is using **Docker Compose**, which sets up the entire environment.
 
-### Prerequisites\n\n**Environment Configuration**\n\nAll sensitive configurations are managed via environment variables. Before running the application, you must create a `.env` file in the root directory based on the provided `.env.example` and populate it with your actual secrets and credentials. The application will not run without these variables set.
+### Prerequisites
+
+**Environment Configuration**
+All sensitive configurations are managed via environment variables. Before running the application, you must create a `.env` file in the root directory based on the provided `.env.example` and populate it with your actual secrets and credentials. The application will not run without these variables set.
 
 | Prerequisite | Version/Requirement                                 |
 | :----------- | :-------------------------------------------------- |
