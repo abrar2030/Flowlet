@@ -107,18 +107,18 @@ setup_env_files() {
 # Flowlet Backend Environment Configuration
 FLASK_ENV=development
 FLASK_DEBUG=True
-SECRET_KEY=dev-secret-key-change-in-production
+SECRET_KEY=${SECRET_KEY} # CHANGE ME
 DATABASE_URL=sqlite:///data/flowlet_dev.db
 REDIS_URL=redis://localhost:6379/0
 
 # API Keys (replace with actual values)
 PLAID_CLIENT_ID=your_plaid_client_id
-PLAID_SECRET=your_plaid_secret
+PLAID_SECRET=${PLAID_SECRET} # CHANGE ME
 PLAID_ENV=sandbox
 
 # Security Settings
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
-JWT_SECRET_KEY=jwt-secret-key-change-in-production
+JWT_SECRET_KEY=${JWT_SECRET_KEY} # CHANGE ME
 
 # Logging
 LOG_LEVEL=INFO
@@ -149,7 +149,7 @@ VITE_ENABLE_CHAT=true
 VITE_ENABLE_FRAUD_DETECTION=true
 
 # External Services
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
+VITE_STRIPE_PUBLISHABLE_KEY=${VITE_STRIPE_PUBLISHABLE_KEY} # CHANGE ME
 EOF
         echo -e "${GREEN}✓ Frontend .env file created${NC}"
     else
