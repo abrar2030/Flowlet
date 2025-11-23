@@ -1,26 +1,81 @@
-name: CI Check
+name: CI Formatting Check
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+    workflow_dispatch:
 
 jobs:
-  build_check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    formatting_check:
+        runs-on: ubuntu-latest
 
-      - name: Run Basic Health Check
-        run: echo "Repository checkout complete. Starting basic checks."
+        steps:
+            # -------------------------------
+            # Checkout
+            # -------------------------------
+            - name: Checkout Repository
+              uses: actions/checkout@v4
 
-      - name: Validate Configuration Files
-        run: |
-          echo "No configuration files to validate. Proceeding."
-          # A real step would be: find . -name "*.yml" | xargs yamllint
+            # -------------------------------
+            # Python Setup + Formatters
+            # -------------------------------
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.10'
 
-      - name: Finalize Check
-        run: echo "Basic CI check finished."
+            - name: Install Python Formatters
+              run: |
+                  pip install autoflake isort black
+
+            # -------------------------------
+            # Python Formatting Check
+            # -------------------------------
+            - name: Run Python Formatting Checks
+              run: |
+                  echo "=== Running autoflake (check mode via diff) ==="
+                  cp -r . /tmp/project_copy
+
+                  autoflake \
+                    --remove-all-unused-imports \
+                    --remove-unused-variables \
+                    --recursive \
+                    --ignore-init-module-imports \
+                    --in-place \
+                    /tmp/project_copy
+
+                  echo "Comparing files..."
+                  diff -r . /tmp/project_copy > /dev/null || {
+                    echo "autoflake found issues."
+                    exit 1
+                  }
+
+                  echo "=== Running black ==="
+                  black . --check
+
+            # -------------------------------
+            # Node + Prettier Setup
+            # -------------------------------
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+
+            - name: Install Node Dependencies
+              run: npm install
+
+            # -------------------------------
+            # Prettier Check
+            # -------------------------------
+            - name: Run Prettier Checks
+              run: |
+                  echo "=== Running Prettier ==="
+                  npx prettier --check "**/*.{js,jsx,ts,tsx,json,html,css,md}"
+
+            # -------------------------------
+            # Done
+            # -------------------------------
+            - name: Finalize Check
+              run: echo "All formatting checks completed."
