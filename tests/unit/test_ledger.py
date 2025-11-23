@@ -95,7 +95,6 @@ class LedgerService:
 
 
 class TestLedgerService(unittest.TestCase):
-
     def setUp(self):
         self.ledger = LedgerService()
 

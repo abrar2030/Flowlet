@@ -565,7 +565,6 @@ class SecurityMonitoringService:
             and len(password_changes) >= 1
             and len(ip_addresses) > 1
         ):
-
             await self._create_correlation_incident(
                 "Account Takeover Detected",
                 f"Potential account takeover for user {event.user_id}",

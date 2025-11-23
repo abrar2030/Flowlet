@@ -49,7 +49,6 @@ class PaymentProcessor:
 
 
 class TestPaymentProcessor(unittest.TestCase):
-
     def setUp(self):
         self.processor = PaymentProcessor(api_key="test_api_key")
         self.valid_card = {

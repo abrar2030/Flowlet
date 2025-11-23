@@ -18,7 +18,6 @@ from sqlalchemy import (
 
 
 class AccountType(PyEnum):
-
     CHECKING = "checking"
     SAVINGS = "savings"
     CREDIT = "credit"
@@ -27,7 +26,6 @@ class AccountType(PyEnum):
 
 
 class AccountStatus(PyEnum):
-
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
@@ -36,7 +34,6 @@ class AccountStatus(PyEnum):
 
 
 class Account(Base):
-
     __tablename__ = (
         "accounts"  # Changed from 'enhanced_accounts' to 'accounts' for simplicity
     )

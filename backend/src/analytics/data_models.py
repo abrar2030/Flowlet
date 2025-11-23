@@ -19,7 +19,6 @@ Base = declarative_base()
 
 
 class TransactionAnalytics(Base):
-
     __tablename__ = "transaction_analytics"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -79,7 +78,6 @@ class TransactionAnalytics(Base):
 
 
 class CustomerAnalytics(Base):
-
     __tablename__ = "customer_analytics"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -135,7 +133,6 @@ class CustomerAnalytics(Base):
 
 
 class BusinessMetrics(Base):
-
     __tablename__ = "business_metrics"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -171,7 +168,6 @@ class BusinessMetrics(Base):
 
 
 class RegulatoryReport(Base):
-
     __tablename__ = "regulatory_reports"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -216,7 +212,6 @@ class RegulatoryReport(Base):
 
 
 class PerformanceMetrics(Base):
-
     __tablename__ = "performance_metrics"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -253,7 +248,6 @@ class PerformanceMetrics(Base):
 
 
 class AlertConfiguration(Base):
-
     __tablename__ = "alert_configurations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

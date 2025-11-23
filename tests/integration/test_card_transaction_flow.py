@@ -43,7 +43,6 @@ class MockLedgerService:
 
 
 class CardTransactionFlowIntegrationTests(unittest.TestCase):
-
     def setUp(self):
         self.card_service = MockCardService()
         self.wallet_service = MockWalletService()

@@ -143,9 +143,9 @@ class AIRiskAssessor:
         # Credit Risk Assessment
         credit_factors = self._assess_credit_risk(user_data)
         risk_factors.extend(credit_factors)
-        category_scores[RiskCategory.CREDIT_RISK.value] = (
-            self._calculate_category_score(credit_factors)
-        )
+        category_scores[
+            RiskCategory.CREDIT_RISK.value
+        ] = self._calculate_category_score(credit_factors)
 
         # Fraud Risk Assessment
         fraud_factors = self._assess_fraud_risk(user_data)
@@ -157,16 +157,16 @@ class AIRiskAssessor:
         # Liquidity Risk Assessment
         liquidity_factors = self._assess_liquidity_risk(user_data)
         risk_factors.extend(liquidity_factors)
-        category_scores[RiskCategory.LIQUIDITY_RISK.value] = (
-            self._calculate_category_score(liquidity_factors)
-        )
+        category_scores[
+            RiskCategory.LIQUIDITY_RISK.value
+        ] = self._calculate_category_score(liquidity_factors)
 
         # Operational Risk Assessment
         operational_factors = self._assess_operational_risk(user_data)
         risk_factors.extend(operational_factors)
-        category_scores[RiskCategory.OPERATIONAL_RISK.value] = (
-            self._calculate_category_score(operational_factors)
-        )
+        category_scores[
+            RiskCategory.OPERATIONAL_RISK.value
+        ] = self._calculate_category_score(operational_factors)
 
         # Calculate overall risk score
         overall_risk_score = self._calculate_overall_risk_score(category_scores)
@@ -249,7 +249,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if payment_score < 0.5
-                    else "Medium" if payment_score < 0.8 else "Low"
+                    else "Medium"
+                    if payment_score < 0.8
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -293,7 +295,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if utilization_ratio > 0.7
-                    else "Medium" if utilization_ratio > 0.3 else "Low"
+                    else "Medium"
+                    if utilization_ratio > 0.3
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -352,7 +356,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if pattern_score < 0.3
-                    else "Medium" if pattern_score < 0.7 else "Low"
+                    else "Medium"
+                    if pattern_score < 0.7
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -380,7 +386,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if device_score < 0.3
-                    else "Medium" if device_score < 0.7 else "Low"
+                    else "Medium"
+                    if device_score < 0.7
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -408,7 +416,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if location_score < 0.3
-                    else "Medium" if location_score < 0.7 else "Low"
+                    else "Medium"
+                    if location_score < 0.7
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -444,7 +454,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if cash_flow_score < 0.3
-                    else "Medium" if cash_flow_score < 0.7 else "Low"
+                    else "Medium"
+                    if cash_flow_score < 0.7
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -474,7 +486,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if balance_score < 0.3
-                    else "Medium" if balance_score < 0.7 else "Low"
+                    else "Medium"
+                    if balance_score < 0.7
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -510,7 +524,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if len(security_incidents) > 3
-                    else "Medium" if len(security_incidents) > 1 else "Low"
+                    else "Medium"
+                    if len(security_incidents) > 1
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [
@@ -541,7 +557,9 @@ class AIRiskAssessor:
                 impact=(
                     "High"
                     if len(violations) > 2
-                    else "Medium" if len(violations) > 0 else "Low"
+                    else "Medium"
+                    if len(violations) > 0
+                    else "Low"
                 ),
                 mitigation_suggestions=(
                     [

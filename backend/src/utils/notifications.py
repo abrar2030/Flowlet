@@ -52,7 +52,6 @@ class NotificationPriority(PyEnum):
 
 
 class NotificationService:
-
     def __init__(self, app=None):
         self.app = app
         self.email_config = {

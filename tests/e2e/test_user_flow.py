@@ -108,7 +108,6 @@ class MockUI:
 
 
 class TestUserFlow(unittest.TestCase):
-
     def setUp(self):
         self.ui = MockUI()
 

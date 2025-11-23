@@ -34,7 +34,6 @@ class MockKYCService:
 
 
 class OnboardingFlowIntegrationTests(unittest.TestCase):
-
     def setUp(self):
         self.user_service = MockUserService()
         self.wallet_service = MockWalletService()

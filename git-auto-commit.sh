@@ -21,6 +21,14 @@ if ! git rev-parse --is-inside-work-tree &> /dev/null; then
     exit 1
 fi
 
+# Parse optional --no-verify flag
+SKIP_PRE_COMMIT=""
+for arg in "$@"; do
+    if [[ "$arg" == "--no-verify" ]]; then
+        SKIP_PRE_COMMIT="--no-verify"
+    fi
+done
+
 # Determine the current day of the month (01-31)
 DAY_OF_MONTH=$(date +%d)
 
@@ -45,7 +53,7 @@ fi
 git add --all
 
 # Commit the changes with the selected commit message
-git commit -m "$COMMIT_MESSAGE"
+git commit -m "$COMMIT_MESSAGE" $SKIP_PRE_COMMIT
 
 # Pull remote changes to avoid conflicts
 echo "Pulling the latest changes from the remote repository..."

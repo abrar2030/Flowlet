@@ -373,9 +373,9 @@ class OpenBankingIntegration(
         }
 
         if payment_request.scheduled_date:
-            payment_data["requestedExecutionDate"] = (
-                payment_request.scheduled_date.strftime("%Y-%m-%d")
-            )
+            payment_data[
+                "requestedExecutionDate"
+            ] = payment_request.scheduled_date.strftime("%Y-%m-%d")
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",

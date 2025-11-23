@@ -3,7 +3,6 @@ from datetime import timedelta
 
 
 class Config:
-
     # Basic Flask Configuration
     SECRET_KEY = os.environ.get("SECRET_KEY")  # MUST be set in production
     SQLALCHEMY_DATABASE_URI = (
@@ -21,20 +20,17 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-
     DEBUG = True
     TESTING = False
     SQLALCHEMY_ECHO = True
 
 
 class TestingConfig(Config):
-
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 class ProductionConfig(Config):
-
     DEBUG = False
     TESTING = False
 

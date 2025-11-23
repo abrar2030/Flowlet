@@ -309,9 +309,9 @@ def issue_card():
         else:
             response_data["card"]["estimated_delivery"] = "5-7 business days"
             response_data["card"]["ready_for_use"] = False
-            response_data["message"] = (
-                "Physical card issued. Activation required upon delivery."
-            )
+            response_data[
+                "message"
+            ] = "Physical card issued. Activation required upon delivery."
 
         return jsonify(response_data), 201
 

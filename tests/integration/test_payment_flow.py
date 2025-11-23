@@ -33,7 +33,6 @@ class MockLedgerService:
 
 
 class PaymentFlowIntegrationTests(unittest.TestCase):
-
     def setUp(self):
         self.wallet_service = MockWalletService()
         self.payment_processor = MockPaymentProcessor()

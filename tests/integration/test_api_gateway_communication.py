@@ -36,7 +36,6 @@ class MockAPIGateway:
 
 
 class APIGatewayCommunicationIntegrationTests(unittest.TestCase):
-
     def setUp(self):
         self.mock_user_service = MockUserService()
         self.mock_payment_service = MockPaymentService()

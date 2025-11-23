@@ -87,7 +87,6 @@ class CardService:
 
 
 class TestCardService(unittest.TestCase):
-
     def setUp(self):
         self.mock_issuer_api = MagicMock()
         self.card_service = CardService(issuer_api=self.mock_issuer_api)

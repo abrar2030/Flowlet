@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class FraudDetectionService:
-
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.ensemble_model = None

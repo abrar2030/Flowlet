@@ -186,9 +186,9 @@ def issue_card():
 
         # Prepare response
         response_data = card.to_dict()
-        response_data["message"] = (
-            f"{card.card_type.value.title()} card issued successfully."
-        )
+        response_data[
+            "message"
+        ] = f"{card.card_type.value.title()} card issued successfully."
 
         return jsonify(response_data), 201
 

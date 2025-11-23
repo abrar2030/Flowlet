@@ -77,7 +77,6 @@ class FraudDetectionService:
 
 
 class TestFraudDetectionService(unittest.TestCase):
-
     def setUp(self):
         self.mock_ml_model_api = MagicMock()
         self.fraud_detection_service = FraudDetectionService(

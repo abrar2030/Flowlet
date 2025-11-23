@@ -66,7 +66,6 @@ class Router:
 
 
 class TestAPIGateway(unittest.TestCase):
-
     def setUp(self):
         self.mock_auth_service = MagicMock(spec=AuthService)
         self.mock_rate_limiter = MagicMock(spec=RateLimiter)
