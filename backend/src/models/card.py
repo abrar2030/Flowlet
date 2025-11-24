@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import password_security  # Use internal security module
+import hashlib\nfrom src.security.password_security import check_password, hash_password\nfrom src.models.database import Base, db, Column, String, Integer, DateTime, Boolean, Numeric, Text, ForeignKey, Index, relationship\n\n\nclass CardType(PyEnum):
 
 
 class CardType(PyEnum):
@@ -71,10 +71,10 @@ class Card(Base):
     # Expiration and security
     expiry_month = Column(Integer, nullable=False)
     expiry_year = Column(Integer, nullable=False)
-    # Note: CVV is NEVER stored as per PCI DSS requirements
+    # Note: CVV is NEVER stored as per PCI DSS requirements\n    cvv_hash = Column(String(255)) # Hashed CVV for internal verification (e.g., tokenization service)
 
     # Limits and controls (using Numeric/Decimal)
-    daily_limit = Column(Numeric(20, 2), default=Decimal("1000.00"))
+    daily_limit = Column(Numeric(20, 2), default=Decimal("1000.00"))\n    blocked_reason = Column(String(255))\n    blocked_at = Column(DateTime)\n    cancelled_reason = Column(String(255))\n    cancelled_at = Column(DateTime)\n    activated_at = Column(DateTime)
     monthly_limit = Column(Numeric(20, 2), default=Decimal("10000.00"))
     single_transaction_limit = Column(Numeric(20, 2), default=Decimal("500.00"))
 
@@ -127,7 +127,7 @@ class Card(Base):
             secrets.choice(string.ascii_uppercase + string.digits) for _ in range(32)
         )
 
-    def set_card_number(self, card_number):
+    def set_card_number(self, card_number):\n        """Set card number with proper tokenization and hashing"""\n        # Store only last 4 digits\n        self.last_four_digits = card_number[-4:]\n\n        # Create hash of full PAN for verification\n        self.card_hash = hashlib.sha256(card_number.encode()).hexdigest()\n\n        # In production, you would call a tokenization service here\n        if not self.card_token:\n            self.card_token = self.generate_card_token()\n\n    def verify_card_number(self, card_number):\n        """Verify card number against stored hash"""\n        return hashlib.sha256(card_number.encode()).hexdigest() == self.card_hash\n\n    def set_cvv(self, cvv: str):\n        """Set CVV with proper hashing (for internal use only)"""\n        if len(cvv) not in [3, 4] or not cvv.isdigit():\n            raise ValueError("CVV must be 3 or 4 digits")\n        self.cvv_hash = hash_password(cvv)\n\n    def verify_cvv(self, cvv: str) -> bool:\n        """Verify CVV against stored hash"""\n        if not self.cvv_hash:\n            return False\n        return check_password(self.cvv_hash, cvv)\n\n    def set_pin(self, pin):
         """Set card number with proper tokenization and hashing"""
         # Store only last 4 digits
         self.last_four_digits = card_number[-4:]

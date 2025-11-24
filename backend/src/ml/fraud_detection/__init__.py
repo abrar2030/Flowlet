@@ -469,13 +469,13 @@ class FraudExplainer:
 
         # Generate summary
         if risk_score >= 0.8:
-            explanation[
-                "summary"
-            ] = "High fraud risk detected due to multiple suspicious indicators"
+            explanation["summary"] = (
+                "High fraud risk detected due to multiple suspicious indicators"
+            )
         elif risk_score >= 0.6:
-            explanation[
-                "summary"
-            ] = "Elevated fraud risk - additional verification recommended"
+            explanation["summary"] = (
+                "Elevated fraud risk - additional verification recommended"
+            )
         elif risk_score >= 0.3:
             explanation["summary"] = "Moderate fraud risk - monitor transaction"
         else:

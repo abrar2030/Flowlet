@@ -258,19 +258,19 @@ class RuleEngine:
         self._action_handlers[ActionType.CALCULATE] = self._handle_calculate_action
         self._action_handlers[ActionType.SEND_EMAIL] = self._handle_send_email_action
         self._action_handlers[ActionType.CREATE_TASK] = self._handle_create_task_action
-        self._action_handlers[
-            ActionType.TRIGGER_WORKFLOW
-        ] = self._handle_trigger_workflow_action
+        self._action_handlers[ActionType.TRIGGER_WORKFLOW] = (
+            self._handle_trigger_workflow_action
+        )
         self._action_handlers[ActionType.LOG_EVENT] = self._handle_log_event_action
-        self._action_handlers[
-            ActionType.BLOCK_TRANSACTION
-        ] = self._handle_block_transaction_action
-        self._action_handlers[
-            ActionType.REQUIRE_APPROVAL
-        ] = self._handle_require_approval_action
-        self._action_handlers[
-            ActionType.UPDATE_STATUS
-        ] = self._handle_update_status_action
+        self._action_handlers[ActionType.BLOCK_TRANSACTION] = (
+            self._handle_block_transaction_action
+        )
+        self._action_handlers[ActionType.REQUIRE_APPROVAL] = (
+            self._handle_require_approval_action
+        )
+        self._action_handlers[ActionType.UPDATE_STATUS] = (
+            self._handle_update_status_action
+        )
 
     def _create_default_templates(self):
         """Create default rule templates."""

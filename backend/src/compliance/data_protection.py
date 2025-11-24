@@ -831,9 +831,9 @@ class DataProtectionService:
             self.logger.info(f"Completed erasure request for {data_subject_id}")
         else:
             request.status = "rejected"
-            request.request_details[
-                "rejection_reason"
-            ] = "Legal obligation to retain data"
+            request.request_details["rejection_reason"] = (
+                "Legal obligation to retain data"
+            )
             self.logger.info(
                 f"Rejected erasure request for {data_subject_id}: legal obligation"
             )
