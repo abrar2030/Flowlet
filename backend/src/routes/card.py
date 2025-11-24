@@ -1,5 +1,4 @@
 import logging
-from functools import wraps
 
 from flask import Blueprint, g, jsonify, request
 from src.models.user import User

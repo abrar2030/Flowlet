@@ -1,10 +1,6 @@
-import hashlib
 import json
 import logging
 import secrets
-import string
-import uuid
-from calendar import monthrange
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
@@ -123,9 +119,12 @@ class CardService:
             Tuple[Card, str, str]: The new Card object, the raw card number, and the raw CVV.
         """
         try:
-            card_type, daily_limit, monthly_limit, per_transaction_limit = (
-                self._validate_card_input(data)
-            )
+            (
+                card_type,
+                daily_limit,
+                monthly_limit,
+                per_transaction_limit,
+            ) = self._validate_card_input(data)
 
             account = Account.query.get(data["account_id"])
             if not account:
