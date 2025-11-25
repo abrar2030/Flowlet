@@ -6,13 +6,10 @@ from ..integrations.payments.payment_factory import PaymentFactory
 from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..models.transaction import (  # Assuming decorators are defined here for now; Import refactored modules
-    InputValidator,
-    Payment,
-    Processing,
-    Routes,
-    Transaction,
-)
+from ..routes.auth import token_required
+from ..security.audit_logger import audit_logger
+from ..models.transaction import Transaction
+from ..security.input_validator import InputValidator
 
 # Create blueprint
 payments_bp = Blueprint("payments", __name__, url_prefix="/api/v1/payments")
