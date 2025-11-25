@@ -108,7 +108,6 @@ module "database" {
   source = "./modules/database"
 
   name_prefix = local.name_prefix
-  vpc_id      = module.networking.vpc_id
 
   private_subnet_ids = module.networking.private_subnet_ids
   security_group_ids = [module.security.database_security_group_id]
@@ -119,12 +118,14 @@ module "database" {
 
   db_name     = var.db_name
   db_username = var.db_username
+  db_password = random_password.db_password.result # Use the generated password
 
   backup_retention_period = var.backup_retention_period
   backup_window          = var.backup_window
   maintenance_window     = var.maintenance_window
 
   enable_encryption = var.enable_encryption
+  multi_az          = var.multi_az
 
   tags = local.common_tags
 }
@@ -170,36 +171,18 @@ resource "aws_secretsmanager_secret_version" "db_password" {
   secret_string = random_password.db_password.result
 }
 
-# ElastiCache Redis cluster
-resource "aws_elasticache_subnet_group" "redis" {
-  name       = "${local.name_prefix}-redis"
-  subnet_ids = module.networking.private_subnet_ids
+# Redis Module
+module "redis" {
+  source = "./modules/redis"
 
-  tags = local.common_tags
-}
+  name_prefix = local.name_prefix
 
-resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id         = "${local.name_prefix}-redis"
-  description                  = "Redis cluster for Flowlet application"
+  private_subnet_ids = module.networking.private_subnet_ids
+  security_group_ids = [module.security.redis_security_group_id]
 
-  node_type                    = var.redis_node_type
-  port                         = 6379
-  parameter_group_name         = "default.redis7"
-
-  num_cache_clusters           = var.redis_num_cache_nodes
-
-  subnet_group_name            = aws_elasticache_subnet_group.redis.name
-  security_group_ids           = [module.security.redis_security_group_id]
-
-  at_rest_encryption_enabled   = true
-  transit_encryption_enabled   = true
-  auth_token                   = random_password.redis_auth_token.result
-
-  automatic_failover_enabled   = var.redis_num_cache_nodes > 1
-  multi_az_enabled            = var.redis_num_cache_nodes > 1
-
-  snapshot_retention_limit     = 5
-  snapshot_window             = "03:00-05:00"
+  redis_node_type       = var.redis_node_type
+  redis_num_cache_nodes = var.redis_num_cache_nodes
+  redis_auth_token      = random_password.redis_auth_token.result
 
   tags = local.common_tags
 }
@@ -209,37 +192,11 @@ resource "random_password" "redis_auth_token" {
   special = false
 }
 
-# S3 bucket for application assets
-resource "aws_s3_bucket" "app_assets" {
-  bucket = "${local.name_prefix}-app-assets"
+# S3 Module
+module "s3" {
+  source = "./modules/s3"
+
+  name_prefix = local.name_prefix
 
   tags = local.common_tags
-}
-
-resource "aws_s3_bucket_versioning" "app_assets" {
-  bucket = aws_s3_bucket.app_assets.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_encryption" "app_assets" {
-  bucket = aws_s3_bucket.app_assets.id
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "app_assets" {
-  bucket = aws_s3_bucket.app_assets.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
 }

@@ -87,6 +87,12 @@ variable "db_engine_version" {
   default     = "15.4"
 }
 
+variable "multi_az" {
+  description = "Specifies if the DB instance is multi-AZ."
+  type        = bool
+  default     = false
+}
+
 variable "db_name" {
   description = "Database name"
   type        = string

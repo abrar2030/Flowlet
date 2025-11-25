@@ -24,34 +24,34 @@ RUN pnpm run build
 FROM nginx:alpine as production
 
 # Install curl for health checks
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl gettext
 
 # Copy custom nginx configuration
-COPY infrastructure/docker/nginx.conf /etc/nginx/nginx.conf
+# Copy custom nginx configuration and entrypoint
+COPY infrastructure/docker/nginx.conf /etc/nginx/nginx.conf.template
+COPY infrastructure/docker/frontend-entrypoint.sh /usr/local/bin/
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create non-root user for nginx
-RUN addgroup -g 1001 -S nginx-user && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-user -g nginx-user nginx-user
+# Nginx official image already runs as non-root user 'nginx' (UID 101)
+# No need to create a new user, using default 'nginx' user.
 
-# Change ownership of nginx directories
-RUN chown -R nginx-user:nginx-user /var/cache/nginx && \
-    chown -R nginx-user:nginx-user /var/log/nginx && \
-    chown -R nginx-user:nginx-user /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx-user:nginx-user /var/run/nginx.pid
+# Change ownership of necessary directories for 'nginx' user
+RUN chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d
 
-# Switch to non-root user
-USER nginx-user
+# Switch to non-root user 'nginx'
+USER nginx
 
-# Expose port
+# Expose port and add a placeholder for environment variable substitution in nginx.conf
 EXPOSE 3000
 
-# Health check
+# Health check - already present and good
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000 || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start nginx - use the entrypoint script
+RUN chmod +x /usr/local/bin/frontend-entrypoint.sh
+CMD ["/usr/local/bin/frontend-entrypoint.sh", "nginx", "-g", "daemon off;"]
