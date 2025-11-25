@@ -5,8 +5,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from . import (EnsembleFraudModel, FeatureEngineer, FraudAlert,
-               FraudDetectionError, RealTimeFraudDetector, RiskLevel)
+from . import (
+    EnsembleFraudModel,
+    FeatureEngineer,
+    FraudAlert,
+    FraudDetectionError,
+    RealTimeFraudDetector,
+    RiskLevel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -143,8 +149,7 @@ class FraudDetectionService:
                 val_predictions = self.ensemble_model.predict(val_features)
 
                 if val_labels is not None:
-                    from sklearn.metrics import (classification_report,
-                                                 roc_auc_score)
+                    from sklearn.metrics import classification_report, roc_auc_score
 
                     auc_score = roc_auc_score(val_labels, val_predictions)
                     training_results["validation_auc"] = auc_score

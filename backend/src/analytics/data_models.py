@@ -1,8 +1,19 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (JSONB, UUID, Boolean, Column, DateTime, Decimal,
-                        ForeignKey, Index, Integer, String, Text)
+from sqlalchemy import (
+    JSONB,
+    UUID,
+    Boolean,
+    Column,
+    DateTime,
+    Decimal,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+)
 
 Base = declarative_base()
 

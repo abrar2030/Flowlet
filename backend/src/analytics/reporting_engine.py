@@ -8,8 +8,7 @@ import pandas as pd
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (CustomerAnalytics, PerformanceMetrics,
-                          TransactionAnalytics)
+from .data_models import CustomerAnalytics, PerformanceMetrics, TransactionAnalytics
 
 
 class ReportType(Enum):

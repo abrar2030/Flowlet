@@ -4,12 +4,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 from src.integrations.banking.fdx_integration import FDXIntegration
-from src.integrations.banking.open_banking_integration import \
-    OpenBankingIntegration
+from src.integrations.banking.open_banking_integration import OpenBankingIntegration
 from src.integrations.banking.plaid_integration import PlaidIntegration
 from src.ml.fraud_detection.service import FraudDetectionService
-from src.services.compliance.sanctions_screening import \
-    SanctionsScreeningService
+from src.services.compliance.sanctions_screening import SanctionsScreeningService
 
 # API Integration Tests for External Services
 
@@ -281,8 +279,7 @@ class TestPaymentProcessorIntegration:
         mock_payment_intent.currency = "usd"
         mock_stripe_create.return_value = mock_payment_intent
 
-        from src.integrations.payments.stripe_integration import \
-            StripeIntegration
+        from src.integrations.payments.stripe_integration import StripeIntegration
 
         stripe_integration = StripeIntegration()
 

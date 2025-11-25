@@ -3,8 +3,16 @@ import uuid
 from datetime import datetime, timezone
 
 from app import db
-from sqlalchemy import (UUID, Boolean, Column, DateTime, Enum, ForeignKey,
-                        Integer, String)
+from sqlalchemy import (
+    UUID,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+)
 
 
 class AuditAction(enum.Enum):

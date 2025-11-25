@@ -5,8 +5,20 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import (Base, Boolean, Column, Date, DateTime, ForeignKey,
-                        Index, Integer, Numeric, String, Text, Transaction)
+from sqlalchemy import (
+    Base,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    Transaction,
+)
 
 
 class TransactionType(PyEnum):

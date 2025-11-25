@@ -1,8 +1,7 @@
 from decimal import Decimal
 
 import pytest
-from src.security.encryption_manager import (EncryptionManager,
-                                             TokenizationManager)
+from src.security.encryption_manager import EncryptionManager, TokenizationManager
 from src.security.input_validator import InputValidator, ValidationError
 from src.security.password_security import PasswordSecurity
 from src.security.rate_limiter import RateLimiter

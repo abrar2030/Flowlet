@@ -6,8 +6,7 @@ from sqlalchemy import Boolean, Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from ..security.password_security import check_password, hash_password
-from .database import (  # Import Base and db from the local database setup
-    Base, db)
+from .database import Base, db  # Import Base and db from the local database setup
 
 """
 User Model for Flowlet Financial Backend

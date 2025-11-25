@@ -154,8 +154,7 @@ def register_blueprints(app):
 
 def register_error_handlers(app):
     """Register error handlers"""
-    from app.utils.error_handlers import \
-        register_error_handlers as reg_handlers
+    from app.utils.error_handlers import register_error_handlers as reg_handlers
 
     reg_handlers(app)
 

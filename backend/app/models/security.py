@@ -3,8 +3,7 @@ import uuid
 from datetime import datetime, timezone
 
 from app import db
-from sqlalchemy import (Column, DateTime, Enum, ForeignKey, Integer, String,
-                        Text)
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .mixins import UUID

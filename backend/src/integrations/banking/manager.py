@@ -2,9 +2,17 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
-from . import (BankAccount, BankingIntegrationBase, BankingIntegrationError,
-               FDXIntegration, OpenBankingIntegration, PaymentRequest,
-               PlaidIntegration, Transaction, TransactionStatus)
+from . import (
+    BankAccount,
+    BankingIntegrationBase,
+    BankingIntegrationError,
+    FDXIntegration,
+    OpenBankingIntegration,
+    PaymentRequest,
+    PlaidIntegration,
+    Transaction,
+    TransactionStatus,
+)
 
 logger = logging.getLogger(__name__)
 

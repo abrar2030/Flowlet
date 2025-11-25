@@ -4,10 +4,16 @@ import numpy as np
 import pandas as pd
 import pytest
 from src.ml.fraud_detection import Comprehensive  # Fraud Detection Tests
-from src.ml.fraud_detection import (FeatureEngineer, FraudAlert,
-                                    FraudDetectionService, FraudExplainer,
-                                    IsolationForestModel, RiskLevel,
-                                    TransactionFeatures, XGBoostFraudModel)
+from src.ml.fraud_detection import (
+    FeatureEngineer,
+    FraudAlert,
+    FraudDetectionService,
+    FraudExplainer,
+    IsolationForestModel,
+    RiskLevel,
+    TransactionFeatures,
+    XGBoostFraudModel,
+)
 
 
 class TestFraudDetection:

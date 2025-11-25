@@ -3,11 +3,17 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from src.integrations.banking import BankAccount  # Banking Integration Tests
-from src.integrations.banking import (BankingIntegrationManager,
-                                      FDXIntegration, IntegrationType,
-                                      OpenBankingIntegration, PaymentRequest,
-                                      PlaidIntegration, Transaction,
-                                      TransactionStatus, TransactionType)
+from src.integrations.banking import (
+    BankingIntegrationManager,
+    FDXIntegration,
+    IntegrationType,
+    OpenBankingIntegration,
+    PaymentRequest,
+    PlaidIntegration,
+    Transaction,
+    TransactionStatus,
+    TransactionType,
+)
 
 
 class TestBankingIntegrations:

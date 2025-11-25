@@ -3,8 +3,19 @@ import uuid
 from datetime import datetime, timezone
 
 from app import db
-from sqlalchemy import (UUID, BigInteger, Boolean, Card, Column, DateTime,
-                        Enum, ForeignKey, Integer, String, Text)
+from sqlalchemy import (
+    UUID,
+    BigInteger,
+    Boolean,
+    Card,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 
 
 class CardType(enum.Enum):

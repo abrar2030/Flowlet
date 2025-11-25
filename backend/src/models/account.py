@@ -4,8 +4,17 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import (Account, Base, Column, DateTime, ForeignKey, Index,
-                        Integer, Numeric, String)
+from sqlalchemy import (
+    Account,
+    Base,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+)
 
 
 class AccountType(PyEnum):
