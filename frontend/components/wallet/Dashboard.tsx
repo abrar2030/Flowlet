@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -8,218 +8,166 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
   Plus,
   Send,
-  TrendingUp,
-  Wallet,
   CreditCard,
+  ArrowDownRight,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth"; // Will be mocked for testing
+import { DashboardState } from "@/types/wallet";
+import { fetchWalletData } from "@/services/walletService"; // Will be mocked for testing
+import WalletSummary from "./WalletSummary";
+import TransactionList from "./TransactionList";
+
+// --- Helper Components ---
+
+/**
+ * Displays the welcome message and quick action buttons.
+ */
+const WelcomeSection: React.FC<{ userName: string }> = ({ userName }) => (
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 className="text-3xl font-bold tracking-tight">
+        Welcome back, {userName}!
+      </h1>
+      <p className="text-muted-foreground">
+        Here's what's happening with your finances today.
+      </p>
+    </div>
+    <div className="flex space-x-2 mt-4 sm:mt-0">
+      <Button>
+        <Plus className="mr-2 h-4 w-4" />
+        Add Transaction
+      </Button>
+      <Button variant="outline">
+        <Send className="mr-2 h-4 w-4" />
+        Send Money
+      </Button>
+    </div>
+  </div>
+);
+
+/**
+ * Displays a list of quick action buttons.
+ */
+const QuickActionsCard: React.FC = () => (
+  <Card>
+    <CardHeader>
+      <CardTitle>Quick Actions</CardTitle>
+      <CardDescription>Common tasks and shortcuts</CardDescription>
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <Button className="w-full justify-start" variant="outline">
+        <Send className="mr-2 h-4 w-4" />
+        Send Money
+      </Button>
+      <Button className="w-full justify-start" variant="outline">
+        <ArrowDownRight className="mr-2 h-4 w-4" />
+        Request Money
+      </Button>
+      <Button className="w-full justify-start" variant="outline">
+        <CreditCard className="mr-2 h-4 w-4" />
+        Pay Bills
+      </Button>
+      <Button className="w-full justify-start" variant="outline">
+        <Plus className="mr-2 h-4 w-4" />
+        Add Account
+      </Button>
+    </CardContent>
+  </Card>
+);
+
+// --- Main Component ---
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const userName = user?.name?.split(" ")[0] || "User";
 
-  const quickStats = [
-    {
-      title: "Total Balance",
-      value: "$12,345.67",
-      change: "+2.5%",
-      trend: "up",
-      icon: Wallet,
-    },
-    {
-      title: "Monthly Income",
-      value: "$4,200.00",
-      change: "+8.1%",
-      trend: "up",
-      icon: ArrowDownRight,
-    },
-    {
-      title: "Monthly Expenses",
-      value: "$2,850.30",
-      change: "-3.2%",
-      trend: "down",
-      icon: ArrowUpRight,
-    },
-    {
-      title: "Savings Rate",
-      value: "32.1%",
-      change: "+5.4%",
-      trend: "up",
-      icon: TrendingUp,
-    },
-  ];
+  const [state, setState] = useState<DashboardState>({
+    data: null,
+    isLoading: true,
+    error: null,
+  });
 
-  const recentTransactions = [
-    {
-      id: 1,
-      description: "Grocery Store",
-      amount: -85.32,
-      date: "2024-01-15",
-      category: "Food",
-    },
-    {
-      id: 2,
-      description: "Salary Deposit",
-      amount: 4200.0,
-      date: "2024-01-15",
-      category: "Income",
-    },
-    {
-      id: 3,
-      description: "Electric Bill",
-      amount: -120.45,
-      date: "2024-01-14",
-      category: "Utilities",
-    },
-    {
-      id: 4,
-      description: "Coffee Shop",
-      amount: -12.5,
-      date: "2024-01-14",
-      category: "Food",
-    },
-    {
-      id: 5,
-      description: "Gas Station",
-      amount: -65.0,
-      date: "2024-01-13",
-      category: "Transport",
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true; // Flag to prevent state update on unmounted component
+
+    const loadData = async () => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      try {
+        const walletData = await fetchWalletData();
+        if (isMounted) {
+          setState({
+            data: walletData,
+            isLoading: false,
+            error: null,
+          });
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred";
+        if (isMounted) {
+          setState({
+            data: null,
+            isLoading: false,
+            error: errorMessage,
+          });
+        }
+      }
+    };
+
+    loadData();
+
+    // Cleanup function to set isMounted to false when the component unmounts
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array means this runs once on mount
+
+  const { data, isLoading, error } = state;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+        <p className="text-lg text-muted-foreground">
+          Loading dashboard data...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center space-x-3">
+        <AlertTriangle className="h-6 w-6" />
+        <p className="font-medium">Error loading data: {error}</p>
+      </div>
+    );
+  }
+
+  // Data is guaranteed to be present if we reach this point
+  if (!data) {
+    // Should not happen if error handling is correct, but good for type safety
+    return null;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(" ")[0] || "User"}!
-          </h1>
-          <p className="text-muted-foreground">
-            Here's what's happening with your finances today.
-          </p>
-        </div>
-        <div className="flex space-x-2 mt-4 sm:mt-0">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
-          <Button variant="outline">
-            <Send className="mr-2 h-4 w-4" />
-            Send Money
-          </Button>
-        </div>
-      </div>
+      <WelcomeSection userName={userName} />
 
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {quickStats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p
-                  className={`text-xs ${
-                    stat.trend === "up" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {stat.change} from last month
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* Wallet Summary (Quick Stats) */}
+      <WalletSummary quickStats={data.quickStats} />
 
       {/* Main Content Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Recent Transactions */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your latest financial activity</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        transaction.amount > 0 ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {transaction.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {transaction.category}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-medium ${
-                        transaction.amount > 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {transaction.amount > 0 ? "+" : ""}$
-                      {Math.abs(transaction.amount).toFixed(2)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {transaction.date}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button variant="outline" className="w-full mt-4">
-              View All Transactions
-            </Button>
-          </CardContent>
-        </Card>
+        <TransactionList transactions={data.recentTransactions} />
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks and shortcuts</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button className="w-full justify-start" variant="outline">
-              <Send className="mr-2 h-4 w-4" />
-              Send Money
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <ArrowDownRight className="mr-2 h-4 w-4" />
-              Request Money
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pay Bills
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Account
-            </Button>
-          </CardContent>
-        </Card>
+        <QuickActionsCard />
       </div>
     </div>
   );
