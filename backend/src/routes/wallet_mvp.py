@@ -7,11 +7,8 @@ from flask import Blueprint, g, jsonify, request
 from src.models.account import Account, AccountStatus, AccountType
 from src.models.database import User, db
 from src.models.transaction import Transaction as EnhancedTransaction
-from src.models.transaction import (
-    TransactionCategory,
-    TransactionStatus,
-    TransactionType,
-)
+from src.models.transaction import (TransactionCategory, TransactionStatus,
+                                    TransactionType)
 
 # Create blueprint
 wallet_mvp_bp = Blueprint("wallet_mvp", __name__, url_prefix="/api/v1/wallet")

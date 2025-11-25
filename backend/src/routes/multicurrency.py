@@ -10,7 +10,8 @@ from ..models.account import Account
 from ..models.database import db
 from ..models.transaction import Transaction
 from ..security.audit_logger import audit_logger
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 """
 Multi-Currency and Exchange Rate Routes

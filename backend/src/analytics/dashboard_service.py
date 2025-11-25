@@ -7,14 +7,9 @@ from typing import Any, Dict, List
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from .data_models import (
-    AlertConfiguration,
-    CustomerAnalytics,
-    Dashboard,
-    PerformanceMetrics,
-    ReportingEngine,
-    TransactionAnalytics,
-)
+from .data_models import (AlertConfiguration, CustomerAnalytics, Dashboard,
+                          PerformanceMetrics, ReportingEngine,
+                          TransactionAnalytics)
 
 
 class WidgetType(Enum):

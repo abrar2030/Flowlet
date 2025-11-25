@@ -8,7 +8,8 @@ from typing import Dict, List, Optional
 
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..models.user import User  # Assuming User model is needed to get contact info
+from ..models.user import \
+    User  # Assuming User model is needed to get contact info
 from ..security.audit_logger import audit_logger
 
 """

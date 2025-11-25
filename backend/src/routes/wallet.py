@@ -6,16 +6,11 @@ from sqlalchemy import select
 from ..models.account import Account, AccountStatus
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..routes.auth import token_required
+from ..models.transaction import (Transaction, TransactionCategory,
+                                  TransactionStatus, TransactionType)
 from ..routes.auth import token_required
 from ..security.audit_logger import audit_logger
 from ..security.input_validator import InputValidator
-from ..models.transaction import (
-    Transaction,
-    TransactionType,
-    TransactionCategory,
-    TransactionStatus,
-)
 
 # Create blueprint
 account_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")

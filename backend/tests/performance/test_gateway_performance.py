@@ -5,7 +5,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
-from src.gateway.optimized_gateway import CacheManager, CircuitBreaker, RequestBatcher
+from src.gateway.optimized_gateway import (CacheManager, CircuitBreaker,
+                                           RequestBatcher)
 from src.main_optimized import create_app
 
 # Performance Optimization Tests for API Gateway

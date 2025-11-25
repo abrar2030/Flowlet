@@ -5,17 +5,9 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
-from . import (
-    AutoencoderModel,
-    FraudAlert,
-    FraudDetectionError,
-    FraudModelBase,
-    FraudType,
-    IsolationForestModel,
-    ModelNotTrainedError,
-    OneClassSVMModel,
-    RiskLevel,
-)
+from . import (AutoencoderModel, FraudAlert, FraudDetectionError,
+               FraudModelBase, FraudType, IsolationForestModel,
+               ModelNotTrainedError, OneClassSVMModel, RiskLevel)
 
 logger = logging.getLogger(__name__)
 

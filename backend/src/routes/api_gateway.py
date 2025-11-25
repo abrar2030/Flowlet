@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify
 
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 """
 API Gateway Routes for Health Check and Documentation

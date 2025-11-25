@@ -9,7 +9,8 @@ from ..models.account import Account
 from ..models.card import Card
 from ..models.database import db
 from ..models.transaction import Transaction, TransactionType
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import \
+    token_required  # Assuming decorators are defined here for now
 
 """
 Financial Analytics Routes

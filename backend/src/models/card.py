@@ -6,20 +6,9 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from src.models.database import (
-    Base,
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Index,
-    Integer,
-    Numeric,
-    String,
-    Text,
-    db,
-    relationship,
-)
+from src.models.database import (Base, Boolean, Column, DateTime, ForeignKey,
+                                 Index, Integer, Numeric, String, Text, db,
+                                 relationship)
 from src.security.password_security import check_password, hash_password
 
 
