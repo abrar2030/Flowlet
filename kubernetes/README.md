@@ -157,7 +157,3 @@ configuration as code, making deployment configurations auditable, repeatable, a
 - **Rotation:** Implement a robust secret rotation policy to regularly change credentials, reducing the window of opportunity for compromise.
 - **Auditing:** Monitor access to Secrets and log all attempts to read or modify them.
 - **External Secrets Management:** For highly sensitive data or advanced secret management features (e.g., dynamic secrets, fine-grained access control, secret leasing), consider integrating with external secrets management systems.
-
-## License
-
-## The Kubernetes configurations within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.

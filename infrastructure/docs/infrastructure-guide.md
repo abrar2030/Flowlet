@@ -762,36 +762,3 @@ cd infrastructure
 # Deploy to development cluster
 ./scripts/deploy-dev.sh
 ```
-
-### Code Standards
-
-- Follow language-specific style guides
-- Write comprehensive tests for all changes
-- Update documentation for new features
-- Use semantic versioning for releases
-
-### Pull Request Process
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write/update tests
-5. Update documentation
-6. Submit a pull request
-
-## Support
-
-### Community Support
-
-- **GitHub Issues**: Report bugs and request features
-- **Documentation**: Comprehensive guides and tutorials
-- **Community Forum**: Ask questions and share knowledge
-
-### Enterprise Support
-
-- **24/7 Support**: Critical issue response
-- **Professional Services**: Implementation assistance
-- **Training**: Developer and operations training
-- **Custom Development**: Tailored feature development
-
-For enterprise support, contact: enterprise@flowlet.com

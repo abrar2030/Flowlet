@@ -481,32 +481,3 @@ EOF
 
 chmod +x health-check.sh
 ```
-
-## Support and Documentation
-
-### Additional Resources
-
-- **API Documentation**: Access via Developer Portal at `https://portal.yourdomain.com`
-- **Monitoring Dashboards**: Access Grafana at `https://monitoring.yourdomain.com`
-- **Infrastructure Guide**: See `docs/infrastructure-guide.md`
-- **Testing Guide**: See `docs/testing-guide.md`
-
-### Getting Help
-
-1. **Check the logs**: `kubectl logs <pod-name> -n <namespace>`
-2. **Review the documentation**: All guides are in the `docs/` directory
-3. **Run diagnostics**: Use the validation and health check scripts
-4. **Community Support**: GitHub issues and community forums
-5. **Enterprise Support**: Contact enterprise@flowlet.com
-
-### Security Considerations
-
-- **Change default passwords** before production deployment
-- **Configure TLS certificates** for all external endpoints
-- **Review network policies** and security configurations
-- **Enable audit logging** for compliance requirements
-- **Regular security updates** for all components
-
----
-
-**Congratulations!** You have successfully deployed the Flowlet embedded finance platform infrastructure. The platform is now ready for application deployment and integration.

@@ -25,10 +25,3 @@ helm install flowlet ./flowlet --namespace flowlet --create-namespace
 # Upgrade existing installation
 helm upgrade flowlet ./flowlet --namespace flowlet -f values/production.yaml
 ```
-
-## Best Practices
-
-- Charts follow Helm best practices
-- All configurable parameters are documented
-- Sensible defaults are provided for all values
-- Resource limits and requests are defined for all components

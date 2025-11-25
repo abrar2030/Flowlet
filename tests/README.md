@@ -67,19 +67,3 @@ You can run specific test files or categories by providing their paths to the `j
 npm test src/test/unit/financial_calculations/calculations.test.ts
 npm test src/test/security/
 ```
-
-## 5. Test Reporting
-
-Test results will be displayed in the console. For more detailed reports, additional Jest reporters can be configured in `jest.config.js` (e.g., `jest-junit` for CI/CD integration, `jest-html-reporters` for HTML reports).
-
-## 6. Contributing to Tests
-
-When adding new tests or modifying existing ones, please adhere to the following guidelines:
-
-- **Follow the Test Architecture:** Place tests in the appropriate category and directory.
-- **Descriptive Naming:** Use clear and concise names for test files and test cases.
-- **Comprehensive Coverage:** Aim for high code coverage, especially for critical financial logic.
-- **Maintainability:** Write clean, readable, and maintainable test code.
-- **Performance:** Ensure tests run efficiently and do not significantly slow down the development cycle.
-
-By following these guidelines, we can ensure the continued quality and reliability of the Flowlet application.
