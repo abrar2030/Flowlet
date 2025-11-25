@@ -2,19 +2,10 @@ import random
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from sqlalchemy import Column, String, Integer, DateTime, Numeric, ForeignKey, Index
+from sqlalchemy.orm import relationship
+from .database import Base, db
 from enum import Enum as PyEnum
-
-from sqlalchemy import (
-    Account,
-    Base,
-    Column,
-    DateTime,
-    ForeignKey,
-    Index,
-    Integer,
-    Numeric,
-    String,
-)
 
 
 class AccountType(PyEnum):
