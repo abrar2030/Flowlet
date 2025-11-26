@@ -1,17 +1,34 @@
 import logging
-import uuid
-from datetime import datetime, timezone
-from decimal import Decimal
+from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, g, jsonify, request
-from src.models.account import Account, AccountStatus
-from src.models.database import User, db
-from src.models.transaction import Transaction as EnhancedTransaction
-from src.models.transaction import (
+from pydantic import ValidationError
+
+from ..models.account import Account
+from ..models.database import db
+from ..models.transaction import Transaction as EnhancedTransaction
+from ..models.transaction import (
     TransactionCategory,
-    TransactionStatus,
     TransactionType,
+)
+from ..utils.auth import token_required
+
+from ..services.payment_service import (
+    process_internal_transfer,
+    send_payment,
+    create_payment_request,
+)
+from ..services.payment_service_errors import PaymentServiceError
+from ..schemas import (
+    InternalTransferRequest,
+    SendPaymentRequest,
+    PaymentRequestCreate,
+)
+from ..error_handlers import (
+    handle_validation_error,
+    handle_wallet_service_error,
+    handle_generic_exception,
 )
 
 # Create blueprint
@@ -20,236 +37,71 @@ payment_mvp_bp = Blueprint("payment_mvp", __name__, url_prefix="/api/v1/payment"
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Re-using handle_wallet_service_error for PaymentServiceError as they share the same base class
 
-def validate_json_request(required_fields=None):
-    """Decorator to validate JSON request data"""
 
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not request.is_json:
-                return (
-                    jsonify(
-                        {
-                            "error": "Content-Type must be application/json",
-                            "code": "INVALID_CONTENT_TYPE",
-                        }
-                    ),
-                    400,
-                )
+# --- Helper function for wallet access (similar to wallet.py's decorator) ---
+def wallet_access_required(f):
+    """Decorator to ensure user has access to the wallet"""
 
-            data = request.get_json()
-            if not data:
-                return (
-                    jsonify(
-                        {
-                            "error": "Request body must contain valid JSON",
-                            "code": "INVALID_JSON",
-                        }
-                    ),
-                    400,
-                )
+    @wraps(f)
+    @token_required
+    def decorated(wallet_id, *args, **kwargs):
+        account = db.session.get(Account, wallet_id)
+        if not account:
+            return (
+                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
+                404,
+            )
 
-            if required_fields:
-                missing_fields = [
-                    field for field in required_fields if field not in data
-                ]
-                if missing_fields:
-                    return (
-                        jsonify(
-                            {
-                                "error": f'Missing required fields: {", ".join(missing_fields)}',
-                                "code": "MISSING_FIELDS",
-                                "missing_fields": missing_fields,
-                            }
-                        ),
-                        400,
-                    )
+        # Check if user owns the account or is admin
+        if account.user_id != g.current_user.id and not getattr(
+            g.current_user, "is_admin", False
+        ):
+            return jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403
 
-            g.request_data = data
-            return f(*args, **kwargs)
+        g.account = account
+        return f(wallet_id, *args, **kwargs)
 
-        return decorated_function
-
-    return decorator
+    return decorated
 
 
 @payment_mvp_bp.route("/transfer", methods=["POST"])
-@validate_json_request(["from_wallet_id", "to_wallet_id", "amount"])
+@token_required
 def transfer_funds():
     """
     Transfer funds between wallets
-
-    Expected JSON payload:
-    {
-        "from_wallet_id": "string",
-        "to_wallet_id": "string",
-        "amount": "decimal",
-        "description": "string" (optional),
-        "reference": "string" (optional)
-    }
     """
     try:
-        data = g.request_data
+        data = request.get_json()
+        transfer_request = InternalTransferRequest(**(data or {}))
 
-        # Find source and destination accounts
-        from_account = Account.query.get(data["from_wallet_id"])
-        to_account = Account.query.get(data["to_wallet_id"])
-
-        if not from_account:
+        # Check if the authenticated user owns the source wallet
+        source_account = db.session.get(Account, transfer_request.from_wallet_id)
+        if not source_account or source_account.user_id != g.current_user.id:
             return (
                 jsonify(
                     {
-                        "error": "Source wallet not found",
-                        "code": "SOURCE_WALLET_NOT_FOUND",
+                        "error": "Source wallet not found or access denied",
+                        "code": "ACCOUNT_ACCESS_DENIED",
                     }
                 ),
-                404,
+                403,
             )
 
-        if not to_account:
-            return (
-                jsonify(
-                    {
-                        "error": "Destination wallet not found",
-                        "code": "DESTINATION_WALLET_NOT_FOUND",
-                    }
-                ),
-                404,
-            )
-
-        # Validate account statuses
-        if from_account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify(
-                    {
-                        "error": "Source wallet is not active",
-                        "code": "SOURCE_WALLET_INACTIVE",
-                    }
-                ),
-                400,
-            )
-
-        if to_account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify(
-                    {
-                        "error": "Destination wallet is not active",
-                        "code": "DESTINATION_WALLET_INACTIVE",
-                    }
-                ),
-                400,
-            )
-
-        # Validate amount
-        try:
-            amount = Decimal(str(data["amount"]))
-            if amount <= 0:
-                return (
-                    jsonify(
-                        {
-                            "error": "Transfer amount must be positive",
-                            "code": "INVALID_AMOUNT",
-                        }
-                    ),
-                    400,
-                )
-        except (ValueError, TypeError):
-            return (
-                jsonify(
-                    {"error": "Invalid amount format", "code": "INVALID_AMOUNT_FORMAT"}
-                ),
-                400,
-            )
-
-        # Check currency compatibility
-        if from_account.currency != to_account.currency:
-            return (
-                jsonify(
-                    {
-                        "error": "Currency mismatch between wallets",
-                        "code": "CURRENCY_MISMATCH",
-                        "from_currency": from_account.currency,
-                        "to_currency": to_account.currency,
-                    }
-                ),
-                400,
-            )
-
-        # Check if source account has sufficient funds
-        can_debit, message = from_account.can_debit(amount)
-        if not can_debit:
-            return jsonify({"error": message, "code": "INSUFFICIENT_FUNDS"}), 400
-
-        # Check daily/monthly limits for source account
-        within_limits, limit_message = from_account.check_limits(amount, "daily")
-        if not within_limits:
-            return (
-                jsonify({"error": limit_message, "code": "DAILY_LIMIT_EXCEEDED"}),
-                400,
-            )
-
-        # Generate transfer reference
-        transfer_reference = data.get(
-            "reference",
-            f"TRF-{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}",
-        )
-        description = data.get(
-            "description",
-            f"Transfer from {from_account.account_name} to {to_account.account_name}",
+        debit_transaction, credit_transaction = process_internal_transfer(
+            db.session, transfer_request
         )
 
-        # Create debit transaction for source account
-        debit_transaction = EnhancedTransaction(
-            user_id=from_account.user_id,
-            account_id=from_account.id,
-            transaction_type=TransactionType.DEBIT,
-            transaction_category=TransactionCategory.TRANSFER,
-            status=TransactionStatus.COMPLETED,
-            description=f"{description} (Outgoing)",
-            reference_number=transfer_reference,
-            channel="api",
-        )
-        debit_transaction.set_amount(amount)
-        debit_transaction.currency = from_account.currency
-        debit_transaction.processed_at = datetime.now(timezone.utc)
-
-        # Create credit transaction for destination account
-        credit_transaction = EnhancedTransaction(
-            user_id=to_account.user_id,
-            account_id=to_account.id,
-            transaction_type=TransactionType.CREDIT,
-            transaction_category=TransactionCategory.TRANSFER,
-            status=TransactionStatus.COMPLETED,
-            description=f"{description} (Incoming)",
-            reference_number=transfer_reference,
-            channel="api",
-        )
-        credit_transaction.set_amount(amount)
-        credit_transaction.currency = to_account.currency
-        credit_transaction.processed_at = datetime.now(timezone.utc)
-
-        # Link transactions as related
-        credit_transaction.parent_transaction_id = debit_transaction.id
-
-        # Update account balances
-        from_account.debit(amount, debit_transaction.description)
-        to_account.credit(amount, credit_transaction.description)
-
-        # Save all changes
-        db.session.add(debit_transaction)
-        db.session.add(credit_transaction)
-        db.session.commit()
-
-        logger.info(
-            f"Transfer completed: {amount} {from_account.currency} from {from_account.id} to {to_account.id}"
-        )
+        # Fetch accounts again to get updated balances
+        from_account = db.session.get(Account, transfer_request.from_wallet_id)
+        to_account = db.session.get(Account, transfer_request.to_wallet_id)
 
         return (
             jsonify(
                 {
                     "success": True,
-                    "transfer_reference": transfer_reference,
+                    "transfer_reference": debit_transaction.reference_number,
                     "from_wallet": {
                         "wallet_id": str(from_account.id),
                         "account_name": from_account.account_name,
@@ -265,9 +117,9 @@ def transfer_funds():
                         ),
                     },
                     "transfer_details": {
-                        "amount": float(amount),
+                        "amount": float(transfer_request.amount),
                         "currency": from_account.currency,
-                        "description": description,
+                        "description": transfer_request.description,
                         "processed_at": debit_transaction.processed_at.isoformat(),
                     },
                     "transactions": {
@@ -280,225 +132,51 @@ def transfer_funds():
             200,
         )
 
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except PaymentServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error processing transfer: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @payment_mvp_bp.route("/send", methods=["POST"])
-@validate_json_request(["from_wallet_id", "recipient_identifier", "amount"])
-def send_payment():
+@token_required
+def send_payment_route():
     """
     Send payment to a recipient (by email, phone, or account number)
-
-    Expected JSON payload:
-    {
-        "from_wallet_id": "string",
-        "recipient_identifier": "string", // email, phone, or account number
-        "recipient_type": "email|phone|account_number" (optional, auto-detected),
-        "amount": "decimal",
-        "description": "string" (optional),
-        "reference": "string" (optional)
-    }
     """
     try:
-        data = g.request_data
+        data = request.get_json()
+        send_request = SendPaymentRequest(**(data or {}))
 
-        # Find source account
-        from_account = Account.query.get(data["from_wallet_id"])
-        if not from_account:
+        # Check if the authenticated user owns the source wallet
+        source_account = db.session.get(Account, send_request.from_wallet_id)
+        if not source_account or source_account.user_id != g.current_user.id:
             return (
                 jsonify(
                     {
-                        "error": "Source wallet not found",
-                        "code": "SOURCE_WALLET_NOT_FOUND",
+                        "error": "Source wallet not found or access denied",
+                        "code": "ACCOUNT_ACCESS_DENIED",
                     }
                 ),
-                404,
+                403,
             )
 
-        # Validate source account status
-        if from_account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify(
-                    {
-                        "error": "Source wallet is not active",
-                        "code": "SOURCE_WALLET_INACTIVE",
-                    }
-                ),
-                400,
-            )
+        debit_transaction, credit_transaction = send_payment(db.session, send_request)
 
-        # Find recipient account
-        recipient_identifier = data["recipient_identifier"]
-        recipient_type = data.get("recipient_type", "auto")
-
-        # Auto-detect recipient type if not specified
-        if recipient_type == "auto":
-            if "@" in recipient_identifier:
-                recipient_type = "email"
-            elif recipient_identifier.isdigit() and len(recipient_identifier) >= 10:
-                if len(recipient_identifier) == 16:  # Account number length
-                    recipient_type = "account_number"
-                else:
-                    recipient_type = "phone"
-            else:
-                recipient_type = "account_number"
-
-        # Find recipient account based on type
-        to_account = None
-        if recipient_type == "email":
-            # Find user by email, then get their primary account
-            user = User.query.filter_by(email=recipient_identifier).first()
-            if user:
-                to_account = Account.query.filter_by(user_id=user.id).first()
-        elif recipient_type == "phone":
-            # Find user by phone, then get their primary account
-            user = User.query.filter_by(phone=recipient_identifier).first()
-            if user:
-                to_account = Account.query.filter_by(user_id=user.id).first()
-        elif recipient_type == "account_number":
-            # Find account by account number
-            to_account = Account.query.filter_by(
-                account_number=recipient_identifier
-            ).first()
-
-        if not to_account:
-            return (
-                jsonify(
-                    {
-                        "error": "Recipient not found",
-                        "code": "RECIPIENT_NOT_FOUND",
-                        "recipient_identifier": recipient_identifier,
-                        "recipient_type": recipient_type,
-                    }
-                ),
-                404,
-            )
-
-        # Validate destination account status
-        if to_account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify(
-                    {
-                        "error": "Recipient wallet is not active",
-                        "code": "RECIPIENT_WALLET_INACTIVE",
-                    }
-                ),
-                400,
-            )
-
-        # Validate amount
-        try:
-            amount = Decimal(str(data["amount"]))
-            if amount <= 0:
-                return (
-                    jsonify(
-                        {
-                            "error": "Payment amount must be positive",
-                            "code": "INVALID_AMOUNT",
-                        }
-                    ),
-                    400,
-                )
-        except (ValueError, TypeError):
-            return (
-                jsonify(
-                    {"error": "Invalid amount format", "code": "INVALID_AMOUNT_FORMAT"}
-                ),
-                400,
-            )
-
-        # Check currency compatibility
-        if from_account.currency != to_account.currency:
-            return (
-                jsonify(
-                    {
-                        "error": "Currency mismatch between wallets",
-                        "code": "CURRENCY_MISMATCH",
-                        "from_currency": from_account.currency,
-                        "to_currency": to_account.currency,
-                    }
-                ),
-                400,
-            )
-
-        # Check if source account has sufficient funds
-        can_debit, message = from_account.can_debit(amount)
-        if not can_debit:
-            return jsonify({"error": message, "code": "INSUFFICIENT_FUNDS"}), 400
-
-        # Check daily/monthly limits for source account
-        within_limits, limit_message = from_account.check_limits(amount, "daily")
-        if not within_limits:
-            return (
-                jsonify({"error": limit_message, "code": "DAILY_LIMIT_EXCEEDED"}),
-                400,
-            )
-
-        # Generate payment reference
-        payment_reference = data.get(
-            "reference",
-            f"PAY-{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}",
-        )
-        description = data.get("description", f"Payment to {recipient_identifier}")
-
-        # Create debit transaction for source account
-        debit_transaction = EnhancedTransaction(
-            user_id=from_account.user_id,
-            account_id=from_account.id,
-            transaction_type=TransactionType.PAYMENT,
-            transaction_category=TransactionCategory.PAYMENT,
-            status=TransactionStatus.COMPLETED,
-            description=f"{description} (Sent)",
-            reference_number=payment_reference,
-            channel="api",
-        )
-        debit_transaction.set_amount(amount)
-        debit_transaction.currency = from_account.currency
-        debit_transaction.processed_at = datetime.now(timezone.utc)
-
-        # Create credit transaction for destination account
-        credit_transaction = EnhancedTransaction(
-            user_id=to_account.user_id,
-            account_id=to_account.id,
-            transaction_type=TransactionType.PAYMENT,
-            transaction_category=TransactionCategory.PAYMENT,
-            status=TransactionStatus.COMPLETED,
-            description=f"{description} (Received)",
-            reference_number=payment_reference,
-            channel="api",
-        )
-        credit_transaction.set_amount(amount)
-        credit_transaction.currency = to_account.currency
-        credit_transaction.processed_at = datetime.now(timezone.utc)
-
-        # Link transactions as related
-        credit_transaction.parent_transaction_id = debit_transaction.id
-
-        # Update account balances
-        from_account.debit(amount, debit_transaction.description)
-        to_account.credit(amount, credit_transaction.description)
-
-        # Save all changes
-        db.session.add(debit_transaction)
-        db.session.add(credit_transaction)
-        db.session.commit()
-
-        logger.info(
-            f"Payment completed: {amount} {from_account.currency} from {from_account.id} to {to_account.id}"
-        )
+        # Fetch accounts again to get updated balances
+        from_account = db.session.get(Account, send_request.from_wallet_id)
+        to_account = db.session.get(Account, credit_transaction.account_id)
 
         return (
             jsonify(
                 {
                     "success": True,
-                    "payment_reference": payment_reference,
-                    "sender": {
+                    "transfer_reference": debit_transaction.reference_number,
+                    "from_wallet": {
                         "wallet_id": str(from_account.id),
                         "account_name": from_account.account_name,
                         "new_balance": float(
@@ -508,13 +186,13 @@ def send_payment():
                     "recipient": {
                         "wallet_id": str(to_account.id),
                         "account_name": to_account.account_name,
-                        "identifier": recipient_identifier,
-                        "type": recipient_type,
+                        "identifier": send_request.recipient_identifier,
+                        "type": send_request.recipient_type,
                     },
                     "payment_details": {
-                        "amount": float(amount),
+                        "amount": float(send_request.amount),
                         "currency": from_account.currency,
-                        "description": description,
+                        "description": send_request.description,
                         "processed_at": debit_transaction.processed_at.isoformat(),
                     },
                     "transactions": {
@@ -527,118 +205,60 @@ def send_payment():
             200,
         )
 
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except PaymentServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error processing payment: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @payment_mvp_bp.route("/request", methods=["POST"])
-@validate_json_request(["from_wallet_id", "amount"])
-def request_payment():
+@token_required
+def request_payment_route():
     """
-    Create a payment request (for future implementation)
-
-    Expected JSON payload:
-    {
-        "from_wallet_id": "string",
-        "amount": "decimal",
-        "description": "string" (optional),
-        "expires_at": "datetime" (optional)
-    }
+    Create a payment request
     """
     try:
-        data = g.request_data
+        data = request.get_json()
+        request_create = PaymentRequestCreate(**(data or {}))
 
-        # Find account
-        account = Account.query.get(data["from_wallet_id"])
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
-
-        # Validate amount
-        try:
-            amount = Decimal(str(data["amount"]))
-            if amount <= 0:
-                return (
-                    jsonify(
-                        {
-                            "error": "Request amount must be positive",
-                            "code": "INVALID_AMOUNT",
-                        }
-                    ),
-                    400,
-                )
-        except (ValueError, TypeError):
+        # Check if the authenticated user owns the source wallet
+        source_account = db.session.get(Account, request_create.from_wallet_id)
+        if not source_account or source_account.user_id != g.current_user.id:
             return (
                 jsonify(
-                    {"error": "Invalid amount format", "code": "INVALID_AMOUNT_FORMAT"}
+                    {
+                        "error": "Source wallet not found or access denied",
+                        "code": "ACCOUNT_ACCESS_DENIED",
+                    }
                 ),
-                400,
+                403,
             )
 
-        # Generate request reference
-        request_reference = (
-            f"REQ-{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}"
-        )
-        description = data.get("description", "Payment request")
+        result = create_payment_request(db.session, request_create)
 
-        # For MVP, we'll just return the request details
-        # In a full implementation, this would be stored in a payment_requests table
+        return jsonify(result), 201
 
-        return (
-            jsonify(
-                {
-                    "success": True,
-                    "request_reference": request_reference,
-                    "wallet_id": str(account.id),
-                    "account_name": account.account_name,
-                    "amount": float(amount),
-                    "currency": account.currency,
-                    "description": description,
-                    "status": "pending",
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "expires_at": data.get("expires_at"),
-                    "message": "Payment request created successfully",
-                }
-            ),
-            201,
-        )
-
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except PaymentServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
     except Exception as e:
-        logger.error(f"Error creating payment request: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        db.session.rollback()
+        return handle_generic_exception(e)
 
 
 @payment_mvp_bp.route("/history/<wallet_id>", methods=["GET"])
+@wallet_access_required
 def get_payment_history(wallet_id):
     """
     Get payment history for a wallet (payments sent and received)
-
-    Query parameters:
-    - page: Page number (default: 1)
-    - per_page: Items per page (default: 20, max: 100)
-    - type: Filter by type (sent, received, all) (default: all)
-    - start_date: Filter from date (ISO format)
-    - end_date: Filter to date (ISO format)
     """
     try:
-        # Find account
-        account = Account.query.get(wallet_id)
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
-
         # Get query parameters
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 100)
@@ -705,6 +325,7 @@ def get_payment_history(wallet_id):
                 )
 
         # Order by creation date (newest first) and paginate
+        # Assuming `paginate` is available (e.g., from Flask-SQLAlchemy)
         payments = query.order_by(EnhancedTransaction.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False
         )
@@ -739,15 +360,13 @@ def get_payment_history(wallet_id):
             200,
         )
 
+    except PaymentServiceError as e:
+        return handle_wallet_service_error(e)
     except Exception as e:
-        logger.error(f"Error getting payment history: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
-# Error handlers for the blueprint
+# Error handlers for the blueprint - removed the original redundant ones
 @payment_mvp_bp.errorhandler(404)
 def not_found(error):
     return jsonify({"error": "Endpoint not found", "code": "ENDPOINT_NOT_FOUND"}), 404
@@ -760,4 +379,4 @@ def method_not_allowed(error):
 
 @payment_mvp_bp.errorhandler(500)
 def internal_error(error):
-    return jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}), 500
+    return handle_generic_exception(error)

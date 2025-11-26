@@ -3,20 +3,22 @@ import string
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum as PyEnum
+
+from .database import Base, db
 from sqlalchemy import (
-    Column,
-    String,
-    Integer,
-    DateTime,
     Boolean,
-    Numeric,
-    Text,
+    Column,
+    Date,
+    DateTime,
     ForeignKey,
     Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
 )
 from sqlalchemy.orm import relationship
-from .database import Base, db
-from enum import Enum as PyEnum
 
 
 class TransactionType(PyEnum):

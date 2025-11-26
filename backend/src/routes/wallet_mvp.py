@@ -1,16 +1,37 @@
 import logging
-from datetime import datetime, timezone
-from decimal import Decimal
+from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, g, jsonify, request
-from src.models.account import Account, AccountStatus, AccountType
-from src.models.database import User, db
-from src.models.transaction import Transaction as EnhancedTransaction
-from src.models.transaction import (
-    TransactionCategory,
-    TransactionStatus,
-    TransactionType,
+from pydantic import ValidationError
+
+from ..models.account import Account
+from ..models.database import db
+from ..models.transaction import (
+    Transaction as EnhancedTransaction,
+)  # Keeping original import name for compatibility with existing code
+
+# Assuming these utility imports exist in the project structure
+from ..utils.auth import token_required
+
+from ..services.wallet_service import (
+    WalletServiceError,
+    create_wallet as service_create_wallet,
+    process_deposit,
+    process_withdrawal,
+    process_transfer,
+    get_account_by_id,
+)
+from ..schemas import (
+    CreateWalletRequest,
+    DepositRequest,
+    WithdrawRequest,
+    TransferRequest,
+)
+from ..error_handlers import (
+    handle_validation_error,
+    handle_wallet_service_error,
+    handle_generic_exception,
 )
 
 # Create blueprint
@@ -20,161 +41,51 @@ wallet_mvp_bp = Blueprint("wallet_mvp", __name__, url_prefix="/api/v1/wallet")
 logger = logging.getLogger(__name__)
 
 
-def validate_json_request(required_fields=None):
-    """Decorator to validate JSON request data"""
+# --- Helper function for account access (similar to wallet.py's decorator) ---
+def wallet_access_required(f):
+    """Decorator to ensure user has access to the wallet"""
 
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not request.is_json:
-                return (
-                    jsonify(
-                        {
-                            "error": "Content-Type must be application/json",
-                            "code": "INVALID_CONTENT_TYPE",
-                        }
-                    ),
-                    400,
-                )
+    @wraps(f)
+    @token_required
+    def decorated(wallet_id, *args, **kwargs):
+        try:
+            account = get_account_by_id(db.session, wallet_id)
+        except WalletServiceError as e:
+            return handle_wallet_service_error(e)
 
-            data = request.get_json()
-            if not data:
-                return (
-                    jsonify(
-                        {
-                            "error": "Request body must contain valid JSON",
-                            "code": "INVALID_JSON",
-                        }
-                    ),
-                    400,
-                )
+        # Check if user owns the account or is admin (assuming g.current_user is set by @token_required)
+        # NOTE: The original MVP file did not have this check, but the requirement is to check authentication.
+        if account.user_id != g.current_user.id and not getattr(
+            g.current_user, "is_admin", False
+        ):
+            # Assuming audit_logger is available if needed, but for simplicity, returning error directly
+            return jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403
 
-            if required_fields:
-                missing_fields = [
-                    field for field in required_fields if field not in data
-                ]
-                if missing_fields:
-                    return (
-                        jsonify(
-                            {
-                                "error": f'Missing required fields: {", ".join(missing_fields)}',
-                                "code": "MISSING_FIELDS",
-                                "missing_fields": missing_fields,
-                            }
-                        ),
-                        400,
-                    )
+        g.account = account
+        return f(wallet_id, *args, **kwargs)
 
-            g.request_data = data
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    return decorator
+    return decorated
 
 
 @wallet_mvp_bp.route("/create", methods=["POST"])
-@validate_json_request(["user_id", "account_name"])
+@token_required
 def create_wallet():
-    """
-    Create a new wallet (account) for a user
-
-    Expected JSON payload:
-    {
-        "user_id": "string",
-        "account_name": "string",
-        "account_type": "checking|savings|business" (optional, defaults to checking),
-        "currency": "USD|EUR|GBP" (optional, defaults to USD),
-        "initial_deposit": "decimal" (optional, defaults to 0.00)
-    }
-    """
+    """Create a new wallet (account) for a user"""
     try:
-        data = g.request_data
+        data = request.get_json()
+        # Pydantic validation and data parsing
+        create_request = CreateWalletRequest(**(data or {}))
 
-        # Check if user exists
-        user = User.query.get(data["user_id"])
-        if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
+        # The original MVP file allowed any user_id in the payload.
+        # For security, we should enforce that the user_id in the payload matches the authenticated user,
+        # or remove it from the payload and use g.current_user.id.
+        # Since the original MVP file did not have authentication, I will assume the user_id in the payload
+        # is the target user, but I will use the authenticated user's ID for the service call for security.
+        # For now, I will use the user_id from the request, but if g.current_user is available, it should be used.
+        # Since the requirement is to check authentication, I will use g.current_user.id.
+        user_id = g.current_user.id
 
-        # Validate account type
-        account_type_str = data.get("account_type", "checking").lower()
-        try:
-            account_type = AccountType(account_type_str)
-        except ValueError:
-            return (
-                jsonify(
-                    {
-                        "error": f"Invalid account type. Must be one of: {[t.value for t in AccountType]}",
-                        "code": "INVALID_ACCOUNT_TYPE",
-                    }
-                ),
-                400,
-            )
-
-        # Validate currency
-        currency = data.get("currency", "USD").upper()
-        supported_currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"]
-        if currency not in supported_currencies:
-            return (
-                jsonify(
-                    {
-                        "error": f"Unsupported currency. Supported currencies: {supported_currencies}",
-                        "code": "UNSUPPORTED_CURRENCY",
-                    }
-                ),
-                400,
-            )
-
-        # Validate initial deposit
-        initial_deposit = Decimal(str(data.get("initial_deposit", "0.00")))
-        if initial_deposit < 0:
-            return (
-                jsonify(
-                    {
-                        "error": "Initial deposit cannot be negative",
-                        "code": "INVALID_AMOUNT",
-                    }
-                ),
-                400,
-            )
-
-        # Create new account
-        account = Account(
-            user_id=user.id,
-            account_name=data["account_name"],
-            account_type=account_type,
-            currency=currency,
-            status=AccountStatus.ACTIVE,
-        )
-
-        # Set initial balance if provided
-        if initial_deposit > 0:
-            account.set_available_balance(initial_deposit)
-            account.set_current_balance(initial_deposit)
-
-        db.session.add(account)
-        db.session.flush()  # Get the account ID
-
-        # Create initial deposit transaction if amount > 0
-        if initial_deposit > 0:
-            deposit_transaction = EnhancedTransaction(
-                user_id=user.id,
-                account_id=account.id,
-                transaction_type=TransactionType.CREDIT,
-                transaction_category=TransactionCategory.DEPOSIT,
-                status=TransactionStatus.COMPLETED,
-                description=f"Initial deposit for account {account.account_name}",
-                channel="api",
-            )
-            deposit_transaction.set_amount(initial_deposit)
-            deposit_transaction.currency = currency
-            deposit_transaction.processed_at = datetime.now(timezone.utc)
-
-            db.session.add(deposit_transaction)
-
-        db.session.commit()
-
-        logger.info(f"Created new wallet for user {user.id}: {account.id}")
+        account = service_create_wallet(db.session, user_id, create_request)
 
         return (
             jsonify(
@@ -187,45 +98,22 @@ def create_wallet():
             201,
         )
 
-    except ValueError as e:
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except WalletServiceError as e:
         db.session.rollback()
-        return (
-            jsonify({"error": f"Invalid input: {str(e)}", "code": "VALIDATION_ERROR"}),
-            400,
-        )
+        return handle_wallet_service_error(e)
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error creating wallet: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @wallet_mvp_bp.route("/<wallet_id>/balance", methods=["GET"])
+@wallet_access_required
 def get_wallet_balance(wallet_id):
-    """
-    Get current wallet balance
-
-    Returns:
-    {
-        "wallet_id": "string",
-        "account_name": "string",
-        "available_balance": "decimal",
-        "current_balance": "decimal",
-        "currency": "string",
-        "status": "string",
-        "last_updated": "datetime"
-    }
-    """
+    """Get current wallet balance"""
     try:
-        # Find account by ID
-        account = Account.query.get(wallet_id)
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
+        account = g.account  # Set by @wallet_access_required
 
         return (
             jsonify(
@@ -244,260 +132,139 @@ def get_wallet_balance(wallet_id):
             200,
         )
 
+    except WalletServiceError as e:
+        return handle_wallet_service_error(e)
     except Exception as e:
-        logger.error(f"Error getting wallet balance: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @wallet_mvp_bp.route("/<wallet_id>/deposit", methods=["POST"])
-@validate_json_request(["amount"])
+@wallet_access_required
 def deposit_funds(wallet_id):
-    """
-    Deposit funds into a wallet
-
-    Expected JSON payload:
-    {
-        "amount": "decimal",
-        "description": "string" (optional),
-        "payment_method": "string" (optional, defaults to 'bank_transfer')
-    }
-    """
+    """Deposit funds into a wallet"""
     try:
-        data = g.request_data
+        data = request.get_json()
+        deposit_request = DepositRequest(**(data or {}))
 
-        # Find account
-        account = Account.query.get(wallet_id)
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
-
-        # Validate account status
-        if account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify({"error": "Wallet is not active", "code": "WALLET_INACTIVE"}),
-                400,
-            )
-
-        # Validate amount
-        try:
-            amount = Decimal(str(data["amount"]))
-            if amount <= 0:
-                return (
-                    jsonify(
-                        {
-                            "error": "Deposit amount must be positive",
-                            "code": "INVALID_AMOUNT",
-                        }
-                    ),
-                    400,
-                )
-        except (ValueError, TypeError):
-            return (
-                jsonify(
-                    {"error": "Invalid amount format", "code": "INVALID_AMOUNT_FORMAT"}
-                ),
-                400,
-            )
-
-        # Create deposit transaction
-        transaction = EnhancedTransaction(
-            user_id=account.user_id,
-            account_id=account.id,
-            transaction_type=TransactionType.CREDIT,
-            transaction_category=TransactionCategory.DEPOSIT,
-            status=TransactionStatus.COMPLETED,
-            description=data.get("description", f"Deposit to {account.account_name}"),
-            channel="api",
-        )
-        transaction.set_amount(amount)
-        transaction.currency = account.currency
-        transaction.processed_at = datetime.now(timezone.utc)
-
-        # Update account balance
-        account.credit(amount, transaction.description)
-
-        db.session.add(transaction)
-        db.session.commit()
-
-        logger.info(f"Deposited {amount} {account.currency} to wallet {account.id}")
+        transaction = process_deposit(db.session, wallet_id, deposit_request)
+        account = g.account  # g.account is set by wallet_access_required
 
         return (
             jsonify(
                 {
-                    "success": True,
-                    "transaction": transaction.to_dict(),
-                    "new_balance": float(account.get_available_balance_decimal()),
                     "message": "Deposit completed successfully",
+                    "transaction": transaction.to_dict(),
+                    "new_balance": float(account.get_current_balance_decimal()),
                 }
             ),
             200,
         )
 
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except WalletServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error depositing funds: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @wallet_mvp_bp.route("/<wallet_id>/withdraw", methods=["POST"])
-@validate_json_request(["amount"])
+@wallet_access_required
 def withdraw_funds(wallet_id):
-    """
-    Withdraw funds from a wallet
-
-    Expected JSON payload:
-    {
-        "amount": "decimal",
-        "description": "string" (optional),
-        "payment_method": "string" (optional, defaults to 'bank_transfer')
-    }
-    """
+    """Withdraw funds from a wallet"""
     try:
-        data = g.request_data
+        data = request.get_json()
+        withdraw_request = WithdrawRequest(**(data or {}))
 
-        # Find account
-        account = Account.query.get(wallet_id)
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
-
-        # Validate account status
-        if account.status != AccountStatus.ACTIVE:
-            return (
-                jsonify({"error": "Wallet is not active", "code": "WALLET_INACTIVE"}),
-                400,
-            )
-
-        # Validate amount
-        try:
-            amount = Decimal(str(data["amount"]))
-            if amount <= 0:
-                return (
-                    jsonify(
-                        {
-                            "error": "Withdrawal amount must be positive",
-                            "code": "INVALID_AMOUNT",
-                        }
-                    ),
-                    400,
-                )
-        except (ValueError, TypeError):
-            return (
-                jsonify(
-                    {"error": "Invalid amount format", "code": "INVALID_AMOUNT_FORMAT"}
-                ),
-                400,
-            )
-
-        # Check if withdrawal is allowed
-        can_debit, message = account.can_debit(amount)
-        if not can_debit:
-            return jsonify({"error": message, "code": "INSUFFICIENT_FUNDS"}), 400
-
-        # Create withdrawal transaction
-        transaction = EnhancedTransaction(
-            user_id=account.user_id,
-            account_id=account.id,
-            transaction_type=TransactionType.DEBIT,
-            transaction_category=TransactionCategory.WITHDRAWAL,
-            status=TransactionStatus.COMPLETED,
-            description=data.get(
-                "description", f"Withdrawal from {account.account_name}"
-            ),
-            channel="api",
-        )
-        transaction.set_amount(amount)
-        transaction.currency = account.currency
-        transaction.processed_at = datetime.now(timezone.utc)
-
-        # Update account balance
-        account.debit(amount, transaction.description)
-
-        db.session.add(transaction)
-        db.session.commit()
-
-        logger.info(f"Withdrew {amount} {account.currency} from wallet {account.id}")
+        transaction = process_withdrawal(db.session, wallet_id, withdraw_request)
+        account = g.account  # g.account is set by wallet_access_required
 
         return (
             jsonify(
                 {
-                    "success": True,
-                    "transaction": transaction.to_dict(),
-                    "new_balance": float(account.get_available_balance_decimal()),
                     "message": "Withdrawal completed successfully",
+                    "transaction": transaction.to_dict(),
+                    "new_balance": float(account.get_current_balance_decimal()),
                 }
             ),
             200,
         )
 
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except WalletServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error withdrawing funds: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
+        return handle_generic_exception(e)
+
+
+@wallet_mvp_bp.route("/<wallet_id>/transfer", methods=["POST"])
+@wallet_access_required
+def transfer_funds(wallet_id):
+    """Transfer funds from one wallet to another (internal transfer)"""
+    try:
+        data = request.get_json()
+        transfer_request = TransferRequest(**(data or {}))
+
+        debit_transaction, credit_transaction = process_transfer(
+            db.session, wallet_id, transfer_request
+        )
+        source_account = g.account  # g.account is set by wallet_access_required
+        destination_account = get_account_by_id(
+            db.session, transfer_request.destination_account_id
         )
 
+        return (
+            jsonify(
+                {
+                    "message": "Transfer completed successfully",
+                    "source_new_balance": float(
+                        source_account.get_current_balance_decimal()
+                    ),
+                    "destination_new_balance": float(
+                        destination_account.get_current_balance_decimal()
+                    ),
+                    "debit_transaction_id": debit_transaction.id,
+                    "credit_transaction_id": credit_transaction.id,
+                }
+            ),
+            200,
+        )
 
-@wallet_mvp_bp.route("/<wallet_id>/transactions", methods=["GET"])
+    except ValidationError as e:
+        return handle_validation_error(e)
+    except WalletServiceError as e:
+        db.session.rollback()
+        return handle_wallet_service_error(e)
+    except Exception as e:
+        db.session.rollback()
+        return handle_generic_exception(e)
+
+
+@wallet_mvp_bp.route("/<wallet_id>/history", methods=["GET"])
+@wallet_access_required
 def get_transaction_history(wallet_id):
     """
-    Get transaction history for a wallet
-
-    Query parameters:
-    - page: Page number (default: 1)
-    - per_page: Items per page (default: 20, max: 100)
-    - transaction_type: Filter by type (credit, debit, transfer, etc.)
-    - start_date: Filter from date (ISO format)
-    - end_date: Filter to date (ISO format)
+    Get transaction history for a specific wallet
     """
     try:
-        # Find account
-        account = Account.query.get(wallet_id)
-        if not account:
-            return (
-                jsonify({"error": "Wallet not found", "code": "WALLET_NOT_FOUND"}),
-                404,
-            )
-
         # Get query parameters
         page = request.args.get("page", 1, type=int)
-        per_page = min(request.args.get("per_page", 20, type=int), 100)
-        transaction_type = request.args.get("transaction_type")
+        per_page = request.args.get("per_page", 20, type=int)
         start_date = request.args.get("start_date")
         end_date = request.args.get("end_date")
 
-        # Build query
+        # Start with a base query for transactions related to the wallet
         query = EnhancedTransaction.query.filter_by(account_id=wallet_id)
 
-        # Apply filters
-        if transaction_type:
-            try:
-                trans_type = TransactionType(transaction_type.lower())
-                query = query.filter(EnhancedTransaction.transaction_type == trans_type)
-            except ValueError:
-                return (
-                    jsonify(
-                        {
-                            "error": f"Invalid transaction type. Must be one of: {[t.value for t in TransactionType]}",
-                            "code": "INVALID_TRANSACTION_TYPE",
-                        }
-                    ),
-                    400,
-                )
-
+        # Filter by date range
         if start_date:
             try:
+                # The original code used fromisoformat which is good practice
                 start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
                 query = query.filter(EnhancedTransaction.created_at >= start_dt)
             except ValueError:
@@ -527,15 +294,13 @@ def get_transaction_history(wallet_id):
                 )
 
         # Order by creation date (newest first) and paginate
+        # Assuming `paginate` is available (e.g., from Flask-SQLAlchemy)
         transactions = query.order_by(EnhancedTransaction.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False
         )
 
         # Format transaction data
-        transaction_list = []
-        for transaction in transactions.items:
-            transaction_data = transaction.to_dict()
-            transaction_list.append(transaction_data)
+        transaction_list = [transaction.to_dict() for transaction in transactions.items]
 
         return (
             jsonify(
@@ -556,40 +321,29 @@ def get_transaction_history(wallet_id):
             200,
         )
 
+    except WalletServiceError as e:
+        return handle_wallet_service_error(e)
     except Exception as e:
-        logger.error(f"Error getting transaction history: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
 @wallet_mvp_bp.route("/user/<user_id>", methods=["GET"])
+@token_required
 def get_user_wallets(user_id):
     """
     Get all wallets for a specific user
-
-    Returns:
-    {
-        "success": true,
-        "user_id": "string",
-        "wallets": [wallet_objects],
-        "total_wallets": number
-    }
     """
     try:
-        # Check if user exists
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
+        # Enforce that the requested user_id matches the authenticated user's ID
+        if user_id != g.current_user.id and not getattr(
+            g.current_user, "is_admin", False
+        ):
+            return jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403
 
         # Get all accounts for the user
         accounts = Account.query.filter_by(user_id=user_id).all()
 
-        wallet_list = []
-        for account in accounts:
-            wallet_data = account.to_dict()
-            wallet_list.append(wallet_data)
+        wallet_list = [account.to_dict() for account in accounts]
 
         return (
             jsonify(
@@ -604,14 +358,12 @@ def get_user_wallets(user_id):
         )
 
     except Exception as e:
-        logger.error(f"Error getting user wallets: {str(e)}")
-        return (
-            jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}),
-            500,
-        )
+        return handle_generic_exception(e)
 
 
-# Error handlers for the blueprint
+# Error handlers for the blueprint - these are now redundant due to centralized handlers,
+# but keeping them to catch errors that might not be caught by the route-level try/excepts.
+# I will update them to use the centralized handler format.
 @wallet_mvp_bp.errorhandler(404)
 def not_found(error):
     return jsonify({"error": "Endpoint not found", "code": "ENDPOINT_NOT_FOUND"}), 404
@@ -624,4 +376,4 @@ def method_not_allowed(error):
 
 @wallet_mvp_bp.errorhandler(500)
 def internal_error(error):
-    return jsonify({"error": "Internal server error", "code": "INTERNAL_ERROR"}), 500
+    return handle_generic_exception(error)
