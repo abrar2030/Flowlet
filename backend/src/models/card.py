@@ -5,9 +5,9 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
+from calendar import monthrange
 
-from src.models.database import (
-    Base,
+from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
@@ -17,35 +17,38 @@ from src.models.database import (
     Numeric,
     String,
     Text,
-    db,
-    relationship,
 )
-from src.security.password_security import check_password, hash_password
+from sqlalchemy.orm import relationship
+
+from ..security.password_security import check_password, hash_password
+from .database import Base, db
 
 
 class CardType(PyEnum):
-    """Types of cards"""
+    """Types of cards - Merged from both"""
 
     DEBIT = "debit"
     CREDIT = "credit"
-    PREPAID = "prepaid"
-    VIRTUAL = "virtual"
+    PREPAID = "prepaid"  # From src/
+    VIRTUAL = "virtual"  # From app/
+    PHYSICAL = "physical"  # From app/
 
 
 class CardStatus(PyEnum):
-    """Card status options"""
+    """Card status options - Merged from both"""
 
     ACTIVE = "active"
     INACTIVE = "inactive"
     BLOCKED = "blocked"
     EXPIRED = "expired"
-    LOST = "lost"
-    STOLEN = "stolen"
-    DAMAGED = "damaged"
+    LOST = "lost"  # From src/
+    STOLEN = "stolen"  # From src/
+    CANCELLED = "cancelled"  # From app/
+    DAMAGED = "damaged"  # From src/
 
 
 class CardNetwork(PyEnum):
-    """Card network providers"""
+    """Card network providers - From src/"""
 
     VISA = "visa"
     MASTERCARD = "mastercard"
@@ -54,7 +57,7 @@ class CardNetwork(PyEnum):
 
 
 class Card(Base):
-    """Secure card model with PCI DSS compliance features"""
+    """Secure card model with merged features"""
 
     __tablename__ = "cards"
 
@@ -63,67 +66,99 @@ class Card(Base):
     # Relationships
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     account_id = Column(String(36), ForeignKey("accounts.id"), nullable=False)
+    user = relationship("User", back_populates="cards")
+    account = relationship("Account", back_populates="cards")
+    transactions = relationship("Transaction", back_populates="card", lazy="dynamic")
 
-    # Card identification (PCI DSS compliant - no full PAN storage)
+    # Card identification (PCI DSS compliant)
     card_token = Column(
         String(100), unique=True, nullable=False, index=True
-    )  # Tokenized card number
-    last_four_digits = Column(String(4), nullable=False)  # Only store last 4 digits
-    card_hash = Column(String(255), nullable=False)  # Hash of full PAN for verification
+    )  # Tokenized card number (src/)
+    card_number_token = Column(
+        String(100), nullable=True
+    )  # From app/ (keeping for compatibility)
+    last_four_digits = Column(String(4), nullable=False)
+    card_hash = Column(
+        String(255), nullable=False
+    )  # Hash of full PAN for verification (src/)
 
     # Card details
     card_type = Column(db.Enum(CardType), nullable=False)
-    card_network = Column(db.Enum(CardNetwork), nullable=False)
-    card_name = Column(String(100), nullable=False)  # Name on card
+    card_network = Column(db.Enum(CardNetwork), nullable=True)  # From src/
+    card_brand = Column(
+        String(20), nullable=True
+    )  # From app/ (redundant with network, keeping for now)
+    card_name = Column(String(100), nullable=False)  # Name on card (src/)
 
     # Card status and settings
     status = Column(db.Enum(CardStatus), default=CardStatus.ACTIVE, nullable=False)
-    is_contactless_enabled = Column(Boolean, default=True)
-    is_online_enabled = Column(Boolean, default=True)
-    is_international_enabled = Column(Boolean, default=False)
+    is_contactless_enabled = Column(Boolean, default=True)  # From src/
+    is_online_enabled = Column(Boolean, default=True)  # From src/
+    is_international_enabled = Column(Boolean, default=False)  # From src/
+    online_transactions_enabled = Column(Boolean, default=True)  # From app/ (redundant)
+    international_transactions_enabled = Column(
+        Boolean, default=False
+    )  # From app/ (redundant)
+    contactless_enabled = Column(Boolean, default=True)  # From app/ (redundant)
+    atm_withdrawals_enabled = Column(Boolean, default=True)  # From app/
 
     # Expiration and security
     expiry_month = Column(Integer, nullable=False)
     expiry_year = Column(Integer, nullable=False)
-    # Note: CVV is NEVER stored as per PCI DSS requirements\n    cvv_hash = Column(String(255)) # Hashed CVV for internal verification (e.g., tokenization service)
 
-    # Limits and controls (using Numeric/Decimal)
+    # Limits and controls (using Numeric/Decimal from src/)
     daily_limit = Column(Numeric(20, 2), default=Decimal("1000.00"))
-    blocked_reason = Column(String(255))
-    blocked_at = Column(DateTime)
-    cancelled_reason = Column(String(255))
-    cancelled_at = Column(DateTime)
-    activated_at = Column(DateTime)
     monthly_limit = Column(Numeric(20, 2), default=Decimal("10000.00"))
     single_transaction_limit = Column(Numeric(20, 2), default=Decimal("500.00"))
 
-    # Usage tracking (using Numeric/Decimal)
+    # Spending controls (from app/ - keeping BigInteger fields for now, but Numeric is preferred)
+    spending_limit_daily_cents = Column(db.BigInteger, nullable=True)
+    spending_limit_monthly_cents = Column(db.BigInteger, nullable=True)
+    spending_limit_per_transaction_cents = Column(db.BigInteger, nullable=True)
+
+    # Transaction controls (from app/)
+    merchant_categories_blocked = Column(Text, nullable=True)  # JSON
+    merchant_categories_allowed = Column(Text, nullable=True)  # JSON
+
+    # Usage tracking (using Numeric/Decimal from src/)
     total_spent_today = Column(Numeric(20, 2), default=Decimal("0.00"))
     total_spent_month = Column(Numeric(20, 2), default=Decimal("0.00"))
-    last_used_at = Column(DateTime)
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
     last_used_location = Column(String(200))
 
-    # Security features
+    # Security features (from both)
     pin_hash = Column(String(255))  # Hashed PIN
     pin_attempts = Column(Integer, default=0)
-    pin_locked_until = Column(DateTime)
+    pin_locked_until = Column(DateTime(timezone=True))
 
-    # Fraud prevention
+    # Fraud prevention (from src/)
     fraud_alerts_enabled = Column(Boolean, default=True)
     velocity_checks_enabled = Column(Boolean, default=True)
     location_verification_enabled = Column(Boolean, default=True)
 
-    # Physical card details
+    # Physical card details (from src/)
     is_physical_card = Column(Boolean, default=True)
     card_design = Column(String(50), default="standard")
     delivery_address = Column(Text)  # JSON string with address
-    shipped_at = Column(DateTime)
-    delivered_at = Column(DateTime)
+    shipped_at = Column(DateTime(timezone=True))
+    delivered_at = Column(DateTime(timezone=True))
 
-    # Relationships
-    user = relationship("User")
-    account = relationship("Account")
-    transactions = relationship("Transaction", back_populates="card", lazy="dynamic")
+    # Status tracking (from src/)
+    blocked_reason = Column(String(255))
+    blocked_at = Column(DateTime(timezone=True))
+    cancelled_reason = Column(String(255))
+    cancelled_at = Column(DateTime(timezone=True))
+    activated_at = Column(DateTime(timezone=True))
+
+    # Timestamps
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     # Indexes
     __table_args__ = (
@@ -146,52 +181,12 @@ class Card(Base):
             secrets.choice(string.ascii_uppercase + string.digits) for _ in range(32)
         )
 
-
-def set_card_number(self, card_number):
-    """Set card number with proper tokenization and hashing"""
-
-    # Store only last 4 digits
-    self.last_four_digits = card_number[-4:]
-
-    # Create hash of full PAN for verification
-    self.card_hash = hashlib.sha256(card_number.encode()).hexdigest()
-
-    # In production, you would call a tokenization service here
-    if not self.card_token:
-        self.card_token = self.generate_card_token()
-
-
-def verify_card_number(self, card_number):
-    """Verify card number against stored hash"""
-    return hashlib.sha256(card_number.encode()).hexdigest() == self.card_hash
-
-
-def set_cvv(self, cvv: str):
-    """Set CVV with proper hashing (for internal use only)"""
-    if len(cvv) not in [3, 4] or not cvv.isdigit():
-        raise ValueError("CVV must be 3 or 4 digits")
-    self.cvv_hash = hash_password(cvv)
-
-
-def verify_cvv(self, cvv: str) -> bool:
-    """Verify CVV against stored hash"""
-    if not self.cvv_hash:
-        return False
-    return check_password(self.cvv_hash, cvv)
-
-
-def set_pin(self, pin):
-    """Set PIN — you can add your hashing logic here"""
-    """Set card number with proper tokenization and hashing"""
-    # Store only last 4 digits
-    self.last_four_digits = card_number[-4:]
-
-    # Create hash of full PAN for verification
-    self.card_hash = hashlib.sha256(card_number.encode()).hexdigest()
-
-    # In production, you would call a tokenization service here
-    if not self.card_token:
-        self.card_token = self.generate_card_token()
+    def set_card_number(self, card_number):
+        """Set card number with proper tokenization and hashing"""
+        self.last_four_digits = card_number[-4:]
+        self.card_hash = hashlib.sha256(card_number.encode()).hexdigest()
+        if not self.card_token:
+            self.card_token = self.generate_card_token()
 
     def verify_card_number(self, card_number):
         """Verify card number against stored hash"""
@@ -202,7 +197,7 @@ def set_pin(self, pin):
         if len(pin) != 4 or not pin.isdigit():
             raise ValueError("PIN must be exactly 4 digits")
 
-        self.pin_hash = hash_password(pin)  # Use internal hash function
+        self.pin_hash = hash_password(pin)
         self.pin_attempts = 0
         self.pin_locked_until = None
 
@@ -214,11 +209,11 @@ def set_pin(self, pin):
         if not self.pin_hash:
             return False, "PIN not set"
 
-        is_valid = check_password(self.pin_hash, pin)  # Use internal check function
+        is_valid = check_password(self.pin_hash, pin)
 
         if not is_valid:
             self.pin_attempts += 1
-            if self.pin_attempts >= 3:  # Lock after 3 failed attempts
+            if self.pin_attempts >= 3:
                 self.lock_pin(duration_minutes=30)
                 return False, "PIN locked due to too many failed attempts"
             return False, f"Invalid PIN. {3 - self.pin_attempts} attempts remaining"
@@ -232,7 +227,6 @@ def set_pin(self, pin):
             if datetime.now(timezone.utc) < self.pin_locked_until:
                 return True
             else:
-                # Unlock PIN if lock period has expired
                 self.pin_locked_until = None
                 self.pin_attempts = 0
         return False
@@ -246,25 +240,31 @@ def set_pin(self, pin):
     def is_expired(self):
         """Check if card is expired"""
         now = datetime.now(timezone.utc)
-        expiry_date = datetime(
-            self.expiry_year, self.expiry_month, 1, tzinfo=timezone.utc
-        )
         # Card expires at the end of the expiry month
-        from calendar import monthrange
-
         last_day = monthrange(self.expiry_year, self.expiry_month)[1]
-        expiry_date = expiry_date.replace(day=last_day, hour=23, minute=59, second=59)
-
+        expiry_date = datetime(
+            self.expiry_year,
+            self.expiry_month,
+            last_day,
+            23,
+            59,
+            59,
+            tzinfo=timezone.utc,
+        )
         return now > expiry_date
 
     def block_card(self, reason=None):
         """Block the card"""
         self.status = CardStatus.BLOCKED
+        self.blocked_reason = reason
+        self.blocked_at = datetime.now(timezone.utc)
 
     def unblock_card(self):
         """Unblock the card"""
         if self.status == CardStatus.BLOCKED:
             self.status = CardStatus.ACTIVE
+            self.blocked_reason = None
+            self.blocked_at = None
 
     def record_transaction(self, amount):
         """Record a transaction against the card limits"""
@@ -288,7 +288,7 @@ def set_pin(self, pin):
             "card_token": self.card_token,
             "last_four_digits": self.last_four_digits,
             "card_type": self.card_type.value,
-            "card_network": self.card_network.value,
+            "card_network": self.card_network.value if self.card_network else None,
             "card_name": self.card_name,
             "status": self.status.value,
             "expiry_month": self.expiry_month,
@@ -308,10 +308,16 @@ def set_pin(self, pin):
                     "is_online_enabled": self.is_online_enabled,
                     "is_international_enabled": self.is_international_enabled,
                     "is_physical_card": self.is_physical_card,
+                    "pin_attempts": self.pin_attempts,
+                    "pin_locked_until": (
+                        self.pin_locked_until.isoformat()
+                        if self.pin_locked_until
+                        else None
+                    ),
                 }
             )
 
         return data
 
     def __repr__(self):
-        return f"<Card {self.last_four_digits} ({self.card_network.value})>"
+        return f"<Card {self.last_four_digits} ({self.card_type.value})>"

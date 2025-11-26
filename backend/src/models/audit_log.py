@@ -3,9 +3,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum as PyEnum
 
-from sqlalchemy import (  # Import Base and db from the local database setup
-    Audit,
-    Base,
+from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
@@ -15,11 +13,15 @@ from sqlalchemy import (  # Import Base and db from the local database setup
     String,
     Text,
 )
+from sqlalchemy.orm import relationship
+
+from .database import Base, db
 
 
 class AuditEventType(PyEnum):
-    """Types of audit events"""
+    """Types of audit events - Merged from both"""
 
+    # From src/
     USER_LOGIN = "user_login"
     USER_LOGOUT = "user_logout"
     USER_REGISTRATION = "user_registration"
@@ -40,9 +42,21 @@ class AuditEventType(PyEnum):
     API_REQUEST = "api_request"
     ADMIN_ACTION = "admin_action"
 
+    # From app/ (mapped to src/ types where possible)
+    CREATE_USER = "user_registration"  # Mapped
+    UPDATE_USER = "user_modification"  # New
+    DELETE_USER = "user_deletion"  # New
+    CREATE_ACCOUNT = "account_creation"  # Mapped
+    UPDATE_ACCOUNT = "account_modification"  # Mapped
+    DELETE_ACCOUNT = "account_deletion"  # New
+    TRANSACTION = "transaction_created"  # Mapped
+    MFA_CHANGE = "mfa_change"  # New
+    SYSTEM_CONFIG_CHANGE = "system_config_change"  # New
+    KYC_UPDATE = "kyc_update"  # New
+
 
 class AuditSeverity(PyEnum):
-    """Severity levels for audit events"""
+    """Severity levels for audit events - From src/"""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -62,34 +76,50 @@ class AuditLog(Base):
     severity = Column(db.Enum(AuditSeverity), default=AuditSeverity.LOW, nullable=False)
 
     # Event details
-    description = Column(String(500), nullable=False)
-    details = Column(Text)  # JSON string with additional details
+    description = Column(String(500), nullable=False)  # From src/
+    details = Column(Text)  # JSON string with additional details (From src/ and app/)
 
     # User and session information
     user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
-    session_id = Column(String(255))
+    session_id = Column(String(255))  # From src/
+    user_email = Column(String(255), nullable=True)  # From app/
 
-    # Request information
+    # Request information (From src/)
     endpoint = Column(String(200))
     method = Column(String(10))
     ip_address = Column(String(45))  # IPv6 compatible
     user_agent = Column(String(500))
 
     # Resource information
-    resource_type = Column(String(100))  # account, transaction, card, etc.
-    resource_id = Column(String(100))
+    resource_type = Column(String(100))  # account, transaction, card, etc. (From src/)
+    resource_id = Column(String(100))  # From src/ (using String(100) for flexibility)
+    target_type = Column(
+        String(50), nullable=True
+    )  # From app/ (redundant with resource_type, keeping for now)
+    target_id = Column(
+        String(36), nullable=True, index=True
+    )  # From app/ (using String(36) for UUID)
 
     # Status and outcome
-    status_code = Column(Integer)
-    success = Column(Boolean, default=True)
-    error_message = Column(String(500))
+    status_code = Column(Integer)  # From src/
+    success = Column(Boolean, default=True)  # From src/
+    error_message = Column(String(500))  # From src/
+    status = Column(
+        String(20), nullable=False, default="success"
+    )  # From app/ (redundant with success/error_message, keeping for now)
 
-    # Compliance and retention
-    retention_period_days = Column(Integer, default=2555)  # 7 years default
-    is_pii_related = Column(Boolean, default=False)
-    is_financial_data = Column(Boolean, default=False)
+    # Compliance and retention (From src/ and app/)
+    retention_period_days = Column(Integer, default=2555)  # 7 years default (From src/)
+    is_pii_related = Column(Boolean, default=False)  # From src/
+    is_financial_data = Column(Boolean, default=False)  # From src/
+    risk_level = Column(
+        Integer, nullable=False, default=1
+    )  # From app/ (redundant with severity, keeping for now)
+    is_sensitive = Column(
+        Boolean, nullable=False, default=False
+    )  # From app/ (redundant with is_pii_related, keeping for now)
 
-    # Geolocation (if available)
+    # Geolocation (if available) (From src/)
     country_code = Column(String(2))
     region = Column(String(100))
     city = Column(String(100))
@@ -97,9 +127,12 @@ class AuditLog(Base):
     # Audit fields
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    timestamp = Column(
+        DateTime, default=datetime.utcnow
+    )  # From app/ (redundant with created_at, keeping for now)
 
     # Relationships
-    user = relationship("User")
+    user = relationship("User", backref="audit_logs")
 
     # Indexes
     __table_args__ = (
@@ -137,6 +170,7 @@ class AuditLog(Base):
             "description": self.description,
             "details": self.get_details(),
             "user_id": self.user_id,
+            "user_email": self.user_email,
             "endpoint": self.endpoint,
             "method": self.method,
             "ip_address": self.ip_address,

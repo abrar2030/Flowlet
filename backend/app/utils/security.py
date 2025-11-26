@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from app import db
-from app.models.security import SecurityEvent, SecurityEventType
+from src.models.security import SecurityEvent, SecurityEventType
 
 """
 Security utility functions

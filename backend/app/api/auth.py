@@ -1,7 +1,7 @@
 import structlog
 from app import db, limiter
-from app.models.audit_log import AuditAction, AuditLog
-from app.models.user import User, UserStatus
+from src.models import AuditLog, AuditEventType
+from src.models import User, UserStatus
 from app.utils.security import log_security_event
 from app.utils.validators import validate_password_strength
 from flask import Blueprint, jsonify, request
@@ -88,7 +88,7 @@ def register():
         # Create default checking account
         import uuid
 
-        from app.models.account import Account, AccountType
+        from src.models import Account, AccountType
 
         account_number = f"ACC{str(uuid.uuid4()).replace('-', '')[:12].upper()}"
         account = Account(
@@ -108,7 +108,7 @@ def register():
         # Create audit log
         audit_log = AuditLog(
             user_id=user.id,
-            action=AuditAction.USER_REGISTERED,
+            action=AuditEventType.USER_REGISTRATION,
             details={"email": user.email, "account_created": account.account_number},
             ip_address=request.remote_addr,
         )
@@ -217,7 +217,7 @@ def login():
         # Create audit log
         audit_log = AuditLog(
             user_id=user.id,
-            action=AuditAction.USER_LOGIN,
+            action=AuditEventType.USER_LOGIN,
             details={"ip_address": request.remote_addr},
             ip_address=request.remote_addr,
         )
@@ -297,7 +297,7 @@ def logout():
         # Create audit log
         audit_log = AuditLog(
             user_id=current_user_id,
-            action=AuditAction.USER_LOGOUT,
+            action=AuditEventType.USER_LOGOUT,
             details={"ip_address": request.remote_addr},
             ip_address=request.remote_addr,
         )
