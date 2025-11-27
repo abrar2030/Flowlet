@@ -56,7 +56,7 @@ Performance tests assess the application's responsiveness, stability, and scalab
 The `test` directory will be reorganized to reflect the defined test categories, promoting modularity and maintainability. The proposed structure is as follows:
 
 ```
-Flowlet/unified-frontend/src/test/
+Flowlet/frontend/src/test/
 ├── unit/
 │   ├── financial_calculations/
 │   ├── business_logic/

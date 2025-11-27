@@ -62,9 +62,9 @@ install_python_deps() {
 install_node_deps() {
     echo -e "${BLUE}Installing Node.js dependencies...${NC}"
 
-    # Install unified frontend dependencies
-    if [ -d "unified-frontend" ]; then
-        cd unified-frontend
+    # Install frontend dependencies
+    if [ -d "frontend" ]; then
+        cd frontend
         if command_exists pnpm; then
             pnpm install
         elif command_exists npm; then
@@ -74,7 +74,7 @@ install_node_deps() {
             exit 1
         fi
         cd ..
-        echo -e "${GREEN}✓ Unified frontend dependencies installed${NC}"
+        echo -e "${GREEN}✓ Frontend dependencies installed${NC}"
     fi
 }
 
@@ -138,8 +138,8 @@ EOF
     fi
 
     # Frontend environment file
-    if [ ! -f "unified-frontend/.env" ]; then
-        cat > unified-frontend/.env << EOF
+    if [ ! -f "frontend/.env" ]; then
+        cat > frontend/.env << EOF
 # Flowlet Frontend Environment Configuration
 VITE_API_BASE_URL=http://localhost:5000
 VITE_APP_NAME=Flowlet
@@ -223,7 +223,7 @@ BACKEND_PID=$!
 
 # Start frontend server
 echo -e "${GREEN}Starting frontend server...${NC}"
-(cd unified-frontend && (command -v pnpm >/dev/null 2>&1 && pnpm run dev --host || npm run dev -- --host)) &
+(cd frontend && (command -v pnpm >/dev/null 2>&1 && pnpm run dev --host || npm run dev -- --host)) &
 FRONTEND_PID=$!
 
 echo -e "${GREEN}=========================================="

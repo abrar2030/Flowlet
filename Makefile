@@ -30,34 +30,34 @@ dev:
 # Build production assets
 build:
 	@echo "Building production assets..."
-	cd unified-frontend && npm run build
+	cd frontend && npm run build
 
 # Run all tests
 test:
 	@echo "Running backend tests..."
 	cd backend && ./run_tests.sh
 	@echo "Running frontend tests..."
-	cd unified-frontend && npm test -- --watchAll=false
+	cd frontend && npm test -- --watchAll=false
 
 # Run linting
 lint:
 	@echo "Linting backend code..."
 	cd backend && flake8 src/ --max-line-length=100
 	@echo "Linting frontend code..."
-	cd unified-frontend && npm run lint
+	cd frontend && npm run lint
 
 # Format code
 format:
 	@echo "Formatting backend code..."
 	cd backend && black src/
 	@echo "Formatting frontend code..."
-	cd unified-frontend && npm run format
+	cd frontend && npm run format
 
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
 	cd backend && rm -rf __pycache__ .pytest_cache test_results logs/*.log
-	cd unified-frontend && rm -rf node_modules dist .vite
+	cd frontend && rm -rf node_modules dist .vite
 	docker system prune -f
 
 # Docker commands
@@ -98,20 +98,20 @@ install:
 	@echo "Installing backend dependencies..."
 	cd backend && pip install -r requirements_updated.txt
 	@echo "Installing frontend dependencies..."
-	cd unified-frontend && npm install
+	cd frontend && npm install
 
 # Update dependencies
 update:
 	@echo "Updating backend dependencies..."
 	cd backend && pip install --upgrade -r requirements_updated.txt
 	@echo "Updating frontend dependencies..."
-	cd unified-frontend && npm update
+	cd frontend && npm update
 
 # Generate documentation
 docs:
 	@echo "Generating documentation..."
 	cd backend && python -m pydoc -w src/
-	cd unified-frontend && npm run build-docs
+	cd frontend && npm run build-docs
 
 # Health check
 health:

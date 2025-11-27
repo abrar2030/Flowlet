@@ -1,4 +1,4 @@
-// Main entry point for unified-frontend components and utilities
+// Main entry point for frontend components and utilities
 
 // ============================================================================
 // Core Components

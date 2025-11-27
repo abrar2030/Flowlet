@@ -11,7 +11,7 @@ The test suite is organized into several categories, each focusing on a specific
 The `test` directory follows a structured approach to maintain modularity and clarity:
 
 ```
-Flowlet/unified-frontend/src/test/
+Flowlet/frontend/src/test/
 ├── unit/                 # Unit tests for individual components and functions
 │   ├── financial_calculations/
 │   ├── business_logic/
@@ -36,10 +36,10 @@ Flowlet/unified-frontend/src/test/
 
 ## 3. Setup and Installation
 
-To run the tests, ensure you have Node.js and npm/yarn installed. Navigate to the `unified-frontend` directory and install the necessary dependencies:
+To run the tests, ensure you have Node.js and npm/yarn installed. Navigate to the `frontend` directory and install the necessary dependencies:
 
 ```bash
-cd Flowlet/unified-frontend
+cd Flowlet/frontend
 npm install # or yarn install
 ```
 
@@ -53,7 +53,7 @@ All tests can be run using the configured test runner (Jest). Make sure your `pa
 }
 ```
 
-Then, you can execute the tests from the `unified-frontend` directory:
+Then, you can execute the tests from the `frontend` directory:
 
 ```bash
 npm test # or yarn test
