@@ -13,7 +13,7 @@ jobs:
 
     env:
       BACKEND_DIR: backend # Python project
-      FRONTEND_DIR: frontend # Node/JS project
+      web-frontend_DIR: web-frontend # Node/JS project
 
     steps:
       # -------------------------------
@@ -66,11 +66,11 @@ jobs:
           node-version: "18"
 
       - name: Install Node Dependencies
-        working-directory: ${{ env.FRONTEND_DIR }}
+        working-directory: ${{ env.web-frontend_DIR }}
         run: npm install
 
       - name: Run Prettier Checks
-        working-directory: ${{ env.FRONTEND_DIR }}
+        working-directory: ${{ env.web-frontend_DIR }}
         run: |
           echo "=== Running Prettier ==="
           npx prettier --check "**/*.{js,jsx,ts,tsx,json,html,css,md}"

@@ -12,10 +12,10 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: flowlet-frontend-pdb
+  name: flowlet-web-frontend-pdb
   namespace: default
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: frontend
+      app: web-frontend

@@ -20,7 +20,7 @@ Unit tests focus on individual components or functions in isolation. For financi
 
 Integration tests verify the interactions between different modules and services. Key areas for financial applications include:
 
-- **API Endpoints:** Proper communication and data exchange between frontend and backend services.
+- **API Endpoints:** Proper communication and data exchange between web-frontend and backend services.
 - **Database Interactions:** Accurate data storage, retrieval, and consistency across various financial records.
 - **Third-Party Integrations:** Seamless and secure interaction with external financial services, payment gateways, and data providers.
 
@@ -56,7 +56,7 @@ Performance tests assess the application's responsiveness, stability, and scalab
 The `test` directory will be reorganized to reflect the defined test categories, promoting modularity and maintainability. The proposed structure is as follows:
 
 ```
-Flowlet/frontend/src/test/
+Flowlet/web-frontend/src/test/
 ├── unit/
 │   ├── financial_calculations/
 │   ├── business_logic/

@@ -161,7 +161,7 @@ def main():
     print("- AI-powered fraud detection")
     print("- Comprehensive security with API keys and audit logging")
     print("- RESTful API design with proper error handling")
-    print("- CORS enabled for frontend integration")
+    print("- CORS enabled for web-frontend integration")
     print("- Production-ready Flask application")
 
 

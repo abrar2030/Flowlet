@@ -1,10 +1,10 @@
-# Flowlet Web Frontend Development Guide
+# Flowlet Web web-frontend Development Guide
 
-This guide provides instructions for setting up the development environment, understanding the project structure, and contributing to the Flowlet web frontend application.
+This guide provides instructions for setting up the development environment, understanding the project structure, and contributing to the Flowlet web web-frontend application.
 
 ## Technologies Used
 
-The Flowlet web frontend is built using the following technologies:
+The Flowlet web web-frontend is built using the following technologies:
 
 - **React**: A JavaScript library for building user interfaces.
 - **Vite**: A fast build tool that provides a lightning-fast development experience.
@@ -13,7 +13,7 @@ The Flowlet web frontend is built using the following technologies:
 
 ## Project Structure
 
-The main source code for the web frontend is located in `Flowlet/frontend/web-frontend/src/`.
+The main source code for the web web-frontend is located in `Flowlet/web-frontend/web-web-frontend/src/`.
 
 - `src/main.jsx`: The entry point of the application.
 - `src/App.jsx`: The main application component.
@@ -33,7 +33,7 @@ To set up the development environment, follow these steps:
 
     ```bash
     git clone https://github.com/abrar2030/Flowlet.git
-    cd Flowlet/frontend/web-frontend
+    cd Flowlet/web-frontend/web-web-frontend
     ```
 
 2.  **Install dependencies**:
@@ -50,7 +50,7 @@ To set up the development environment, follow these steps:
     ```
 
 3.  **Environment Variables**:
-    Create a `.env` file in the `Flowlet/frontend/web-frontend/` directory based on `example.env` (if available) or consult the backend documentation for required API endpoints. Typically, you might need to configure the backend API URL:
+    Create a `.env` file in the `Flowlet/web-frontend/web-web-frontend/` directory based on `example.env` (if available) or consult the backend documentation for required API endpoints. Typically, you might need to configure the backend API URL:
 
     ```
     VITE_API_BASE_URL=http://localhost:5000/api/v1
@@ -84,7 +84,7 @@ Many IDEs have ESLint integrations that can provide real-time feedback.
 
 ## Contributing
 
-When contributing to the web frontend, please follow these guidelines:
+When contributing to the web web-frontend, please follow these guidelines:
 
 - Create a new branch for your features or bug fixes.
 - Write clear and concise commit messages.

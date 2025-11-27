@@ -33,24 +33,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flowlet-frontend
+  name: flowlet-web-frontend
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: frontend
+      app: web-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: web-frontend
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 2000
       containers:
-        - name: frontend
-          image: flowlet/frontend:latest
+        - name: web-frontend
+          image: flowlet/web-frontend:latest
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

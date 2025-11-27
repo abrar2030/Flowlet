@@ -9,7 +9,7 @@ metadata:
     # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:region:account-id:webacl/webacl-name/webacl-id
     # Google Cloud Armor:
     # networking.gke.io/managed-certificates: flowlet-certificate
-    # networking.gke.io/v1beta1.FrontendConfig: flowlet-frontend-config
+    # networking.gke.io/v1beta1.web-frontendConfig: flowlet-web-frontend-config
     # Azure Application Gateway WAF:
     # appgw.ingress.kubernetes.io/waf-policy-id: /subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/<policyname>
     kubernetes.io/ingress.class: nginx
@@ -22,7 +22,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: flowlet-frontend-service
+                name: flowlet-web-frontend-service
                 port:
                   number: 80
   tls:

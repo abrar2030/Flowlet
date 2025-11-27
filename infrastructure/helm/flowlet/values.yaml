@@ -60,12 +60,12 @@ backend:
     timeoutSeconds: 3
     failureThreshold: 3
 
-# Frontend service configuration
-frontend:
+# web-frontend service configuration
+web-frontend:
   enabled: true
   replicaCount: 2
   image:
-    repository: flowlet/frontend
+    repository: flowlet/web-frontend
     tag: "latest"
     pullPolicy: IfNotPresent
   service:
@@ -171,7 +171,7 @@ ingress:
         - path: /
           pathType: Prefix
           service:
-            name: flowlet-frontend
+            name: flowlet-web-frontend
             port: 3000
   tls:
     - secretName: flowlet-tls

@@ -73,12 +73,12 @@ services:
       timeout: 10s
       retries: 5
 
-  # Frontend Web Application
-  frontend:
+  # web-frontend Web Application
+  web-frontend:
     build:
       context: ../../
-      dockerfile: infrastructure/docker/Dockerfile.frontend
-    container_name: flowlet-frontend
+      dockerfile: infrastructure/docker/Dockerfile.web-frontend
+    container_name: flowlet-web-frontend
     ports:
       - "3000:3000"
     networks:
@@ -105,7 +105,7 @@ services:
       - flowlet-network
     depends_on:
       - backend
-      - frontend
+      - web-frontend
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]

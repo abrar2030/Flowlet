@@ -1,13 +1,13 @@
 # Setup Guide for Flowlet
 
-This guide provides instructions on how to set up the Flowlet development environment, including both the backend and frontend components.
+This guide provides instructions on how to set up the Flowlet development environment, including both the backend and web-frontend components.
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
 
 - **Python 3.8+:** For the Flask backend.
-- **Node.js 14+ & npm/yarn:** For the React frontend applications.
+- **Node.js 14+ & npm/yarn:** For the React web-frontend applications.
 - **Git:** For cloning the repository.
 
 ## 1. Clone the Repository
@@ -40,47 +40,47 @@ python src/main.py
 
 The backend server will typically run on `http://127.0.0.1:5000`.
 
-## 3. Frontend Setup (React)
+## 3. web-frontend Setup (React)
 
-Flowlet includes two frontend applications: `web-frontend` and `mobile-frontend`. You need to set up each one separately.
+Flowlet includes two web-frontend applications: `web-web-frontend` and `mobile-web-frontend`. You need to set up each one separately.
 
-### Web Frontend
+### Web web-frontend
 
-Navigate to the `frontend/web-frontend` directory and install the Node.js dependencies.
+Navigate to the `web-frontend/web-web-frontend` directory and install the Node.js dependencies.
 
 ```bash
-cd ../frontend/web-frontend
+cd ../web-frontend/web-web-frontend
 npm install  # or yarn install
 ```
 
-### Running the Web Frontend
+### Running the Web web-frontend
 
-To start the web frontend development server:
+To start the web web-frontend development server:
 
 ```bash
 npm start  # or yarn start
 ```
 
-The web frontend will typically run on `http://localhost:3000`.
+The web web-frontend will typically run on `http://localhost:3000`.
 
-### Mobile Frontend
+### Mobile web-frontend
 
-Navigate to the `frontend/mobile-frontend` directory and install the Node.js dependencies.
+Navigate to the `web-frontend/mobile-web-frontend` directory and install the Node.js dependencies.
 
 ```bash
-cd ../mobile-frontend
+cd ../mobile-web-frontend
 npm install  # or yarn install
 ```
 
-### Running the Mobile Frontend
+### Running the Mobile web-frontend
 
-To start the mobile frontend development server:
+To start the mobile web-frontend development server:
 
 ```bash
 npm start  # or yarn start
 ```
 
-The mobile frontend will typically run on `http://localhost:19006` (Expo default).
+The mobile web-frontend will typically run on `http://localhost:19006` (Expo default).
 
 ## 4. Database Setup
 
@@ -99,15 +99,15 @@ cd backend
 pytest
 ```
 
-### Frontend Tests
+### web-frontend Tests
 
-Frontend tests are typically run using `npm test` or `yarn test` within their respective directories.
+web-frontend tests are typically run using `npm test` or `yarn test` within their respective directories.
 
 ```bash
-cd frontend/web-frontend
+cd web-frontend/web-web-frontend
 npm test
 
-cd ../mobile-frontend
+cd ../mobile-web-frontend
 npm test
 ```
 

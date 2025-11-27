@@ -16,7 +16,7 @@ from src.utils.error_handlers import register_error_handlers
 
 def create_app():
     # Initialize Flask app
-    app = Flask(__name__, static_folder="../frontend/dist", static_url_path="")
+    app = Flask(__name__, static_folder="../web-frontend/dist", static_url_path="")
 
     # Custom JSON encoder to handle Decimal and datetime objects
     class CustomJSONEncoder(Flask.json.JSONEncoder):
@@ -70,12 +70,12 @@ def create_app():
     app.register_blueprint(api_bp)
 
     # ============================================================================
-    # FRONTEND ROUTES
+    # web-frontend ROUTES
     # ============================================================================
 
     @app.route("/")
-    def serve_frontend():
-        """Serve the React frontend"""
+    def serve_web-frontend():
+        """Serve the React web-frontend"""
         return send_from_directory(app.static_folder, "index.html")
 
     @app.route("/<path:path>")

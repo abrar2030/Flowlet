@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flowlet-frontend
+  name: flowlet-web-frontend
   labels:
     app: flowlet
-    tier: frontend
+    tier: web-frontend
 spec:
   replicas: 2
   strategy:
@@ -15,20 +15,20 @@ spec:
   selector:
     matchLabels:
       app: flowlet
-      tier: frontend
+      tier: web-frontend
   template:
     metadata:
       labels:
         app: flowlet
-        tier: frontend
+        tier: web-frontend
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 2000
       containers:
-        - name: flowlet-frontend
-          image: flowlet/frontend:latest # Replace with your actual image
+        - name: flowlet-web-frontend
+          image: flowlet/web-frontend:latest # Replace with your actual image
           ports:
             - containerPort: 3000
           resources:

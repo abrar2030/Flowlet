@@ -1,4 +1,4 @@
-// Wallet Service for Flowlet Frontend
+// Wallet Service for Flowlet web-frontend
 import { api, ApiError, PaginatedResponse } from "./api";
 
 // Types

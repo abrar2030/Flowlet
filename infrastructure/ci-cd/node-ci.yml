@@ -13,10 +13,10 @@ jobs:
           node-version: 16.x
       - name: Install dependencies
         run: npm install
-        working-directory: Flowlet/frontend/web-frontend
+        working-directory: Flowlet/web-frontend/web-web-frontend
       - name: Run tests
         run: npm test
-        working-directory: Flowlet/frontend/web-frontend
+        working-directory: Flowlet/web-frontend/web-web-frontend
       - name: Build
         run: npm run build
-        working-directory: Flowlet/frontend/web-frontend
+        working-directory: Flowlet/web-frontend/web-web-frontend

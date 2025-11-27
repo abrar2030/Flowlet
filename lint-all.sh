@@ -43,11 +43,11 @@ npm install -g eslint prettier || log_error "Failed to install JavaScript/TypeSc
 log_success "JavaScript/TypeScript linting tools installed."
 
 echo "Running ESLint (JavaScript/TypeScript linter)..."
-eslint Flowlet/frontend/web-frontend/src || log_error "ESLint linting failed."
+eslint Flowlet/web-frontend/web-web-frontend/src || log_error "ESLint linting failed."
 log_success "ESLint linting completed."
 
 echo "Running Prettier (code formatter)..."
-prettier --check Flowlet/frontend/web-frontend/src || log_error "Prettier formatting check failed. Run 'prettier --write Flowlet/frontend/web-frontend/src' to fix."
+prettier --check Flowlet/web-frontend/web-web-frontend/src || log_error "Prettier formatting check failed. Run 'prettier --write Flowlet/web-frontend/web-web-frontend/src' to fix."
 log_success "Prettier formatting check completed."
 
 echo "Linting process completed successfully."

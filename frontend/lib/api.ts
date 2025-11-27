@@ -1,4 +1,4 @@
-// Improved API Client Configuration for Flowlet Frontend
+// Improved API Client Configuration for Flowlet web-frontend
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Utility function for safe base64 decoding (JWT payload)

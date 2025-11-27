@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "flowlet.fullname" . }}-frontend
+  name: {{ include "flowlet.fullname" . }}-web-frontend
   labels:
     {{- include "flowlet.labels" . | nindent 4 }}
-    app.kubernetes.io/component: frontend
+    app.kubernetes.io/component: web-frontend
 spec:
-  {{- if not .Values.frontend.autoscaling.enabled }}
-  replicas: {{ .Values.frontend.replicaCount }}
+  {{- if not .Values.web-frontend.autoscaling.enabled }}
+  replicas: {{ .Values.web-frontend.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "flowlet.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: frontend
+      app.kubernetes.io/component: web-frontend
   template:
     metadata:
       labels:
         {{- include "flowlet.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: frontend
+        app.kubernetes.io/component: web-frontend
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -27,21 +27,21 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: frontend
+        - name: web-frontend
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          image: "{{ .Values.web-frontend.image.repository }}:{{ .Values.web-frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.web-frontend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.frontend.service.targetPort }}
+              containerPort: {{ .Values.web-frontend.service.targetPort }}
               protocol: TCP
           livenessProbe:
-            {{- toYaml .Values.frontend.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.web-frontend.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.frontend.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.web-frontend.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.frontend.resources | nindent 12 }}
+            {{- toYaml .Values.web-frontend.resources | nindent 12 }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp

@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: flowlet-frontend-service
+  name: flowlet-web-frontend-service
   labels:
     app: flowlet
-    tier: frontend
+    tier: web-frontend
 spec:
   selector:
     app: flowlet
-    tier: frontend
+    tier: web-frontend
   ports:
     - protocol: TCP
       port: 80

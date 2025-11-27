@@ -1,4 +1,4 @@
-// Improved TypeScript type definitions for Flowlet frontend
+// Improved TypeScript type definitions for Flowlet web-frontend
 
 // ============================================================================
 // Core Types

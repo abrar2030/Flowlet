@@ -15,7 +15,7 @@ Flowlet is a comprehensive embedded finance platform designed to integrate finan
 
 ## Architecture Overview
 
-Flowlet is built with a modular architecture, primarily consisting of a Python Flask backend and a React-based frontend (both web and mobile). The backend exposes a set of RESTful APIs that interact with a SQLite database (for demonstration purposes, can be configured for other databases). The frontend applications consume these APIs to provide a user interface for financial operations.
+Flowlet is built with a modular architecture, primarily consisting of a Python Flask backend and a React-based web-frontend (both web and mobile). The backend exposes a set of RESTful APIs that interact with a SQLite database (for demonstration purposes, can be configured for other databases). The web-frontend applications consume these APIs to provide a user interface for financial operations.
 
 ### Backend (Flask)
 
@@ -25,12 +25,12 @@ The backend is developed using Python Flask and provides the core business logic
 - **Database Models:** SQLAlchemy ORM is used to define database schemas for entities like Wallets, Transactions, Cards, Users, and Ledger Entries.
 - **Business Logic:** Handles transaction processing, balance updates, compliance checks, and other financial operations.
 
-### Frontend (React)
+### web-frontend (React)
 
-The frontend consists of two separate React applications:
+The web-frontend consists of two separate React applications:
 
-- **Web Frontend:** A web-based interface for administrative tasks and user management.
-- **Mobile Frontend:** A mobile-optimized interface for end-users to manage their wallets, cards, and transactions.
+- **Web web-frontend:** A web-based interface for administrative tasks and user management.
+- **Mobile web-frontend:** A mobile-optimized interface for end-users to manage their wallets, cards, and transactions.
 
 ### Database
 

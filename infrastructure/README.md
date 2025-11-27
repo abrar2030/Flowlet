@@ -23,7 +23,7 @@ The repository is organized into logical directories, each focusing on a specifi
 | :-------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
 | **terraform/**  | Infrastructure as Code for cloud resource provisioning.                | `main.tf`, `variables.tf`, `outputs.tf`, `modules/` (reusable components).                       |
 | **kubernetes/** | Kubernetes manifests for deploying the application.                    | Sub-directories for `namespaces/`, `services/`, `databases/`, `monitoring/`, and `security/`.    |
-| **docker/**     | Dockerfiles and related configuration for building service images.     | `Dockerfile.backend`, `Dockerfile.frontend`, `docker-compose.yml` (for local dev).               |
+| **docker/**     | Dockerfiles and related configuration for building service images.     | `Dockerfile.backend`, `Dockerfile.web-frontend`, `docker-compose.yml` (for local dev).           |
 | **helm/**       | Helm charts for packaging and deploying the application to Kubernetes. | `flowlet/` (the main application chart).                                                         |
 | **ci-cd/**      | Continuous Integration and Continuous Deployment pipelines.            | YAML files defining GitHub Actions workflows for various services and infrastructure components. |
 | **scripts/**    | Utility scripts for deployment, building, and maintenance tasks.       | `deploy.sh`, `build-images.sh`, `cleanup.sh`, `validate.sh`.                                     |
@@ -48,14 +48,14 @@ The `kubernetes/` directory is structured to manage the deployment of the entire
 
 The `ci-cd/` directory contains workflows to automate the software delivery process.
 
-| Workflow File               | Trigger                            | Purpose                                                                 |
-| :-------------------------- | :--------------------------------- | :---------------------------------------------------------------------- |
-| `python-backend-ci-cd.yml`  | Push to `main` (or feature branch) | Builds, tests, and deploys the Python backend service.                  |
-| `nodejs-frontend-ci-cd.yml` | Push to `main` (or feature branch) | Builds, tests, and deploys the Node.js frontend application.            |
-| `terraform-ci.yml`          | Changes in `terraform/`            | Runs `terraform plan` and `terraform apply` for infrastructure changes. |
-| `kubernetes-ci.yml`         | Changes in `kubernetes/`           | Validates Kubernetes manifests and applies changes to the cluster.      |
-| `documentation.yml`         | Scheduled or Manual                | Generates and updates documentation (e.g., API specs, runbooks).        |
-| `scripts-ci.yml`            | Changes in `scripts/`              | Runs linting and validation checks on utility scripts.                  |
+| Workflow File                   | Trigger                            | Purpose                                                                 |
+| :------------------------------ | :--------------------------------- | :---------------------------------------------------------------------- |
+| `python-backend-ci-cd.yml`      | Push to `main` (or feature branch) | Builds, tests, and deploys the Python backend service.                  |
+| `nodejs-web-frontend-ci-cd.yml` | Push to `main` (or feature branch) | Builds, tests, and deploys the Node.js web-frontend application.        |
+| `terraform-ci.yml`              | Changes in `terraform/`            | Runs `terraform plan` and `terraform apply` for infrastructure changes. |
+| `kubernetes-ci.yml`             | Changes in `kubernetes/`           | Validates Kubernetes manifests and applies changes to the cluster.      |
+| `documentation.yml`             | Scheduled or Manual                | Generates and updates documentation (e.g., API specs, runbooks).        |
+| `scripts-ci.yml`                | Changes in `scripts/`              | Runs linting and validation checks on utility scripts.                  |
 
 ## 5. Quick Start: Deployment
 

@@ -1,10 +1,10 @@
-# Flowlet Web Frontend Usage Guide
+# Flowlet Web web-frontend Usage Guide
 
-This guide provides instructions on how to use and navigate the Flowlet web frontend application. The web frontend provides a user-friendly interface to interact with the Flowlet embedded finance platform.
+This guide provides instructions on how to use and navigate the Flowlet web web-frontend application. The web web-frontend provides a user-friendly interface to interact with the Flowlet embedded finance platform.
 
 ## Accessing the Application
 
-Once the Flowlet web frontend is deployed, you can access it via your web browser. The URL will depend on your deployment configuration (e.g., `http://localhost:3000` for local development, or a public domain for production).
+Once the Flowlet web web-frontend is deployed, you can access it via your web browser. The URL will depend on your deployment configuration (e.g., `http://localhost:3000` for local development, or a public domain for production).
 
 ## Login and Registration
 
@@ -21,7 +21,7 @@ After successful login, you will be directed to the main dashboard. The dashboar
 
 ## Key Sections
 
-The Flowlet web frontend is organized into several key sections, accessible via the navigation menu (typically on the sidebar or top bar):
+The Flowlet web web-frontend is organized into several key sections, accessible via the navigation menu (typically on the sidebar or top bar):
 
 ### Dashboard
 

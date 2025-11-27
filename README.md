@@ -52,10 +52,10 @@ Flowlet's strength lies in its comprehensive suite of embedded finance capabilit
 
 ### 💰 Digital Wallet Management
 
-| Component                  | Key Files/Modules                                                                                                                                                                                                               | Purpose                                                                                                                                                                    |
-| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Backend Implementation** | `backend/src/routes/wallet.py`, `backend/src/routes/wallet_mvp.py`, `backend/src/models/account.py`, `backend/src/models/transaction.py`, `backend/src/currency/multi_currency_system.py`, `backend/src/utils/notifications.py` | Core logic for wallet creation, management, and transaction processing; defines API endpoints, business logic, data models, multi-currency support, and real-time updates. |
-| **Frontend Integration**   | `frontend/src/components/wallet/Dashboard.tsx`, `frontend/src/lib/walletService.ts`, `frontend/src/store/walletSlice.ts`                                                                                                        | User interface for viewing balances and transaction history, integrating with the backend and managing state for real-time display.                                        |
+| Component                    | Key Files/Modules                                                                                                                                                                                                               | Purpose                                                                                                                                                                    |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backend Implementation**   | `backend/src/routes/wallet.py`, `backend/src/routes/wallet_mvp.py`, `backend/src/models/account.py`, `backend/src/models/transaction.py`, `backend/src/currency/multi_currency_system.py`, `backend/src/utils/notifications.py` | Core logic for wallet creation, management, and transaction processing; defines API endpoints, business logic, data models, multi-currency support, and real-time updates. |
+| **web-frontend Integration** | `web-frontend/src/components/wallet/Dashboard.tsx`, `web-frontend/src/lib/walletService.ts`, `web-frontend/src/store/walletSlice.ts`                                                                                            | User interface for viewing balances and transaction history, integrating with the backend and managing state for real-time display.                                        |
 
 ### 💳 Payment Processing
 
@@ -116,7 +116,7 @@ The infrastructure leverages **containerization (Docker)** for application packa
 | **Integration Layer**   | Securely connects Flowlet with external financial systems.    | Integrations for banking partners (`backend/src/integrations/banking`) and payment processors (`backend/src/integrations/payments`).                                      |
 | **Data Layer**          | Manages system state and analytics.                           | Polyglot persistence model with Kubernetes configurations for various databases (`infrastructure/kubernetes/databases`) and SQLAlchemy ORM models (`backend/src/models`). |
 | **AI/ML Layer**         | Provides intelligent automation and enhanced decision-making. | Modules for fraud detection, risk assessment, and transaction intelligence (`backend/src/ai/`, `backend/src/ml/`).                                                        |
-| **Presentation Layer**  | User-facing applications and interfaces.                      | React-based frontend (`frontend/`) and dedicated developer documentation (`docs/`).                                                                                       |
+| **Presentation Layer**  | User-facing applications and interfaces.                      | React-based web-frontend (`web-frontend/`) and dedicated developer documentation (`docs/`).                                                                               |
 
 ---
 
@@ -143,18 +143,18 @@ The `backend` directory is the central hub for Flowlet's server-side logic, impl
 | `backend/src/utils/`        | General utility functions and helper modules.                              | `error_handlers.py`, `notifications.py`, `validators.py`                                                      |
 | **Root Files**              | Main application entry points and configuration.                           | **`main.py`** (Primary entry point), `requirements.txt`, `run_tests.sh`, `wsgi.py`                            |
 
-### Frontend (`frontend/`)
+### web-frontend (`web-frontend/`)
 
 This directory contains the **React-based Single-Page Application (SPA)** built with **TypeScript**, leveraging **Vite** for the build system, and **pnpm** for package management.
 
-| Directory/File             | Description                                                      | Key Components and Files                                                                       |
-| :------------------------- | :--------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
-| `frontend/src/components/` | Reusable UI components.                                          | `auth/` (Login, Register, Onboarding), `ui/` (Generic components), `wallet/` (`Dashboard.tsx`) |
-| `frontend/src/hooks/`      | Custom React hooks for encapsulating and reusing stateful logic. | `useAuth.ts` (Authentication state), `use-mobile.js` (Responsive design logic)                 |
-| `frontend/src/lib/`        | Utility functions and service integrations.                      | `api.ts` (Centralized API calls), `authService.ts`, `walletService.ts`, `utils.js`             |
-| `frontend/src/store/`      | Client-side state management using **Redux Toolkit**.            | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration)      |
-| `frontend/src/types/`      | **TypeScript** type definitions for type safety.                 | `index.ts` (Centralized custom type definitions)                                               |
-| **Root Files**             | Main application files and configuration.                        | `main.tsx` (Entry point), `package.json`, `tsconfig.json`, `vite.config.ts`                    |
+| Directory/File                 | Description                                                      | Key Components and Files                                                                       |
+| :----------------------------- | :--------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `web-frontend/src/components/` | Reusable UI components.                                          | `auth/` (Login, Register, Onboarding), `ui/` (Generic components), `wallet/` (`Dashboard.tsx`) |
+| `web-frontend/src/hooks/`      | Custom React hooks for encapsulating and reusing stateful logic. | `useAuth.ts` (Authentication state), `use-mobile.js` (Responsive design logic)                 |
+| `web-frontend/src/lib/`        | Utility functions and service integrations.                      | `api.ts` (Centralized API calls), `authService.ts`, `walletService.ts`, `utils.js`             |
+| `web-frontend/src/store/`      | Client-side state management using **Redux Toolkit**.            | `authSlice.ts`, `transactionSlice.ts`, `walletSlice.ts`, `index.ts` (Store configuration)      |
+| `web-frontend/src/types/`      | **TypeScript** type definitions for type safety.                 | `index.ts` (Centralized custom type definitions)                                               |
+| **Root Files**                 | Main application files and configuration.                        | `main.tsx` (Entry point), `package.json`, `tsconfig.json`, `vite.config.ts`                    |
 
 ### Documentation (`docs/`)
 
@@ -167,7 +167,7 @@ The `docs/` directory is a comprehensive repository of documentation catering to
 | `03_API_Reference/`             | Exhaustive documentation for all exposed APIs.                   | `API_Documentation.md`, `Backend_API.md`, `API_Gateway.md`                          |
 | `04_Compliance_and_Regulatory/` | Details on adherence to financial regulations.                   | `Compliance_Overview.md`, `KYC_AML.md`                                              |
 | `05_Core_Financial_Services/`   | In-depth documentation on each core financial service.           | `Banking_Integrations.md`, `Card_Services.md`, `Ledger.md`, `Payment_Processing.md` |
-| `06_Developer_Guides/`          | Practical, hands-on guides for developers.                       | `Setup_Guide.md`, `Authentication.md`, `Frontend_Development.md`                    |
+| `06_Developer_Guides/`          | Practical, hands-on guides for developers.                       | `Setup_Guide.md`, `Authentication.md`, `web-frontend_Development.md`                |
 | `07_Security/`                  | Details on robust security measures and architecture.            | `Security_Overview.md`                                                              |
 | `08_Infrastructure/`            | Documentation for DevOps and operations teams.                   | `Deployment_Guide.md`, `Monitoring_and_Observability.md`                            |
 
@@ -177,7 +177,7 @@ This directory contains all the Infrastructure-as-Code (IaC) definitions for dep
 
 | Directory/File               | Description                                                              | Key Components and Files                                                                                                                    |
 | :--------------------------- | :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| `infrastructure/docker/`     | Dockerfiles and configuration for local environment.                     | **`docker-compose.yml`** (Full stack local environment), `Dockerfile.backend`, `Dockerfile.frontend`, `nginx-lb.conf`                       |
+| `infrastructure/docker/`     | Dockerfiles and configuration for local environment.                     | **`docker-compose.yml`** (Full stack local environment), `Dockerfile.backend`, `Dockerfile.web-frontend`, `nginx-lb.conf`                   |
 | `infrastructure/kubernetes/` | Kubernetes manifests for deploying the application and its dependencies. | `databases/` (`postgresql.yaml`, `mongodb.yaml`, `redis.yaml`), `monitoring/` (Prometheus, Grafana), `services/` (Core service deployments) |
 | `infrastructure/helm/`       | Helm charts for templating and managing Kubernetes deployments.          | `flowlet-chart/` (Main application chart)                                                                                                   |
 | `infrastructure/terraform/`  | Terraform configurations for provisioning cloud resources.               | `aws/`, `gcp/` (Provider-specific resource definitions)                                                                                     |
@@ -186,11 +186,11 @@ This directory contains all the Infrastructure-as-Code (IaC) definitions for dep
 
 Contains the CI/CD pipeline definitions, automating the software delivery lifecycle.
 
-| Workflow File               | Description                                                         | Key Stages                                                                                     |
-| :-------------------------- | :------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
-| `backend-ci-cd.yml`         | Continuous Integration and Deployment for the backend services.     | Testing, Linting, Building Docker Images, Pushing to Registry, Deploying to Staging/Production |
-| `nodejs-frontend-ci-cd.yml` | CI/CD for the frontend application.                                 | Testing, Linting, Building Static Assets, Deployment to CDN/Web Server                         |
-| `infrastructure-ci.yml`     | Continuous Integration for Infrastructure-as-Code (Terraform/Helm). | Plan/Validate Infrastructure Changes                                                           |
+| Workflow File                   | Description                                                         | Key Stages                                                                                     |
+| :------------------------------ | :------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
+| `backend-ci-cd.yml`             | Continuous Integration and Deployment for the backend services.     | Testing, Linting, Building Docker Images, Pushing to Registry, Deploying to Staging/Production |
+| `nodejs-web-frontend-ci-cd.yml` | CI/CD for the web-frontend application.                             | Testing, Linting, Building Static Assets, Deployment to CDN/Web Server                         |
+| `infrastructure-ci.yml`         | Continuous Integration for Infrastructure-as-Code (Terraform/Helm). | Plan/Validate Infrastructure Changes                                                           |
 
 ---
 
@@ -209,26 +209,26 @@ All sensitive configurations are managed via environment variables. Before runni
 
 ### Setup with Docker Compose (Recommended)
 
-| Step                          | Command                                                        | Description                                                                            |
-| :---------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **1. Clone Repository**       | `git clone https://github.com/abrar2030/Flowlet && cd Flowlet` | Download the source code and navigate to the project directory.                        |
-| **2. Start the Services**     | `cd infrastructure/docker && docker compose up --build -d`     | Builds the images and runs all services (DB, Cache, Backend, Frontend, Load Balancer). |
-| **3. Access the Application** | See access points below.                                       |                                                                                        |
+| Step                          | Command                                                        | Description                                                                                |
+| :---------------------------- | :------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| **1. Clone Repository**       | `git clone https://github.com/abrar2030/Flowlet && cd Flowlet` | Download the source code and navigate to the project directory.                            |
+| **2. Start the Services**     | `cd infrastructure/docker && docker compose up --build -d`     | Builds the images and runs all services (DB, Cache, Backend, web-frontend, Load Balancer). |
+| **3. Access the Application** | See access points below.                                       |                                                                                            |
 
 **Access the Development Environment:**
 
-| Component             | Endpoint                | Default Credentials                 |
-| :-------------------- | :---------------------- | :---------------------------------- |
-| **Frontend Web App**  | `http://localhost:80`   | N/A                                 |
-| **Backend API**       | `http://localhost:8000` | N/A                                 |
-| **Grafana Dashboard** | `http://localhost:3001` | User: `admin`, Password: `admin123` |
+| Component                | Endpoint                | Default Credentials                 |
+| :----------------------- | :---------------------- | :---------------------------------- |
+| **web-frontend Web App** | `http://localhost:80`   | N/A                                 |
+| **Backend API**          | `http://localhost:8000` | N/A                                 |
+| **Grafana Dashboard**    | `http://localhost:3001` | User: `admin`, Password: `admin123` |
 
 ### Manual Setup (For Development)
 
-| Component                       | Prerequisites                   | Setup Steps                                                                                   |
-| :------------------------------ | :------------------------------ | :-------------------------------------------------------------------------------------------- |
-| **Backend (Python/Flask)**      | Python 3.11+, PostgreSQL, Redis | `cd backend`, `pip install -r requirements.txt`, `python main.py` (after setting DB env vars) |
-| **Frontend (React/TypeScript)** | Node.js (v18+), pnpm            | `cd frontend`, `pnpm install`, `pnpm run dev`                                                 |
+| Component                           | Prerequisites                   | Setup Steps                                                                                   |
+| :---------------------------------- | :------------------------------ | :-------------------------------------------------------------------------------------------- |
+| **Backend (Python/Flask)**          | Python 3.11+, PostgreSQL, Redis | `cd backend`, `pip install -r requirements.txt`, `python main.py` (after setting DB env vars) |
+| **web-frontend (React/TypeScript)** | Node.js (v18+), pnpm            | `cd web-frontend`, `pnpm install`, `pnpm run dev`                                             |
 
 ---
 

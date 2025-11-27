@@ -4,7 +4,7 @@
 
 This document provides a comprehensive overview of the Kubernetes configurations for the Flowlet application. In the financial industry, robust and secure infrastructure is paramount for ensuring the availability, reliability, and integrity of critical systems. Kubernetes, as a container orchestration platform, plays a pivotal role in achieving these objectives by enabling scalable, resilient, and manageable deployments.
 
-This directory contains all the necessary Kubernetes manifests, Helm charts, and configuration files required to deploy, manage, and scale the Flowlet backend and frontend services within a Kubernetes cluster. The configurations are designed with a strong emphasis on security best practices, operational efficiency, and adherence to regulatory compliance standards relevant to financial applications. This documentation aims to provide a clear understanding of how Flowlet is deployed and managed in a containerized environment, facilitating secure operations, auditing, and continuous delivery.
+This directory contains all the necessary Kubernetes manifests, Helm charts, and configuration files required to deploy, manage, and scale the Flowlet backend and web-frontend services within a Kubernetes cluster. The configurations are designed with a strong emphasis on security best practices, operational efficiency, and adherence to regulatory compliance standards relevant to financial applications. This documentation aims to provide a clear understanding of how Flowlet is deployed and managed in a containerized environment, facilitating secure operations, auditing, and continuous delivery.
 
 ## Directory Structure
 
@@ -112,8 +112,8 @@ configuration as code, making deployment configurations auditable, repeatable, a
 - `README.md`: Provides an overview of the Kubernetes Manifests.
 - `backend-deployment.yaml`: Defines the Kubernetes `Deployment` for the Flowlet backend service. This manifest specifies the container image, replica count, resource requests/limits, and environment variables for the backend application.
 - `backend-service.yaml`: Defines the Kubernetes `Service` for the Flowlet backend. This service provides a stable network endpoint for the backend pods, enabling other services or the ingress controller to communicate with it.
-- `frontend-deployment.yaml`: Defines the Kubernetes `Deployment` for the Flowlet frontend service.
-- `frontend-service.yaml`: Defines the Kubernetes `Service` for the Flowlet frontend.
+- `web-frontend-deployment.yaml`: Defines the Kubernetes `Deployment` for the Flowlet web-frontend service.
+- `web-frontend-service.yaml`: Defines the Kubernetes `Service` for the Flowlet web-frontend.
 - `ingress.yaml`: Defines the Kubernetes `Ingress` resource, which manages external access to the services in the cluster, typically providing HTTP/HTTPS routing and load balancing.
 
 **Financial Industry Relevance:**

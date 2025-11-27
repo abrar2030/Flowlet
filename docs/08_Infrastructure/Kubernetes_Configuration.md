@@ -18,8 +18,8 @@ The `kubernetes/manifests/` directory contains the following key manifest files:
 
 - `backend-deployment.yaml`: Defines the deployment for the Flowlet backend service.
 - `backend-service.yaml`: Defines the Kubernetes Service for the Flowlet backend.
-- `frontend-deployment.yaml`: Defines the deployment for the Flowlet web frontend.
-- `frontend-service.yaml`: Defines the Kubernetes Service for the Flowlet web frontend.
+- `web-frontend-deployment.yaml`: Defines the deployment for the Flowlet web web-frontend.
+- `web-frontend-service.yaml`: Defines the Kubernetes Service for the Flowlet web web-frontend.
 - `ingress.yaml`: Configures Ingress resources for external access to the services.
 
 To deploy these manifests, you can use `kubectl`:

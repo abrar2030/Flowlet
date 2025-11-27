@@ -173,7 +173,7 @@ curl -X POST http://localhost:5001/api/v1/payment/transfer \
 
 - Input validation and sanitization
 - SQL injection prevention
-- CORS support for frontend integration
+- CORS support for web-frontend integration
 - Transaction integrity checks
 - Balance validation
 - Comprehensive error handling

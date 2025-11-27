@@ -62,9 +62,9 @@ install_python_deps() {
 install_node_deps() {
     echo -e "${BLUE}Installing Node.js dependencies...${NC}"
 
-    # Install frontend dependencies
-    if [ -d "frontend" ]; then
-        cd frontend
+    # Install web-frontend dependencies
+    if [ -d "web-frontend" ]; then
+        cd web-frontend
         if command_exists pnpm; then
             pnpm install
         elif command_exists npm; then
@@ -74,7 +74,7 @@ install_node_deps() {
             exit 1
         fi
         cd ..
-        echo -e "${GREEN}✓ Frontend dependencies installed${NC}"
+        echo -e "${GREEN}✓ web-frontend dependencies installed${NC}"
     fi
 }
 
@@ -137,10 +137,10 @@ EOF
         echo -e "${YELLOW}⚠ Backend .env file already exists. Skipping creation.${NC}"
     fi
 
-    # Frontend environment file
-    if [ ! -f "frontend/.env" ]; then
-        cat > frontend/.env << EOF
-# Flowlet Frontend Environment Configuration
+    # web-frontend environment file
+    if [ ! -f "web-frontend/.env" ]; then
+        cat > web-frontend/.env << EOF
+# Flowlet web-frontend Environment Configuration
 VITE_API_BASE_URL=http://localhost:5000
 VITE_APP_NAME=Flowlet
 VITE_APP_VERSION=2.0.0
@@ -154,9 +154,9 @@ VITE_ENABLE_FRAUD_DETECTION=true
 # External Services
 VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 EOF
-        echo -e "${GREEN}✓ Frontend .env file created${NC}"
+        echo -e "${GREEN}✓ web-frontend .env file created${NC}"
     else
-        echo -e "${YELLOW}⚠ Frontend .env file already exists. Skipping creation.${NC}"
+        echo -e "${YELLOW}⚠ web-frontend .env file already exists. Skipping creation.${NC}"
     fi
 }
 
@@ -193,7 +193,7 @@ EOF
     # Combined development start script
     cat > dev-start.sh << 'EOF'
 #!/usr/bin/env bash
-# Start both backend and frontend development servers
+# Start both backend and web-frontend development servers
 
 set -euo pipefail
 
@@ -221,15 +221,15 @@ echo -e "${GREEN}Starting backend server...${NC}"
 (cd backend && ./dev.sh) &
 BACKEND_PID=$!
 
-# Start frontend server
-echo -e "${GREEN}Starting frontend server...${NC}"
-(cd frontend && (command -v pnpm >/dev/null 2>&1 && pnpm run dev --host || npm run dev -- --host)) &
-FRONTEND_PID=$!
+# Start web-frontend server
+echo -e "${GREEN}Starting web-frontend server...${NC}"
+(cd web-frontend && (command -v pnpm >/dev/null 2>&1 && pnpm run dev --host || npm run dev -- --host)) &
+web-frontend_PID=$!
 
 echo -e "${GREEN}=========================================="
 echo -e "Development servers started!"
 echo -e "Backend:  http://localhost:5000"
-echo -e "Frontend: http://localhost:5173"
+echo -e "web-frontend: http://localhost:5173"
 echo -e "Press Ctrl+C to stop all servers"
 echo -e "==========================================${NC}"
 

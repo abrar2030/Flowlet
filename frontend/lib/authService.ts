@@ -1,4 +1,4 @@
-// Authentication Service for Flowlet Frontend
+// Authentication Service for Flowlet web-frontend
 import { api, TokenManager, ApiError } from "./api";
 
 // Types

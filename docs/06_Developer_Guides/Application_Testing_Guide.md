@@ -1,6 +1,6 @@
 # Flowlet Application Testing Guide
 
-This guide outlines the testing methodologies and practices for the Flowlet application components, including unit, integration, and end-to-end (E2E) testing for both backend services and frontend applications.
+This guide outlines the testing methodologies and practices for the Flowlet application components, including unit, integration, and end-to-end (E2E) testing for both backend services and web-frontend applications.
 
 ## Overview
 
@@ -106,7 +106,7 @@ def test_create_wallet_integration(setup_db):
 
 ### End-to-End (E2E) Tests
 
-E2E tests simulate complete user flows, interacting with the application through its external interfaces (e.g., API Gateway, web frontend). These tests verify that all components work together seamlessly.
+E2E tests simulate complete user flows, interacting with the application through its external interfaces (e.g., API Gateway, web web-frontend). These tests verify that all components work together seamlessly.
 
 E2E tests are located in `Flowlet/tests/e2e/`.
 
@@ -160,9 +160,9 @@ def test_full_user_registration_and_wallet_creation():
     assert wallet_data["currency"] == "USD"
 ```
 
-## Frontend Testing
+## web-frontend Testing
 
-The Flowlet web frontend is built with React. Testing is typically done using testing libraries like `@testing-library/react` and a test runner like `Vitest` or `Jest`.
+The Flowlet web web-frontend is built with React. Testing is typically done using testing libraries like `@testing-library/react` and a test runner like `Vitest` or `Jest`.
 
 ### Unit Tests
 
@@ -170,17 +170,17 @@ Unit tests for React components focus on testing individual components in isolat
 
 **Running Unit Tests**:
 
-Navigate to the `Flowlet/frontend/web-frontend/` directory and run the test command (assuming `Vitest` is configured):
+Navigate to the `Flowlet/web-frontend/web-web-frontend/` directory and run the test command (assuming `Vitest` is configured):
 
 ```bash
-cd Flowlet/frontend/web-frontend/
+cd Flowlet/web-frontend/web-web-frontend/
 pnpm test
 ```
 
 **Example Test Structure**:
 
 ```jsx
-// Flowlet/frontend/web-frontend/src/components/Button.test.jsx
+// Flowlet/web-frontend/web-web-frontend/src/components/Button.test.jsx
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -199,11 +199,11 @@ test("calls onClick prop when clicked", async () => {
 });
 ```
 
-### E2E Tests (Frontend)
+### E2E Tests (web-frontend)
 
-Frontend E2E tests can be performed using tools like Cypress or Playwright to simulate user interactions directly in a browser. These tests would cover complete user journeys within the web application.
+web-frontend E2E tests can be performed using tools like Cypress or Playwright to simulate user interactions directly in a browser. These tests would cover complete user journeys within the web application.
 
-(Note: Specific E2E tests for the frontend are not explicitly provided in the repository structure, but this section outlines how they would typically be implemented.)
+(Note: Specific E2E tests for the web-frontend are not explicitly provided in the repository structure, but this section outlines how they would typically be implemented.)
 
 ## Performance Testing
 

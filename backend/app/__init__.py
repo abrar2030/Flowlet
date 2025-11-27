@@ -51,7 +51,7 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
 
-    # Configure CORS for frontend-backend interaction
+    # Configure CORS for web-frontend-backend interaction
     CORS(
         app,
         origins=app.config.get("CORS_ORIGINS", ["*"]),

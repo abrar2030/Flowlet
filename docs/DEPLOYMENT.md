@@ -83,18 +83,18 @@ The application is deployed to the provisioned EKS cluster using Helm.
 
 ### 3.1. Build and Push Docker Images
 
-The CI pipeline (`.github/workflows/docker-build.yml`) handles the automated build and push of the frontend and backend images. If deploying manually, use the following steps:
+The CI pipeline (`.github/workflows/docker-build.yml`) handles the automated build and push of the web-frontend and backend images. If deploying manually, use the following steps:
 
 1.  **Build Images**:
 
     ```bash
-    docker build -t your-registry/flowlet/frontend:latest -f infrastructure/docker/Dockerfile.frontend .
+    docker build -t your-registry/flowlet/web-frontend:latest -f infrastructure/docker/Dockerfile.web-frontend .
     docker build -t your-registry/flowlet/backend:latest -f infrastructure/docker/Dockerfile.backend .
     ```
 
 2.  **Push Images**:
     ```bash
-    docker push your-registry/flowlet/frontend:latest
+    docker push your-registry/flowlet/web-frontend:latest
     docker push your-registry/flowlet/backend:latest
     ```
 
@@ -139,17 +139,17 @@ The application is deployed using the `flowlet-chart` Helm chart.
 The repository includes two GitHub Actions workflows:
 
 1.  **`terraform-ci.yml`**: Validates Terraform code on every push to `infrastructure/terraform`. It runs `terraform fmt -check`, `terraform validate`, and `terraform plan`.
-2.  **`docker-build.yml`**: Builds and pushes the optimized multi-stage Docker images for the frontend and backend to a container registry on changes to application or Dockerfile code.
+2.  **`docker-build.yml`**: Builds and pushes the optimized multi-stage Docker images for the web-frontend and backend to a container registry on changes to application or Dockerfile code.
 
 ## 5. Key Infrastructure Refactoring Details
 
 | Component                  | Refactoring Detail                                                                                                                         | Benefit                                                                        |
 | :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| **Dockerfiles**            | Converted to optimized multi-stage builds (`Dockerfile.frontend`, `Dockerfile.backend`).                                                   | Smaller image size, faster build times, reduced attack surface.                |
-| **Configuration**          | Parameterized with environment variables and Kubernetes Secrets. Frontend uses `envsubst` for runtime configuration.                       | Separation of configuration from code, enhanced security for sensitive values. |
+| **Dockerfiles**            | Converted to optimized multi-stage builds (`Dockerfile.web-frontend`, `Dockerfile.backend`).                                               | Smaller image size, faster build times, reduced attack surface.                |
+| **Configuration**          | Parameterized with environment variables and Kubernetes Secrets. web-frontend uses `envsubst` for runtime configuration.                   | Separation of configuration from code, enhanced security for sensitive values. |
 | **Terraform**              | Refactored into reusable modules (`database`, `redis`, `s3`, `networking`, `security`, `kubernetes`) with S3 backend and DynamoDB locking. | Improved code organization, reusability, and state management integrity.       |
 | **CI Scripts**             | Added `terraform-ci.yml` to validate Terraform code (`fmt`, `plan`).                                                                       | Early detection of configuration errors and style issues.                      |
-| **Kubernetes Deployments** | Added `strategy: RollingUpdate` to both `frontend-deployment.yaml` and `backend-deployment.yaml`.                                          | Zero-downtime deployments and safer rollouts.                                  |
+| **Kubernetes Deployments** | Added `strategy: RollingUpdate` to both `web-frontend-deployment.yaml` and `backend-deployment.yaml`.                                      | Zero-downtime deployments and safer rollouts.                                  |
 | **Health Checks**          | Liveness and Readiness probes are configured in both deployments, leveraging the health check endpoints defined in the Dockerfiles.        | Improved service reliability and traffic routing.                              |
 
 ---

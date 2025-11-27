@@ -1,10 +1,10 @@
-# Flowlet Frontend
+# Flowlet web-frontend
 
-The Flowlet Frontend is a comprehensive, production-ready component library and application built for financial technology. It is developed using **React**, **TypeScript**, and modern tooling to ensure high performance, security, and maintainability.
+The Flowlet web-frontend is a comprehensive, production-ready component library and application built for financial technology. It is developed using **React**, **TypeScript**, and modern tooling to ensure high performance, security, and maintainability.
 
 ## 1. Core Technologies and Dependencies
 
-The frontend is built on a modern stack, leveraging key libraries for state management, UI components, and data handling.
+The web-frontend is built on a modern stack, leveraging key libraries for state management, UI components, and data handling.
 
 | Category             | Key Technologies                                          | Purpose                                                                     |
 | :------------------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------- |
@@ -75,8 +75,8 @@ The `package.json` defines a comprehensive set of scripts for development, testi
 ### Setup and Run
 
 ```bash
-# Navigate to the frontend directory
-cd Flowlet/frontend
+# Navigate to the web-frontend directory
+cd Flowlet/web-frontend
 
 # Install dependencies using pnpm
 pnpm install

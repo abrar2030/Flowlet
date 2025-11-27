@@ -13,7 +13,7 @@ The `.github/workflows/` directory contains a collection of YAML files, each def
 - `documentation.yml`: Manages the build and deployment of project documentation.
 - `kubernetes-ci.yml`: Ensures the quality and validity of Kubernetes and Helm configurations.
 - `node-ci.yml`: Performs CI checks for general Node.js projects within the repository.
-- `nodejs-frontend-ci-cd.yml`: Handles CI/CD for the Node.js-based frontend components.
+- `nodejs-web-frontend-ci-cd.yml`: Handles CI/CD for the Node.js-based web-frontend components.
 - `python-backend-ci-cd.yml`: Manages CI/CD for the Python-based backend components.
 - `python-ci.yml`: Performs CI checks for general Python projects within the repository.
 - `scripts-ci.yml`: Validates and lints operational scripts.
@@ -72,7 +72,7 @@ This modular approach allows for independent testing and deployment of different
 
 ### 3. Node.js CI (`node-ci.yml`)
 
-**Purpose:** This workflow performs continuous integration checks for general Node.js projects within the repository. It ensures that Node.js-based components (e.g., utilities, small services) adhere to coding standards, pass tests, and can be successfully built. While `nodejs-frontend-ci-cd.yml` focuses on the main frontend, this workflow provides broader coverage for other Node.js assets.
+**Purpose:** This workflow performs continuous integration checks for general Node.js projects within the repository. It ensures that Node.js-based components (e.g., utilities, small services) adhere to coding standards, pass tests, and can be successfully built. While `nodejs-web-frontend-ci-cd.yml` focuses on the main web-frontend, this workflow provides broader coverage for other Node.js assets.
 
 **Triggers:**
 
@@ -92,34 +92,34 @@ This modular approach allows for independent testing and deployment of different
 - **Reliability:** Verifies that Node.js components function as expected, contributing to the overall reliability of the Flowlet platform.
 - **Consistency:** Promotes consistent development practices across all Node.js projects within the repository.
 
-### 4. Node.js Frontend CI/CD (`nodejs-frontend-ci-cd.yml`)
+### 4. Node.js web-frontend CI/CD (`nodejs-web-frontend-ci-cd.yml`)
 
-**Purpose:** This comprehensive workflow manages the Continuous Integration and Continuous Delivery/Deployment process for the Node.js-based frontend components of the Flowlet application. It ensures that the user-facing applications are thoroughly tested, scanned for security vulnerabilities, and ready for deployment. For financial applications, the frontend must be highly secure, performant, and reliable to provide a trustworthy user experience.
+**Purpose:** This comprehensive workflow manages the Continuous Integration and Continuous Delivery/Deployment process for the Node.js-based web-frontend components of the Flowlet application. It ensures that the user-facing applications are thoroughly tested, scanned for security vulnerabilities, and ready for deployment. For financial applications, the web-frontend must be highly secure, performant, and reliable to provide a trustworthy user experience.
 
 **Triggers:**
 
-- `push` events to `main` or `develop` branches on changes within the `frontend/**` path.
-- `pull_request` events targeting `main` or `develop` branches on changes within the `frontend/**` path.
+- `push` events to `main` or `develop` branches on changes within the `web-frontend/**` path.
+- `pull_request` events targeting `main` or `develop` branches on changes within the `web-frontend/**` path.
 
 **Key Steps:**
 
 - \*\*Build and Test Job (`build-and-test`):
   - **Checkout Repository:** Fetches the code.
   - **Use Node.js 16.x:** Sets up the Node.js environment.
-  - **Install dependencies (web-frontend):** Installs Node.js dependencies for the `web-frontend`.
-  - **Run tests (web-frontend):** Executes unit and integration tests for the `web-frontend`.
-  - **Build (web-frontend):** Builds the `web-frontend` application.
+  - **Install dependencies (web-web-frontend):** Installs Node.js dependencies for the `web-web-frontend`.
+  - **Run tests (web-web-frontend):** Executes unit and integration tests for the `web-web-frontend`.
+  - **Build (web-web-frontend):** Builds the `web-web-frontend` application.
 - \*\*Security Scan Job (`security-scan`):
   - **Needs `build-and-test`:** Ensures that the security scan runs only after a successful build and test.
   - **Checkout Repository & Set up Node.js:** Similar setup steps.
   - **Install dependencies for security scan:** Installs dependencies required for the security scanning tools.
   - **Run npm audit:** Executes `npm audit` to identify known vulnerabilities in project dependencies. The output is saved to a JSON file.
   - **Upload npm audit report:** Uploads the generated audit report as a workflow artifact for later review.
-- **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of frontend deployment logic. This would typically involve deploying the built frontend assets to a web server or CDN.
+- **Deployment Job (`deploy` - Placeholder):** A placeholder for future implementation of web-frontend deployment logic. This would typically involve deploying the built web-frontend assets to a web server or CDN.
 
 **Financial Industry Relevance:**
 
-- **Frontend Security:** `npm audit` is a critical step for identifying and mitigating known vulnerabilities in third-party JavaScript libraries, which could otherwise expose sensitive user data or lead to application compromise.
+- **web-frontend Security:** `npm audit` is a critical step for identifying and mitigating known vulnerabilities in third-party JavaScript libraries, which could otherwise expose sensitive user data or lead to application compromise.
 - **User Experience and Reliability:** Thorough testing and building ensure a stable and performant user interface, crucial for maintaining user trust and facilitating smooth financial transactions.
 - **Compliance with Security Standards:** Integrates security scanning into the CI/CD pipeline, aligning with secure software development lifecycle (SSDLC) requirements often mandated in financial regulations.
 - **Automated Quality Gates:** Ensures that only high-quality, secure code is merged and deployed, reducing operational risk.

@@ -35,7 +35,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-frontend-to-backend
+  name: allow-web-frontend-to-backend
   namespace: default
 spec:
   podSelector:
@@ -47,7 +47,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: frontend
+              app: web-frontend
       ports:
         - protocol: TCP
           port: 80
@@ -55,12 +55,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-to-frontend
+  name: allow-ingress-to-web-frontend
   namespace: default
 spec:
   podSelector:
     matchLabels:
-      app: frontend
+      app: web-frontend
   policyTypes:
     - Ingress
   ingress:

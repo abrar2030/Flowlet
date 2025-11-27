@@ -1,12 +1,12 @@
-# Multi-stage build for Flowlet Frontend
+# Multi-stage build for Flowlet web-frontend
 FROM node:20-alpine as builder
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY frontend/web-frontend/package*.json ./
-COPY frontend/web-frontend/pnpm-lock.yaml ./
+COPY web-frontend/web-web-frontend/package*.json ./
+COPY web-frontend/web-web-frontend/pnpm-lock.yaml ./
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -15,7 +15,7 @@ RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
-COPY frontend/web-frontend/ .
+COPY web-frontend/web-web-frontend/ .
 
 # Build the application
 RUN pnpm run build
@@ -29,7 +29,7 @@ RUN apk add --no-cache curl gettext
 # Copy custom nginx configuration
 # Copy custom nginx configuration and entrypoint
 COPY infrastructure/docker/nginx.conf /etc/nginx/nginx.conf.template
-COPY infrastructure/docker/frontend-entrypoint.sh /usr/local/bin/
+COPY infrastructure/docker/web-frontend-entrypoint.sh /usr/local/bin/
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -53,5 +53,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000 || exit 1
 
 # Start nginx - use the entrypoint script
-RUN chmod +x /usr/local/bin/frontend-entrypoint.sh
-CMD ["/usr/local/bin/frontend-entrypoint.sh", "nginx", "-g", "daemon off;"]
+RUN chmod +x /usr/local/bin/web-frontend-entrypoint.sh
+CMD ["/usr/local/bin/web-frontend-entrypoint.sh", "nginx", "-g", "daemon off;"]
