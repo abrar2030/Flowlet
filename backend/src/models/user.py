@@ -233,6 +233,11 @@ class User(Base):
         """Check if phone is verified"""
         return self.phone_verified_at is not None or self.phone_verified
 
+    @property
+    def is_admin(self) -> bool:
+        """Check if user is an admin"""
+        return self.role == UserRole.ADMIN
+
     def has_role(self, role: UserRole) -> bool:
         """Check if user has specific role"""
         return self.role == role

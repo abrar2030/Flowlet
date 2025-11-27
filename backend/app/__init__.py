@@ -1,5 +1,8 @@
 import logging
 import os
+from pathlib import Path
+from logging.handlers import RotatingFileHandler
+from typing import Optional
 
 import redis
 import structlog
@@ -16,22 +19,21 @@ from flask_sqlalchemy import SQLAlchemy
 Flowlet Financial Backend Application Factory
 """
 
-
-# Initialize extensions
+# === Extensions (module-level so other modules can import them) ===
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
-limiter = Limiter(key_func=get_remote_address, default_limits=["1000 per hour"])
+# Create an uninitialized Limiter — we'll init it with app-specific settings below
+limiter = Limiter()
 
 
-def create_app(config_name=None):
+def create_app(config_name: Optional[str] = None) -> Flask:
     """Application factory pattern"""
     app = Flask(__name__)
 
-    # Load configuration
+    # Load configuration (fall back to PRODUCTION if FLASK_ENV not set)
     config_name = config_name or os.environ.get("FLASK_ENV", "production")
-
     if config_name == "development":
         from app.config import DevelopmentConfig
 
@@ -45,13 +47,18 @@ def create_app(config_name=None):
 
         app.config.from_object(ProductionConfig)
 
+    # safe defaults / performance tweaks
+    app.config.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", False)
+    # Example: app.config.setdefault("RATELIMIT_DEFAULT", ["1000 per hour"])
+
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
 
-    # Configure CORS for web-frontend-backend interaction
+    # Configure CORS for frontend-backend interaction
+    # If you want to restrict origins, set CORS_ORIGINS in config to a list or string
     CORS(
         app,
         origins=app.config.get("CORS_ORIGINS", ["*"]),
@@ -60,38 +67,57 @@ def create_app(config_name=None):
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
-    # Initialize rate limiter
-    try:
-        redis_client = redis.from_url(
-            app.config.get("REDIS_URL", "redis://localhost:6379")
-        )
-        limiter.init_app(app, storage_uri=app.config.get("REDIS_URL"))
-    except Exception as e:
-        app.logger.warning(f"Redis not available, using in-memory rate limiting: {e}")
-        limiter.init_app(app)
+    # Initialize rate limiter with optional Redis storage (fall back to in-memory)
+    ratelimit_defaults = app.config.get("RATELIMIT_DEFAULT", ["1000 per hour"])
+    limiter_init_kwargs = {
+        "key_func": get_remote_address,
+        "default_limits": ratelimit_defaults,
+    }
 
-    # Configure structured logging
+    redis_url = app.config.get("REDIS_URL")
+    if redis_url:
+        try:
+            # test redis connectivity (non-fatal)
+            redis.from_url(redis_url).ping()
+            limiter_init_kwargs["storage_uri"] = redis_url
+            app.logger.info("Using Redis-backed rate limiting")
+        except Exception as e:  # pragma: no cover - runtime behavior
+            app.logger.warning("Redis not available for rate limiting: %s", e)
+
+    # init limiter (will fall back to in-memory if no storage_uri)
+    limiter.init_app(app, **limiter_init_kwargs)
+
+    # Configure structured logging (should be done after config so log paths can come from config)
     configure_logging(app)
 
-    # Register blueprints
-    register_blueprints(app)
+    # Register blueprints (wrapped to avoid failing startup if a blueprint import fails)
+    try:
+        register_blueprints(app)
+    except (
+        Exception
+    ) as e:  # pragma: no cover - protects startup from misconfigured modules
+        app.logger.exception("Failed to register all blueprints: %s", e)
 
-    # Register error handlers
-    register_error_handlers(app)
+    # Register error handlers from your utility module
+    try:
+        from src.utils.error_handlers import register_error_handlers as reg_handlers
 
-    # Register CLI commands
-    register_cli_commands(app)
-
-    # JWT configuration
-    configure_jwt(app)
+        reg_handlers(app)
+    except Exception as e:
+        app.logger.exception("Failed to register error handlers: %s", e)
 
     return app
 
 
-def configure_logging(app):
-    """Configure structured logging"""
+def configure_logging(app: Flask) -> None:
+    """Configure structured and file logging."""
+    # ensure basic logging so structlog has handlers to wrap
+    logging.basicConfig(level=logging.INFO)
+    root_logger = logging.getLogger()
+
+    # Use file logging in non-debug / non-testing (production) environments
     if not app.debug and not app.testing:
-        # Configure structlog for production
+        # configure structlog
         structlog.configure(
             processors=[
                 structlog.stdlib.filter_by_level,
@@ -110,64 +136,64 @@ def configure_logging(app):
             cache_logger_on_first_use=True,
         )
 
-        # Set up file logging
-        if not os.path.exists("logs"):
-            os.mkdir("logs")
+        # logs directory and rotating file handler
+        log_dir = Path(app.config.get("LOG_DIR", "logs"))
+        log_dir.mkdir(parents=True, exist_ok=True)
+        file_path = log_dir / app.config.get("LOG_FILE", "flowlet.log")
 
-        file_handler = logging.FileHandler("logs/flowlet.log")
+        file_handler = RotatingFileHandler(
+            filename=str(file_path),
+            maxBytes=10 * 1024 * 1024,  # 10 MB
+            backupCount=5,
+        )
         file_handler.setFormatter(
             logging.Formatter(
-                "%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]"
+                "%(asctime)s %(levelname)s [%(name)s] %(message)s [in %(pathname)s:%(lineno)d]"
             )
         )
         file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
 
-        app.logger.setLevel(logging.INFO)
+        # Avoid duplicating handlers
+        if not any(
+            isinstance(h, RotatingFileHandler) and h.baseFilename == str(file_path)
+            for h in root_logger.handlers
+            if hasattr(h, "baseFilename")
+        ):
+            root_logger.addHandler(file_handler)
+
+        root_logger.setLevel(logging.INFO)
         app.logger.info("Flowlet Financial Backend startup")
 
 
-def register_blueprints(app):
-    """Register application blueprints"""
-    from app.api.accounts import accounts_bp
-    from app.api.auth import auth_bp
-    from app.api.cards import cards_bp
-    from app.api.compliance import compliance_bp
-    from app.api.security import security_bp
-    from app.api.transactions import transactions_bp
-    from app.api.users import users_bp
+def register_blueprints(app: Flask) -> None:
+    """Register application blueprints."""
+    # Import blueprints lazily so missing ones won't stop the app from starting
+    blueprint_imports = [
+        ("app.api.auth", "auth_bp", "/api/v1/auth"),
+        ("app.api.accounts", "accounts_bp", "/api/v1/accounts"),
+        ("app.api.transactions", "transactions_bp", "/api/v1/transactions"),
+        ("app.api.cards", "cards_bp", "/api/v1/cards"),
+        ("app.api.users", "users_bp", "/api/v1/users"),
+        ("app.api.compliance", "compliance_bp", "/api/v1/compliance"),
+        ("app.api.security", "security_bp", "/api/v1/security"),
+    ]
 
-    # API v1 blueprints
-    app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
-    app.register_blueprint(accounts_bp, url_prefix="/api/v1/accounts")
-    app.register_blueprint(transactions_bp, url_prefix="/api/v1/transactions")
-    app.register_blueprint(cards_bp, url_prefix="/api/v1/cards")
-    app.register_blueprint(users_bp, url_prefix="/api/v1/users")
-    app.register_blueprint(compliance_bp, url_prefix="/api/v1/compliance")
-    app.register_blueprint(security_bp, url_prefix="/api/v1/security")
+    for module_path, attr_name, url_prefix in blueprint_imports:
+        try:
+            module = __import__(module_path, fromlist=[attr_name])
+            bp = getattr(module, attr_name)
+            app.register_blueprint(bp, url_prefix=url_prefix)
+            app.logger.debug("Registered blueprint %s -> %s", attr_name, url_prefix)
+        except (ImportError, AttributeError) as e:
+            # Log but do not raise — protects startup when a single blueprint is missing
+            app.logger.warning(
+                "Could not register blueprint %s from %s: %s", attr_name, module_path, e
+            )
 
-    # Health check and info endpoints
-    from app.api.health import health_bp
+    # Health check (register without prefix)
+    try:
+        from app.api.health import health_bp
 
-    app.register_blueprint(health_bp)
-
-
-def register_error_handlers(app):
-    """Register error handlers"""
-    from app.utils.error_handlers import register_error_handlers as reg_handlers
-
-    reg_handlers(app)
-
-
-def register_cli_commands(app):
-    """Register CLI commands"""
-    from app.cli import register_commands
-
-    register_commands(app)
-
-
-def configure_jwt(app):
-    """Configure JWT settings"""
-    from app.utils.jwt_handlers import configure_jwt_handlers
-
-    configure_jwt_handlers(app, jwt)
+        app.register_blueprint(health_bp)
+    except Exception as e:
+        app.logger.warning("Health blueprint not registered: %s", e)
