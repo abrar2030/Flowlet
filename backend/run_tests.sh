@@ -1,197 +1,166 @@
+#!/usr/bin/env bash
 
-#!/bin/bash
+# Flowlet Backend - Comprehensive Test Suite
+# This script runs all automated tests and generates reports.
+# Designed for robust execution in CI/CD environments.
 
-# Comprehensive Test Runner for Flowlet Backend
-# This script runs all automated tests and generates reports
+# --- Security and Robustness ---
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error.
+# -o pipefail: Exit status of a pipeline is the status of the last command to exit with a non-zero status.
+set -euo pipefail
 
-set -e  # Exit on any error
+# --- Configuration ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+TEST_RESULTS_DIR="test_results"
+UNIT_TEST_FILES="tests/unit"
+INTEGRATION_TEST_FILES="tests/integration"
+PERFORMANCE_TEST_FILES="tests/performance"
+
+# --- Helper Functions ---
+
+# Function to check if a command exists
+command_exists () {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Function to run a test suite
+run_test_suite() {
+    local name="$1"
+    local files="$2"
+    local report_name="$3"
+    local cov_append="$4"
+    local exit_on_fail="$5"
+
+    echo -e "${BLUE}Running ${name} tests...${NC}"
+
+    # Check for pytest
+    if ! command_exists pytest; then
+        echo -e "${RED}✗ Pytest not found. Skipping ${name} tests.${NC}"
+        return 1
+    fi
+
+    # Build pytest command
+    PYTEST_CMD="pytest ${files} \
+        --cov=src \
+        --cov-report=html:${TEST_RESULTS_DIR}/coverage/${report_name} \
+        --cov-report=xml:${TEST_RESULTS_DIR}/coverage/${report_name}_coverage.xml \
+        --html=${TEST_RESULTS_DIR}/reports/${report_name}_tests.html \
+        --self-contained-html \
+        -v \
+        --tb=short"
+
+    if [ "${cov_append}" = "true" ]; then
+        PYTEST_CMD="${PYTEST_CMD} --cov-append"
+    fi
+
+    # Execute pytest
+    if eval "${PYTEST_CMD}"; then
+        echo -e "${GREEN}✓ ${name} tests passed${NC}"
+        return 0
+    else
+        echo -e "${RED}✗ ${name} tests failed${NC}"
+        if [ "${exit_on_fail}" = "true" ]; then
+            return 1 # Return 1 to trigger the main script's exit logic
+        fi
+        return 1
+    fi
+}
+
+# --- Setup ---
 
 echo "=========================================="
 echo "Flowlet Backend - Comprehensive Test Suite"
 echo "=========================================="
-
-# Colors for output
-RED=\033[0;31m
-GREEN=\033[0;32m
-YELLOW=\033[1;33m
-BLUE=\033[0;34m
-NC=\033[0m # No Color
-
-# Create test results directory
-mkdir -p test_results
-mkdir -p test_results/coverage
-mkdir -p test_results/reports
-
 echo -e "${BLUE}Setting up test environment...${NC}"
 
-# Install test dependencies if not already installed
-pip install -q pytest pytest-cov pytest-html pytest-xdist pytest-mock coverage
+# Create and clean test results directory
+rm -rf "${TEST_RESULTS_DIR}"
+mkdir -p "${TEST_RESULTS_DIR}/coverage/unit"
+mkdir -p "${TEST_RESULTS_DIR}/coverage/integration"
+mkdir -p "${TEST_RESULTS_DIR}/reports"
+
+# Install/Upgrade necessary tools (using sudo for sandbox compatibility)
+echo -e "${YELLOW}Installing/Upgrading dependencies...${NC}"
+sudo pip install --upgrade pip > /dev/null
+sudo pip install -q pytest pytest-cov pytest-html pytest-xdist pytest-mock coverage bandit flake8 > /dev/null
 
 # Set environment variables for testing
+# NOTE: In a production environment, SECRET_KEY and other sensitive variables
+# should be loaded securely from a secret manager (e.g., Vault, AWS Secrets Manager).
 export FLASK_ENV=testing
 export DATABASE_URL=sqlite:///:memory:
-export SECRET_KEY=test-secret-key
+export SECRET_KEY="CI_TEST_SECRET_KEY_MUST_BE_SECURELY_LOADED"
 export REDIS_URL=redis://localhost:6379/1
 
-echo -e "${BLUE}Running unit tests...${NC}"
+# --- Test Execution ---
 
-# Run unit tests with coverage
-pytest tests/test_service_integrations.py \
-    --cov=src \
-    --cov-report=html:test_results/coverage/unit \
-    --cov-report=xml:test_results/coverage/unit_coverage.xml \
-    --html=test_results/reports/unit_tests.html \
-    --self-contained-html \
-    -v \
-    --tb=short
+# 1. Unit Tests (Critical)
+run_test_suite "Unit" "${UNIT_TEST_FILES}" "unit" "false" "true"
+UNIT_TEST_STATUS=$?
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Unit tests passed${NC}"
-else
-    echo -e "${RED}✗ Unit tests failed${NC}"
-    exit 1
-fi
+# 2. Integration Tests (Critical)
+run_test_suite "Integration" "${INTEGRATION_TEST_FILES}" "integration" "true" "true"
+INTEGRATION_TEST_STATUS=$?
 
-echo -e "${BLUE}Running API integration tests...${NC}"
+# 3. Performance Tests (Non-critical, should not exit on failure)
+run_test_suite "Performance" "${PERFORMANCE_TEST_FILES}" "performance" "false" "false"
+PERFORMANCE_TEST_STATUS=$?
 
-# Run API integration tests
-pytest tests/test_api_integrations.py \
-    --cov=src \
-    --cov-append \
-    --cov-report=html:test_results/coverage/integration \
-    --cov-report=xml:test_results/coverage/integration_coverage.xml \
-    --html=test_results/reports/integration_tests.html \
-    --self-contained-html \
-    -v \
-    --tb=short
-
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ API integration tests passed${NC}"
-else
-    echo -e "${RED}✗ API integration tests failed${NC}"
-    exit 1
-fi
-
-echo -e "${BLUE}Running performance tests...${NC}"
-
-# Run performance tests
-pytest tests/test_performance.py \
-    --html=test_results/reports/performance_tests.html \
-    --self-contained-html \
-    -v \
-    --tb=short
-
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Performance tests passed${NC}"
-else
-    echo -e "${YELLOW}⚠ Performance tests completed with warnings${NC}"
-fi
+# --- Post-Test Analysis ---
 
 echo -e "${BLUE}Generating comprehensive coverage report...${NC}"
 
 # Generate combined coverage report
-coverage combine
-coverage html -d test_results/coverage/combined
-coverage xml -o test_results/coverage/combined_coverage.xml
-coverage report --show-missing > test_results/coverage/coverage_summary.txt
-
-echo -e "${BLUE}Running security tests...${NC}"
-
-# Security testing with bandit (if available)
-if command -v bandit &> /dev/null; then
-    bandit -r src/ -f json -o test_results/reports/security_report.json || true
-    echo -e "${GREEN}✓ Security scan completed${NC}"
+if command_exists coverage; then
+    coverage combine
+    coverage html -d "${TEST_RESULTS_DIR}/coverage/combined" > /dev/null
+    coverage xml -o "${TEST_RESULTS_DIR}/coverage/combined_coverage.xml"
+    coverage report --show-missing > "${TEST_RESULTS_DIR}/coverage/coverage_summary.txt"
+    echo -e "${GREEN}✓ Coverage reports generated.${NC}"
 else
-    echo -e "${YELLOW}⚠ Bandit not installed, skipping security scan${NC}"
+    echo -e "${YELLOW}⚠ Coverage tool not found. Skipping coverage reports.${NC}"
 fi
 
-echo -e "${BLUE}Running code quality checks...${NC}"
-
-# Code quality checks with flake8 (if available)
-if command -v flake8 &> /dev/null; then
-    flake8 src/ --output-file=test_results/reports/flake8_report.txt --tee || true
-    echo -e "${GREEN}✓ Code quality check completed${NC}"
+# 4. Security Scan (Bandit)
+echo -e "${BLUE}Running security tests (Bandit)...${NC}"
+if command_exists bandit; then
+    # The '|| true' ensures the script doesn't exit if bandit finds issues (which is expected)
+    bandit -r src/ -f json -o "${TEST_RESULTS_DIR}/reports/security_report.json" || true
+    echo -e "${GREEN}✓ Security scan completed.${NC}"
 else
-    echo -e "${YELLOW}⚠ Flake8 not installed, skipping code quality check${NC}"
+    echo -e "${YELLOW}⚠ Bandit not installed. Skipping security scan.${NC}"
 fi
 
-echo -e "${BLUE}Generating test summary...${NC}"
+# 5. Code Quality Checks (Flake8)
+echo -e "${BLUE}Running code quality checks (Flake8)...${NC}"
+if command_exists flake8; then
+    # The '|| true' ensures the script doesn't exit if flake8 finds issues (which is expected)
+    flake8 src/ --output-file="${TEST_RESULTS_DIR}/reports/flake8_report.txt" --tee || true
+    echo -e "${GREEN}✓ Code quality check completed.${NC}"
+else
+    echo -e "${YELLOW}⚠ Flake8 not installed. Skipping code quality check.${NC}"
+fi
 
-# Generate test summary
-cat > test_results/test_summary.md << EOF
-# Flowlet Backend Test Summary
-
-## Test Execution Date
-$(date)
-
-## Test Results
-
-### Unit Tests
-- **Status**: $([ -f "test_results/reports/unit_tests.html" ] && echo "✅ PASSED" || echo "❌ FAILED")
-- **Report**: [Unit Test Report](reports/unit_tests.html)
-
-### Integration Tests
-- **Status**: $([ -f "test_results/reports/integration_tests.html" ] && echo "✅ PASSED" || echo "❌ FAILED")
-- **Report**: [Integration Test Report](reports/integration_tests.html)
-
-### Performance Tests
-- **Status**: $([ -f "test_results/reports/performance_tests.html" ] && echo "✅ PASSED" || echo "⚠️ COMPLETED")
-- **Report**: [Performance Test Report](reports/performance_tests.html)
-
-## Coverage Summary
-$(cat test_results/coverage/coverage_summary.txt)
-
-## Security Scan
-- **Status**: $([ -f "test_results/reports/security_report.json" ] && echo "✅ COMPLETED" || echo "⚠️ SKIPPED")
-- **Report**: $([ -f "test_results/reports/security_report.json" ] && echo "[Security Report](reports/security_report.json)" || echo "Not available")
-
-## Code Quality
-- **Status**: $([ -f "test_results/reports/flake8_report.txt" ] && echo "✅ COMPLETED" || echo "⚠️ SKIPPED")
-- **Report**: $([ -f "test_results/reports/flake8_report.txt" ] && echo "[Code Quality Report](reports/flake8_report.txt)" || echo "Not available")
-
-## Test Coverage
-- **Combined Coverage**: [Coverage Report](coverage/combined/index.html)
-- **Unit Test Coverage**: [Unit Coverage](coverage/unit/index.html)
-- **Integration Test Coverage**: [Integration Coverage](coverage/integration/index.html)
-
-## Recommendations
-
-### High Priority
-- Ensure all tests pass before deployment
-- Maintain test coverage above 80%
-- Address any security vulnerabilities found
-
-### Medium Priority
-- Optimize performance bottlenecks identified in performance tests
-- Improve code quality based on flake8 recommendations
-- Add more edge case testing
-
-### Low Priority
-- Enhance test documentation
-- Add more performance benchmarks
-- Consider adding mutation testing
-
-## Next Steps
-1. Review failed tests and fix issues
-2. Deploy to staging environment
-3. Run integration tests against staging
-4. Prepare for production deployment
-EOF
+# --- Final Summary ---
 
 echo -e "${GREEN}=========================================="
 echo -e "Test execution completed!"
 echo -e "=========================================="
-echo -e "📊 Test results available in: test_results/"
-echo -e "📈 Coverage reports: test_results/coverage/"
-echo -e "📋 Test summary: test_results/test_summary.md"
-echo -e "=========================================="${NC}
 
 # Display coverage summary
-echo -e "${BLUE}Coverage Summary:${NC}"
-coverage report --show-missing | tail -n 5
+if [ -f "${TEST_RESULTS_DIR}/coverage/coverage_summary.txt" ]; then
+    echo -e "${BLUE}📋 Coverage Summary:${NC}"
+    cat "${TEST_RESULTS_DIR}/coverage/coverage_summary.txt" | tail -n 5
+fi
 
-# Check if all critical tests passed
-if [ -f "test_results/reports/unit_tests.html" ] && [ -f "test_results/reports/integration_tests.html" ]; then
+# Final Exit Status: Only exit 0 if all critical tests passed
+if [ "${UNIT_TEST_STATUS}" -eq 0 ] && [ "${INTEGRATION_TEST_STATUS}" -eq 0 ]; then
     echo -e "${GREEN}🎉 All critical tests passed! Ready for deployment.${NC}"
     exit 0
 else
