@@ -599,21 +599,3 @@ command=/home/flowlet/Flowlet/backend/venv/bin/gunicorn \
 3. **Security Events**: Failed authentication attempts, suspicious activity
 4. **Performance Issues**: High response times, resource utilization
 5. **Infrastructure Issues**: Disk space, memory usage, network connectivity
-
-## Support and Maintenance
-
-### 24/7 Support
-
-- **Primary Contact**: support@yourdomain.com
-- **Emergency Hotline**: +1-XXX-XXX-XXXX
-- **Escalation Matrix**: L1 → L2 → L3 → Engineering
-- **SLA Targets**: Critical (15 min), High (1 hour), Medium (4 hours), Low (24 hours)
-
-### Documentation
-
-- **API Documentation**: https://docs.yourdomain.com
-- **Runbooks**: Internal operations documentation
-- **Change Log**: All system changes and updates
-- **Incident Reports**: Post-incident analysis and improvements
-
-This deployment guide ensures a production-ready, secure, and compliant financial backend system that meets enterprise standards and regulatory requirements.
