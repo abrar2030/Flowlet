@@ -2,67 +2,71 @@
 
 ## Overview
 
-The Flowlet Backend is a robust, modular platform designed to support financial technology operations. It is built around a microservices-like structure within a Python framework, emphasizing security, compliance, and advanced analytics.
+The Flowlet Backend is a robust, modular platform designed to support financial technology operations. It is built using **Python and Flask**, following a microservices-like architecture to emphasize security, compliance, and advanced financial intelligence.
 
 ## 1. Core Directory Structure
 
-The backend is organized into a main application (`app/`) and a comprehensive source directory (`src/`) that houses the core business logic and specialized services.
+The backend is organized to separate the application entry point, configuration, and core business logic.
 
-| Directory     | Primary Function                                  | Key Components                                                               |
-| :------------ | :------------------------------------------------ | :--------------------------------------------------------------------------- |
-| **app/**      | Main application entry point and basic structure. | `api/` (Basic Auth), `models/` (Core User/Account models).                   |
-| **src/**      | Core business logic and specialized services.     | `ai/`, `analytics/`, `compliance/`, `integrations/`, `security/`, `nocode/`. |
-| **instance/** | Runtime data and configuration.                   | SQLite database files (`flowlet_*.db`).                                      |
-| **logs/**     | Application logging.                              | `flowlet.log`.                                                               |
-| **tests/**    | Comprehensive testing suite.                      | `api/`, `functional/`, `integration/`, `performance/`, `security/`, `unit/`. |
+| Directory       | Primary Function             | Key Components                                                                                                              |
+| :-------------- | :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| **app.py**      | **Application Entry Point**  | Contains the `create_app()` factory function, initializes extensions (DB, Migrations, Limiter), and registers blueprints.   |
+| **src/**        | **Core Business Logic**      | Houses all specialized modules: `ai/`, `analytics/`, `compliance/`, `integrations/`, `security/`, `routes/`, and `models/`. |
+| **src/config/** | **Configuration Management** | Centralized application settings (`settings.py`) and security policies (`security.py`).                                     |
+| **src/models/** | **Database Models**          | SQLAlchemy models for core entities: `user.py`, `account.py`, `transaction.py`, `card.py`, etc.                             |
+| **src/routes/** | **API Endpoints**            | Flask Blueprints defining all API routes (e.g., `/auth`, `/payment`, `/analytics`).                                         |
+| **instance/**   | **Runtime Data**             | Directory for environment-specific data (e.g., SQLite DB files, if used). Currently empty after cleanup.                    |
+| **logs/**       | **Application Logging**      | Stores application logs (`flowlet.log`).                                                                                    |
+| **tests/**      | **Comprehensive Testing**    | Structured suite for Unit, Integration, Functional, Performance, and Security testing.                                      |
 
 ## 2. Specialized Services in `src/`
 
-The `src/` directory is the heart of the Flowlet backend, containing highly specialized modules.
+The `src/` directory is the heart of the Flowlet backend, containing highly specialized, domain-specific modules.
 
-| Module            | Primary Function                                      | Key Sub-Components/Files                                                                         |
-| :---------------- | :---------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| **ai/**           | Advanced AI/ML services for financial intelligence.   | `fraud_detection.py`, `risk_assessment.py`, `transaction_intelligence.py`, `support_chatbot.py`. |
-| **analytics/**    | Data processing and reporting.                        | `dashboard_service.py`, `reporting_engine.py`, `real_time_analytics.py`.                         |
-| **compliance/**   | Regulatory adherence and legal services.              | `aml_engine.py`, `kyc_service.py`, `regulatory_framework.py`, `compliance_engine.py`.            |
-| **integrations/** | External system connectivity.                         | `banking/` (Plaid, Open Banking), `payments/` (Stripe), `currency/`.                             |
-| **nocode/**       | Business logic configuration tools.                   | `rule_engine.py`, `workflow_builder.py`, `config_engine.py`.                                     |
-| **security/**     | Authentication, authorization, and threat prevention. | `authentication.py`, `encryption_service.py`, `rate_limiter.py`, `threat_prevention.py`.         |
-| **database/**     | Database setup and connection.                        | `app.db`, `flowlet.db`.                                                                          |
-| **routes/**       | API endpoint definitions.                             | `auth.py`, `payment.py`, `wallet.py`, `analytics.py`, `kyc_aml.py`.                              |
+| Module            | Primary Function                       | Key Sub-Components/Files                                                                                         |
+| :---------------- | :------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| **ai/**           | **Financial AI/ML**                    | `fraud_detection.py`, `risk_assessment.py`, `transaction_intelligence.py`, `support_chatbot.py`.                 |
+| **analytics/**    | **Data Processing & Reporting**        | `dashboard_service.py`, `reporting_engine.py`, `real_time_analytics.py`, `metrics_calculator.py`.                |
+| **compliance/**   | **Regulatory Adherence**               | `aml_engine.py`, `kyc_service.py`, `regulatory_framework.py`, `compliance_engine.py`.                            |
+| **integrations/** | **External System Connectivity**       | Sub-modules for `banking/` (Plaid, FDX), `payments/` (Stripe), and `currency/` (Exchange Rates).                 |
+| **nocode/**       | **Business Logic Configuration**       | `rule_engine.py`, `workflow_builder.py`, `config_engine.py` for dynamic business rules.                          |
+| **security/**     | **Authentication & Threat Prevention** | `authentication.py`, `encryption_service.py`, `rate_limiter.py`, `threat_prevention.py`, `password_security.py`. |
+| **services/**     | **Core Business Services**             | `payment_service.py`, `card_service.py`, `wallet_service.py` implementing core financial logic.                  |
+| **gateway/**      | **API Gateway Logic**                  | `optimized_gateway.py` for handling and routing external API requests.                                           |
 
-## 3. Testing Suite Overview
+## 3. Configuration and Security
 
-The `tests/` directory is structured to cover all aspects of the application, from low-level units to end-to-end performance.
+Configuration is split into two primary files for clarity and separation of concerns.
 
-| Test Category   | Location             | Purpose                                                            |
-| :-------------- | :------------------- | :----------------------------------------------------------------- |
-| **Unit**        | `tests/unit/`        | Verify individual functions and classes in isolation.              |
-| **API**         | `tests/api/`         | Validate API endpoint responses and data contracts.                |
-| **Functional**  | `tests/functional/`  | Test end-to-end user flows and core business logic.                |
-| **Integration** | `tests/integration/` | Verify interactions between services (e.g., banking integrations). |
-| **Performance** | `tests/performance/` | Measure latency and throughput of critical paths (e.g., gateway).  |
-| **Security**    | `tests/security/`    | Validate security controls (e.g., rate limiting, authentication).  |
+| File                       | Description              | Key Responsibilities                                                                                                                                     |
+| :------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **src/config/settings.py** | **Application Settings** | Defines environment-specific settings (e.g., `SQLALCHEMY_DATABASE_URI`, `REDIS_URL`), API metadata, and feature flags (e.g., `FRAUD_DETECTION_ENABLED`). |
+| **src/config/security.py** | **Security Policies**    | Defines strict security parameters, including JWT configuration, password policy, rate limiting rules, and encryption key requirements.                  |
 
-## 4. Key Configuration and Entry Points
+## 4. API Routes Overview
 
-| File/Component           | Description                            | Role                                                               |
-| :----------------------- | :------------------------------------- | :----------------------------------------------------------------- |
-| `main.py`                | Main application entry point.          | Initializes the application and runs the development server.       |
-| `wsgi.py`                | WSGI entry point.                      | Used for production deployment with WSGI servers (e.g., Gunicorn). |
-| `config.py`              | Base configuration file.               | Contains environment-agnostic settings.                            |
-| `src/config/settings.py` | Detailed application settings.         | Defines environment-specific variables and feature flags.          |
-| `requirements.txt`       | Python dependencies.                   | Lists all required libraries for the project.                      |
-| `Procfile`               | Heroku/Cloud deployment configuration. | Defines processes for the application (e.g., web, worker).         |
+The `src/routes/` directory contains Flask Blueprints, each managing a set of related API endpoints.
 
-## 5. Development and Operations
+| Blueprint File     | Domain          | Key Functionality                                                              |
+| :----------------- | :-------------- | :----------------------------------------------------------------------------- |
+| **auth.py**        | Authentication  | User registration, login, token refresh, and password management.              |
+| **user.py**        | User Management | Profile retrieval, updates, and administrative user operations.                |
+| **payment.py**     | Payments        | Processing transactions, managing payment methods, and payment status checks.  |
+| **wallet.py**      | Wallet          | Managing user wallets, balances, and internal transfers.                       |
+| **analytics.py**   | Analytics       | Access to dashboard data, metrics, and reporting endpoints.                    |
+| **kyc_aml.py**     | Compliance      | Endpoints for Know Your Customer (KYC) and Anti-Money Laundering (AML) checks. |
+| **security.py**    | Security        | Audit log access, security status checks, and threat monitoring data.          |
+| **api_gateway.py** | Gateway         | External API routing and centralized request handling.                         |
 
-The backend uses a standard Python development setup.
+## 5. Testing Suite Overview
 
-| Area               | Detail                                                                                    |
-| :----------------- | :---------------------------------------------------------------------------------------- |
-| **Language**       | Python 3.x                                                                                |
-| **Framework**      | Flask (implied by file structure) or similar lightweight framework.                       |
-| **Database**       | SQLite for development/testing, production-ready RDBMS (e.g., PostgreSQL) for deployment. |
-| **Testing**        | `pytest` (implied by `conftest.py` in test structure).                                    |
-| **Test Execution** | `./run_tests.sh` script for comprehensive test execution.                                 |
+The `tests/` directory is structured to ensure comprehensive quality assurance across all layers of the application.
+
+| Test Category   | Location             | Purpose                                                                                                       |
+| :-------------- | :------------------- | :------------------------------------------------------------------------------------------------------------ |
+| **Unit**        | `tests/unit/`        | Verifies individual functions, classes, and service methods in isolation (e.g., `test_payment_service.py`).   |
+| **Functional**  | `tests/functional/`  | Tests end-to-end user flows and core business logic (e.g., `test_fraud_detection.py`).                        |
+| **Integration** | `tests/integration/` | Verifies interactions between different services and external systems (e.g., `test_banking_integrations.py`). |
+| **API**         | `tests/api/`         | Validates API endpoint responses, data contracts, and status codes (e.g., `test_api_integration.py`).         |
+| **Performance** | `tests/performance/` | Measures latency and throughput of critical paths (e.g., `test_gateway_performance.py`).                      |
+| **Security**    | `tests/security/`    | Validates security controls like rate limiting, authentication, and input validation.                         |
