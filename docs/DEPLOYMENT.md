@@ -153,5 +153,3 @@ The repository includes two GitHub Actions workflows:
 | **Health Checks**          | Liveness and Readiness probes are configured in both deployments, leveraging the health check endpoints defined in the Dockerfiles.        | Improved service reliability and traffic routing.                              |
 
 ---
-
-_Document Author: Manus AI_
