@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify
-from .auth import token_required
 
 "\nBanking Integrations Routes (Placeholder for External Banking APIs)\n"
 banking_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")

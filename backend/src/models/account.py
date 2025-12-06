@@ -12,7 +12,6 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
-    Text,
     BigInteger,
 )
 from sqlalchemy.orm import relationship

@@ -54,7 +54,6 @@ def check_funds_and_limits(account: Account, amount: Decimal) -> Any:
     """Checks for sufficient funds and transaction limits."""
     if not account.can_debit(amount):
         raise InsufficientFunds()
-    pass
 
 
 def process_external_payment(

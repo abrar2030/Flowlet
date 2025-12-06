@@ -5,7 +5,6 @@ from functools import wraps
 from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
-from ..models.transaction import Transaction
 from ..utils.auth import token_required
 from ..utils.audit import audit_logger
 from ..services.wallet_service import (

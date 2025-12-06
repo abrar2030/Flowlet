@@ -187,7 +187,7 @@ def submit_kyc_document(kyc_record_id: Any) -> Any:
                 400,
             )
         document_type = data["document_type"]
-        document_data = data["document_data"]
+        data["document_data"]
         is_valid = True
         if is_valid:
             kyc_record.status = KYCStatus.IN_PROGRESS

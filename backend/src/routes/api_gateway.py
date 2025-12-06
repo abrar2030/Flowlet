@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify
-from .auth import token_required
 
 "\nAPI Gateway Routes for Health Check and Documentation\n"
 api_gateway_bp = Blueprint("api_gateway", __name__, url_prefix="/api/v1")

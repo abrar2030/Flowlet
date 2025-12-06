@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify
 from ..models.database import db
-from .auth import token_required
 
 "\nSystem Monitoring and Health Check Routes\n"
 monitoring_bp = Blueprint("monitoring", __name__, url_prefix="/api/v1/monitoring")

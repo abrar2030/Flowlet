@@ -9,7 +9,6 @@ from ..models.database import db
 from ..models.transaction import Transaction, TransactionType
 from ..models.user import User
 from ..security.audit_logger import audit_logger
-from .auth import Admin
 
 compliance_bp = Blueprint("compliance", __name__, url_prefix="/api/v1/compliance")
 logger = logging.getLogger(__name__)

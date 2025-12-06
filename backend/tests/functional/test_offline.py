@@ -30,7 +30,6 @@ def test_database_models() -> Any:
 def test_route_imports() -> Any:
     """Test that all route blueprints can be imported"""
     try:
-        pass
         logger.info("✓ All route blueprints imported successfully")
         return True
     except Exception as e:
