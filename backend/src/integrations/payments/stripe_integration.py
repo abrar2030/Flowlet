@@ -4,7 +4,6 @@ import uuid
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Dict, List, Optional
-
 import requests
 
 logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class PaymentProcessor(ABC):
 class StripePaymentProcessor(PaymentProcessor):
     """Stripe payment processor implementation"""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("STRIPE_SECRET_KEY")
         self.webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
         self.base_url = "https://api.stripe.com/v1"
@@ -47,11 +46,7 @@ class StripePaymentProcessor(PaymentProcessor):
                     "error": "STRIPE_NOT_CONFIGURED",
                     "message": "Stripe API key not configured",
                 }
-
-            # Convert amount to cents for Stripe
             amount_cents = int(amount * 100)
-
-            # Create payment intent
             payload = {
                 "amount": amount_cents,
                 "currency": currency.lower(),
@@ -60,22 +55,18 @@ class StripePaymentProcessor(PaymentProcessor):
                 "confirm": True,
                 "metadata": {"flowlet_payment": "true", "processor": "stripe"},
             }
-
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
-
             response = requests.post(
                 f"{self.base_url}/payment_intents",
                 data=payload,
                 headers=headers,
                 timeout=30,
             )
-
             if response.status_code == 200:
                 data = response.json()
-
                 return {
                     "success": True,
                     "external_id": data["id"],
@@ -93,7 +84,6 @@ class StripePaymentProcessor(PaymentProcessor):
                     ),
                     "processor": "stripe",
                 }
-
         except Exception as e:
             logger.error(f"Stripe payment processing error: {str(e)}")
             return {
@@ -106,19 +96,15 @@ class StripePaymentProcessor(PaymentProcessor):
         """Refund Stripe payment"""
         try:
             payload = {"payment_intent": payment_id}
-
             if amount:
                 payload["amount"] = int(amount * 100)
-
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/x-www-form-urlencoded",
             }
-
             response = requests.post(
                 f"{self.base_url}/refunds", data=payload, headers=headers, timeout=30
             )
-
             if response.status_code == 200:
                 data = response.json()
                 return {
@@ -133,7 +119,6 @@ class StripePaymentProcessor(PaymentProcessor):
                     "error": "STRIPE_REFUND_ERROR",
                     "message": "Failed to process refund",
                 }
-
         except Exception as e:
             logger.error(f"Stripe refund error: {str(e)}")
             return {"success": False, "error": "STRIPE_REFUND_ERROR", "message": str(e)}
@@ -142,13 +127,11 @@ class StripePaymentProcessor(PaymentProcessor):
         """Get Stripe payment status"""
         try:
             headers = {"Authorization": f"Bearer {self.api_key}"}
-
             response = requests.get(
                 f"{self.base_url}/payment_intents/{payment_id}",
                 headers=headers,
                 timeout=30,
             )
-
             if response.status_code == 200:
                 data = response.json()
                 return {
@@ -163,7 +146,6 @@ class StripePaymentProcessor(PaymentProcessor):
                     "error": "PAYMENT_NOT_FOUND",
                     "message": "Payment not found",
                 }
-
         except Exception as e:
             logger.error(f"Stripe status check error: {str(e)}")
             return {"success": False, "error": "STRIPE_STATUS_ERROR", "message": str(e)}
@@ -179,14 +161,13 @@ class StripePaymentProcessor(PaymentProcessor):
             "canceled": "cancelled",
             "succeeded": "completed",
         }
-
         return status_mapping.get(stripe_status, "pending")
 
 
 class ACHPaymentProcessor(PaymentProcessor):
     """ACH payment processor implementation"""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("ACH_API_KEY")
         self.api_secret = os.environ.get("ACH_API_SECRET")
         self.base_url = os.environ.get("ACH_BASE_URL", "https://api.achprovider.com/v1")
@@ -202,15 +183,12 @@ class ACHPaymentProcessor(PaymentProcessor):
                     "error": "ACH_NOT_CONFIGURED",
                     "message": "ACH processor not configured",
                 }
-
-            # ACH payments are typically USD only
             if currency.upper() != "USD":
                 return {
                     "success": False,
                     "error": "CURRENCY_NOT_SUPPORTED",
                     "message": "ACH only supports USD",
                 }
-
             payload = {
                 "amount": str(amount),
                 "currency": currency,
@@ -219,19 +197,14 @@ class ACHPaymentProcessor(PaymentProcessor):
                 "account_type": payment_details.get("account_type", "checking"),
                 "description": payment_details.get("description", "Flowlet payment"),
             }
-
-            # In a real implementation, this would make an actual API call
-            # For now, simulate a successful ACH initiation
             transaction_id = f"ach_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "external_id": transaction_id,
-                "status": "processing",  # ACH payments take time to settle
+                "status": "processing",
                 "processor": "ach",
                 "estimated_settlement": "1-3 business days",
             }
-
         except Exception as e:
             logger.error(f"ACH payment processing error: {str(e)}")
             return {
@@ -243,16 +216,13 @@ class ACHPaymentProcessor(PaymentProcessor):
     def refund_payment(self, payment_id: str, amount: Optional[Decimal] = None) -> Dict:
         """Refund ACH payment"""
         try:
-            # ACH refunds are typically done as reverse transactions
             refund_id = f"ach_refund_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "refund_id": refund_id,
                 "status": "processing",
                 "processor": "ach",
             }
-
         except Exception as e:
             logger.error(f"ACH refund error: {str(e)}")
             return {"success": False, "error": "ACH_REFUND_ERROR", "message": str(e)}
@@ -260,8 +230,6 @@ class ACHPaymentProcessor(PaymentProcessor):
     def get_payment_status(self, payment_id: str) -> Dict:
         """Get ACH payment status"""
         try:
-            # In a real implementation, this would query the ACH processor
-            # For now, simulate status check
             return {
                 "success": True,
                 "status": "processing",
@@ -271,7 +239,6 @@ class ACHPaymentProcessor(PaymentProcessor):
                     "estimated_settlement": "1-3 business days",
                 },
             }
-
         except Exception as e:
             logger.error(f"ACH status check error: {str(e)}")
             return {"success": False, "error": "ACH_STATUS_ERROR", "message": str(e)}
@@ -280,7 +247,7 @@ class ACHPaymentProcessor(PaymentProcessor):
 class WirePaymentProcessor(PaymentProcessor):
     """Wire transfer payment processor implementation"""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("WIRE_API_KEY")
         self.base_url = os.environ.get(
             "WIRE_BASE_URL", "https://api.wireprovider.com/v1"
@@ -297,8 +264,6 @@ class WirePaymentProcessor(PaymentProcessor):
                     "error": "WIRE_NOT_CONFIGURED",
                     "message": "Wire transfer processor not configured",
                 }
-
-            # Wire transfers require additional details
             required_fields = [
                 "beneficiary_name",
                 "beneficiary_account",
@@ -311,10 +276,7 @@ class WirePaymentProcessor(PaymentProcessor):
                         "error": "MISSING_WIRE_DETAILS",
                         "message": f"Missing required field: {field}",
                     }
-
-            # Simulate wire transfer initiation
             wire_id = f"wire_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "external_id": wire_id,
@@ -322,7 +284,6 @@ class WirePaymentProcessor(PaymentProcessor):
                 "processor": "wire",
                 "estimated_settlement": "Same day to 1 business day",
             }
-
         except Exception as e:
             logger.error(f"Wire transfer processing error: {str(e)}")
             return {
@@ -335,14 +296,12 @@ class WirePaymentProcessor(PaymentProcessor):
         """Refund wire transfer (typically done as new outgoing wire)"""
         try:
             refund_id = f"wire_refund_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "refund_id": refund_id,
                 "status": "processing",
                 "processor": "wire",
             }
-
         except Exception as e:
             logger.error(f"Wire refund error: {str(e)}")
             return {"success": False, "error": "WIRE_REFUND_ERROR", "message": str(e)}
@@ -359,7 +318,6 @@ class WirePaymentProcessor(PaymentProcessor):
                     "estimated_settlement": "Same day to 1 business day",
                 },
             }
-
         except Exception as e:
             logger.error(f"Wire status check error: {str(e)}")
             return {"success": False, "error": "WIRE_STATUS_ERROR", "message": str(e)}
@@ -368,7 +326,7 @@ class WirePaymentProcessor(PaymentProcessor):
 class SEPAPaymentProcessor(PaymentProcessor):
     """SEPA payment processor implementation"""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("SEPA_API_KEY")
         self.base_url = os.environ.get(
             "SEPA_BASE_URL", "https://api.sepaprovider.com/v1"
@@ -385,26 +343,19 @@ class SEPAPaymentProcessor(PaymentProcessor):
                     "error": "SEPA_NOT_CONFIGURED",
                     "message": "SEPA processor not configured",
                 }
-
-            # SEPA is typically EUR only
             if currency.upper() != "EUR":
                 return {
                     "success": False,
                     "error": "CURRENCY_NOT_SUPPORTED",
                     "message": "SEPA only supports EUR",
                 }
-
-            # SEPA requires IBAN
             if "iban" not in payment_details:
                 return {
                     "success": False,
                     "error": "MISSING_IBAN",
                     "message": "IBAN is required for SEPA payments",
                 }
-
-            # Simulate SEPA payment initiation
             sepa_id = f"sepa_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "external_id": sepa_id,
@@ -412,7 +363,6 @@ class SEPAPaymentProcessor(PaymentProcessor):
                 "processor": "sepa",
                 "estimated_settlement": "1-2 business days",
             }
-
         except Exception as e:
             logger.error(f"SEPA payment processing error: {str(e)}")
             return {
@@ -425,14 +375,12 @@ class SEPAPaymentProcessor(PaymentProcessor):
         """Refund SEPA payment"""
         try:
             refund_id = f"sepa_refund_{uuid.uuid4().hex[:16]}"
-
             return {
                 "success": True,
                 "refund_id": refund_id,
                 "status": "processing",
                 "processor": "sepa",
             }
-
         except Exception as e:
             logger.error(f"SEPA refund error: {str(e)}")
             return {"success": False, "error": "SEPA_REFUND_ERROR", "message": str(e)}
@@ -449,7 +397,6 @@ class SEPAPaymentProcessor(PaymentProcessor):
                     "estimated_settlement": "1-2 business days",
                 },
             }
-
         except Exception as e:
             logger.error(f"SEPA status check error: {str(e)}")
             return {"success": False, "error": "SEPA_STATUS_ERROR", "message": str(e)}
@@ -467,11 +414,9 @@ class PaymentProcessorFactory:
             "wire": WirePaymentProcessor,
             "sepa": SEPAPaymentProcessor,
         }
-
         processor_class = processors.get(processor_type.lower())
         if processor_class:
             return processor_class()
-
         return None
 
     @staticmethod

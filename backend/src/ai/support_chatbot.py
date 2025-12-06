@@ -5,19 +5,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
-
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from transformers import pipeline
 
-"""
-AI Support Chatbot for Flowlet Developer Portal
-Provides intelligent assistance for developers integrating with the platform
-"""
-
-
-# Configure logging
+"\nAI Support Chatbot for Flowlet Developer Portal\nProvides intelligent assistance for developers integrating with the platform\n"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -75,48 +68,35 @@ class FlowletAIChatbot:
     Provides intelligent assistance for Flowlet platform integration
     """
 
-    def __init__(self, knowledge_base_path: str = "/data/knowledge_base"):
+    def __init__(self, knowledge_base_path: str = "/data/knowledge_base") -> Any:
         self.knowledge_base_path = knowledge_base_path
         self.vectorizer = TfidfVectorizer(max_features=5000, stop_words="english")
         self.knowledge_vectors = None
         self.knowledge_documents = []
-
-        # Initialize NLP models
         self._initialize_models()
-
-        # Load knowledge base
         self._load_knowledge_base()
-
-        # Initialize conversation context
         self.conversation_contexts = {}
 
-    def _initialize_models(self):
+    def _initialize_models(self) -> Any:
         """Initialize NLP models for intent classification and response generation"""
         try:
-            # Intent classification model
             self.intent_classifier = pipeline(
                 "text-classification",
                 model="microsoft/DialoGPT-medium",
                 return_all_scores=True,
             )
-
-            # Question answering model
             self.qa_model = pipeline(
                 "question-answering", model="distilbert-base-cased-distilled-squad"
             )
-
             logger.info("NLP models initialized successfully")
-
         except Exception as e:
             logger.error(f"Error initializing NLP models: {str(e)}")
-            # Fallback to rule-based approach
             self.intent_classifier = None
             self.qa_model = None
 
-    def _load_knowledge_base(self):
+    def _load_knowledge_base(self) -> Any:
         """Load and vectorize the knowledge base"""
         try:
-            # Load knowledge base documents
             knowledge_files = [
                 "api_documentation.json",
                 "integration_guides.json",
@@ -125,7 +105,6 @@ class FlowletAIChatbot:
                 "security_guidelines.json",
                 "compliance_requirements.json",
             ]
-
             all_documents = []
             for file_name in knowledge_files:
                 file_path = os.path.join(self.knowledge_base_path, file_name)
@@ -134,29 +113,21 @@ class FlowletAIChatbot:
                         documents = json.load(f)
                         all_documents.extend(documents)
                 else:
-                    # Create sample knowledge base if files don't exist
                     self._create_sample_knowledge_base()
                     break
-
             if not all_documents:
                 all_documents = self._get_default_knowledge_base()
-
             self.knowledge_documents = all_documents
-
-            # Create document vectors
             document_texts = [doc["content"] for doc in all_documents]
             self.knowledge_vectors = self.vectorizer.fit_transform(document_texts)
-
             logger.info(f"Knowledge base loaded with {len(all_documents)} documents")
-
         except Exception as e:
             logger.error(f"Error loading knowledge base: {str(e)}")
             self.knowledge_documents = self._get_default_knowledge_base()
 
-    def _create_sample_knowledge_base(self):
+    def _create_sample_knowledge_base(self) -> Any:
         """Create sample knowledge base files"""
         os.makedirs(self.knowledge_base_path, exist_ok=True)
-
         sample_data = {
             "api_documentation.json": [
                 {
@@ -193,7 +164,6 @@ class FlowletAIChatbot:
                 }
             ],
         }
-
         for filename, data in sample_data.items():
             with open(os.path.join(self.knowledge_base_path, filename), "w") as f:
                 json.dump(data, f, indent=2)
@@ -220,35 +190,21 @@ class FlowletAIChatbot:
     async def process_message(self, message: ChatMessage) -> ChatResponse:
         """Process incoming chat message and generate response"""
         start_time = datetime.now()
-
         try:
-            # Classify query intent
             query_type = await self._classify_intent(message.message)
-
-            # Find relevant knowledge base documents
             relevant_docs = await self._find_relevant_documents(message.message)
-
-            # Generate response
             response_text, confidence = await self._generate_response(
                 message.message, query_type, relevant_docs
             )
-
-            # Determine if human escalation is needed
             escalate_to_human = (
                 confidence == ConfidenceLevel.LOW
                 or "escalate" in message.message.lower()
             )
-
-            # Generate suggested actions
             suggested_actions = await self._generate_suggested_actions(
                 query_type, relevant_docs
             )
-
-            # Extract related documentation links
             related_docs = [doc["title"] for doc in relevant_docs[:3]]
-
             processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
-
             response = ChatResponse(
                 message_id=f"resp_{message.id}",
                 response=response_text,
@@ -260,15 +216,9 @@ class FlowletAIChatbot:
                 processing_time_ms=processing_time,
                 timestamp=datetime.now(timezone.utc),
             )
-
-            # Update conversation context
             await self._update_conversation_context(message, response)
-
-            # Log interaction for analytics
             await self._log_interaction(message, response)
-
             return response
-
         except Exception as e:
             logger.error(f"Error processing message: {str(e)}")
             return self._generate_error_response(message, start_time)
@@ -276,48 +226,53 @@ class FlowletAIChatbot:
     async def _classify_intent(self, message: str) -> QueryType:
         """Classify the intent of the user message"""
         try:
-            # Use ML model if available
             if self.intent_classifier:
-                # This would use a trained intent classification model
-                # For now, using rule-based classification
                 pass
-
-            # Rule-based intent classification
             message_lower = message.lower()
-
             if any(
-                word in message_lower
-                for word in ["api", "endpoint", "request", "response"]
+                (
+                    word in message_lower
+                    for word in ["api", "endpoint", "request", "response"]
+                )
             ):
                 return QueryType.API_DOCUMENTATION
             elif any(
-                word in message_lower
-                for word in ["integrate", "sdk", "setup", "install"]
+                (
+                    word in message_lower
+                    for word in ["integrate", "sdk", "setup", "install"]
+                )
             ):
                 return QueryType.INTEGRATION_HELP
             elif any(
-                word in message_lower
-                for word in ["error", "bug", "issue", "problem", "fix"]
+                (
+                    word in message_lower
+                    for word in ["error", "bug", "issue", "problem", "fix"]
+                )
             ):
                 return QueryType.TROUBLESHOOTING
             elif any(
-                word in message_lower
-                for word in ["best practice", "recommend", "should", "better"]
+                (
+                    word in message_lower
+                    for word in ["best practice", "recommend", "should", "better"]
+                )
             ):
                 return QueryType.BEST_PRACTICES
             elif any(
-                word in message_lower
-                for word in ["security", "secure", "encrypt", "auth"]
+                (
+                    word in message_lower
+                    for word in ["security", "secure", "encrypt", "auth"]
+                )
             ):
                 return QueryType.SECURITY_GUIDANCE
             elif any(
-                word in message_lower
-                for word in ["compliance", "regulation", "kyc", "aml"]
+                (
+                    word in message_lower
+                    for word in ["compliance", "regulation", "kyc", "aml"]
+                )
             ):
                 return QueryType.COMPLIANCE_INFO
             else:
                 return QueryType.GENERAL_INQUIRY
-
         except Exception as e:
             logger.error(f"Error classifying intent: {str(e)}")
             return QueryType.GENERAL_INQUIRY
@@ -327,27 +282,18 @@ class FlowletAIChatbot:
         try:
             if self.knowledge_vectors is None:
                 return []
-
-            # Vectorize the query
             query_vector = self.vectorizer.transform([query])
-
-            # Calculate similarity scores
             similarity_scores = cosine_similarity(
                 query_vector, self.knowledge_vectors
             ).flatten()
-
-            # Get top-k most similar documents
             top_indices = np.argsort(similarity_scores)[::-1][:top_k]
-
             relevant_docs = []
             for idx in top_indices:
-                if similarity_scores[idx] > 0.1:  # Minimum similarity threshold
+                if similarity_scores[idx] > 0.1:
                     doc = self.knowledge_documents[idx].copy()
                     doc["similarity_score"] = float(similarity_scores[idx])
                     relevant_docs.append(doc)
-
             return relevant_docs
-
         except Exception as e:
             logger.error(f"Error finding relevant documents: {str(e)}")
             return []
@@ -358,12 +304,11 @@ class FlowletAIChatbot:
         """Generate response based on query and relevant documents"""
         try:
             if not relevant_docs:
-                return self._generate_fallback_response(query_type), ConfidenceLevel.LOW
-
-            # Use the most relevant document as context
+                return (
+                    self._generate_fallback_response(query_type),
+                    ConfidenceLevel.LOW,
+                )
             best_doc = relevant_docs[0]
-
-            # Generate contextual response
             if query_type == QueryType.API_DOCUMENTATION:
                 response = f"Based on our API documentation: {best_doc['content']}\n\n"
                 response += "For more detailed information, please refer to our complete API documentation."
@@ -372,7 +317,6 @@ class FlowletAIChatbot:
                     if best_doc["similarity_score"] > 0.7
                     else ConfidenceLevel.MEDIUM
                 )
-
             elif query_type == QueryType.TROUBLESHOOTING:
                 response = (
                     f"Here's how to resolve this issue: {best_doc['content']}\n\n"
@@ -383,7 +327,6 @@ class FlowletAIChatbot:
                     if best_doc["similarity_score"] > 0.6
                     else ConfidenceLevel.MEDIUM
                 )
-
             elif query_type == QueryType.INTEGRATION_HELP:
                 response = f"For integration guidance: {best_doc['content']}\n\n"
                 response += "Check out our integration examples and SDK documentation for step-by-step instructions."
@@ -392,17 +335,14 @@ class FlowletAIChatbot:
                     if best_doc["similarity_score"] > 0.6
                     else ConfidenceLevel.MEDIUM
                 )
-
             else:
                 response = f"{best_doc['content']}\n\n"
                 response += "Let me know if you need more specific information about this topic."
                 confidence = ConfidenceLevel.MEDIUM
-
-            return response, confidence
-
+            return (response, confidence)
         except Exception as e:
             logger.error(f"Error generating response: {str(e)}")
-            return self._generate_fallback_response(query_type), ConfidenceLevel.LOW
+            return (self._generate_fallback_response(query_type), ConfidenceLevel.LOW)
 
     def _generate_fallback_response(self, query_type: QueryType) -> str:
         """Generate fallback response when no relevant documents found"""
@@ -415,7 +355,6 @@ class FlowletAIChatbot:
             QueryType.COMPLIANCE_INFO: "I can help with compliance information. Which regulatory requirements are you interested in?",
             QueryType.GENERAL_INQUIRY: "I'm here to help with any questions about Flowlet. Could you provide more details about what you're looking for?",
         }
-
         return fallback_responses.get(
             query_type,
             "I'm here to help! Could you please provide more details about your question?",
@@ -462,7 +401,6 @@ class FlowletAIChatbot:
                 "Contact sales team",
             ],
         }
-
         return base_actions.get(query_type, ["Contact support team"])
 
     async def _update_conversation_context(
@@ -476,7 +414,6 @@ class FlowletAIChatbot:
                     "topics": set(),
                     "last_query_type": None,
                 }
-
             context = self.conversation_contexts[message.session_id]
             context["messages"].append(
                 {
@@ -486,16 +423,10 @@ class FlowletAIChatbot:
                     "query_type": response.query_type.value,
                 }
             )
-
-            # Keep only last 10 messages
             context["messages"] = context["messages"][-10:]
-
-            # Track topics
             if response.related_docs:
                 context["topics"].update(response.related_docs)
-
             context["last_query_type"] = response.query_type
-
         except Exception as e:
             logger.error(f"Error updating conversation context: {str(e)}")
 
@@ -512,9 +443,7 @@ class FlowletAIChatbot:
                 "processing_time_ms": response.processing_time_ms,
                 "escalated": response.escalate_to_human,
             }
-
             logger.info(f"Chatbot interaction: {json.dumps(log_entry)}")
-
         except Exception as e:
             logger.error(f"Error logging interaction: {str(e)}")
 
@@ -523,7 +452,6 @@ class FlowletAIChatbot:
     ) -> ChatResponse:
         """Generate error response when processing fails"""
         processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
-
         return ChatResponse(
             message_id=f"resp_{message.id}",
             response="I apologize, but I'm experiencing technical difficulties. Please try again or contact our support team for assistance.",
@@ -540,7 +468,7 @@ class FlowletAIChatbot:
 class ChatbotAnalytics:
     """Analytics and monitoring for chatbot performance"""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.interaction_stats = {
             "total_interactions": 0,
             "by_query_type": {},
@@ -549,37 +477,31 @@ class ChatbotAnalytics:
             "avg_processing_time": 0.0,
         }
 
-    def update_stats(self, response: ChatResponse):
+    def update_stats(self, response: ChatResponse) -> Any:
         """Update analytics statistics"""
         self.interaction_stats["total_interactions"] += 1
-
-        # Update query type stats
         query_type = response.query_type.value
         if query_type not in self.interaction_stats["by_query_type"]:
             self.interaction_stats["by_query_type"][query_type] = 0
         self.interaction_stats["by_query_type"][query_type] += 1
-
-        # Update confidence stats
         confidence = response.confidence.value
         if confidence not in self.interaction_stats["by_confidence"]:
             self.interaction_stats["by_confidence"][confidence] = 0
         self.interaction_stats["by_confidence"][confidence] += 1
-
-        # Update escalation rate
         if response.escalate_to_human:
             escalations = sum(
-                1
-                for qt, count in self.interaction_stats["by_query_type"].items()
-                if "escalated" in qt
+                (
+                    1
+                    for qt, count in self.interaction_stats["by_query_type"].items()
+                    if "escalated" in qt
+                )
             )
             self.interaction_stats["escalation_rate"] = (
                 escalations / self.interaction_stats["total_interactions"]
             )
-
-        # Update average processing time
         current_avg = self.interaction_stats["avg_processing_time"]
         new_avg = (
-            (current_avg * (self.interaction_stats["total_interactions"] - 1))
+            current_avg * (self.interaction_stats["total_interactions"] - 1)
             + response.processing_time_ms
         ) / self.interaction_stats["total_interactions"]
         self.interaction_stats["avg_processing_time"] = new_avg
@@ -589,7 +511,6 @@ class ChatbotAnalytics:
         return self.interaction_stats.copy()
 
 
-# Export main classes
 __all__ = [
     "FlowletAIChatbot",
     "ChatMessage",

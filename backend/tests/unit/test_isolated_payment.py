@@ -4,10 +4,7 @@ from decimal import Decimal
 import os
 import stripe
 
-# Set up mock environment variables for Stripe key
 os.environ["STRIPE_SECRET_KEY"] = "sk_test_123"
-
-# Import the modules to be tested
 from src.clients.stripe_client import StripeClient
 from src.services.payment_service_errors import PaymentProcessorError
 
@@ -15,8 +12,7 @@ from src.services.payment_service_errors import PaymentProcessorError
 class TestStripeClient(unittest.TestCase):
 
     @patch("stripe.Charge.create")
-    def test_create_charge_success(self, mock_stripe_create):
-        # Mock Stripe's successful response
+    def test_create_charge_success(self, mock_stripe_create: Any) -> Any:
         mock_charge = MagicMock(
             id="ch_123",
             status="succeeded",
@@ -28,12 +24,10 @@ class TestStripeClient(unittest.TestCase):
             },
         )
         mock_stripe_create.return_value = mock_charge
-
         client = StripeClient()
         result = client.create_charge(
             Decimal("10.00"), "USD", "tok_visa", "test charge"
         )
-
         self.assertEqual(result["status"], "succeeded")
         mock_stripe_create.assert_called_once_with(
             amount=1000,
@@ -44,8 +38,7 @@ class TestStripeClient(unittest.TestCase):
         )
 
     @patch("stripe.Charge.create")
-    def test_create_charge_card_error(self, mock_stripe_create):
-        # Mock Stripe's CardError
+    def test_create_charge_card_error(self, mock_stripe_create: Any) -> Any:
         mock_stripe_create.side_effect = stripe.error.CardError(
             message="Your card was declined.",
             param="source",
@@ -53,7 +46,6 @@ class TestStripeClient(unittest.TestCase):
             http_status=400,
             json_body={"error": {"message": "Your card was declined."}},
         )
-
         client = StripeClient()
         with self.assertRaisesRegex(
             PaymentProcessorError, "Payment failed: Your card was declined."
@@ -61,14 +53,12 @@ class TestStripeClient(unittest.TestCase):
             client.create_charge(Decimal("10.00"), "USD", "tok_visa", "test charge")
 
     @patch("stripe.Charge.create")
-    def test_create_charge_api_error(self, mock_stripe_create):
-        # Mock a general Stripe API error
+    def test_create_charge_api_error(self, mock_stripe_create: Any) -> Any:
         mock_stripe_create.side_effect = stripe.error.StripeError(
             message="Invalid API Key provided.",
             http_status=500,
             json_body={"error": {"message": "Invalid API Key provided."}},
         )
-
         client = StripeClient()
         with self.assertRaisesRegex(
             PaymentProcessorError, "Stripe processing error: Invalid API Key provided."

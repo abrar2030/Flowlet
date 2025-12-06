@@ -5,16 +5,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 import numpy as np
 import pandas as pd
 
-"""
-Fraud Detection ML Models Base Classes
-Provides abstract base classes and common utilities for fraud detection
-"""
-
-
+"\nFraud Detection ML Models Base Classes\nProvides abstract base classes and common utilities for fraud detection\n"
 logger = logging.getLogger(__name__)
 
 
@@ -88,8 +82,6 @@ class TransactionFeatures:
     ip_address: Optional[str] = None
     payment_method: Optional[str] = None
     channel: Optional[str] = None
-
-    # Derived features
     hour_of_day: Optional[int] = None
     day_of_week: Optional[int] = None
     is_weekend: Optional[bool] = None
@@ -97,14 +89,10 @@ class TransactionFeatures:
     velocity_1h: Optional[int] = None
     velocity_24h: Optional[int] = None
     velocity_7d: Optional[int] = None
-
-    # User behavior features
     user_age_days: Optional[int] = None
     avg_transaction_amount: Optional[float] = None
     transaction_count_30d: Optional[int] = None
     unique_merchants_30d: Optional[int] = None
-
-    # Risk indicators
     new_device: Optional[bool] = None
     new_location: Optional[bool] = None
     unusual_time: Optional[bool] = None
@@ -128,7 +116,7 @@ class FraudModelBase(ABC):
     Abstract base class for fraud detection models
     """
 
-    def __init__(self, model_config: Dict[str, Any]):
+    def __init__(self, model_config: Dict[str, Any]) -> Any:
         self.config = model_config
         self.model = None
         self.is_trained = False
@@ -180,17 +168,11 @@ class FraudModelBase(ABC):
         Returns:
             pd.DataFrame: Preprocessed features
         """
-        # Handle missing values
         features = features.fillna(0)
-
-        # Ensure all required columns are present
         for col in self.feature_columns:
             if col not in features.columns:
                 features[col] = 0
-
-        # Select only required columns in correct order
         features = features[self.feature_columns]
-
         return features
 
     def calculate_risk_level(self, score: float) -> RiskLevel:
@@ -224,7 +206,6 @@ class FraudModelBase(ABC):
             "config": self.config,
             "is_trained": self.is_trained,
         }
-
         joblib.dump(model_data, filepath)
         self.logger.info(f"Model saved to {filepath}")
 
@@ -233,14 +214,12 @@ class FraudModelBase(ABC):
         import joblib
 
         model_data = joblib.load(filepath)
-
         self.model = model_data["model"]
         self.feature_columns = model_data["feature_columns"]
         self.model_version = model_data["model_version"]
         self.training_timestamp = model_data["training_timestamp"]
         self.config = model_data["config"]
         self.is_trained = model_data["is_trained"]
-
         self.logger.info(f"Model loaded from {filepath}")
 
 
@@ -249,7 +228,7 @@ class FeatureEngineer:
     Feature engineering for fraud detection
     """
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.logger = logging.getLogger(__name__)
 
     def extract_transaction_features(
@@ -273,7 +252,6 @@ class FeatureEngineer:
                 if isinstance(transaction_data["timestamp"], str)
                 else transaction_data["timestamp"]
             )
-
             features = TransactionFeatures(
                 transaction_id=transaction_data["transaction_id"],
                 user_id=transaction_data["user_id"],
@@ -288,20 +266,14 @@ class FeatureEngineer:
                 payment_method=transaction_data.get("payment_method"),
                 channel=transaction_data.get("channel"),
             )
-
-            # Extract time-based features
             features.hour_of_day = timestamp.hour
             features.day_of_week = timestamp.weekday()
             features.is_weekend = timestamp.weekday() >= 5
-
-            # Calculate user behavior features if history is available
-            if user_history is not None and not user_history.empty:
+            if user_history is not None and (not user_history.empty):
                 features = self._calculate_user_features(features, user_history)
                 features = self._calculate_velocity_features(features, user_history)
                 features = self._calculate_risk_indicators(features, user_history)
-
             return features
-
         except Exception as e:
             self.logger.error(f"Feature extraction error: {str(e)}")
             raise FeatureExtractionError(f"Feature extraction error: {str(e)}")
@@ -310,79 +282,55 @@ class FeatureEngineer:
         self, features: TransactionFeatures, user_history: pd.DataFrame
     ) -> TransactionFeatures:
         """Calculate user behavior features"""
-
-        # User age
         if not user_history.empty:
             first_transaction = user_history["timestamp"].min()
             features.user_age_days = (features.timestamp - first_transaction).days
-
-        # Transaction statistics
         recent_30d = user_history[
             user_history["timestamp"] >= features.timestamp - timedelta(days=30)
         ]
-
         if not recent_30d.empty:
             features.avg_transaction_amount = recent_30d["amount"].mean()
             features.transaction_count_30d = len(recent_30d)
             features.unique_merchants_30d = recent_30d["merchant_category"].nunique()
-
-        # Amount z-score
         if not user_history.empty and len(user_history) > 1:
             user_amounts = user_history["amount"]
             mean_amount = user_amounts.mean()
             std_amount = user_amounts.std()
             if std_amount > 0:
                 features.amount_zscore = (features.amount - mean_amount) / std_amount
-
         return features
 
     def _calculate_velocity_features(
         self, features: TransactionFeatures, user_history: pd.DataFrame
     ) -> TransactionFeatures:
         """Calculate transaction velocity features"""
-
-        # 1 hour velocity
         hour_ago = features.timestamp - timedelta(hours=1)
         features.velocity_1h = len(user_history[user_history["timestamp"] >= hour_ago])
-
-        # 24 hour velocity
         day_ago = features.timestamp - timedelta(hours=24)
         features.velocity_24h = len(user_history[user_history["timestamp"] >= day_ago])
-
-        # 7 day velocity
         week_ago = features.timestamp - timedelta(days=7)
         features.velocity_7d = len(user_history[user_history["timestamp"] >= week_ago])
-
         return features
 
     def _calculate_risk_indicators(
         self, features: TransactionFeatures, user_history: pd.DataFrame
     ) -> TransactionFeatures:
         """Calculate risk indicator features"""
-
-        # New device indicator
         if features.device_fingerprint:
             features.new_device = (
                 features.device_fingerprint
                 not in user_history["device_fingerprint"].values
             )
-
-        # New location indicator
         if features.location_country:
             features.new_location = (
                 features.location_country not in user_history["location_country"].values
             )
-
-        # Unusual time indicator (outside normal hours)
         if not user_history.empty:
             user_hours = user_history["timestamp"].dt.hour
             common_hours = user_hours.mode().values
             features.unusual_time = features.hour_of_day not in common_hours
-
-        # High risk merchant (placeholder - would be based on merchant risk database)
         high_risk_categories = ["gambling", "adult", "cryptocurrency"]
         features.high_risk_merchant = features.merchant_category in high_risk_categories
-
         return features
 
     def features_to_dataframe(self, features: TransactionFeatures) -> pd.DataFrame:
@@ -413,7 +361,6 @@ class FeatureEngineer:
             "unusual_time": int(features.unusual_time or False),
             "high_risk_merchant": int(features.high_risk_merchant or False),
         }
-
         return pd.DataFrame([feature_dict])
 
 
@@ -422,7 +369,7 @@ class FraudExplainer:
     Provides explanations for fraud detection decisions
     """
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.logger = logging.getLogger(__name__)
 
     def explain_prediction(
@@ -449,8 +396,6 @@ class FraudExplainer:
             "protective_factors": [],
             "summary": "",
         }
-
-        # Analyze high-impact features
         high_impact_threshold = 0.1
         for feature, importance in feature_importance.items():
             if importance > high_impact_threshold:
@@ -466,8 +411,6 @@ class FraudExplainer:
                             ),
                         }
                     )
-
-        # Generate summary
         if risk_score >= 0.8:
             explanation["summary"] = (
                 "High fraud risk detected due to multiple suspicious indicators"
@@ -480,7 +423,6 @@ class FraudExplainer:
             explanation["summary"] = "Moderate fraud risk - monitor transaction"
         else:
             explanation["summary"] = "Low fraud risk - transaction appears normal"
-
         return explanation
 
     def _get_feature_description(self, feature: str, value: Any) -> str:
@@ -506,5 +448,4 @@ class FraudExplainer:
                 "High-risk merchant category" if value else "Normal merchant category"
             ),
         }
-
         return descriptions.get(feature, f"{feature}: {value}")

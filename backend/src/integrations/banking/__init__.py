@@ -6,12 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-"""
-Banking Integration Base Classes
-Provides abstract base classes for third-party banking integrations
-"""
-
-
+"\nBanking Integration Base Classes\nProvides abstract base classes for third-party banking integrations\n"
 logger = logging.getLogger(__name__)
 
 
@@ -112,7 +107,7 @@ class BankingIntegrationBase(ABC):
     Defines the interface that all banking integrations must implement
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> Any:
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._authenticated = False

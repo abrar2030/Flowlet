@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, List, Optional
-
 import redis
 import requests
 
@@ -53,8 +52,6 @@ class CurrencyExchangeService:
         "KRW",
         "PLN",
     ]
-
-    # Major currency pairs for better rates
     MAJOR_PAIRS = [
         ("USD", "EUR"),
         ("USD", "GBP"),
@@ -68,14 +65,10 @@ class CurrencyExchangeService:
         ("NZD", "USD"),
     ]
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("EXCHANGE_RATE_API_KEY")
         self.backup_api_key = os.environ.get("BACKUP_EXCHANGE_RATE_API_KEY")
-        self.cache_ttl = int(
-            os.environ.get("EXCHANGE_RATE_CACHE_TTL", "300")
-        )  # 5 minutes
-
-        # Initialize Redis for caching
+        self.cache_ttl = int(os.environ.get("EXCHANGE_RATE_CACHE_TTL", "300"))
         try:
             self.redis_client = redis.Redis.from_url(
                 os.environ.get("REDIS_URL", "redis://localhost:6379"),
@@ -85,8 +78,6 @@ class CurrencyExchangeService:
         except Exception:
             self.redis_client = None
             logger.warning("Redis not available for exchange rate caching")
-
-        # Exchange rate providers
         self.providers = {
             "exchangerate_api": {
                 "url": "https://v6.exchangerate-api.com/v6/{api_key}/latest/{base}",
@@ -115,16 +106,12 @@ class CurrencyExchangeService:
             ExchangeRate object or None if not available
         """
         try:
-            # Validate currencies
             if from_currency not in self.SUPPORTED_CURRENCIES:
                 logger.error(f"Unsupported source currency: {from_currency}")
                 return None
-
             if to_currency not in self.SUPPORTED_CURRENCIES:
                 logger.error(f"Unsupported target currency: {to_currency}")
                 return None
-
-            # Same currency
             if from_currency == to_currency:
                 return ExchangeRate(
                     from_currency=from_currency,
@@ -133,21 +120,13 @@ class CurrencyExchangeService:
                     timestamp=datetime.now(timezone.utc),
                     provider="internal",
                 )
-
-            # Check cache first
             cached_rate = self._get_cached_rate(from_currency, to_currency)
             if cached_rate:
                 return cached_rate
-
-            # Fetch from provider
             rate = self._fetch_rate_from_provider(from_currency, to_currency, provider)
-
             if rate:
-                # Cache the rate
                 self._cache_rate(rate)
                 return rate
-
-            # Try backup provider if primary fails
             if provider != "fixer":
                 logger.warning(
                     f"Primary provider failed, trying backup for {from_currency}/{to_currency}"
@@ -158,12 +137,10 @@ class CurrencyExchangeService:
                 if backup_rate:
                     self._cache_rate(backup_rate)
                     return backup_rate
-
             logger.error(
                 f"Failed to get exchange rate for {from_currency}/{to_currency}"
             )
             return None
-
         except Exception as e:
             logger.error(f"Error getting exchange rate: {str(e)}")
             return None
@@ -174,11 +151,9 @@ class CurrencyExchangeService:
         """Get cached exchange rate"""
         if not self.redis_client:
             return None
-
         try:
             cache_key = f"exchange_rate:{from_currency}:{to_currency}"
             cached_data = self.redis_client.get(cache_key)
-
             if cached_data:
                 data = json.loads(cached_data)
                 return ExchangeRate(
@@ -190,17 +165,14 @@ class CurrencyExchangeService:
                     bid=Decimal(data["bid"]) if data.get("bid") else None,
                     ask=Decimal(data["ask"]) if data.get("ask") else None,
                 )
-
         except Exception as e:
             logger.error(f"Error getting cached rate: {str(e)}")
-
         return None
 
-    def _cache_rate(self, rate: ExchangeRate):
+    def _cache_rate(self, rate: ExchangeRate) -> Any:
         """Cache exchange rate"""
         if not self.redis_client:
             return
-
         try:
             cache_key = f"exchange_rate:{rate.from_currency}:{rate.to_currency}"
             cache_data = {
@@ -212,9 +184,7 @@ class CurrencyExchangeService:
                 "bid": str(rate.bid) if rate.bid else None,
                 "ask": str(rate.ask) if rate.ask else None,
             }
-
             self.redis_client.setex(cache_key, self.cache_ttl, json.dumps(cache_data))
-
         except Exception as e:
             logger.error(f"Error caching rate: {str(e)}")
 
@@ -232,7 +202,6 @@ class CurrencyExchangeService:
             else:
                 logger.error(f"Unknown provider: {provider}")
                 return None
-
         except Exception as e:
             logger.error(f"Error fetching from provider {provider}: {str(e)}")
             return None
@@ -245,21 +214,16 @@ class CurrencyExchangeService:
             if not self.api_key:
                 logger.error("ExchangeRate-API key not configured")
                 return None
-
             url = self.providers["exchangerate_api"]["url"].format(
                 api_key=self.api_key, base=from_currency
             )
-
             response = requests.get(url, timeout=10)
             response.raise_for_status()
-
             data = response.json()
-
             if data.get("result") == "success" and to_currency in data.get(
                 "conversion_rates", {}
             ):
                 rate = Decimal(str(data["conversion_rates"][to_currency]))
-
                 return ExchangeRate(
                     from_currency=from_currency,
                     to_currency=to_currency,
@@ -267,10 +231,8 @@ class CurrencyExchangeService:
                     timestamp=datetime.now(timezone.utc),
                     provider="exchangerate_api",
                 )
-
         except Exception as e:
             logger.error(f"Error fetching from ExchangeRate-API: {str(e)}")
-
         return None
 
     def _fetch_from_fixer(
@@ -281,19 +243,14 @@ class CurrencyExchangeService:
             if not self.backup_api_key:
                 logger.error("Fixer.io API key not configured")
                 return None
-
             url = self.providers["fixer"]["url"].format(
                 api_key=self.backup_api_key, base=from_currency, symbols=to_currency
             )
-
             response = requests.get(url, timeout=10)
             response.raise_for_status()
-
             data = response.json()
-
             if data.get("success") and to_currency in data.get("rates", {}):
                 rate = Decimal(str(data["rates"][to_currency]))
-
                 return ExchangeRate(
                     from_currency=from_currency,
                     to_currency=to_currency,
@@ -301,10 +258,8 @@ class CurrencyExchangeService:
                     timestamp=datetime.now(timezone.utc),
                     provider="fixer",
                 )
-
         except Exception as e:
             logger.error(f"Error fetching from Fixer.io: {str(e)}")
-
         return None
 
     def _fetch_from_currencylayer(
@@ -312,10 +267,7 @@ class CurrencyExchangeService:
     ) -> Optional[ExchangeRate]:
         """Fetch rate from CurrencyLayer"""
         try:
-            # CurrencyLayer implementation would go here
-            # For now, return None as it requires different API structure
             return None
-
         except Exception as e:
             logger.error(f"Error fetching from CurrencyLayer: {str(e)}")
             return None
@@ -342,24 +294,18 @@ class CurrencyExchangeService:
         try:
             if from_currency == to_currency:
                 return amount
-
-            # Get exchange rate if not provided
             if rate is None:
                 exchange_rate = self.get_exchange_rate(from_currency, to_currency)
                 if not exchange_rate:
                     return None
                 rate = exchange_rate.rate
-
-            # Perform conversion with proper rounding
             converted_amount = (amount * rate).quantize(
                 Decimal("0.01"), rounding=ROUND_HALF_UP
             )
-
             logger.info(
                 f"Converted {amount} {from_currency} to {converted_amount} {to_currency} at rate {rate}"
             )
             return converted_amount
-
         except Exception as e:
             logger.error(f"Error converting currency: {str(e)}")
             return None
@@ -400,7 +346,6 @@ class CurrencyExchangeService:
             "KRW": {"name": "South Korean Won", "symbol": "₩", "decimal_places": 0},
             "PLN": {"name": "Polish Zloty", "symbol": "zł", "decimal_places": 2},
         }
-
         return currency_info.get(currency_code.upper())
 
     def get_historical_rates(
@@ -422,8 +367,6 @@ class CurrencyExchangeService:
         Returns:
             List of historical exchange rates
         """
-        # This would require a different API endpoint for historical data
-        # For now, return empty list as it's not implemented
         logger.warning("Historical rates not implemented yet")
         return []
 
@@ -442,28 +385,20 @@ class CurrencyExchangeService:
             Cross rate or None if calculation fails
         """
         try:
-            # Get rates to base currency
             rate_a = self.get_exchange_rate(base_currency, currency_a)
             rate_b = self.get_exchange_rate(base_currency, currency_b)
-
             if not rate_a or not rate_b:
                 return None
-
-            # Calculate cross rate
             cross_rate = rate_a.rate / rate_b.rate
-
             return cross_rate.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
-
         except Exception as e:
             logger.error(f"Error calculating cross rate: {str(e)}")
             return None
 
 
-# Global currency exchange service instance
 currency_service = CurrencyExchangeService()
 
 
-# Convenience functions
 def get_exchange_rate(from_currency: str, to_currency: str) -> Optional[ExchangeRate]:
     """Get exchange rate between currencies"""
     return currency_service.get_exchange_rate(from_currency, to_currency)

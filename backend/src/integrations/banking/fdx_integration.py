@@ -3,7 +3,6 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-
 import aiohttp
 
 logger = logging.getLogger(__name__)
@@ -15,7 +14,7 @@ class FDXIntegration(BankingIntegrationBase):
     Implements FDX API standards for secure financial data sharing
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> Any:
         super().__init__(config)
         self.client_id = config.get("client_id")
         self.client_secret = config.get("client_secret")
@@ -31,20 +30,16 @@ class FDXIntegration(BankingIntegrationBase):
         """
         try:
             self.session = aiohttp.ClientSession()
-
-            # Get access token using client credentials flow
             token_data = {
                 "grant_type": "client_credentials",
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
                 "scope": "FDX:accountbasic FDX:accountdetailed FDX:transactions",
             }
-
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "application/json",
             }
-
             async with self.session.post(
                 f"{self.base_url}/token", headers=headers, data=token_data
             ) as response:
@@ -64,7 +59,6 @@ class FDXIntegration(BankingIntegrationBase):
                     raise AuthenticationError(
                         f"FDX authentication failed: {error_data}"
                     )
-
         except Exception as e:
             self.logger.error(f"FDX authentication error: {str(e)}")
             raise AuthenticationError(f"FDX authentication error: {str(e)}")
@@ -81,13 +75,11 @@ class FDXIntegration(BankingIntegrationBase):
         Retrieve accounts using FDX Account API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/accounts",
             headers=headers,
@@ -96,9 +88,7 @@ class FDXIntegration(BankingIntegrationBase):
             if response.status == 200:
                 result = await response.json()
                 accounts = []
-
                 for account_data in result.get("accounts", []):
-                    # Map FDX account types to our standard types
                     account_type_mapping = {
                         "CHECKING": "checking",
                         "SAVINGS": "savings",
@@ -109,7 +99,6 @@ class FDXIntegration(BankingIntegrationBase):
                         "INVESTMENT": "investment",
                         "LOAN": "loan",
                     }
-
                     account = BankAccount(
                         account_id=account_data["accountId"],
                         account_number=account_data.get("accountNumber", ""),
@@ -124,7 +113,6 @@ class FDXIntegration(BankingIntegrationBase):
                         account_holder_name=account_data.get("accountName", ""),
                     )
                     accounts.append(account)
-
                 return accounts
             else:
                 error_data = await response.json()
@@ -135,13 +123,11 @@ class FDXIntegration(BankingIntegrationBase):
         Get account balance using FDX Account API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/accounts/{account_id}", headers=headers
         ) as response:
@@ -166,13 +152,11 @@ class FDXIntegration(BankingIntegrationBase):
         Retrieve transaction history using FDX Transaction API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         params = {}
         if start_date:
             params["startTime"] = start_date.isoformat()
@@ -180,7 +164,6 @@ class FDXIntegration(BankingIntegrationBase):
             params["endTime"] = end_date.isoformat()
         if limit:
             params["limit"] = limit
-
         async with self.session.get(
             f"{self.base_url}/accounts/{account_id}/transactions",
             headers=headers,
@@ -189,9 +172,7 @@ class FDXIntegration(BankingIntegrationBase):
             if response.status == 200:
                 result = await response.json()
                 transactions = []
-
                 for txn_data in result.get("transactions", []):
-                    # Map FDX transaction types
                     txn_type_mapping = {
                         "CREDIT": TransactionType.CREDIT,
                         "DEBIT": TransactionType.DEBIT,
@@ -199,15 +180,12 @@ class FDXIntegration(BankingIntegrationBase):
                         "PAYMENT": TransactionType.PAYMENT,
                         "REFUND": TransactionType.REFUND,
                     }
-
-                    # Map FDX transaction status
                     status_mapping = {
                         "POSTED": TransactionStatus.COMPLETED,
                         "PENDING": TransactionStatus.PENDING,
                         "CANCELLED": TransactionStatus.CANCELLED,
                         "FAILED": TransactionStatus.FAILED,
                     }
-
                     transaction = Transaction(
                         transaction_id=txn_data["transactionId"],
                         account_id=account_id,
@@ -236,7 +214,6 @@ class FDXIntegration(BankingIntegrationBase):
                         },
                     )
                     transactions.append(transaction)
-
                 return transactions
             else:
                 error_data = await response.json()
@@ -249,7 +226,6 @@ class FDXIntegration(BankingIntegrationBase):
         Initiate payment using FDX Payment API
         """
         await self._ensure_authenticated()
-
         payment_data = {
             "paymentId": str(uuid.uuid4()),
             "amount": payment_request.amount,
@@ -260,20 +236,16 @@ class FDXIntegration(BankingIntegrationBase):
             "referenceNumber": payment_request.reference_id
             or self.generate_reference_id(),
         }
-
         if payment_request.scheduled_date:
             payment_data["scheduledDate"] = payment_request.scheduled_date.isoformat()
-
         if payment_request.metadata:
             payment_data.update(payment_request.metadata)
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.post(
             f"{self.base_url}/payments", headers=headers, json=payment_data
         ) as response:
@@ -291,13 +263,11 @@ class FDXIntegration(BankingIntegrationBase):
         Get payment status using FDX Payment API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/payments/{transaction_id}", headers=headers
         ) as response:
@@ -324,19 +294,16 @@ class FDXIntegration(BankingIntegrationBase):
         Cancel payment using FDX Payment API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         cancel_data = {
             "status": "CANCELLED",
             "reason": "Customer requested cancellation",
         }
-
         async with self.session.patch(
             f"{self.base_url}/payments/{transaction_id}",
             headers=headers,
@@ -349,13 +316,11 @@ class FDXIntegration(BankingIntegrationBase):
         Get detailed account information using FDX Account API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/accounts/{account_id}/details", headers=headers
         ) as response:
@@ -372,13 +337,11 @@ class FDXIntegration(BankingIntegrationBase):
         Get customer information using FDX Customer API
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Accept": "application/json",
             "Idempotency-Key": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/customers/{customer_id}", headers=headers
         ) as response:
@@ -395,7 +358,7 @@ class FDXIntegration(BankingIntegrationBase):
         if self.session:
             await self.session.close()
 
-    def __del__(self):
+    def __del__(self) -> Any:
         """Cleanup on deletion"""
-        if self.session and not self.session.closed:
+        if self.session and (not self.session.closed):
             asyncio.create_task(self.session.close())

@@ -1,10 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-
 import numpy as np
 import pandas as pd
-
 from . import (
     EnsembleFraudModel,
     FeatureEngineer,
@@ -18,19 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class FraudDetectionService:
-    def __init__(self, config: Dict[str, Any]):
+
+    def __init__(self, config: Dict[str, Any]) -> Any:
         self.config = config
         self.ensemble_model = None
         self.real_time_detector = None
         self.feature_engineer = FeatureEngineer()
         self.logger = logging.getLogger(__name__)
-
-        # Model management
         self.model_path = config.get("model_path", "/tmp/fraud_model.joblib")
         self.auto_retrain = config.get("auto_retrain", True)
         self.retrain_threshold_days = config.get("retrain_threshold_days", 30)
-
-        # Performance tracking
         self.performance_metrics = {
             "total_predictions": 0,
             "fraud_detected": 0,
@@ -38,32 +33,23 @@ class FraudDetectionService:
             "true_positives": 0,
             "last_retrain": None,
         }
-
-        # Alert storage (in production, this would be a database)
         self.alerts_storage = []
-
-        # Initialize model
         self._initialize_model()
 
-    def _initialize_model(self):
+    def _initialize_model(self) -> Any:
         """Initialize the fraud detection model"""
         try:
-            # Try to load existing model
             if self._model_exists():
                 self.load_model()
             else:
-                # Create new model with default configuration
                 model_config = self.config.get(
                     "model_config", self._get_default_model_config()
                 )
                 self.ensemble_model = EnsembleFraudModel(model_config)
                 self.logger.info("Created new fraud detection model")
-
-            # Initialize real-time detector
             if self.ensemble_model and self.ensemble_model.is_trained:
                 self.real_time_detector = RealTimeFraudDetector(self.ensemble_model)
                 self.logger.info("Real-time fraud detector initialized")
-
         except Exception as e:
             self.logger.error(f"Model initialization failed: {str(e)}")
             raise FraudDetectionError(f"Model initialization failed: {str(e)}")
@@ -120,21 +106,13 @@ class FraudDetectionService:
         """
         try:
             self.logger.info("Starting model training")
-
-            # Initialize model if not exists
             if not self.ensemble_model:
                 model_config = self.config.get(
                     "model_config", self._get_default_model_config()
                 )
                 self.ensemble_model = EnsembleFraudModel(model_config)
-
-            # Train the model
             self.ensemble_model.train(training_data, labels)
-
-            # Initialize real-time detector
             self.real_time_detector = RealTimeFraudDetector(self.ensemble_model)
-
-            # Evaluate model performance
             training_results = {
                 "training_samples": len(training_data),
                 "features": list(training_data.columns),
@@ -142,34 +120,23 @@ class FraudDetectionService:
                 "training_timestamp": self.ensemble_model.training_timestamp,
                 "models_trained": list(self.ensemble_model.models.keys()),
             }
-
-            # Add validation metrics if validation data provided
             if validation_data:
                 val_features, val_labels = validation_data
                 val_predictions = self.ensemble_model.predict(val_features)
-
                 if val_labels is not None:
                     from sklearn.metrics import classification_report, roc_auc_score
 
                     auc_score = roc_auc_score(val_labels, val_predictions)
                     training_results["validation_auc"] = auc_score
-
-                    # Binary classification metrics
                     val_pred_binary = (val_predictions > 0.5).astype(int)
                     report = classification_report(
                         val_labels, val_pred_binary, output_dict=True
                     )
                     training_results["classification_report"] = report
-
-            # Save model
             self.save_model()
-
-            # Update performance tracking
             self.performance_metrics["last_retrain"] = datetime.now()
-
             self.logger.info("Model training completed successfully")
             return training_results
-
         except Exception as e:
             self.logger.error(f"Model training failed: {str(e)}")
             raise FraudDetectionError(f"Model training failed: {str(e)}")
@@ -194,27 +161,16 @@ class FraudDetectionService:
                 raise FraudDetectionError(
                     "Real-time detector not initialized. Train model first."
                 )
-
-            # Detect fraud
             alert = self.real_time_detector.detect_fraud(transaction_data, user_history)
-
-            # Store alert
             self.alerts_storage.append(alert)
-
-            # Update performance metrics
             self.performance_metrics["total_predictions"] += 1
             if alert.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
                 self.performance_metrics["fraud_detected"] += 1
-
-            # Log high-risk alerts
             if alert.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
                 self.logger.warning(
-                    f"High-risk transaction detected: {alert.transaction_id} "
-                    f"(Risk: {alert.risk_level.value}, Score: {alert.risk_score:.3f})"
+                    f"High-risk transaction detected: {alert.transaction_id} (Risk: {alert.risk_level.value}, Score: {alert.risk_score:.3f})"
                 )
-
             return alert
-
         except Exception as e:
             self.logger.error(f"Fraud detection failed: {str(e)}")
             raise FraudDetectionError(f"Fraud detection failed: {str(e)}")
@@ -236,19 +192,15 @@ class FraudDetectionService:
         """
         try:
             alerts = []
-
             for transaction in transactions:
                 user_id = transaction.get("user_id")
                 user_history = user_histories.get(user_id) if user_histories else None
-
                 alert = await self.detect_fraud(transaction, user_history)
                 alerts.append(alert)
-
             self.logger.info(
                 f"Batch fraud detection completed for {len(transactions)} transactions"
             )
             return alerts
-
         except Exception as e:
             self.logger.error(f"Batch fraud detection failed: {str(e)}")
             raise FraudDetectionError(f"Batch fraud detection failed: {str(e)}")
@@ -268,7 +220,6 @@ class FraudDetectionService:
             "real_time_detector_ready": self.real_time_detector is not None,
             "performance_metrics": self.performance_metrics.copy(),
         }
-
         if self.ensemble_model:
             status.update(
                 {
@@ -278,7 +229,6 @@ class FraudDetectionService:
                     "individual_models": self.ensemble_model.get_model_status(),
                 }
             )
-
         return status
 
     def get_recent_alerts(
@@ -295,16 +245,13 @@ class FraudDetectionService:
             List[FraudAlert]: Recent alerts
         """
         cutoff_time = datetime.now() - timedelta(hours=hours)
-
         recent_alerts = [
             alert for alert in self.alerts_storage if alert.timestamp >= cutoff_time
         ]
-
         if risk_levels:
             recent_alerts = [
                 alert for alert in recent_alerts if alert.risk_level in risk_levels
             ]
-
         return recent_alerts
 
     def get_fraud_statistics(self, hours: int = 24) -> Dict[str, Any]:
@@ -318,7 +265,6 @@ class FraudDetectionService:
             Dict[str, Any]: Fraud statistics
         """
         recent_alerts = self.get_recent_alerts(hours)
-
         if not recent_alerts:
             return {
                 "total_transactions": 0,
@@ -327,8 +273,6 @@ class FraudDetectionService:
                 "risk_distribution": {},
                 "fraud_types": {},
             }
-
-        # Calculate statistics
         total_transactions = len(recent_alerts)
         high_risk_alerts = [
             alert
@@ -339,19 +283,14 @@ class FraudDetectionService:
         fraud_rate = (
             fraud_detected / total_transactions if total_transactions > 0 else 0
         )
-
-        # Risk level distribution
         risk_distribution = {}
         for level in RiskLevel:
-            count = sum(1 for alert in recent_alerts if alert.risk_level == level)
+            count = sum((1 for alert in recent_alerts if alert.risk_level == level))
             risk_distribution[level.value] = count
-
-        # Fraud type distribution
         fraud_types = {}
         for alert in recent_alerts:
             for fraud_type in alert.fraud_types:
                 fraud_types[fraud_type.value] = fraud_types.get(fraud_type.value, 0) + 1
-
         return {
             "total_transactions": total_transactions,
             "fraud_detected": fraud_detected,
@@ -363,13 +302,13 @@ class FraudDetectionService:
             ),
         }
 
-    def save_model(self):
+    def save_model(self) -> Any:
         """Save the trained model to disk"""
         if self.ensemble_model and self.ensemble_model.is_trained:
             self.ensemble_model.save_model(self.model_path)
             self.logger.info(f"Model saved to {self.model_path}")
 
-    def load_model(self):
+    def load_model(self) -> Any:
         """Load a trained model from disk"""
         try:
             model_config = self.config.get(
@@ -377,13 +316,11 @@ class FraudDetectionService:
             )
             self.ensemble_model = EnsembleFraudModel(model_config)
             self.ensemble_model.load_model(self.model_path)
-
             if self.ensemble_model.is_trained:
                 self.real_time_detector = RealTimeFraudDetector(self.ensemble_model)
                 self.logger.info(f"Model loaded from {self.model_path}")
             else:
                 self.logger.warning("Loaded model is not trained")
-
         except Exception as e:
             self.logger.error(f"Failed to load model: {str(e)}")
             raise FraudDetectionError(f"Failed to load model: {str(e)}")
@@ -400,18 +337,14 @@ class FraudDetectionService:
             feedback_type: Type of feedback (manual_review, customer_report, etc.)
         """
         try:
-            # Find the alert for this transaction
             alert = None
             for stored_alert in self.alerts_storage:
                 if stored_alert.transaction_id == transaction_id:
                     alert = stored_alert
                     break
-
             if not alert:
                 self.logger.warning(f"Alert not found for transaction {transaction_id}")
                 return
-
-            # Update performance metrics
             if is_fraud and alert.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
                 self.performance_metrics["true_positives"] += 1
             elif not is_fraud and alert.risk_level in [
@@ -419,8 +352,6 @@ class FraudDetectionService:
                 RiskLevel.CRITICAL,
             ]:
                 self.performance_metrics["false_positives"] += 1
-
-            # Store feedback for future model retraining
             feedback_data = {
                 "transaction_id": transaction_id,
                 "predicted_risk_score": alert.risk_score,
@@ -430,16 +361,12 @@ class FraudDetectionService:
                 "feedback_timestamp": datetime.now(),
                 "features": alert.metadata.get("feature_values", {}),
             }
-
-            # In production, this would be stored in a database
             if not hasattr(self, "feedback_storage"):
                 self.feedback_storage = []
             self.feedback_storage.append(feedback_data)
-
             self.logger.info(
                 f"Feedback recorded for transaction {transaction_id}: fraud={is_fraud}"
             )
-
         except Exception as e:
             self.logger.error(f"Failed to update model feedback: {str(e)}")
 
@@ -452,38 +379,30 @@ class FraudDetectionService:
         """
         if not self.auto_retrain:
             return False
-
-        # Check if enough time has passed since last training
         if self.performance_metrics["last_retrain"]:
             days_since_retrain = (
                 datetime.now() - self.performance_metrics["last_retrain"]
             ).days
             if days_since_retrain >= self.retrain_threshold_days:
                 return True
-
-        # Check if performance has degraded (if we have feedback data)
         if hasattr(self, "feedback_storage") and len(self.feedback_storage) > 100:
-            recent_feedback = self.feedback_storage[-100:]  # Last 100 feedback items
-
-            # Calculate false positive rate
+            recent_feedback = self.feedback_storage[-100:]
             false_positives = sum(
-                1
-                for fb in recent_feedback
-                if not fb["actual_fraud"] and fb["predicted_risk_score"] > 0.6
+                (
+                    1
+                    for fb in recent_feedback
+                    if not fb["actual_fraud"] and fb["predicted_risk_score"] > 0.6
+                )
             )
             false_positive_rate = false_positives / len(recent_feedback)
-
-            # Retrain if false positive rate is too high
-            if false_positive_rate > 0.2:  # 20% threshold
+            if false_positive_rate > 0.2:
                 self.logger.info(
                     f"High false positive rate detected: {false_positive_rate:.2%}"
                 )
                 return True
-
         return False
 
 
-# Global fraud detection service instance
 fraud_service = None
 
 
@@ -498,7 +417,6 @@ def get_fraud_service(config: Optional[Dict[str, Any]] = None) -> FraudDetection
         FraudDetectionService: Service instance
     """
     global fraud_service
-
     if fraud_service is None:
         if config is None:
             config = {
@@ -507,5 +425,4 @@ def get_fraud_service(config: Optional[Dict[str, Any]] = None) -> FraudDetection
                 "retrain_threshold_days": 30,
             }
         fraud_service = FraudDetectionService(config)
-
     return fraud_service

@@ -7,16 +7,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List
-
 from sqlalchemy.orm import Session
 
-"""
-Threat Prevention Service
-========================
-
-Advanced threat prevention and cybersecurity service for financial applications.
-Provides real-time threat detection, prevention, and response capabilities.
-"""
+"\nThreat Prevention Service\n========================\n\nAdvanced threat prevention and cybersecurity service for financial applications.\nProvides real-time threat detection, prevention, and response capabilities.\n"
 
 
 class ThreatType(Enum):
@@ -138,20 +131,16 @@ class ThreatPreventionService:
     - Automated incident response
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Threat prevention components
         self._threat_signatures = {}
         self._behavioral_baselines = {}
         self._threat_intelligence = {}
         self._rate_limiters = {}
         self._blocked_entities = {}
         self._security_rules = {}
-
-        # Detection thresholds
         self._threat_thresholds = {
             ThreatSeverity.INFO: 0.1,
             ThreatSeverity.LOW: 0.3,
@@ -159,86 +148,64 @@ class ThreatPreventionService:
             ThreatSeverity.HIGH: 0.7,
             ThreatSeverity.CRITICAL: 0.9,
         }
-
-        # Initialize threat prevention service
         self._initialize_threat_prevention()
 
-    def _initialize_threat_prevention(self):
+    def _initialize_threat_prevention(self) -> Any:
         """Initialize the threat prevention service."""
-
-        # Load threat signatures
         self._load_threat_signatures()
-
-        # Initialize security rules
         self._initialize_security_rules()
-
-        # Load threat intelligence
         self._load_threat_intelligence()
-
-        # Initialize rate limiters
         self._initialize_rate_limiters()
-
-        # Set up behavioral baselines
         self._initialize_behavioral_baselines()
-
         self.logger.info("Threat prevention service initialized successfully")
 
-    def _load_threat_signatures(self):
+    def _load_threat_signatures(self) -> Any:
         """Load threat detection signatures."""
-
-        # SQL Injection signatures
         self._threat_signatures[ThreatType.SQL_INJECTION] = [
-            r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)",
-            r"(\b(OR|AND)\s+\d+\s*=\s*\d+)",
-            r"(\b(OR|AND)\s+['\"]?\w+['\"]?\s*=\s*['\"]?\w+['\"]?)",
-            r"(--|#|/\*|\*/)",
-            r"(\bUNION\s+(ALL\s+)?SELECT\b)",
-            r"(\b(EXEC|EXECUTE)\s+\w+)",
-            r"(\b(CAST|CONVERT|CHAR|ASCII)\s*\()",
-            r"(\b(WAITFOR|DELAY)\s+['\"]?\d+['\"]?)",
+            "(\\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\\b)",
+            "(\\b(OR|AND)\\s+\\d+\\s*=\\s*\\d+)",
+            "(\\b(OR|AND)\\s+['\\\"]?\\w+['\\\"]?\\s*=\\s*['\\\"]?\\w+['\\\"]?)",
+            "(--|#|/\\*|\\*/)",
+            "(\\bUNION\\s+(ALL\\s+)?SELECT\\b)",
+            "(\\b(EXEC|EXECUTE)\\s+\\w+)",
+            "(\\b(CAST|CONVERT|CHAR|ASCII)\\s*\\()",
+            "(\\b(WAITFOR|DELAY)\\s+['\\\"]?\\d+['\\\"]?)",
         ]
-
-        # XSS signatures
         self._threat_signatures[ThreatType.XSS] = [
-            r"(<script[^>]*>.*?</script>)",
-            r"(javascript\s*:)",
-            r"(on\w+\s*=\s*['\"][^'\"]*['\"])",
-            r"(<iframe[^>]*>)",
-            r"(<object[^>]*>)",
-            r"(<embed[^>]*>)",
-            r"(<link[^>]*>)",
-            r"(<meta[^>]*>)",
-            r"(eval\s*\()",
-            r"(document\.(write|writeln|cookie))",
-            r"(window\.(location|open))",
+            "(<script[^>]*>.*?</script>)",
+            "(javascript\\s*:)",
+            "(on\\w+\\s*=\\s*['\\\"][^'\\\"]*['\\\"])",
+            "(<iframe[^>]*>)",
+            "(<object[^>]*>)",
+            "(<embed[^>]*>)",
+            "(<link[^>]*>)",
+            "(<meta[^>]*>)",
+            "(eval\\s*\\()",
+            "(document\\.(write|writeln|cookie))",
+            "(window\\.(location|open))",
         ]
-
-        # Command injection signatures
         self._threat_signatures[ThreatType.MALWARE] = [
-            r"(\b(cmd|powershell|bash|sh)\s+)",
-            r"(\b(wget|curl|nc|netcat)\s+)",
-            r"(\b(chmod|chown|sudo)\s+)",
-            r"(\|\s*(cat|ls|ps|id|whoami|uname))",
-            r"(\$\(.*\))",
-            r"(`.*`)",
-            r"(\b(rm|del|format)\s+)",
+            "(\\b(cmd|powershell|bash|sh)\\s+)",
+            "(\\b(wget|curl|nc|netcat)\\s+)",
+            "(\\b(chmod|chown|sudo)\\s+)",
+            "(\\|\\s*(cat|ls|ps|id|whoami|uname))",
+            "(\\$\\(.*\\))",
+            "(`.*`)",
+            "(\\b(rm|del|format)\\s+)",
         ]
-
-        # Phishing signatures
         self._threat_signatures[ThreatType.PHISHING] = [
-            r"(urgent.{0,20}action.{0,20}required)",
-            r"(verify.{0,20}account.{0,20}immediately)",
-            r"(suspended.{0,20}account)",
-            r"(click.{0,20}here.{0,20}now)",
-            r"(limited.{0,20}time.{0,20}offer)",
-            r"(congratulations.{0,20}winner)",
-            r"(security.{0,20}alert)",
-            r"(update.{0,20}payment.{0,20}information)",
+            "(urgent.{0,20}action.{0,20}required)",
+            "(verify.{0,20}account.{0,20}immediately)",
+            "(suspended.{0,20}account)",
+            "(click.{0,20}here.{0,20}now)",
+            "(limited.{0,20}time.{0,20}offer)",
+            "(congratulations.{0,20}winner)",
+            "(security.{0,20}alert)",
+            "(update.{0,20}payment.{0,20}information)",
         ]
 
-    def _initialize_security_rules(self):
+    def _initialize_security_rules(self) -> Any:
         """Initialize security rules and policies."""
-
         self._security_rules = {
             "rate_limiting": {
                 "api_requests_per_minute": 100,
@@ -267,17 +234,15 @@ class ThreatPreventionService:
                 "session_timeout_minutes": 30,
             },
             "network_security": {
-                "blocked_countries": ["XX", "YY"],  # High-risk countries
+                "blocked_countries": ["XX", "YY"],
                 "blocked_ip_ranges": ["192.168.100.0/24"],
                 "require_https": True,
                 "block_tor_exit_nodes": True,
             },
         }
 
-    def _load_threat_intelligence(self):
+    def _load_threat_intelligence(self) -> Any:
         """Load threat intelligence data."""
-
-        # Mock threat intelligence feeds
         self._threat_intelligence = {
             "malicious_ips": {
                 "192.168.1.100": {
@@ -317,9 +282,8 @@ class ThreatPreventionService:
             },
         }
 
-    def _initialize_rate_limiters(self):
+    def _initialize_rate_limiters(self) -> Any:
         """Initialize rate limiting mechanisms."""
-
         self._rate_limiters = {
             "api_requests": defaultdict(lambda: deque()),
             "login_attempts": defaultdict(lambda: deque()),
@@ -327,22 +291,21 @@ class ThreatPreventionService:
             "transaction_requests": defaultdict(lambda: deque()),
         }
 
-    def _initialize_behavioral_baselines(self):
+    def _initialize_behavioral_baselines(self) -> Any:
         """Initialize behavioral analysis baselines."""
-
         self._behavioral_baselines = {
             "normal_request_patterns": {
                 "avg_requests_per_minute": 10,
-                "typical_request_sizes": [100, 500, 1000],  # bytes
+                "typical_request_sizes": [100, 500, 1000],
                 "common_user_agents": [
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
                     "Mozilla/5.0 (X11; Linux x86_64)",
                 ],
-                "typical_response_times": [50, 100, 200],  # milliseconds
+                "typical_response_times": [50, 100, 200],
             },
             "normal_login_patterns": {
-                "typical_login_hours": list(range(6, 23)),  # 6 AM to 11 PM
+                "typical_login_hours": list(range(6, 23)),
                 "common_locations": ["US", "CA", "GB", "DE"],
                 "session_duration_minutes": [15, 30, 60, 120],
             },
@@ -360,57 +323,33 @@ class ThreatPreventionService:
         Returns:
             ThreatAssessment containing threat analysis results
         """
-
         assessment_id = str(uuid.uuid4())
         request_id = request_data.get("request_id", "unknown")
-
         try:
             self.logger.info(f"Starting threat assessment for request {request_id}")
-
             threat_indicators = []
-
-            # Input validation and injection detection
             injection_indicators = await self._detect_injection_attacks(request_data)
             threat_indicators.extend(injection_indicators)
-
-            # Rate limiting checks
             rate_limit_indicators = await self._check_rate_limits(request_data)
             threat_indicators.extend(rate_limit_indicators)
-
-            # IP reputation checks
             ip_reputation_indicators = await self._check_ip_reputation(request_data)
             threat_indicators.extend(ip_reputation_indicators)
-
-            # Behavioral analysis
             behavioral_indicators = await self._analyze_request_behavior(request_data)
             threat_indicators.extend(behavioral_indicators)
-
-            # File upload security
             if "file_uploads" in request_data:
                 file_indicators = await self._analyze_file_uploads(
                     request_data["file_uploads"]
                 )
                 threat_indicators.extend(file_indicators)
-
-            # Calculate overall threat score
             overall_threat_score = self._calculate_threat_score(threat_indicators)
-
-            # Determine threat level
             threat_level = self._determine_threat_level(overall_threat_score)
-
-            # Determine recommended actions
             recommended_actions = self._determine_response_actions(
                 threat_level, threat_indicators
             )
-
-            # Identify attack vectors
             attack_vectors = self._identify_attack_vectors(threat_indicators)
-
-            # Generate mitigation recommendations
             mitigation_recommendations = self._generate_mitigation_recommendations(
                 threat_indicators
             )
-
             assessment = ThreatAssessment(
                 assessment_id=assessment_id,
                 target_id=request_id,
@@ -424,20 +363,15 @@ class ThreatPreventionService:
                 assessment_timestamp=datetime.utcnow(),
                 expires_at=datetime.utcnow() + timedelta(minutes=15),
             )
-
-            # Execute immediate response actions
             await self._execute_response_actions(assessment, request_data)
-
             self.logger.info(
                 f"Threat assessment completed for request {request_id}: {threat_level.value}"
             )
             return assessment
-
         except Exception as e:
             self.logger.error(
                 f"Error in threat assessment for request {request_id}: {str(e)}"
             )
-
             return ThreatAssessment(
                 assessment_id=assessment_id,
                 target_id=request_id,
@@ -468,30 +402,17 @@ class ThreatPreventionService:
         self, request_data: Dict[str, Any]
     ) -> List[ThreatIndicator]:
         """Detect injection attacks in request data."""
-
         indicators = []
-
-        # Check all input fields
         inputs_to_check = []
-
-        # URL parameters
         if "url_params" in request_data:
             inputs_to_check.extend(request_data["url_params"].values())
-
-        # POST data
         if "post_data" in request_data:
             inputs_to_check.extend(request_data["post_data"].values())
-
-        # Headers
         if "headers" in request_data:
             inputs_to_check.extend(request_data["headers"].values())
-
-        # Check each input against threat signatures
         for input_value in inputs_to_check:
             if not isinstance(input_value, str):
                 continue
-
-            # SQL Injection detection
             sql_matches = self._check_signatures(input_value, ThreatType.SQL_INJECTION)
             if sql_matches:
                 indicators.append(
@@ -507,8 +428,6 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # XSS detection
             xss_matches = self._check_signatures(input_value, ThreatType.XSS)
             if xss_matches:
                 indicators.append(
@@ -524,8 +443,6 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Command injection detection
             cmd_matches = self._check_signatures(input_value, ThreatType.MALWARE)
             if cmd_matches:
                 indicators.append(
@@ -541,50 +458,35 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return indicators
 
     def _check_signatures(self, input_value: str, threat_type: ThreatType) -> List[str]:
         """Check input against threat signatures."""
-
         matches = []
         signatures = self._threat_signatures.get(threat_type, [])
-
         for signature in signatures:
             if re.search(signature, input_value, re.IGNORECASE):
                 matches.append(signature)
-
         return matches
 
     async def _check_rate_limits(
         self, request_data: Dict[str, Any]
     ) -> List[ThreatIndicator]:
         """Check for rate limiting violations."""
-
         indicators = []
         client_ip = request_data.get("client_ip", "")
         user_id = request_data.get("user_id", "")
         request_type = request_data.get("request_type", "api")
-
-        # Determine rate limit key
         rate_limit_key = user_id if user_id else client_ip
-
         if not rate_limit_key:
             return indicators
-
         current_time = datetime.utcnow()
-
-        # Check API request rate limit
         if request_type == "api":
             api_requests = self._rate_limiters["api_requests"][rate_limit_key]
             api_requests.append(current_time)
-
-            # Remove old requests (older than 1 minute)
             cutoff = current_time - timedelta(minutes=1)
             while api_requests and api_requests[0] < cutoff:
                 api_requests.popleft()
-
-            # Check if rate limit exceeded
             max_requests = self._security_rules["rate_limiting"][
                 "api_requests_per_minute"
             ]
@@ -607,18 +509,12 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-        # Check login attempt rate limit
         elif request_type == "login":
             login_attempts = self._rate_limiters["login_attempts"][rate_limit_key]
             login_attempts.append(current_time)
-
-            # Remove old attempts (older than 1 hour)
             cutoff = current_time - timedelta(hours=1)
             while login_attempts and login_attempts[0] < cutoff:
                 login_attempts.popleft()
-
-            # Check if rate limit exceeded
             max_attempts = self._security_rules["rate_limiting"][
                 "login_attempts_per_hour"
             ]
@@ -641,24 +537,18 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return indicators
 
     async def _check_ip_reputation(
         self, request_data: Dict[str, Any]
     ) -> List[ThreatIndicator]:
         """Check IP reputation against threat intelligence."""
-
         indicators = []
         client_ip = request_data.get("client_ip", "")
-
         if not client_ip:
             return indicators
-
-        # Check against malicious IP database
         if client_ip in self._threat_intelligence["malicious_ips"]:
             threat_info = self._threat_intelligence["malicious_ips"][client_ip]
-
             indicators.append(
                 ThreatIndicator(
                     indicator_id=f"malicious_ip_{int(datetime.utcnow().timestamp())}",
@@ -677,13 +567,10 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Check against blocked countries
         country_code = request_data.get("country_code", "")
         blocked_countries = self._security_rules["network_security"][
             "blocked_countries"
         ]
-
         if country_code in blocked_countries:
             indicators.append(
                 ThreatIndicator(
@@ -698,8 +585,6 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Check for Tor exit nodes
         if self._is_tor_exit_node(client_ip):
             indicators.append(
                 ThreatIndicator(
@@ -714,20 +599,15 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
         return indicators
 
     async def _analyze_request_behavior(
         self, request_data: Dict[str, Any]
     ) -> List[ThreatIndicator]:
         """Analyze request behavioral patterns."""
-
         indicators = []
-
-        # Check request size
         request_size = request_data.get("request_size", 0)
         max_size = self._security_rules["input_validation"]["max_input_length"]
-
         if request_size > max_size:
             indicators.append(
                 ThreatIndicator(
@@ -742,8 +622,6 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Check user agent
         user_agent = request_data.get("user_agent", "")
         if self._is_suspicious_user_agent(user_agent):
             indicators.append(
@@ -759,8 +637,6 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Check for unusual request patterns
         request_path = request_data.get("request_path", "")
         if self._is_suspicious_path(request_path):
             indicators.append(
@@ -776,27 +652,21 @@ class ThreatPreventionService:
                     timestamp=datetime.utcnow(),
                 )
             )
-
         return indicators
 
     async def _analyze_file_uploads(
         self, file_uploads: List[Dict[str, Any]]
     ) -> List[ThreatIndicator]:
         """Analyze uploaded files for security threats."""
-
         indicators = []
-
         for file_info in file_uploads:
             filename = file_info.get("filename", "")
             file_size = file_info.get("file_size", 0)
             file_content = file_info.get("content", b"")
-
-            # Check file extension
             file_ext = "." + filename.split(".")[-1].lower() if "." in filename else ""
             blocked_extensions = self._security_rules["input_validation"][
                 "blocked_extensions"
             ]
-
             if file_ext in blocked_extensions:
                 indicators.append(
                     ThreatIndicator(
@@ -811,11 +681,8 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Check file size
             max_size_mb = self._security_rules["input_validation"]["max_file_size_mb"]
             max_size_bytes = max_size_mb * 1024 * 1024
-
             if file_size > max_size_bytes:
                 indicators.append(
                     ThreatIndicator(
@@ -834,8 +701,6 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Basic malware detection
             if self._contains_malware_signatures(file_content):
                 indicators.append(
                     ThreatIndicator(
@@ -850,21 +715,16 @@ class ThreatPreventionService:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return indicators
 
     def _calculate_threat_score(
         self, threat_indicators: List[ThreatIndicator]
     ) -> float:
         """Calculate overall threat score from indicators."""
-
         if not threat_indicators:
             return 0.0
-
-        # Weighted average based on severity and confidence
         total_weighted_score = 0.0
         total_weight = 0.0
-
         severity_weights = {
             ThreatSeverity.INFO: 0.1,
             ThreatSeverity.LOW: 0.3,
@@ -872,26 +732,19 @@ class ThreatPreventionService:
             ThreatSeverity.HIGH: 0.8,
             ThreatSeverity.CRITICAL: 1.0,
         }
-
         for indicator in threat_indicators:
             severity_weight = severity_weights[indicator.severity]
             weight = severity_weight * indicator.confidence
             total_weighted_score += weight
             total_weight += weight
-
         if total_weight == 0:
             return 0.0
-
         base_score = total_weighted_score / total_weight
-
-        # Apply indicator count multiplier
         indicator_multiplier = min(1.0 + (len(threat_indicators) - 1) * 0.1, 1.5)
-
         return min(base_score * indicator_multiplier, 1.0)
 
     def _determine_threat_level(self, threat_score: float) -> ThreatSeverity:
         """Determine threat level based on threat score."""
-
         if threat_score >= self._threat_thresholds[ThreatSeverity.CRITICAL]:
             return ThreatSeverity.CRITICAL
         elif threat_score >= self._threat_thresholds[ThreatSeverity.HIGH]:
@@ -907,13 +760,8 @@ class ThreatPreventionService:
         self, threat_level: ThreatSeverity, threat_indicators: List[ThreatIndicator]
     ) -> List[ResponseAction]:
         """Determine appropriate response actions."""
-
         actions = []
-
-        # Always log
         actions.append(ResponseAction.LOG)
-
-        # Determine actions based on threat level
         if threat_level == ThreatSeverity.CRITICAL:
             actions.extend(
                 [ResponseAction.BLOCK, ResponseAction.ALERT, ResponseAction.ESCALATE]
@@ -924,29 +772,26 @@ class ThreatPreventionService:
             actions.extend([ResponseAction.ALERT, ResponseAction.INVESTIGATE])
         elif threat_level == ThreatSeverity.LOW:
             actions.append(ResponseAction.ALERT)
-
-        # Check for specific threat types requiring immediate blocking
         critical_threats = {
             ThreatType.SQL_INJECTION,
             ThreatType.MALWARE,
             ThreatType.XSS,
         }
         has_critical_threat = any(
-            indicator.threat_type in critical_threats for indicator in threat_indicators
+            (
+                indicator.threat_type in critical_threats
+                for indicator in threat_indicators
+            )
         )
-
         if has_critical_threat and ResponseAction.BLOCK not in actions:
             actions.append(ResponseAction.BLOCK)
-
         return actions
 
     def _identify_attack_vectors(
         self, threat_indicators: List[ThreatIndicator]
     ) -> List[str]:
         """Identify attack vectors from threat indicators."""
-
         attack_vectors = set()
-
         for indicator in threat_indicators:
             if indicator.threat_type == ThreatType.SQL_INJECTION:
                 attack_vectors.add("SQL Injection")
@@ -962,16 +807,13 @@ class ThreatPreventionService:
                 attack_vectors.add("API Abuse")
             elif indicator.threat_type == ThreatType.PHISHING:
                 attack_vectors.add("Phishing")
-
         return list(attack_vectors)
 
     def _generate_mitigation_recommendations(
         self, threat_indicators: List[ThreatIndicator]
     ) -> List[str]:
         """Generate mitigation recommendations."""
-
         recommendations = set()
-
         for indicator in threat_indicators:
             if indicator.threat_type == ThreatType.SQL_INJECTION:
                 recommendations.add(
@@ -995,17 +837,14 @@ class ThreatPreventionService:
             elif indicator.threat_type == ThreatType.API_ABUSE:
                 recommendations.add("Implement API rate limiting and authentication")
                 recommendations.add("Monitor API usage patterns")
-
         return list(recommendations)
 
     async def _execute_response_actions(
         self, assessment: ThreatAssessment, request_data: Dict[str, Any]
     ):
         """Execute immediate response actions."""
-
         client_ip = request_data.get("client_ip", "")
         user_id = request_data.get("user_id", "")
-
         for action in assessment.recommended_actions:
             if action == ResponseAction.BLOCK:
                 await self._block_entity(client_ip, user_id, assessment)
@@ -1020,9 +859,7 @@ class ThreatPreventionService:
         self, client_ip: str, user_id: str, assessment: ThreatAssessment
     ):
         """Block IP address or user account."""
-
-        block_duration = timedelta(hours=24)  # Default 24 hour block
-
+        block_duration = timedelta(hours=24)
         if client_ip:
             self._blocked_entities[client_ip] = {
                 "blocked_at": datetime.utcnow(),
@@ -1031,7 +868,6 @@ class ThreatPreventionService:
                 "assessment_id": assessment.assessment_id,
             }
             self.logger.warning(f"Blocked IP address: {client_ip}")
-
         if user_id:
             self._blocked_entities[user_id] = {
                 "blocked_at": datetime.utcnow(),
@@ -1043,7 +879,6 @@ class ThreatPreventionService:
 
     async def _send_security_alert(self, assessment: ThreatAssessment):
         """Send security alert to monitoring systems."""
-
         alert_data = {
             "alert_type": "security_threat",
             "severity": assessment.threat_level.value,
@@ -1052,13 +887,10 @@ class ThreatPreventionService:
             "indicators": len(assessment.threat_indicators),
             "timestamp": assessment.assessment_timestamp.isoformat(),
         }
-
-        # In practice, this would send alerts to SIEM, email, Slack, etc.
         self.logger.warning(f"Security alert: {json.dumps(alert_data)}")
 
     async def _escalate_incident(self, assessment: ThreatAssessment):
         """Escalate security incident to security team."""
-
         incident_data = {
             "incident_type": "security_threat",
             "severity": assessment.threat_level.value,
@@ -1067,8 +899,6 @@ class ThreatPreventionService:
             "attack_vectors": assessment.attack_vectors,
             "timestamp": assessment.assessment_timestamp.isoformat(),
         }
-
-        # In practice, this would create tickets in incident management systems
         self.logger.critical(
             f"Security incident escalated: {json.dumps(incident_data)}"
         )
@@ -1077,14 +907,11 @@ class ThreatPreventionService:
         self, client_ip: str, user_id: str, assessment: ThreatAssessment
     ):
         """Quarantine entity for further investigation."""
-
-        # Similar to blocking but with different handling
         await self._block_entity(client_ip, user_id, assessment)
         self.logger.warning(f"Quarantined entity - IP: {client_ip}, User: {user_id}")
 
     def _is_suspicious_user_agent(self, user_agent: str) -> bool:
         """Check if user agent is suspicious."""
-
         suspicious_patterns = [
             "bot",
             "crawler",
@@ -1097,13 +924,11 @@ class ThreatPreventionService:
             "java",
             "go-http",
         ]
-
         user_agent_lower = user_agent.lower()
-        return any(pattern in user_agent_lower for pattern in suspicious_patterns)
+        return any((pattern in user_agent_lower for pattern in suspicious_patterns))
 
     def _is_suspicious_path(self, request_path: str) -> bool:
         """Check if request path is suspicious."""
-
         suspicious_patterns = [
             "/admin",
             "/wp-admin",
@@ -1121,20 +946,15 @@ class ThreatPreventionService:
             "base64_decode",
             "system(",
         ]
-
         path_lower = request_path.lower()
-        return any(pattern in path_lower for pattern in suspicious_patterns)
+        return any((pattern in path_lower for pattern in suspicious_patterns))
 
     def _is_tor_exit_node(self, ip_address: str) -> bool:
         """Check if IP is a Tor exit node."""
-
-        # Mock implementation - would check against Tor exit node lists
         return "tor" in ip_address.lower()
 
     def _contains_malware_signatures(self, file_content: bytes) -> bool:
         """Check file content for malware signatures."""
-
-        # Mock implementation - would use actual malware scanning
         malware_signatures = [
             b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE",
             b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR",
@@ -1143,44 +963,34 @@ class ThreatPreventionService:
             b"exec(",
             b"shell_exec(",
         ]
-
         for signature in malware_signatures:
             if signature in file_content:
                 return True
-
         return False
 
     def is_entity_blocked(self, entity_id: str) -> bool:
         """Check if an entity (IP or user) is currently blocked."""
-
         if entity_id not in self._blocked_entities:
             return False
-
         block_info = self._blocked_entities[entity_id]
-
-        # Check if block has expired
         if datetime.utcnow() > block_info["expires_at"]:
             del self._blocked_entities[entity_id]
             return False
-
         return True
 
     def unblock_entity(self, entity_id: str) -> bool:
         """Manually unblock an entity."""
-
         if entity_id in self._blocked_entities:
             del self._blocked_entities[entity_id]
             self.logger.info(f"Manually unblocked entity: {entity_id}")
             return True
-
         return False
 
     def get_threat_statistics(self) -> Dict[str, Any]:
         """Get threat prevention service statistics."""
-
         return {
             "threat_signatures": sum(
-                len(sigs) for sigs in self._threat_signatures.values()
+                (len(sigs) for sigs in self._threat_signatures.values())
             ),
             "blocked_entities": len(self._blocked_entities),
             "threat_intelligence_ips": len(self._threat_intelligence["malicious_ips"]),

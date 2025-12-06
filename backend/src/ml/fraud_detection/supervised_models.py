@@ -1,6 +1,5 @@
 import logging
 from typing import Any, Dict
-
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
@@ -12,15 +11,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow import keras
 from tensorflow.keras import layers
-
 from . import FraudDetectionError, FraudModelBase, ModelNotTrainedError
 
-"""
-Supervised Learning Models for Fraud Detection
-Implements supervised ML models for fraud classification
-"""
-
-
+"\nSupervised Learning Models for Fraud Detection\nImplements supervised ML models for fraud classification\n"
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +23,7 @@ class RandomForestFraudModel(FraudModelBase):
     Robust ensemble method with good interpretability
     """
 
-    def __init__(self, model_config: Dict[str, Any]):
+    def __init__(self, model_config: Dict[str, Any]) -> Any:
         super().__init__(model_config)
         self.n_estimators = model_config.get("n_estimators", 100)
         self.max_depth = model_config.get("max_depth", None)
@@ -49,11 +42,7 @@ class RandomForestFraudModel(FraudModelBase):
         """
         try:
             self.logger.info("Training Random Forest model")
-
-            # Store feature columns
             self.feature_columns = list(training_data.columns)
-
-            # Initialize model
             self.model = RandomForestClassifier(
                 n_estimators=self.n_estimators,
                 max_depth=self.max_depth,
@@ -63,22 +52,15 @@ class RandomForestFraudModel(FraudModelBase):
                 random_state=self.random_state,
                 n_jobs=-1,
             )
-
-            # Train model
             self.model.fit(training_data, labels)
-
-            # Calculate training metrics
             train_predictions = self.model.predict_proba(training_data)[:, 1]
             train_auc = roc_auc_score(labels, train_predictions)
-
             self.is_trained = True
             self.training_timestamp = pd.Timestamp.now()
-
             self.logger.info(
                 f"Random Forest model trained with {len(training_data)} samples"
             )
             self.logger.info(f"Training AUC: {train_auc:.4f}")
-
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}")
             raise FraudDetectionError(f"Training failed: {str(e)}")
@@ -95,16 +77,10 @@ class RandomForestFraudModel(FraudModelBase):
         """
         if not self.is_trained:
             raise ModelNotTrainedError("Model must be trained before prediction")
-
         try:
-            # Preprocess features
             features = self.preprocess_features(features)
-
-            # Get fraud probabilities
             fraud_probabilities = self.model.predict_proba(features)[:, 1]
-
             return fraud_probabilities
-
         except Exception as e:
             self.logger.error(f"Prediction failed: {str(e)}")
             raise FraudDetectionError(f"Prediction failed: {str(e)}")
@@ -117,13 +93,10 @@ class RandomForestFraudModel(FraudModelBase):
             raise ModelNotTrainedError(
                 "Model must be trained before getting feature importance"
             )
-
         importance_scores = {}
         feature_importances = self.model.feature_importances_
-
         for i, feature in enumerate(self.feature_columns):
             importance_scores[feature] = float(feature_importances[i])
-
         return importance_scores
 
 
@@ -133,7 +106,7 @@ class XGBoostFraudModel(FraudModelBase):
     High-performance gradient boosting with excellent results on tabular data
     """
 
-    def __init__(self, model_config: Dict[str, Any]):
+    def __init__(self, model_config: Dict[str, Any]) -> Any:
         super().__init__(model_config)
         self.n_estimators = model_config.get("n_estimators", 100)
         self.max_depth = model_config.get("max_depth", 6)
@@ -153,17 +126,11 @@ class XGBoostFraudModel(FraudModelBase):
         """
         try:
             self.logger.info("Training XGBoost model")
-
-            # Store feature columns
             self.feature_columns = list(training_data.columns)
-
-            # Calculate scale_pos_weight if not provided
             if self.scale_pos_weight is None:
                 neg_count = (labels == 0).sum()
                 pos_count = (labels == 1).sum()
                 self.scale_pos_weight = neg_count / pos_count if pos_count > 0 else 1
-
-            # Initialize model
             self.model = xgb.XGBClassifier(
                 n_estimators=self.n_estimators,
                 max_depth=self.max_depth,
@@ -175,8 +142,6 @@ class XGBoostFraudModel(FraudModelBase):
                 eval_metric="auc",
                 use_label_encoder=False,
             )
-
-            # Split data for early stopping
             X_train, X_val, y_train, y_val = train_test_split(
                 training_data,
                 labels,
@@ -184,8 +149,6 @@ class XGBoostFraudModel(FraudModelBase):
                 random_state=self.random_state,
                 stratify=labels,
             )
-
-            # Train model with early stopping
             self.model.fit(
                 X_train,
                 y_train,
@@ -193,17 +156,12 @@ class XGBoostFraudModel(FraudModelBase):
                 early_stopping_rounds=10,
                 verbose=False,
             )
-
-            # Calculate training metrics
             train_predictions = self.model.predict_proba(training_data)[:, 1]
             train_auc = roc_auc_score(labels, train_predictions)
-
             self.is_trained = True
             self.training_timestamp = pd.Timestamp.now()
-
             self.logger.info(f"XGBoost model trained with {len(training_data)} samples")
             self.logger.info(f"Training AUC: {train_auc:.4f}")
-
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}")
             raise FraudDetectionError(f"Training failed: {str(e)}")
@@ -220,16 +178,10 @@ class XGBoostFraudModel(FraudModelBase):
         """
         if not self.is_trained:
             raise ModelNotTrainedError("Model must be trained before prediction")
-
         try:
-            # Preprocess features
             features = self.preprocess_features(features)
-
-            # Get fraud probabilities
             fraud_probabilities = self.model.predict_proba(features)[:, 1]
-
             return fraud_probabilities
-
         except Exception as e:
             self.logger.error(f"Prediction failed: {str(e)}")
             raise FraudDetectionError(f"Prediction failed: {str(e)}")
@@ -242,13 +194,10 @@ class XGBoostFraudModel(FraudModelBase):
             raise ModelNotTrainedError(
                 "Model must be trained before getting feature importance"
             )
-
         importance_scores = {}
         feature_importances = self.model.feature_importances_
-
         for i, feature in enumerate(self.feature_columns):
             importance_scores[feature] = float(feature_importances[i])
-
         return importance_scores
 
 
@@ -258,7 +207,7 @@ class LightGBMFraudModel(FraudModelBase):
     Fast gradient boosting with excellent performance and memory efficiency
     """
 
-    def __init__(self, model_config: Dict[str, Any]):
+    def __init__(self, model_config: Dict[str, Any]) -> Any:
         super().__init__(model_config)
         self.n_estimators = model_config.get("n_estimators", 100)
         self.max_depth = model_config.get("max_depth", -1)
@@ -279,11 +228,7 @@ class LightGBMFraudModel(FraudModelBase):
         """
         try:
             self.logger.info("Training LightGBM model")
-
-            # Store feature columns
             self.feature_columns = list(training_data.columns)
-
-            # Initialize model
             self.model = lgb.LGBMClassifier(
                 n_estimators=self.n_estimators,
                 max_depth=self.max_depth,
@@ -295,8 +240,6 @@ class LightGBMFraudModel(FraudModelBase):
                 random_state=self.random_state,
                 verbose=-1,
             )
-
-            # Split data for early stopping
             X_train, X_val, y_train, y_val = train_test_split(
                 training_data,
                 labels,
@@ -304,27 +247,20 @@ class LightGBMFraudModel(FraudModelBase):
                 random_state=self.random_state,
                 stratify=labels,
             )
-
-            # Train model with early stopping
             self.model.fit(
                 X_train,
                 y_train,
                 eval_set=[(X_val, y_val)],
                 callbacks=[lgb.early_stopping(10), lgb.log_evaluation(0)],
             )
-
-            # Calculate training metrics
             train_predictions = self.model.predict_proba(training_data)[:, 1]
             train_auc = roc_auc_score(labels, train_predictions)
-
             self.is_trained = True
             self.training_timestamp = pd.Timestamp.now()
-
             self.logger.info(
                 f"LightGBM model trained with {len(training_data)} samples"
             )
             self.logger.info(f"Training AUC: {train_auc:.4f}")
-
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}")
             raise FraudDetectionError(f"Training failed: {str(e)}")
@@ -341,16 +277,10 @@ class LightGBMFraudModel(FraudModelBase):
         """
         if not self.is_trained:
             raise ModelNotTrainedError("Model must be trained before prediction")
-
         try:
-            # Preprocess features
             features = self.preprocess_features(features)
-
-            # Get fraud probabilities
             fraud_probabilities = self.model.predict_proba(features)[:, 1]
-
             return fraud_probabilities
-
         except Exception as e:
             self.logger.error(f"Prediction failed: {str(e)}")
             raise FraudDetectionError(f"Prediction failed: {str(e)}")
@@ -363,13 +293,10 @@ class LightGBMFraudModel(FraudModelBase):
             raise ModelNotTrainedError(
                 "Model must be trained before getting feature importance"
             )
-
         importance_scores = {}
         feature_importances = self.model.feature_importances_
-
         for i, feature in enumerate(self.feature_columns):
             importance_scores[feature] = float(feature_importances[i])
-
         return importance_scores
 
 
@@ -379,7 +306,7 @@ class NeuralNetworkFraudModel(FraudModelBase):
     Flexible architecture for complex pattern recognition
     """
 
-    def __init__(self, model_config: Dict[str, Any]):
+    def __init__(self, model_config: Dict[str, Any]) -> Any:
         super().__init__(model_config)
         self.scaler = StandardScaler()
         self.hidden_layers = model_config.get("hidden_layers", [128, 64, 32])
@@ -399,35 +326,22 @@ class NeuralNetworkFraudModel(FraudModelBase):
         """
         try:
             self.logger.info("Training Neural Network model")
-
-            # Store feature columns
             self.feature_columns = list(training_data.columns)
             input_dim = len(self.feature_columns)
-
-            # Scale features
             scaled_data = self.scaler.fit_transform(training_data)
-
-            # Calculate class weights for imbalanced data
             neg_count = (labels == 0).sum()
             pos_count = (labels == 1).sum()
             total_count = len(labels)
-
             class_weight = {
                 0: total_count / (2 * neg_count),
                 1: total_count / (2 * pos_count),
             }
-
-            # Build model
             self.model = self._build_neural_network(input_dim)
-
-            # Compile model
             self.model.compile(
                 optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate),
                 loss="binary_crossentropy",
                 metrics=["accuracy", "precision", "recall"],
             )
-
-            # Train model
             history = self.model.fit(
                 scaled_data,
                 labels,
@@ -442,23 +356,18 @@ class NeuralNetworkFraudModel(FraudModelBase):
                         monitor="val_loss", patience=10, restore_best_weights=True
                     ),
                     keras.callbacks.ReduceLROnPlateau(
-                        monitor="val_loss", factor=0.5, patience=5, min_lr=1e-7
+                        monitor="val_loss", factor=0.5, patience=5, min_lr=1e-07
                     ),
                 ],
             )
-
-            # Calculate training metrics
             train_predictions = self.model.predict(scaled_data, verbose=0).flatten()
             train_auc = roc_auc_score(labels, train_predictions)
-
             self.is_trained = True
             self.training_timestamp = pd.Timestamp.now()
-
             self.logger.info(
                 f"Neural Network model trained with {len(training_data)} samples"
             )
             self.logger.info(f"Training AUC: {train_auc:.4f}")
-
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}")
             raise FraudDetectionError(f"Training failed: {str(e)}")
@@ -473,22 +382,14 @@ class NeuralNetworkFraudModel(FraudModelBase):
         Returns:
             keras.Model: Neural network model
         """
-        # Input layer
         input_layer = keras.Input(shape=(input_dim,))
-
-        # Hidden layers
         x = input_layer
         for hidden_dim in self.hidden_layers:
             x = layers.Dense(hidden_dim, activation="relu")(x)
             x = layers.BatchNormalization()(x)
             x = layers.Dropout(self.dropout_rate)(x)
-
-        # Output layer
         output = layers.Dense(1, activation="sigmoid")(x)
-
-        # Create model
         model = keras.Model(input_layer, output)
-
         return model
 
     def predict(self, features: pd.DataFrame) -> np.ndarray:
@@ -503,21 +404,13 @@ class NeuralNetworkFraudModel(FraudModelBase):
         """
         if not self.is_trained:
             raise ModelNotTrainedError("Model must be trained before prediction")
-
         try:
-            # Preprocess features
             features = self.preprocess_features(features)
-
-            # Scale features
             scaled_features = self.scaler.transform(features)
-
-            # Get fraud probabilities
             fraud_probabilities = self.model.predict(
                 scaled_features, verbose=0
             ).flatten()
-
             return fraud_probabilities
-
         except Exception as e:
             self.logger.error(f"Prediction failed: {str(e)}")
             raise FraudDetectionError(f"Prediction failed: {str(e)}")
@@ -530,33 +423,21 @@ class NeuralNetworkFraudModel(FraudModelBase):
             raise ModelNotTrainedError(
                 "Model must be trained before getting feature importance"
             )
-
         importance_scores = {}
-
-        # Create a sample input
         sample_input = np.zeros((1, len(self.feature_columns)))
         sample_input = tf.constant(sample_input, dtype=tf.float32)
-
         with tf.GradientTape() as tape:
             tape.watch(sample_input)
             prediction = self.model(sample_input)
-
-        # Get gradients
         gradients = tape.gradient(prediction, sample_input)
-
-        # Calculate importance as absolute gradient values
         if gradients is not None:
             importance_values = np.abs(gradients.numpy()[0])
-            # Normalize to sum to 1
             if np.sum(importance_values) > 0:
                 importance_values = importance_values / np.sum(importance_values)
-
             for i, feature in enumerate(self.feature_columns):
                 importance_scores[feature] = float(importance_values[i])
         else:
-            # Fallback to equal importance
             num_features = len(self.feature_columns)
             for feature in self.feature_columns:
                 importance_scores[feature] = 1.0 / num_features
-
         return importance_scores

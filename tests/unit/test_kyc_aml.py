@@ -1,11 +1,17 @@
 import unittest
 
-# Mocking KYC/AML related classes and functions
-# In a real scenario, these would be imported from the actual source code
-
 
 class UserProfile:
-    def __init__(self, user_id, name, dob, address, id_document=None, status="pending"):
+
+    def __init__(
+        self,
+        user_id: Any,
+        name: Any,
+        dob: Any,
+        address: Any,
+        id_document: Any = None,
+        status: Any = "pending",
+    ) -> Any:
         self.user_id = user_id
         self.name = name
         self.dob = dob
@@ -15,21 +21,20 @@ class UserProfile:
 
 
 class KYCService:
-    def __init__(self):
+
+    def __init__(self) -> Any:
         self.user_profiles = {}
 
-    def submit_for_verification(self, user_id, name, dob, address, id_document):
+    def submit_for_verification(
+        self, user_id: Any, name: Any, dob: Any, address: Any, id_document: Any
+    ) -> Any:
         if not all([user_id, name, dob, address, id_document]):
             return {
                 "status": "failed",
                 "message": "All fields are required for submission",
             }
-
         profile = UserProfile(user_id, name, dob, address, id_document)
         self.user_profiles[user_id] = profile
-
-        # Simulate an asynchronous verification process
-        # In a real system, this would trigger an external service or a background task
         profile.status = "submitted"
         return {
             "status": "success",
@@ -37,13 +42,13 @@ class KYCService:
             "user_id": user_id,
         }
 
-    def get_verification_status(self, user_id):
+    def get_verification_status(self, user_id: Any) -> Any:
         profile = self.user_profiles.get(user_id)
         if not profile:
             return {"status": "failed", "message": "User profile not found"}
         return {"status": "success", "user_id": user_id, "status": profile.status}
 
-    def approve_verification(self, user_id):
+    def approve_verification(self, user_id: Any) -> Any:
         profile = self.user_profiles.get(user_id)
         if not profile:
             return {"status": "failed", "message": "User profile not found"}
@@ -52,7 +57,7 @@ class KYCService:
         profile.status = "approved"
         return {"status": "success", "user_id": user_id, "new_status": "approved"}
 
-    def reject_verification(self, user_id, reason):
+    def reject_verification(self, user_id: Any, reason: Any) -> Any:
         profile = self.user_profiles.get(user_id)
         if not profile:
             return {"status": "failed", "message": "User profile not found"}
@@ -69,11 +74,11 @@ class KYCService:
 
 
 class AMLService:
-    def __init__(self):
+
+    def __init__(self) -> Any:
         self.flagged_users = set()
 
-    def screen_transaction(self, user_id, amount, recipient_id):
-        # Simulate AML screening logic
+    def screen_transaction(self, user_id: Any, amount: Any, recipient_id: Any) -> Any:
         if (
             amount > 10000
             or user_id in self.flagged_users
@@ -85,11 +90,11 @@ class AMLService:
             }
         return {"status": "clean"}
 
-    def add_to_watchlist(self, user_id):
+    def add_to_watchlist(self, user_id: Any) -> Any:
         self.flagged_users.add(user_id)
         return {"status": "success", "message": f"User {user_id} added to watchlist"}
 
-    def remove_from_watchlist(self, user_id):
+    def remove_from_watchlist(self, user_id: Any) -> Any:
         if user_id in self.flagged_users:
             self.flagged_users.remove(user_id)
             return {
@@ -100,10 +105,11 @@ class AMLService:
 
 
 class TestKYCService(unittest.TestCase):
-    def setUp(self):
+
+    def setUp(self) -> Any:
         self.kyc_service = KYCService()
 
-    def test_submit_for_verification_success(self):
+    def test_submit_for_verification_success(self) -> Any:
         result = self.kyc_service.submit_for_verification(
             user_id="user123",
             name="John Doe",
@@ -114,7 +120,7 @@ class TestKYCService(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(self.kyc_service.user_profiles["user123"].status, "submitted")
 
-    def test_submit_for_verification_missing_fields(self):
+    def test_submit_for_verification_missing_fields(self) -> Any:
         result = self.kyc_service.submit_for_verification(
             user_id="user123",
             name="John Doe",
@@ -125,7 +131,7 @@ class TestKYCService(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "All fields are required for submission")
 
-    def test_get_verification_status(self):
+    def test_get_verification_status(self) -> Any:
         self.kyc_service.submit_for_verification(
             user_id="user123",
             name="John Doe",
@@ -137,12 +143,12 @@ class TestKYCService(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["status"], "submitted")
 
-    def test_get_verification_status_not_found(self):
+    def test_get_verification_status_not_found(self) -> Any:
         result = self.kyc_service.get_verification_status("nonexistent_user")
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "User profile not found")
 
-    def test_approve_verification_success(self):
+    def test_approve_verification_success(self) -> Any:
         self.kyc_service.submit_for_verification(
             user_id="user123",
             name="John Doe",
@@ -155,8 +161,7 @@ class TestKYCService(unittest.TestCase):
         self.assertEqual(result["new_status"], "approved")
         self.assertEqual(self.kyc_service.user_profiles["user123"].status, "approved")
 
-    def test_approve_verification_not_submitted(self):
-        # Create a profile but don't submit it
+    def test_approve_verification_not_submitted(self) -> Any:
         self.kyc_service.user_profiles["user123"] = UserProfile(
             "user123", "John Doe", "1990-01-01", "123 Main St"
         )
@@ -164,7 +169,7 @@ class TestKYCService(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "Profile not in submitted state")
 
-    def test_reject_verification_success(self):
+    def test_reject_verification_success(self) -> Any:
         self.kyc_service.submit_for_verification(
             user_id="user123",
             name="John Doe",
@@ -183,36 +188,37 @@ class TestKYCService(unittest.TestCase):
 
 
 class TestAMLService(unittest.TestCase):
-    def setUp(self):
+
+    def setUp(self) -> Any:
         self.aml_service = AMLService()
 
-    def test_screen_transaction_clean(self):
+    def test_screen_transaction_clean(self) -> Any:
         result = self.aml_service.screen_transaction("user1", 100, "user2")
         self.assertEqual(result["status"], "clean")
 
-    def test_screen_transaction_high_value(self):
+    def test_screen_transaction_high_value(self) -> Any:
         result = self.aml_service.screen_transaction("user1", 15000, "user2")
         self.assertEqual(result["status"], "flagged")
         self.assertEqual(result["reason"], "High value transaction or flagged user")
 
-    def test_screen_transaction_flagged_user(self):
+    def test_screen_transaction_flagged_user(self) -> Any:
         self.aml_service.add_to_watchlist("user1")
         result = self.aml_service.screen_transaction("user1", 500, "user2")
         self.assertEqual(result["status"], "flagged")
         self.assertEqual(result["reason"], "High value transaction or flagged user")
 
-    def test_add_to_watchlist(self):
+    def test_add_to_watchlist(self) -> Any:
         result = self.aml_service.add_to_watchlist("user3")
         self.assertEqual(result["status"], "success")
         self.assertIn("user3", self.aml_service.flagged_users)
 
-    def test_remove_from_watchlist(self):
+    def test_remove_from_watchlist(self) -> Any:
         self.aml_service.add_to_watchlist("user4")
         result = self.aml_service.remove_from_watchlist("user4")
         self.assertEqual(result["status"], "success")
         self.assertNotIn("user4", self.aml_service.flagged_users)
 
-    def test_remove_from_watchlist_not_found(self):
+    def test_remove_from_watchlist_not_found(self) -> Any:
         result = self.aml_service.remove_from_watchlist("nonexistent_user")
         self.assertEqual(result["status"], "failed")
         self.assertEqual(

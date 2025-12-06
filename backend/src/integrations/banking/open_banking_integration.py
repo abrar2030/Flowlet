@@ -3,7 +3,6 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-
 import aiohttp
 
 logger = logging.getLogger(__name__)
@@ -17,7 +16,7 @@ class OpenBankingIntegration(
     Supports Account Information Services (AIS) and Payment Initiation Services (PIS)
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> Any:
         super().__init__(config)
         self.client_id = config.get("client_id")
         self.client_secret = config.get("client_secret")
@@ -34,25 +33,19 @@ class OpenBankingIntegration(
         Authenticate with Open Banking API using OAuth2 with mutual TLS
         """
         try:
-            # Create SSL context with client certificate
             ssl_context = self._create_ssl_context()
-
             connector = aiohttp.TCPConnector(ssl=ssl_context)
             self.session = aiohttp.ClientSession(connector=connector)
-
-            # Get access token using client credentials flow
             token_data = {
                 "grant_type": "client_credentials",
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
                 "scope": "accounts payments",
             }
-
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "application/json",
             }
-
             async with self.session.post(
                 f"{self.base_url}/oauth2/token", headers=headers, data=token_data
             ) as response:
@@ -74,12 +67,11 @@ class OpenBankingIntegration(
                     raise AuthenticationError(
                         f"Open Banking authentication failed: {error_data}"
                     )
-
         except Exception as e:
             self.logger.error(f"Open Banking authentication error: {str(e)}")
             raise AuthenticationError(f"Open Banking authentication error: {str(e)}")
 
-    def _create_ssl_context(self):
+    def _create_ssl_context(self) -> Any:
         """Create SSL context with client certificate for mutual TLS"""
         import ssl
 
@@ -100,7 +92,6 @@ class OpenBankingIntegration(
         Get customer consent for data access (PSD2 requirement)
         """
         await self._ensure_authenticated()
-
         consent_data = {
             "access": {"accounts": scope, "balances": scope, "transactions": scope},
             "recurringIndicator": True,
@@ -108,14 +99,12 @@ class OpenBankingIntegration(
             "frequencyPerDay": 4,
             "combinedServiceIndicator": False,
         }
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "X-Request-ID": str(uuid.uuid4()),
             "PSU-ID": customer_id,
         }
-
         async with self.session.post(
             f"{self.base_url}/v1/consents", headers=headers, json=consent_data
         ) as response:
@@ -131,21 +120,18 @@ class OpenBankingIntegration(
         Initiate Strong Customer Authentication
         """
         await self._ensure_authenticated()
-
         sca_data = {
             "scaRedirect": self.redirect_uri,
             "scaOAuth": self.redirect_uri,
             "psuData": {"psuId": customer_id},
             "transactionData": transaction_data,
         }
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "X-Request-ID": str(uuid.uuid4()),
             "PSU-ID": customer_id,
         }
-
         async with self.session.post(
             f"{self.base_url}/v1/sca/initiate", headers=headers, json=sca_data
         ) as response:
@@ -161,18 +147,15 @@ class OpenBankingIntegration(
         Verify SCA authentication code
         """
         await self._ensure_authenticated()
-
         verification_data = {
             "scaSessionId": sca_session_id,
             "authenticationCode": auth_code,
         }
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         async with self.session.post(
             f"{self.base_url}/v1/sca/verify", headers=headers, json=verification_data
         ) as response:
@@ -183,20 +166,17 @@ class OpenBankingIntegration(
         Retrieve accounts using Open Banking AIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Consent-ID": consent_id,
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/v1/accounts", headers=headers
         ) as response:
             if response.status == 200:
                 result = await response.json()
                 accounts = []
-
                 for account_data in result["accounts"]:
                     account = BankAccount(
                         account_id=account_data["resourceId"],
@@ -209,7 +189,6 @@ class OpenBankingIntegration(
                         swift_code=account_data.get("bic"),
                     )
                     accounts.append(account)
-
                 return accounts
             else:
                 error_data = await response.json()
@@ -222,29 +201,24 @@ class OpenBankingIntegration(
         Get account balance using Open Banking AIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Consent-ID": consent_id,
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/v1/accounts/{account_id}/balances", headers=headers
         ) as response:
             if response.status == 200:
                 result = await response.json()
                 balances = result["balances"]
-
                 current_balance = None
                 available_balance = None
-
                 for balance in balances:
                     if balance["balanceType"] == "closingBooked":
                         current_balance = float(balance["balanceAmount"]["amount"])
                     elif balance["balanceType"] == "interimAvailable":
                         available_balance = float(balance["balanceAmount"]["amount"])
-
                 return {
                     "balance": current_balance or 0.0,
                     "available_balance": available_balance or current_balance or 0.0,
@@ -265,19 +239,16 @@ class OpenBankingIntegration(
         Retrieve transaction history using Open Banking AIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Consent-ID": consent_id,
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         params = {}
         if start_date:
             params["dateFrom"] = start_date.strftime("%Y-%m-%d")
         if end_date:
             params["dateTo"] = end_date.strftime("%Y-%m-%d")
-
         async with self.session.get(
             f"{self.base_url}/v1/accounts/{account_id}/transactions",
             headers=headers,
@@ -286,13 +257,11 @@ class OpenBankingIntegration(
             if response.status == 200:
                 result = await response.json()
                 transactions = []
-
                 for txn_data in result["transactions"]["booked"]:
                     amount = float(txn_data["transactionAmount"]["amount"])
                     txn_type = (
                         TransactionType.CREDIT if amount > 0 else TransactionType.DEBIT
                     )
-
                     transaction = Transaction(
                         transaction_id=txn_data.get("transactionId", str(uuid.uuid4())),
                         account_id=account_id,
@@ -319,7 +288,6 @@ class OpenBankingIntegration(
                         },
                     )
                     transactions.append(transaction)
-
                 return transactions
             else:
                 error_data = await response.json()
@@ -334,13 +302,11 @@ class OpenBankingIntegration(
         Get comprehensive account information using Open Banking AIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Consent-ID": consent_id,
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         async with self.session.get(
             f"{self.base_url}/v1/accounts/{account_id}", headers=headers
         ) as response:
@@ -359,7 +325,6 @@ class OpenBankingIntegration(
         Initiate payment using Open Banking PIS
         """
         await self._ensure_authenticated()
-
         payment_data = {
             "instructedAmount": {
                 "currency": payment_request.currency,
@@ -371,19 +336,16 @@ class OpenBankingIntegration(
             "endToEndIdentification": payment_request.reference_id
             or self.generate_reference_id(),
         }
-
         if payment_request.scheduled_date:
             payment_data["requestedExecutionDate"] = (
                 payment_request.scheduled_date.strftime("%Y-%m-%d")
             )
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
             "Consent-ID": consent_id,
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         async with self.session.post(
             f"{self.base_url}/v1/payments/sepa-credit-transfers",
             headers=headers,
@@ -402,8 +364,6 @@ class OpenBankingIntegration(
         """
         Initiate payment (requires consent)
         """
-        # This method requires a valid consent ID
-        # In practice, you would get this from the payment request metadata
         consent_id = (
             payment_request.metadata.get("consent_id")
             if payment_request.metadata
@@ -413,7 +373,6 @@ class OpenBankingIntegration(
             raise BankingIntegrationError(
                 "Consent ID required for Open Banking payments"
             )
-
         return await self.initiate_payment_pis(consent_id, payment_request)
 
     async def get_payment_status(
@@ -423,15 +382,12 @@ class OpenBankingIntegration(
         Get payment status using Open Banking PIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         if consent_id:
             headers["Consent-ID"] = consent_id
-
         async with self.session.get(
             f"{self.base_url}/v1/payments/sepa-credit-transfers/{payment_id}/status",
             headers=headers,
@@ -459,15 +415,12 @@ class OpenBankingIntegration(
         Cancel payment using Open Banking PIS
         """
         await self._ensure_authenticated()
-
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "X-Request-ID": str(uuid.uuid4()),
         }
-
         if consent_id:
             headers["Consent-ID"] = consent_id
-
         async with self.session.delete(
             f"{self.base_url}/v1/payments/sepa-credit-transfers/{payment_id}",
             headers=headers,
@@ -479,7 +432,7 @@ class OpenBankingIntegration(
         if self.session:
             await self.session.close()
 
-    def __del__(self):
+    def __del__(self) -> Any:
         """Cleanup on deletion"""
-        if self.session and not self.session.closed:
+        if self.session and (not self.session.closed):
             asyncio.create_task(self.session.close())

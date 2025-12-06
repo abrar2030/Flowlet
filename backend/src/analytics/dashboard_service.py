@@ -3,10 +3,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List
-
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
-
 from .data_models import (
     AlertConfiguration,
     CustomerAnalytics,
@@ -33,10 +31,10 @@ class WidgetType(Enum):
 class RefreshInterval(Enum):
     """Dashboard refresh intervals."""
 
-    REAL_TIME = 5  # 5 seconds
-    FAST = 30  # 30 seconds
-    NORMAL = 300  # 5 minutes
-    SLOW = 1800  # 30 minutes
+    REAL_TIME = 5
+    FAST = 30
+    NORMAL = 300
+    SLOW = 1800
 
 
 @dataclass
@@ -49,10 +47,10 @@ class Widget:
     data_source: str
     refresh_interval: RefreshInterval
     config: Dict[str, Any]
-    position: Dict[str, int]  # x, y, width, height
+    position: Dict[str, int]
     filters: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if self.filters is None:
             self.filters = {}
 
@@ -65,13 +63,13 @@ class Dashboard:
     name: str
     description: str
     widgets: List[Widget]
-    layout: str = "grid"  # grid, flex
-    theme: str = "light"  # light, dark
+    layout: str = "grid"
+    theme: str = "light"
     auto_refresh: bool = True
     created_at: datetime = None
     updated_at: datetime = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if self.created_at is None:
             self.created_at = datetime.utcnow()
         if self.updated_at is None:
@@ -91,7 +89,7 @@ class DashboardService:
     - Export capabilities
     """
 
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: Session) -> Any:
         self.db = db_session
         self.reporting_engine = ReportingEngine(db_session)
         self.logger = logging.getLogger(__name__)
@@ -100,9 +98,7 @@ class DashboardService:
 
     async def create_dashboard(self, dashboard_config: Dict[str, Any]) -> Dashboard:
         """Create a new dashboard with specified configuration."""
-
         try:
-            # Parse widgets
             widgets = []
             for widget_config in dashboard_config.get("widgets", []):
                 widget = Widget(
@@ -120,7 +116,6 @@ class DashboardService:
                     filters=widget_config.get("filters", {}),
                 )
                 widgets.append(widget)
-
             dashboard = Dashboard(
                 id=dashboard_config["id"],
                 name=dashboard_config["name"],
@@ -130,25 +125,18 @@ class DashboardService:
                 theme=dashboard_config.get("theme", "light"),
                 auto_refresh=dashboard_config.get("auto_refresh", True),
             )
-
             self._active_dashboards[dashboard.id] = dashboard
             self.logger.info(f"Created dashboard: {dashboard.name}")
-
             return dashboard
-
         except Exception as e:
             self.logger.error(f"Error creating dashboard: {str(e)}")
             raise
 
     async def get_dashboard_data(self, dashboard_id: str) -> Dict[str, Any]:
         """Get complete dashboard data with all widget data."""
-
         if dashboard_id not in self._active_dashboards:
             raise ValueError(f"Dashboard {dashboard_id} not found")
-
         dashboard = self._active_dashboards[dashboard_id]
-
-        # Get data for all widgets
         widget_data = {}
         for widget in dashboard.widgets:
             try:
@@ -159,7 +147,6 @@ class DashboardService:
                     f"Error getting data for widget {widget.id}: {str(e)}"
                 )
                 widget_data[widget.id] = {"error": str(e)}
-
         return {
             "dashboard": asdict(dashboard),
             "widget_data": widget_data,
@@ -168,8 +155,6 @@ class DashboardService:
 
     async def _get_widget_data(self, widget: Widget) -> Dict[str, Any]:
         """Get data for a specific widget."""
-
-        # Check cache first
         cache_key = f"{widget.id}_{hash(str(widget.filters))}"
         if cache_key in self._widget_cache:
             cached_data, cache_time = self._widget_cache[cache_key]
@@ -177,8 +162,6 @@ class DashboardService:
                 seconds=widget.refresh_interval.value
             ):
                 return cached_data
-
-        # Generate new data
         if widget.data_source == "transaction_summary":
             data = await self._get_transaction_summary_data(widget)
         elif widget.data_source == "customer_metrics":
@@ -193,20 +176,13 @@ class DashboardService:
             data = await self._get_alerts_data(widget)
         else:
             raise ValueError(f"Unknown data source: {widget.data_source}")
-
-        # Cache the data
         self._widget_cache[cache_key] = (data, datetime.utcnow())
-
         return data
 
     async def _get_transaction_summary_data(self, widget: Widget) -> Dict[str, Any]:
         """Get transaction summary data for widgets."""
-
-        # Default time range (last 24 hours)
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=1)
-
-        # Apply widget filters
         if "time_range" in widget.filters:
             time_range = widget.filters["time_range"]
             if time_range == "last_hour":
@@ -217,16 +193,12 @@ class DashboardService:
                 start_date = end_date - timedelta(weeks=1)
             elif time_range == "last_month":
                 start_date = end_date - timedelta(days=30)
-
-        # Query transactions
         query = self.db.query(TransactionAnalytics).filter(
             and_(
                 TransactionAnalytics.transaction_date >= start_date,
                 TransactionAnalytics.transaction_date <= end_date,
             )
         )
-
-        # Apply additional filters
         if "currency" in widget.filters:
             query = query.filter(
                 TransactionAnalytics.currency.in_(widget.filters["currency"])
@@ -237,9 +209,7 @@ class DashboardService:
                     widget.filters["transaction_type"]
                 )
             )
-
         transactions = query.all()
-
         if widget.type == WidgetType.KPI_CARD:
             return self._format_kpi_data(transactions, widget.config)
         elif widget.type == WidgetType.LINE_CHART:
@@ -255,9 +225,7 @@ class DashboardService:
 
     async def _get_customer_metrics_data(self, widget: Widget) -> Dict[str, Any]:
         """Get customer metrics data for widgets."""
-
         customers = self.db.query(CustomerAnalytics).all()
-
         if widget.type == WidgetType.KPI_CARD:
             if widget.config.get("metric") == "total_customers":
                 return {
@@ -267,7 +235,7 @@ class DashboardService:
                 }
             elif widget.config.get("metric") == "average_ltv":
                 avg_ltv = (
-                    sum(float(c.predicted_ltv) for c in customers if c.predicted_ltv)
+                    sum((float(c.predicted_ltv) for c in customers if c.predicted_ltv))
                     / len(customers)
                     if customers
                     else 0
@@ -277,28 +245,22 @@ class DashboardService:
                     "label": "Average LTV",
                     "format": "currency",
                 }
-
         elif widget.type == WidgetType.PIE_CHART:
             if widget.config.get("metric") == "lifecycle_stages":
                 stages = {}
                 for customer in customers:
                     stage = customer.lifecycle_stage or "unknown"
                     stages[stage] = stages.get(stage, 0) + 1
-
                 return {
                     "data": [{"name": k, "value": v} for k, v in stages.items()],
                     "title": "Customer Lifecycle Stages",
                 }
-
         return {"error": "Unsupported customer metric configuration"}
 
     async def _get_risk_metrics_data(self, widget: Widget) -> Dict[str, Any]:
         """Get risk metrics data for widgets."""
-
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=1)
-
-        # High risk transactions
         high_risk_count = (
             self.db.query(func.count(TransactionAnalytics.id))
             .filter(
@@ -310,8 +272,6 @@ class DashboardService:
             )
             .scalar()
         )
-
-        # Total transactions
         total_count = (
             self.db.query(func.count(TransactionAnalytics.id))
             .filter(
@@ -322,22 +282,20 @@ class DashboardService:
             )
             .scalar()
         )
-
         if widget.type == WidgetType.KPI_CARD:
             if widget.config.get("metric") == "high_risk_transactions":
                 return {
                     "value": high_risk_count,
                     "label": "High Risk Transactions",
-                    "trend": "stable",  # Would calculate actual trend
+                    "trend": "stable",
                 }
             elif widget.config.get("metric") == "risk_ratio":
-                ratio = (high_risk_count / total_count * 100) if total_count > 0 else 0
+                ratio = high_risk_count / total_count * 100 if total_count > 0 else 0
                 return {
                     "value": round(ratio, 2),
                     "label": "Risk Ratio (%)",
                     "format": "percentage",
                 }
-
         elif widget.type == WidgetType.GAUGE:
             if widget.config.get("metric") == "overall_risk_score":
                 avg_risk = (
@@ -350,7 +308,6 @@ class DashboardService:
                     )
                     .scalar()
                 )
-
                 return {
                     "value": float(avg_risk) if avg_risk else 0,
                     "min": 0,
@@ -362,15 +319,12 @@ class DashboardService:
                         {"value": 1.0, "color": "red"},
                     ],
                 }
-
         return {"error": "Unsupported risk metric configuration"}
 
     async def _get_performance_metrics_data(self, widget: Widget) -> Dict[str, Any]:
         """Get performance metrics data for widgets."""
-
         end_date = datetime.utcnow()
-        start_date = end_date - timedelta(hours=1)  # Last hour for performance
-
+        start_date = end_date - timedelta(hours=1)
         performance_data = (
             self.db.query(PerformanceMetrics)
             .filter(
@@ -381,11 +335,10 @@ class DashboardService:
             )
             .all()
         )
-
         if widget.type == WidgetType.KPI_CARD:
             if widget.config.get("metric") == "avg_response_time":
                 avg_response = (
-                    sum(p.response_time_ms for p in performance_data)
+                    sum((p.response_time_ms for p in performance_data))
                     / len(performance_data)
                     if performance_data
                     else 0
@@ -398,9 +351,11 @@ class DashboardService:
             elif widget.config.get("metric") == "system_availability":
                 avg_success = (
                     sum(
-                        float(p.transaction_success_rate)
-                        for p in performance_data
-                        if p.transaction_success_rate
+                        (
+                            float(p.transaction_success_rate)
+                            for p in performance_data
+                            if p.transaction_success_rate
+                        )
                     )
                     / len(performance_data)
                     if performance_data
@@ -411,7 +366,6 @@ class DashboardService:
                     "label": "System Availability (%)",
                     "format": "percentage",
                 }
-
         elif widget.type == WidgetType.LINE_CHART:
             if widget.config.get("metric") == "response_time_trend":
                 data_points = []
@@ -422,21 +376,17 @@ class DashboardService:
                             "value": p.response_time_ms,
                         }
                     )
-
                 return {
                     "data": data_points,
                     "title": "Response Time Trend",
                     "yAxis": "Response Time (ms)",
                 }
-
         return {"error": "Unsupported performance metric configuration"}
 
     async def _get_revenue_metrics_data(self, widget: Widget) -> Dict[str, Any]:
         """Get revenue metrics data for widgets."""
-
         end_date = datetime.utcnow()
-        start_date = end_date - timedelta(days=30)  # Last 30 days
-
+        start_date = end_date - timedelta(days=30)
         transactions = (
             self.db.query(TransactionAnalytics)
             .filter(
@@ -447,11 +397,8 @@ class DashboardService:
             )
             .all()
         )
-
-        # Calculate estimated revenue (assuming 2.9% fee)
-        total_volume = sum(float(t.amount) for t in transactions)
+        total_volume = sum((float(t.amount) for t in transactions))
         estimated_revenue = total_volume * 0.029
-
         if widget.type == WidgetType.KPI_CARD:
             if widget.config.get("metric") == "total_revenue":
                 return {
@@ -466,7 +413,6 @@ class DashboardService:
                     "label": "Transaction Volume (30d)",
                     "format": "currency",
                 }
-
         elif widget.type == WidgetType.LINE_CHART:
             if widget.config.get("metric") == "daily_revenue":
                 daily_revenue = {}
@@ -475,39 +421,31 @@ class DashboardService:
                     if date_key not in daily_revenue:
                         daily_revenue[date_key] = 0
                     daily_revenue[date_key] += float(transaction.amount) * 0.029
-
                 data_points = []
                 for date, revenue in sorted(daily_revenue.items()):
                     data_points.append(
                         {"date": date.isoformat(), "value": round(revenue, 2)}
                     )
-
                 return {
                     "data": data_points,
                     "title": "Daily Revenue Trend",
                     "yAxis": "Revenue ($)",
                 }
-
         return {"error": "Unsupported revenue metric configuration"}
 
     async def _get_alerts_data(self, widget: Widget) -> Dict[str, Any]:
         """Get alerts data for widgets."""
-
-        # Get active alerts
         active_alerts = (
             self.db.query(AlertConfiguration)
             .filter(AlertConfiguration.is_active == True)
             .all()
         )
-
-        # Get recent triggered alerts
         recent_alerts = [
             alert
             for alert in active_alerts
             if alert.last_triggered
             and alert.last_triggered > datetime.utcnow() - timedelta(hours=24)
         ]
-
         if widget.type == WidgetType.ALERT_LIST:
             alerts_data = []
             for alert in recent_alerts:
@@ -524,13 +462,11 @@ class DashboardService:
                         "trigger_count": alert.trigger_count,
                     }
                 )
-
             return {
                 "alerts": alerts_data,
                 "total_active": len(active_alerts),
                 "recent_triggers": len(recent_alerts),
             }
-
         elif widget.type == WidgetType.KPI_CARD:
             if widget.config.get("metric") == "active_alerts":
                 return {
@@ -538,16 +474,13 @@ class DashboardService:
                     "label": "Active Alerts (24h)",
                     "trend": "stable",
                 }
-
         return {"error": "Unsupported alerts configuration"}
 
     def _format_kpi_data(
         self, transactions: List, config: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Format data for KPI card widgets."""
-
         metric = config.get("metric", "total_transactions")
-
         if metric == "total_transactions":
             return {
                 "value": len(transactions),
@@ -555,7 +488,7 @@ class DashboardService:
                 "trend": "stable",
             }
         elif metric == "total_volume":
-            total = sum(float(t.amount) for t in transactions)
+            total = sum((float(t.amount) for t in transactions))
             return {
                 "value": round(total, 2),
                 "label": "Total Volume",
@@ -563,7 +496,7 @@ class DashboardService:
             }
         elif metric == "average_transaction":
             avg = (
-                sum(float(t.amount) for t in transactions) / len(transactions)
+                sum((float(t.amount) for t in transactions)) / len(transactions)
                 if transactions
                 else 0
             )
@@ -572,28 +505,21 @@ class DashboardService:
                 "label": "Average Transaction",
                 "format": "currency",
             }
-
         return {"error": f"Unknown KPI metric: {metric}"}
 
     def _format_line_chart_data(
         self, transactions: List, config: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Format data for line chart widgets."""
-
-        # Group by time period
         time_series = {}
         for transaction in transactions:
-            # Group by hour for line charts
             time_key = transaction.transaction_date.replace(
                 minute=0, second=0, microsecond=0
             )
             if time_key not in time_series:
                 time_series[time_key] = {"count": 0, "volume": 0}
-
             time_series[time_key]["count"] += 1
             time_series[time_key]["volume"] += float(transaction.amount)
-
-        # Format for chart
         data_points = []
         for timestamp, data in sorted(time_series.items()):
             data_points.append(
@@ -603,7 +529,6 @@ class DashboardService:
                     "volume": round(data["volume"], 2),
                 }
             )
-
         return {
             "data": data_points,
             "title": config.get("title", "Transaction Trends"),
@@ -615,9 +540,7 @@ class DashboardService:
         self, transactions: List, config: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Format data for bar chart widgets."""
-
         group_by = config.get("group_by", "transaction_type")
-
         groups = {}
         for transaction in transactions:
             if group_by == "transaction_type":
@@ -630,14 +553,10 @@ class DashboardService:
                 key = transaction.payment_method or "Unknown"
             else:
                 key = "Other"
-
             if key not in groups:
                 groups[key] = {"count": 0, "volume": 0}
-
             groups[key]["count"] += 1
             groups[key]["volume"] += float(transaction.amount)
-
-        # Format for chart
         data_points = []
         for category, data in groups.items():
             data_points.append(
@@ -647,7 +566,6 @@ class DashboardService:
                     "volume": round(data["volume"], 2),
                 }
             )
-
         return {
             "data": data_points,
             "title": config.get("title", f"Transactions by {group_by}"),
@@ -659,9 +577,7 @@ class DashboardService:
         self, transactions: List, config: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Format data for pie chart widgets."""
-
         group_by = config.get("group_by", "transaction_type")
-
         groups = {}
         for transaction in transactions:
             if group_by == "transaction_type":
@@ -672,14 +588,10 @@ class DashboardService:
                 key = transaction.country_code or "Unknown"
             else:
                 key = "Other"
-
             groups[key] = groups.get(key, 0) + float(transaction.amount)
-
-        # Format for pie chart
         data_points = []
         for category, value in groups.items():
             data_points.append({"name": category, "value": round(value, 2)})
-
         return {
             "data": data_points,
             "title": config.get("title", f"Distribution by {group_by}"),
@@ -689,11 +601,8 @@ class DashboardService:
         self, transactions: List, config: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Format data for table widgets."""
-
-        # Limit number of rows
         max_rows = config.get("max_rows", 100)
         limited_transactions = transactions[:max_rows]
-
         columns = config.get(
             "columns",
             [
@@ -704,7 +613,6 @@ class DashboardService:
                 "transaction_date",
             ],
         )
-
         rows = []
         for transaction in limited_transactions:
             row = {}
@@ -717,7 +625,6 @@ class DashboardService:
                         value = str(value)
                     row[column] = value
             rows.append(row)
-
         return {
             "columns": columns,
             "rows": rows,
@@ -727,29 +634,20 @@ class DashboardService:
 
     def _calculate_customer_trend(self) -> str:
         """Calculate customer growth trend."""
-
-        # This would compare current period to previous period
-        # For now, return a placeholder
         return "increasing"
 
     async def update_widget(
         self, dashboard_id: str, widget_id: str, config: Dict[str, Any]
     ) -> bool:
         """Update widget configuration."""
-
         if dashboard_id not in self._active_dashboards:
             return False
-
         dashboard = self._active_dashboards[dashboard_id]
-
         for widget in dashboard.widgets:
             if widget.id == widget_id:
-                # Update widget configuration
                 for key, value in config.items():
                     if hasattr(widget, key):
                         setattr(widget, key, value)
-
-                # Clear cache for this widget
                 cache_keys_to_remove = [
                     key
                     for key in self._widget_cache.keys()
@@ -757,29 +655,23 @@ class DashboardService:
                 ]
                 for key in cache_keys_to_remove:
                     del self._widget_cache[key]
-
                 dashboard.updated_at = datetime.utcnow()
                 return True
-
         return False
 
     async def export_dashboard(
         self, dashboard_id: str, format: str = "json"
     ) -> Dict[str, Any]:
         """Export dashboard configuration and data."""
-
         if dashboard_id not in self._active_dashboards:
             raise ValueError(f"Dashboard {dashboard_id} not found")
-
         dashboard_data = await self.get_dashboard_data(dashboard_id)
-
         if format == "json":
             return dashboard_data
         elif format == "csv":
-            # Convert widget data to CSV format
             csv_data = {}
             for widget_id, data in dashboard_data["widget_data"].items():
-                if "rows" in data:  # Table data
+                if "rows" in data:
                     csv_data[widget_id] = data["rows"]
             return csv_data
         else:
@@ -787,7 +679,6 @@ class DashboardService:
 
     def get_predefined_dashboards(self) -> List[Dict[str, Any]]:
         """Get predefined dashboard templates."""
-
         return [
             {
                 "id": "executive_summary",

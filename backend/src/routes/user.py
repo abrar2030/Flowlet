@@ -1,11 +1,9 @@
 import logging
 from datetime import datetime, timezone
 from decimal import Decimal
-
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
-
 from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
@@ -14,21 +12,17 @@ from ..models.user import User
 from ..security.audit_logger import audit_logger
 from ..utils.validators import InputValidator
 
-# Create blueprint
 user_bp = Blueprint("user", __name__, url_prefix="/api/v1/users")
-
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
 @user_bp.route("/", methods=["GET"])
 @admin_required
-def get_users():
+def get_users() -> Any:
     """
     Get all users with pagination and filtering (Admin only)
     """
     try:
-        # Get query parameters
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 100)
         search = request.args.get("search", "").strip()
@@ -36,11 +30,7 @@ def get_users():
         status = request.args.get("status")
         sort_by = request.args.get("sort_by", "created_at")
         sort_order = request.args.get("sort_order", "desc")
-
-        # Build query
         stmt = select(User)
-
-        # Apply search filter
         if search:
             search_filter = or_(
                 User.first_name.ilike(f"%{search}%"),
@@ -48,53 +38,32 @@ def get_users():
                 User.email.ilike(f"%{search}%"),
             )
             stmt = stmt.where(search_filter)
-
-        # Apply KYC status filter
         if kyc_status:
-            # Assuming kyc_status is a string field
             stmt = stmt.where(User.kyc_status == kyc_status)
-
-        # Apply status filter
         if status:
             is_active = status.lower() == "active"
             stmt = stmt.where(User.is_active == is_active)
-
-        # Apply sorting
         sort_column = getattr(User, sort_by, User.created_at)
         if sort_order.lower() == "desc":
             stmt = stmt.order_by(sort_column.desc())
         else:
             stmt = stmt.order_by(sort_column.asc())
-
-        # Paginate results (using SQLAlchemy 2.0 style pagination)
-        # Note: Flask-SQLAlchemy's paginate is often preferred, but using core for compatibility
         offset = (page - 1) * per_page
         paginated_stmt = stmt.limit(per_page).offset(offset)
-
         users = db.session.execute(paginated_stmt).scalars().all()
-
-        # Get total count for pagination metadata
         count_stmt = select(func.count()).select_from(User)
         if search or kyc_status or status:
-            # Re-apply filters to the count query
             count_stmt = select(func.count()).select_from(stmt.subquery())
-
         total_users = db.session.execute(count_stmt).scalar_one()
         total_pages = (total_users + per_page - 1) // per_page
-
-        # Format user data
         user_list = []
         for user in users:
-            # Get user's account summary
             accounts = (
                 db.session.execute(select(Account).filter_by(user_id=user.id))
                 .scalars()
                 .all()
             )
-
-            # Calculate total balance using Decimal
-            total_balance = sum(account.balance for account in accounts)
-
+            total_balance = sum((account.balance for account in accounts))
             user_data = {
                 "id": user.id,
                 "email": user.email,
@@ -116,7 +85,6 @@ def get_users():
                 },
             }
             user_list.append(user_data)
-
         return (
             jsonify(
                 {
@@ -141,7 +109,6 @@ def get_users():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Get users error: {str(e)}", exc_info=True)
         return (
@@ -152,26 +119,20 @@ def get_users():
 
 @user_bp.route("/<user_id>", methods=["GET"])
 @token_required
-def get_user(user_id):
+def get_user(user_id: Any) -> Any:
     """Get user details by ID (Admin or own profile)"""
     try:
         current_user = g.current_user
-
-        # Check if user is accessing their own profile or is admin
-        if current_user.id != user_id and not current_user.is_admin:
-            return jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403
-
+        if current_user.id != user_id and (not current_user.is_admin):
+            return (jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403)
         user = db.session.get(User, user_id)
         if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
-
-        # Get user's accounts
+            return (jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404)
         accounts = (
             db.session.execute(select(Account).filter_by(user_id=user.id))
             .scalars()
             .all()
         )
-
         account_data = []
         for account in accounts:
             account_data.append(
@@ -180,16 +141,12 @@ def get_user(user_id):
                     "account_name": account.account_name,
                     "account_type": account.account_type.value,
                     "currency": account.currency,
-                    "available_balance": float(
-                        account.balance
-                    ),  # Assuming balance is the available balance
+                    "available_balance": float(account.balance),
                     "current_balance": float(account.balance),
                     "status": account.status.value,
                     "created_at": account.created_at.isoformat(),
                 }
             )
-
-        # Get recent transactions (last 10)
         recent_transactions_stmt = (
             select(Transaction)
             .filter_by(user_id=user.id)
@@ -199,7 +156,6 @@ def get_user(user_id):
         recent_transactions = (
             db.session.execute(recent_transactions_stmt).scalars().all()
         )
-
         transaction_data = []
         for transaction in recent_transactions:
             transaction_data.append(
@@ -214,16 +170,11 @@ def get_user(user_id):
                     "created_at": transaction.created_at.isoformat(),
                 }
             )
-
-        # Calculate user statistics
-        total_balance = sum(account.balance for account in accounts)
-
+        total_balance = sum((account.balance for account in accounts))
         total_transactions_stmt = (
             select(func.count()).select_from(Transaction).filter_by(user_id=user.id)
         )
         total_transactions = db.session.execute(total_transactions_stmt).scalar_one()
-
-        # Get monthly transaction volume
         current_month = datetime.now(timezone.utc).replace(
             day=1, hour=0, minute=0, second=0, microsecond=0
         )
@@ -237,7 +188,6 @@ def get_user(user_id):
         monthly_volume = db.session.execute(
             monthly_volume_stmt
         ).scalar_one_or_none() or Decimal("0.00")
-
         user_data = {
             "id": user.id,
             "email": user.email,
@@ -270,7 +220,6 @@ def get_user(user_id):
             "created_at": user.created_at.isoformat(),
             "updated_at": user.updated_at.isoformat(),
         }
-
         return (
             jsonify(
                 {
@@ -291,7 +240,6 @@ def get_user(user_id):
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Get user error: {str(e)}", exc_info=True)
         return (
@@ -302,19 +250,15 @@ def get_user(user_id):
 
 @user_bp.route("/<user_id>", methods=["PUT"])
 @token_required
-def update_user(user_id):
+def update_user(user_id: Any) -> Any:
     """Update user details (Admin or own profile)"""
     try:
         current_user = g.current_user
-
-        # Check if user is updating their own profile or is admin
-        if current_user.id != user_id and not current_user.is_admin:
-            return jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403
-
+        if current_user.id != user_id and (not current_user.is_admin):
+            return (jsonify({"error": "Access denied", "code": "ACCESS_DENIED"}), 403)
         user = db.session.get(User, user_id)
         if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
-
+            return (jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404)
         data = request.get_json()
         if not data:
             return (
@@ -326,14 +270,8 @@ def update_user(user_id):
                 ),
                 400,
             )
-
-        # Fields that can be updated by self or admin
         updatable_fields = ["first_name", "last_name", "phone", "date_of_birth"]
-
-        # Admin-only fields
         admin_fields = ["is_active", "is_admin", "kyc_status"]
-
-        # Apply updates
         for field in updatable_fields:
             if field in data:
                 if field == "date_of_birth":
@@ -348,14 +286,10 @@ def update_user(user_id):
                     setattr(user, field, dob)
                 else:
                     setattr(user, field, data[field])
-
-        # Apply admin-only updates
         if current_user.is_admin:
             for field in admin_fields:
                 if field in data:
                     setattr(user, field, data[field])
-
-        # Update address
         if "address" in data and isinstance(data["address"], dict):
             address_data = data["address"]
             user.address_street = address_data.get("street", user.address_street)
@@ -365,9 +299,7 @@ def update_user(user_id):
                 "postal_code", user.address_postal_code
             )
             user.address_country = address_data.get("country", user.address_country)
-
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.ACCOUNT_MODIFICATION,
             description=f"User details updated for user: {user_id}",
@@ -377,14 +309,12 @@ def update_user(user_id):
             ),
             details={"updated_fields": list(data.keys())},
         )
-
         return (
             jsonify(
                 {"message": "User details updated successfully", "user_id": user.id}
             ),
             200,
         )
-
     except IntegrityError:
         db.session.rollback()
         return (
@@ -409,14 +339,12 @@ def update_user(user_id):
 
 @user_bp.route("/<user_id>", methods=["DELETE"])
 @admin_required
-def delete_user(user_id):
+def delete_user(user_id: Any) -> Any:
     """Delete a user (Admin only)"""
     try:
         user = db.session.get(User, user_id)
         if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
-
-        # Prevent self-deletion for admin
+            return (jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404)
         if g.current_user.id == user_id:
             return (
                 jsonify(
@@ -427,8 +355,6 @@ def delete_user(user_id):
                 ),
                 403,
             )
-
-        # Soft delete: set is_active to False and anonymize PII
         user.is_active = False
         user.email = f"deleted_{user.id}@deleted.com"
         user.phone = None
@@ -438,12 +364,7 @@ def delete_user(user_id):
         user.two_factor_secret = None
         user.two_factor_enabled = False
         user.kyc_status = "revoked"
-
-        # Optionally, delete all associated data (accounts, transactions, etc.)
-        # For financial compliance, it's better to keep the data but anonymize PII.
-
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.ACCOUNT_MODIFICATION,
             description=f"User account soft-deleted: {user_id}",
@@ -452,7 +373,6 @@ def delete_user(user_id):
             resource_type="user",
             resource_id=user_id,
         )
-
         return (
             jsonify(
                 {
@@ -462,7 +382,6 @@ def delete_user(user_id):
             ),
             200,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Delete user error: {str(e)}", exc_info=True)

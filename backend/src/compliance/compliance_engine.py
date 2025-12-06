@@ -3,9 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 from sqlalchemy.orm import Session
-
 from .aml_engine import AMLEngine, AMLResult
 from .audit_service import ComplianceAuditService
 from .data_protection import DataProtectionService
@@ -13,13 +11,7 @@ from .kyc_service import KYCService
 from .regulatory_framework import ComplianceRule, Jurisdiction, RegulatoryFramework
 from .reporting_service import ComplianceReportingService
 
-"""
-Compliance Engine
-================
-
-Central compliance engine for multi-jurisdiction regulatory compliance.
-Orchestrates all compliance activities including AML, KYC, data protection, and reporting.
-"""
+"\nCompliance Engine\n================\n\nCentral compliance engine for multi-jurisdiction regulatory compliance.\nOrchestrates all compliance activities including AML, KYC, data protection, and reporting.\n"
 
 
 class ComplianceStatus(Enum):
@@ -81,7 +73,7 @@ class ComplianceAssessment:
 
     assessment_id: str
     entity_id: str
-    entity_type: str  # user, transaction, merchant, etc.
+    entity_type: str
     jurisdictions: List[Jurisdiction]
     overall_status: ComplianceStatus
     checks: List[ComplianceCheck]
@@ -117,24 +109,19 @@ class ComplianceEngine:
     - Remediation workflow management
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Initialize compliance components
         self.regulatory_framework = RegulatoryFramework()
         self.aml_engine = AMLEngine(db_session)
         self.kyc_service = KYCService(db_session)
         self.data_protection = DataProtectionService(db_session)
         self.reporting_service = ComplianceReportingService(db_session)
         self.audit_service = ComplianceAuditService(db_session)
-
-        # Compliance state
         self._active_assessments = {}
         self._compliance_cache = {}
         self._monitoring_enabled = True
-
         self.logger.info("Compliance engine initialized")
 
     async def assess_compliance(
@@ -156,16 +143,11 @@ class ComplianceEngine:
         Returns:
             ComplianceAssessment containing detailed compliance status
         """
-
         assessment_id = (
             f"{entity_type}_{entity_id}_{int(datetime.utcnow().timestamp())}"
         )
-
-        # Use default jurisdictions if not specified
         if jurisdictions is None:
             jurisdictions = [Jurisdiction.EU, Jurisdiction.US, Jurisdiction.SINGAPORE]
-
-        # Check cache if not forcing refresh
         cache_key = f"{entity_type}_{entity_id}_{hash(tuple(jurisdictions))}"
         if not force_refresh and cache_key in self._compliance_cache:
             cached_assessment = self._compliance_cache[cache_key]
@@ -177,30 +159,20 @@ class ComplianceEngine:
                     f"Returning cached compliance assessment for {entity_id}"
                 )
                 return cached_assessment
-
         try:
             self.logger.info(
                 f"Starting compliance assessment for {entity_type} {entity_id}"
             )
-
-            # Get entity data
             entity_data = await self._get_entity_data(entity_id, entity_type)
-
-            # Perform compliance checks for each jurisdiction
             all_checks = []
             overall_risk_score = 0.0
-
             for jurisdiction in jurisdictions:
                 jurisdiction_checks = await self._assess_jurisdiction_compliance(
                     entity_id, entity_type, entity_data, jurisdiction
                 )
                 all_checks.extend(jurisdiction_checks)
-
-            # Calculate overall compliance status and risk score
             overall_status = self._calculate_overall_status(all_checks)
             overall_risk_score = self._calculate_risk_score(all_checks)
-
-            # Create assessment
             assessment = ComplianceAssessment(
                 assessment_id=assessment_id,
                 entity_id=entity_id,
@@ -210,17 +182,10 @@ class ComplianceEngine:
                 checks=all_checks,
                 risk_score=overall_risk_score,
                 timestamp=datetime.utcnow(),
-                expires_at=datetime.utcnow()
-                + timedelta(hours=24),  # Cache for 24 hours
+                expires_at=datetime.utcnow() + timedelta(hours=24),
             )
-
-            # Cache the assessment
             self._compliance_cache[cache_key] = assessment
-
-            # Store in active assessments
             self._active_assessments[assessment_id] = assessment
-
-            # Log audit event
             await self.audit_service.log_compliance_event(
                 event_type="compliance_assessment",
                 entity_id=entity_id,
@@ -232,12 +197,10 @@ class ComplianceEngine:
                     "risk_score": overall_risk_score,
                 },
             )
-
             self.logger.info(
                 f"Compliance assessment completed for {entity_id}: {overall_status.value}"
             )
             return assessment
-
         except Exception as e:
             self.logger.error(
                 f"Error in compliance assessment for {entity_id}: {str(e)}"
@@ -252,24 +215,18 @@ class ComplianceEngine:
         jurisdiction: Jurisdiction,
     ) -> List[ComplianceCheck]:
         """Assess compliance for a specific jurisdiction."""
-
         checks = []
-
-        # Get applicable rules for this jurisdiction and entity type
         rules = self.regulatory_framework.get_applicable_rules(
             jurisdiction, entity_type
         )
-
         for rule in rules:
             try:
                 check_result = await self._evaluate_compliance_rule(
                     rule, entity_id, entity_type, entity_data, jurisdiction
                 )
                 checks.append(check_result)
-
             except Exception as e:
                 self.logger.error(f"Error evaluating rule {rule.rule_id}: {str(e)}")
-                # Create failed check
                 checks.append(
                     ComplianceCheck(
                         check_id=f"{rule.rule_id}_{entity_id}_{int(datetime.utcnow().timestamp())}",
@@ -282,7 +239,6 @@ class ComplianceEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return checks
 
     async def _evaluate_compliance_rule(
@@ -294,10 +250,7 @@ class ComplianceEngine:
         jurisdiction: Jurisdiction,
     ) -> ComplianceCheck:
         """Evaluate a specific compliance rule."""
-
         check_id = f"{rule.rule_id}_{entity_id}_{int(datetime.utcnow().timestamp())}"
-
-        # Route to appropriate compliance service based on rule category
         if rule.category == "aml":
             return await self._evaluate_aml_rule(
                 rule, entity_id, entity_type, entity_data, check_id
@@ -319,7 +272,6 @@ class ComplianceEngine:
                 rule, entity_id, entity_type, entity_data, check_id
             )
         else:
-            # Generic rule evaluation
             return await self._evaluate_generic_rule(
                 rule, entity_id, entity_type, entity_data, check_id
             )
@@ -333,7 +285,6 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate AML-specific compliance rule."""
-
         if entity_type == "transaction":
             aml_result = await self.aml_engine.screen_transaction(entity_data)
         elif entity_type == "user":
@@ -346,8 +297,6 @@ class ComplianceEngine:
                 flags=[],
                 details={},
             )
-
-        # Determine compliance status based on AML result
         if aml_result.status == "clear":
             status = ComplianceStatus.COMPLIANT
             severity = ComplianceSeverity.LOW
@@ -360,7 +309,6 @@ class ComplianceEngine:
         else:
             status = ComplianceStatus.UNKNOWN
             severity = ComplianceSeverity.MEDIUM
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -374,7 +322,7 @@ class ComplianceEngine:
                 "flags": aml_result.flags,
             },
             timestamp=datetime.utcnow(),
-            remediation_required=(status == ComplianceStatus.NON_COMPLIANT),
+            remediation_required=status == ComplianceStatus.NON_COMPLIANT,
         )
 
     async def _evaluate_kyc_rule(
@@ -386,7 +334,6 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate KYC-specific compliance rule."""
-
         if entity_type != "user":
             return ComplianceCheck(
                 check_id=check_id,
@@ -398,10 +345,7 @@ class ComplianceEngine:
                 details={},
                 timestamp=datetime.utcnow(),
             )
-
         kyc_result = await self.kyc_service.verify_customer(entity_data)
-
-        # Determine compliance status based on KYC result
         if kyc_result.status == "verified":
             status = ComplianceStatus.COMPLIANT
             severity = ComplianceSeverity.LOW
@@ -414,7 +358,6 @@ class ComplianceEngine:
         else:
             status = ComplianceStatus.UNKNOWN
             severity = ComplianceSeverity.MEDIUM
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -428,7 +371,7 @@ class ComplianceEngine:
                 "documents_verified": kyc_result.documents_verified,
             },
             timestamp=datetime.utcnow(),
-            remediation_required=(status == ComplianceStatus.NON_COMPLIANT),
+            remediation_required=status == ComplianceStatus.NON_COMPLIANT,
         )
 
     async def _evaluate_data_protection_rule(
@@ -440,11 +383,9 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate data protection compliance rule."""
-
         dp_result = await self.data_protection.assess_data_protection_compliance(
             entity_data, rule.jurisdiction
         )
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -466,7 +407,6 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate transaction monitoring compliance rule."""
-
         if entity_type != "transaction":
             return ComplianceCheck(
                 check_id=check_id,
@@ -478,35 +418,23 @@ class ComplianceEngine:
                 details={},
                 timestamp=datetime.utcnow(),
             )
-
-        # Check transaction limits and patterns
         amount = entity_data.get("amount", 0)
         currency = entity_data.get("currency", "USD")
         country = entity_data.get("country_code", "US")
-
-        # Apply jurisdiction-specific transaction monitoring rules
         violations = []
-
         if rule.jurisdiction == Jurisdiction.EU:
-            # EU transaction monitoring rules
-            if amount > 10000:  # CTR threshold
+            if amount > 10000:
                 violations.append("Large transaction requiring reporting")
             if country not in ["EU", "EEA"] and amount > 1000:
                 violations.append("Cross-border transaction monitoring")
-
         elif rule.jurisdiction == Jurisdiction.US:
-            # US transaction monitoring rules
-            if amount > 10000:  # BSA CTR threshold
+            if amount > 10000:
                 violations.append("Currency Transaction Report required")
-            if amount >= 3000:  # SAR threshold
+            if amount >= 3000:
                 violations.append("Suspicious Activity Report monitoring")
-
         elif rule.jurisdiction == Jurisdiction.SINGAPORE:
-            # Singapore transaction monitoring rules
-            if amount > 20000:  # SGD equivalent
+            if amount > 20000:
                 violations.append("Large transaction monitoring")
-
-        # Determine compliance status
         if violations:
             status = ComplianceStatus.REQUIRES_ACTION
             severity = ComplianceSeverity.MEDIUM
@@ -515,7 +443,6 @@ class ComplianceEngine:
             status = ComplianceStatus.COMPLIANT
             severity = ComplianceSeverity.LOW
             description = "Transaction monitoring compliance verified"
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -530,7 +457,7 @@ class ComplianceEngine:
                 "country": country,
             },
             timestamp=datetime.utcnow(),
-            remediation_required=(len(violations) > 0),
+            remediation_required=len(violations) > 0,
         )
 
     async def _evaluate_reporting_rule(
@@ -542,11 +469,9 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate regulatory reporting compliance rule."""
-
         reporting_result = await self.reporting_service.check_reporting_requirements(
             entity_data, rule.jurisdiction
         )
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -568,10 +493,6 @@ class ComplianceEngine:
         check_id: str,
     ) -> ComplianceCheck:
         """Evaluate generic compliance rule."""
-
-        # Generic rule evaluation logic
-        # This would be expanded based on specific rule requirements
-
         return ComplianceCheck(
             check_id=check_id,
             rule_id=rule.rule_id,
@@ -587,38 +508,30 @@ class ComplianceEngine:
         self, checks: List[ComplianceCheck]
     ) -> ComplianceStatus:
         """Calculate overall compliance status from individual checks."""
-
         if not checks:
             return ComplianceStatus.UNKNOWN
-
-        # Priority order: NON_COMPLIANT > REQUIRES_ACTION > PENDING_REVIEW > COMPLIANT
         statuses = [check.status for check in checks]
-
         if ComplianceStatus.NON_COMPLIANT in statuses:
             return ComplianceStatus.NON_COMPLIANT
         elif ComplianceStatus.REQUIRES_ACTION in statuses:
             return ComplianceStatus.REQUIRES_ACTION
         elif ComplianceStatus.PENDING_REVIEW in statuses:
             return ComplianceStatus.PENDING_REVIEW
-        elif all(status == ComplianceStatus.COMPLIANT for status in statuses):
+        elif all((status == ComplianceStatus.COMPLIANT for status in statuses)):
             return ComplianceStatus.COMPLIANT
         else:
             return ComplianceStatus.UNKNOWN
 
     def _calculate_risk_score(self, checks: List[ComplianceCheck]) -> float:
         """Calculate overall risk score from individual checks."""
-
         if not checks:
             return 0.0
-
-        # Weight scores by severity
         severity_weights = {
             ComplianceSeverity.LOW: 0.1,
             ComplianceSeverity.MEDIUM: 0.3,
             ComplianceSeverity.HIGH: 0.7,
             ComplianceSeverity.CRITICAL: 1.0,
         }
-
         status_scores = {
             ComplianceStatus.COMPLIANT: 0.0,
             ComplianceStatus.PENDING_REVIEW: 0.3,
@@ -626,29 +539,20 @@ class ComplianceEngine:
             ComplianceStatus.NON_COMPLIANT: 1.0,
             ComplianceStatus.UNKNOWN: 0.5,
         }
-
         total_score = 0.0
         total_weight = 0.0
-
         for check in checks:
             weight = severity_weights.get(check.severity, 0.5)
             score = status_scores.get(check.status, 0.5)
-
             total_score += score * weight
             total_weight += weight
-
         return total_score / total_weight if total_weight > 0 else 0.0
 
     async def _get_entity_data(
         self, entity_id: str, entity_type: str
     ) -> Dict[str, Any]:
         """Retrieve entity data for compliance assessment."""
-
-        # This would query the appropriate tables based on entity type
-        # For now, return mock data structure
-
         if entity_type == "user":
-            # Query user data
             return {
                 "user_id": entity_id,
                 "email": f"user_{entity_id}@example.com",
@@ -657,9 +561,7 @@ class ComplianceEngine:
                 "account_created": datetime.utcnow().isoformat(),
                 "last_login": datetime.utcnow().isoformat(),
             }
-
         elif entity_type == "transaction":
-            # Query transaction data
             return {
                 "transaction_id": entity_id,
                 "amount": 1000.0,
@@ -669,7 +571,6 @@ class ComplianceEngine:
                 "merchant_category": "retail",
                 "timestamp": datetime.utcnow().isoformat(),
             }
-
         else:
             return {"entity_id": entity_id, "entity_type": entity_type}
 
@@ -677,24 +578,15 @@ class ComplianceEngine:
         self, entity_id: str, entity_type: str, jurisdictions: List[Jurisdiction] = None
     ) -> Dict[str, Any]:
         """Start continuous compliance monitoring for an entity."""
-
         if not self._monitoring_enabled:
             return {"status": "monitoring_disabled"}
-
-        # Perform initial assessment
         assessment = await self.assess_compliance(entity_id, entity_type, jurisdictions)
-
-        # Set up monitoring schedule based on risk score
         if assessment.risk_score > 0.7:
-            monitoring_interval = timedelta(hours=1)  # High risk - hourly monitoring
+            monitoring_interval = timedelta(hours=1)
         elif assessment.risk_score > 0.4:
-            monitoring_interval = timedelta(
-                hours=6
-            )  # Medium risk - 6-hourly monitoring
+            monitoring_interval = timedelta(hours=6)
         else:
-            monitoring_interval = timedelta(days=1)  # Low risk - daily monitoring
-
-        # Store monitoring configuration
+            monitoring_interval = timedelta(days=1)
         monitoring_config = {
             "entity_id": entity_id,
             "entity_type": entity_type,
@@ -703,7 +595,6 @@ class ComplianceEngine:
             "last_check": datetime.utcnow(),
             "next_check": datetime.utcnow() + monitoring_interval,
         }
-
         return {
             "status": "monitoring_started",
             "assessment": assessment.to_dict(),
@@ -714,18 +605,13 @@ class ComplianceEngine:
         self, entity_id: str, entity_type: str
     ) -> Dict[str, Any]:
         """Get current compliance status for an entity."""
-
-        # Check for existing assessment
         f"{entity_type}_{entity_id}"
-
         for assessment in self._active_assessments.values():
             if (
                 assessment.entity_id == entity_id
                 and assessment.entity_type == entity_type
             ):
                 return assessment.to_dict()
-
-        # No existing assessment found
         return {
             "entity_id": entity_id,
             "entity_type": entity_type,
@@ -740,11 +626,8 @@ class ComplianceEngine:
         remediation_data: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """Initiate remediation for a compliance issue."""
-
-        # Find the compliance check
         target_check = None
         target_assessment = None
-
         for assessment in self._active_assessments.values():
             for check in assessment.checks:
                 if check.check_id == check_id:
@@ -753,14 +636,11 @@ class ComplianceEngine:
                     break
             if target_check:
                 break
-
         if not target_check:
             return {
                 "status": "error",
                 "message": f"Compliance check {check_id} not found",
             }
-
-        # Log remediation action
         await self.audit_service.log_compliance_event(
             event_type="remediation_initiated",
             entity_id=target_assessment.entity_id,
@@ -771,29 +651,19 @@ class ComplianceEngine:
                 "remediation_data": remediation_data or {},
             },
         )
-
-        # Execute remediation based on action type
         if remediation_action == "manual_review":
-            # Flag for manual review
             target_check.status = ComplianceStatus.PENDING_REVIEW
-
         elif remediation_action == "auto_approve":
-            # Auto-approve if conditions are met
             target_check.status = ComplianceStatus.COMPLIANT
-
         elif remediation_action == "request_documents":
-            # Request additional documentation
             target_check.status = ComplianceStatus.PENDING_REVIEW
             target_check.remediation_deadline = datetime.utcnow() + timedelta(days=7)
-
-        # Update assessment
         target_assessment.overall_status = self._calculate_overall_status(
             target_assessment.checks
         )
         target_assessment.risk_score = self._calculate_risk_score(
             target_assessment.checks
         )
-
         return {
             "status": "remediation_initiated",
             "check_id": check_id,
@@ -803,9 +673,7 @@ class ComplianceEngine:
 
     def get_compliance_metrics(self) -> Dict[str, Any]:
         """Get compliance metrics and statistics."""
-
         total_assessments = len(self._active_assessments)
-
         if total_assessments == 0:
             return {
                 "total_assessments": 0,
@@ -813,27 +681,22 @@ class ComplianceEngine:
                 "average_risk_score": 0.0,
                 "status_distribution": {},
             }
-
-        # Calculate metrics
         compliant_count = sum(
-            1
-            for a in self._active_assessments.values()
-            if a.overall_status == ComplianceStatus.COMPLIANT
+            (
+                1
+                for a in self._active_assessments.values()
+                if a.overall_status == ComplianceStatus.COMPLIANT
+            )
         )
-
         compliance_rate = compliant_count / total_assessments
-
         average_risk_score = (
-            sum(a.risk_score for a in self._active_assessments.values())
+            sum((a.risk_score for a in self._active_assessments.values()))
             / total_assessments
         )
-
-        # Status distribution
         status_counts = {}
         for assessment in self._active_assessments.values():
             status = assessment.overall_status.value
             status_counts[status] = status_counts.get(status, 0) + 1
-
         return {
             "total_assessments": total_assessments,
             "compliance_rate": compliance_rate,
@@ -842,12 +705,12 @@ class ComplianceEngine:
             "monitoring_enabled": self._monitoring_enabled,
         }
 
-    def enable_monitoring(self):
+    def enable_monitoring(self) -> Any:
         """Enable compliance monitoring."""
         self._monitoring_enabled = True
         self.logger.info("Compliance monitoring enabled")
 
-    def disable_monitoring(self):
+    def disable_monitoring(self) -> Any:
         """Disable compliance monitoring."""
         self._monitoring_enabled = False
         self.logger.info("Compliance monitoring disabled")
@@ -859,7 +722,6 @@ class ComplianceEngine:
         end_date: datetime = None,
     ) -> Dict[str, Any]:
         """Generate comprehensive compliance report."""
-
         return await self.reporting_service.generate_compliance_report(
             jurisdiction=jurisdiction,
             start_date=start_date,

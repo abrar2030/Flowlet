@@ -1,22 +1,17 @@
 import unittest
 from unittest.mock import MagicMock
 
-# Assuming a simplified FraudDetectionService module structure
-# In a real scenario, you would import the actual classes/functions
-
 
 class FraudDetectionService:
-    def __init__(self, ml_model_api):
-        self.ml_model_api = ml_model_api  # Mock this for testing
 
-    def analyze_transaction_for_fraud(self, transaction_data):
+    def __init__(self, ml_model_api: Any) -> Any:
+        self.ml_model_api = ml_model_api
+
+    def analyze_transaction_for_fraud(self, transaction_data: Any) -> Any:
         if not transaction_data:
             return {"status": "failed", "message": "Transaction data is required"}
-
         try:
-            # Simulate calling an ML model API for fraud prediction
             prediction_result = self.ml_model_api.predict_fraud(transaction_data)
-
             if prediction_result.get("is_fraudulent"):
                 score = prediction_result.get("score", 0.0)
                 if score > 0.8:
@@ -46,11 +41,9 @@ class FraudDetectionService:
         except Exception as e:
             return {"status": "failed", "message": f"ML model API error: {str(e)}"}
 
-    def get_fraud_report(self, transaction_id):
-        # Simulate retrieving a fraud report for a given transaction
+    def get_fraud_report(self, transaction_id: Any) -> Any:
         if not transaction_id:
             return {"status": "failed", "message": "Transaction ID is required"}
-
         if transaction_id == "fraud_txn_123":
             return {
                 "status": "success",
@@ -77,13 +70,14 @@ class FraudDetectionService:
 
 
 class TestFraudDetectionService(unittest.TestCase):
-    def setUp(self):
+
+    def setUp(self) -> Any:
         self.mock_ml_model_api = MagicMock()
         self.fraud_detection_service = FraudDetectionService(
             ml_model_api=self.mock_ml_model_api
         )
 
-    def test_analyze_transaction_fraud_detected(self):
+    def test_analyze_transaction_fraud_detected(self) -> Any:
         self.mock_ml_model_api.predict_fraud.return_value = {
             "is_fraudulent": True,
             "score": 0.9,
@@ -97,7 +91,7 @@ class TestFraudDetectionService(unittest.TestCase):
         self.assertEqual(result["score"], 0.9)
         self.mock_ml_model_api.predict_fraud.assert_called_once_with(transaction_data)
 
-    def test_analyze_transaction_suspicious(self):
+    def test_analyze_transaction_suspicious(self) -> Any:
         self.mock_ml_model_api.predict_fraud.return_value = {
             "is_fraudulent": True,
             "score": 0.6,
@@ -110,7 +104,7 @@ class TestFraudDetectionService(unittest.TestCase):
         self.assertEqual(result["action"], "review_transaction")
         self.assertEqual(result["score"], 0.6)
 
-    def test_analyze_transaction_clean_not_fraudulent(self):
+    def test_analyze_transaction_clean_not_fraudulent(self) -> Any:
         self.mock_ml_model_api.predict_fraud.return_value = {
             "is_fraudulent": False,
             "score": 0.1,
@@ -123,7 +117,7 @@ class TestFraudDetectionService(unittest.TestCase):
         self.assertEqual(result["action"], "allow_transaction")
         self.assertEqual(result["score"], 0.1)
 
-    def test_analyze_transaction_clean_low_score_fraudulent(self):
+    def test_analyze_transaction_clean_low_score_fraudulent(self) -> Any:
         self.mock_ml_model_api.predict_fraud.return_value = {
             "is_fraudulent": True,
             "score": 0.4,
@@ -136,30 +130,30 @@ class TestFraudDetectionService(unittest.TestCase):
         self.assertEqual(result["action"], "allow_transaction")
         self.assertEqual(result["score"], 0.4)
 
-    def test_analyze_transaction_missing_data(self):
+    def test_analyze_transaction_missing_data(self) -> Any:
         result = self.fraud_detection_service.analyze_transaction_for_fraud(None)
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "Transaction data is required")
         self.mock_ml_model_api.predict_fraud.assert_not_called()
 
-    def test_get_fraud_report_found_fraud(self):
+    def test_get_fraud_report_found_fraud(self) -> Any:
         result = self.fraud_detection_service.get_fraud_report("fraud_txn_123")
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["report"]["severity"], "high")
 
-    def test_get_fraud_report_found_suspicious(self):
+    def test_get_fraud_report_found_suspicious(self) -> Any:
         result = self.fraud_detection_service.get_fraud_report("suspicious_txn_456")
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["report"]["severity"], "medium")
 
-    def test_get_fraud_report_not_found(self):
+    def test_get_fraud_report_not_found(self) -> Any:
         result = self.fraud_detection_service.get_fraud_report("non_existent_txn")
         self.assertEqual(result["status"], "not_found")
         self.assertEqual(
             result["message"], "Fraud report not found for this transaction"
         )
 
-    def test_get_fraud_report_missing_id(self):
+    def test_get_fraud_report_missing_id(self) -> Any:
         result = self.fraud_detection_service.get_fraud_report(None)
         self.assertEqual(result["status"], "failed")
         self.assertEqual(result["message"], "Transaction ID is required")

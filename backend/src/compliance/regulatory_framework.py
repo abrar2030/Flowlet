@@ -3,13 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-"""
-Regulatory Framework
-===================
-
-Multi-jurisdiction regulatory framework for financial compliance.
-Defines compliance rules, requirements, and mappings for different jurisdictions.
-"""
+"\nRegulatory Framework\n===================\n\nMulti-jurisdiction regulatory framework for financial compliance.\nDefines compliance rules, requirements, and mappings for different jurisdictions.\n"
 
 
 class Jurisdiction(Enum):
@@ -59,7 +53,7 @@ class ComplianceRule:
     jurisdiction: Jurisdiction
     category: RuleCategory
     severity: RuleSeverity
-    applicable_entities: List[str]  # user, transaction, merchant, etc.
+    applicable_entities: List[str]
     requirements: Dict[str, Any]
     penalties: Dict[str, Any]
     effective_date: datetime
@@ -67,21 +61,14 @@ class ComplianceRule:
 
     def is_applicable(self, entity_type: str, current_date: datetime = None) -> bool:
         """Check if rule is applicable to entity type and current date."""
-
         if current_date is None:
             current_date = datetime.utcnow()
-
-        # Check entity type applicability
         if entity_type not in self.applicable_entities:
             return False
-
-        # Check date validity
         if current_date < self.effective_date:
             return False
-
         if self.expiry_date and current_date > self.expiry_date:
             return False
-
         return True
 
 
@@ -113,24 +100,18 @@ class RegulatoryFramework:
     - Cross-jurisdiction harmonization
     """
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self._rules = {}
         self._jurisdiction_profiles = {}
         self._initialize_framework()
 
-    def _initialize_framework(self):
+    def _initialize_framework(self) -> Any:
         """Initialize the regulatory framework with default rules and profiles."""
-
-        # Initialize jurisdiction profiles
         self._initialize_jurisdiction_profiles()
-
-        # Initialize compliance rules
         self._initialize_compliance_rules()
 
-    def _initialize_jurisdiction_profiles(self):
+    def _initialize_jurisdiction_profiles(self) -> Any:
         """Initialize jurisdiction profiles with regulatory requirements."""
-
-        # European Union
         self._jurisdiction_profiles[Jurisdiction.EU] = JurisdictionProfile(
             jurisdiction=Jurisdiction.EU,
             name="European Union",
@@ -144,7 +125,7 @@ class RegulatoryFramework:
             key_regulations=["PSD2", "GDPR", "6AMLD", "MiCA", "DORA"],
             aml_requirements={
                 "customer_due_diligence": True,
-                "enhanced_due_diligence_threshold": 15000,  # EUR
+                "enhanced_due_diligence_threshold": 15000,
                 "suspicious_transaction_reporting": True,
                 "sanctions_screening": True,
                 "pep_screening": True,
@@ -168,15 +149,15 @@ class RegulatoryFramework:
             reporting_requirements={
                 "transaction_reporting": True,
                 "suspicious_activity_reporting": True,
-                "large_transaction_reporting": 10000,  # EUR
-                "cross_border_reporting": 10000,  # EUR
+                "large_transaction_reporting": 10000,
+                "cross_border_reporting": 10000,
                 "regulatory_reporting_frequency": "monthly",
             },
             transaction_limits={
-                "daily_limit": 15000,  # EUR
-                "monthly_limit": 50000,  # EUR
-                "annual_limit": 200000,  # EUR
-                "cash_transaction_limit": 10000,  # EUR
+                "daily_limit": 15000,
+                "monthly_limit": 50000,
+                "annual_limit": 200000,
+                "cash_transaction_limit": 10000,
             },
             penalties={
                 "gdpr_max_fine": "4% of annual turnover or €20M",
@@ -184,8 +165,6 @@ class RegulatoryFramework:
                 "psd2_max_fine": "€5M or 10% of annual turnover",
             },
         )
-
-        # United States
         self._jurisdiction_profiles[Jurisdiction.US] = JurisdictionProfile(
             jurisdiction=Jurisdiction.US,
             name="United States",
@@ -201,7 +180,7 @@ class RegulatoryFramework:
             key_regulations=["BSA", "USA PATRIOT Act", "FCRA", "CCPA", "Dodd-Frank"],
             aml_requirements={
                 "customer_due_diligence": True,
-                "enhanced_due_diligence_threshold": 10000,  # USD
+                "enhanced_due_diligence_threshold": 10000,
                 "suspicious_transaction_reporting": True,
                 "sanctions_screening": True,
                 "pep_screening": True,
@@ -225,15 +204,15 @@ class RegulatoryFramework:
             reporting_requirements={
                 "ctr_reporting": True,
                 "sar_reporting": True,
-                "large_transaction_reporting": 10000,  # USD
-                "cross_border_reporting": 10000,  # USD
+                "large_transaction_reporting": 10000,
+                "cross_border_reporting": 10000,
                 "regulatory_reporting_frequency": "monthly",
             },
             transaction_limits={
-                "daily_limit": 10000,  # USD
-                "monthly_limit": 50000,  # USD
-                "annual_limit": 200000,  # USD
-                "cash_transaction_limit": 10000,  # USD
+                "daily_limit": 10000,
+                "monthly_limit": 50000,
+                "annual_limit": 200000,
+                "cash_transaction_limit": 10000,
             },
             penalties={
                 "bsa_civil_penalty": "$25,000 per violation",
@@ -241,8 +220,6 @@ class RegulatoryFramework:
                 "ccpa_max_fine": "$7,500 per violation",
             },
         )
-
-        # Singapore
         self._jurisdiction_profiles[Jurisdiction.SINGAPORE] = JurisdictionProfile(
             jurisdiction=Jurisdiction.SINGAPORE,
             name="Singapore",
@@ -250,7 +227,7 @@ class RegulatoryFramework:
             key_regulations=["PSA", "PDPA", "CDSA", "SFA"],
             aml_requirements={
                 "customer_due_diligence": True,
-                "enhanced_due_diligence_threshold": 20000,  # SGD
+                "enhanced_due_diligence_threshold": 20000,
                 "suspicious_transaction_reporting": True,
                 "sanctions_screening": True,
                 "pep_screening": True,
@@ -274,15 +251,15 @@ class RegulatoryFramework:
             reporting_requirements={
                 "transaction_reporting": True,
                 "suspicious_activity_reporting": True,
-                "large_transaction_reporting": 20000,  # SGD
-                "cross_border_reporting": 20000,  # SGD
+                "large_transaction_reporting": 20000,
+                "cross_border_reporting": 20000,
                 "regulatory_reporting_frequency": "monthly",
             },
             transaction_limits={
-                "daily_limit": 20000,  # SGD
-                "monthly_limit": 100000,  # SGD
-                "annual_limit": 500000,  # SGD
-                "cash_transaction_limit": 20000,  # SGD
+                "daily_limit": 20000,
+                "monthly_limit": 100000,
+                "annual_limit": 500000,
+                "cash_transaction_limit": 20000,
             },
             penalties={
                 "pdpa_max_fine": "S$1M",
@@ -290,8 +267,6 @@ class RegulatoryFramework:
                 "psa_max_fine": "S$125,000",
             },
         )
-
-        # Hong Kong
         self._jurisdiction_profiles[Jurisdiction.HONG_KONG] = JurisdictionProfile(
             jurisdiction=Jurisdiction.HONG_KONG,
             name="Hong Kong",
@@ -299,7 +274,7 @@ class RegulatoryFramework:
             key_regulations=["AMLO", "PDPO", "SFO"],
             aml_requirements={
                 "customer_due_diligence": True,
-                "enhanced_due_diligence_threshold": 120000,  # HKD
+                "enhanced_due_diligence_threshold": 120000,
                 "suspicious_transaction_reporting": True,
                 "sanctions_screening": True,
                 "pep_screening": True,
@@ -323,15 +298,15 @@ class RegulatoryFramework:
             reporting_requirements={
                 "transaction_reporting": True,
                 "suspicious_activity_reporting": True,
-                "large_transaction_reporting": 120000,  # HKD
-                "cross_border_reporting": 120000,  # HKD
+                "large_transaction_reporting": 120000,
+                "cross_border_reporting": 120000,
                 "regulatory_reporting_frequency": "monthly",
             },
             transaction_limits={
-                "daily_limit": 120000,  # HKD
-                "monthly_limit": 500000,  # HKD
-                "annual_limit": 2000000,  # HKD
-                "cash_transaction_limit": 120000,  # HKD
+                "daily_limit": 120000,
+                "monthly_limit": 500000,
+                "annual_limit": 2000000,
+                "cash_transaction_limit": 120000,
             },
             penalties={
                 "pdpo_max_fine": "HK$1M",
@@ -340,28 +315,16 @@ class RegulatoryFramework:
             },
         )
 
-    def _initialize_compliance_rules(self):
+    def _initialize_compliance_rules(self) -> Any:
         """Initialize compliance rules for all jurisdictions."""
-
-        # EU Rules
         self._add_eu_rules()
-
-        # US Rules
         self._add_us_rules()
-
-        # Singapore Rules
         self._add_singapore_rules()
-
-        # Hong Kong Rules
         self._add_hong_kong_rules()
-
-        # Global Rules
         self._add_global_rules()
 
-    def _add_eu_rules(self):
+    def _add_eu_rules(self) -> Any:
         """Add EU-specific compliance rules."""
-
-        # GDPR Rules
         self._rules["eu_gdpr_consent"] = ComplianceRule(
             rule_id="eu_gdpr_consent",
             name="GDPR Consent Management",
@@ -389,8 +352,6 @@ class RegulatoryFramework:
             },
             effective_date=datetime(2018, 5, 25),
         )
-
-        # PSD2 Rules
         self._rules["eu_psd2_sca"] = ComplianceRule(
             rule_id="eu_psd2_sca",
             name="PSD2 Strong Customer Authentication",
@@ -403,16 +364,14 @@ class RegulatoryFramework:
                 "two_factor_authentication": True,
                 "dynamic_linking": True,
                 "exemption_thresholds": {
-                    "low_value": 30,  # EUR
-                    "contactless": 50,  # EUR
+                    "low_value": 30,
+                    "contactless": 50,
                     "trusted_beneficiary": True,
                 },
             },
             penalties={"max_fine": "€5M or 10% of annual turnover"},
             effective_date=datetime(2019, 9, 14),
         )
-
-        # 6AMLD Rules
         self._rules["eu_6amld_aml"] = ComplianceRule(
             rule_id="eu_6amld_aml",
             name="6AMLD Anti-Money Laundering",
@@ -437,10 +396,8 @@ class RegulatoryFramework:
             effective_date=datetime(2021, 6, 3),
         )
 
-    def _add_us_rules(self):
+    def _add_us_rules(self) -> Any:
         """Add US-specific compliance rules."""
-
-        # BSA/AML Rules
         self._rules["us_bsa_ctr"] = ComplianceRule(
             rule_id="us_bsa_ctr",
             name="BSA Currency Transaction Reporting",
@@ -450,8 +407,8 @@ class RegulatoryFramework:
             severity=RuleSeverity.HIGH,
             applicable_entities=["transaction"],
             requirements={
-                "reporting_threshold": 10000,  # USD
-                "filing_deadline": 15,  # days
+                "reporting_threshold": 10000,
+                "filing_deadline": 15,
                 "form_required": "FinCEN Form 104",
                 "exemptions": ["bank_to_bank", "government_transactions"],
             },
@@ -461,8 +418,6 @@ class RegulatoryFramework:
             },
             effective_date=datetime(1970, 10, 26),
         )
-
-        # SAR Rules
         self._rules["us_bsa_sar"] = ComplianceRule(
             rule_id="us_bsa_sar",
             name="BSA Suspicious Activity Reporting",
@@ -472,8 +427,8 @@ class RegulatoryFramework:
             severity=RuleSeverity.CRITICAL,
             applicable_entities=["transaction", "user"],
             requirements={
-                "reporting_threshold": 5000,  # USD for aggregated transactions
-                "filing_deadline": 30,  # days
+                "reporting_threshold": 5000,
+                "filing_deadline": 30,
                 "form_required": "FinCEN Form 111",
                 "suspicious_indicators": [
                     "structuring",
@@ -487,8 +442,6 @@ class RegulatoryFramework:
             },
             effective_date=datetime(1996, 4, 1),
         )
-
-        # CCPA Rules
         self._rules["us_ccpa_privacy"] = ComplianceRule(
             rule_id="us_ccpa_privacy",
             name="CCPA Consumer Privacy Rights",
@@ -511,10 +464,8 @@ class RegulatoryFramework:
             effective_date=datetime(2020, 1, 1),
         )
 
-    def _add_singapore_rules(self):
+    def _add_singapore_rules(self) -> Any:
         """Add Singapore-specific compliance rules."""
-
-        # PSA Rules
         self._rules["sg_psa_licensing"] = ComplianceRule(
             rule_id="sg_psa_licensing",
             name="PSA Payment Service Licensing",
@@ -532,8 +483,6 @@ class RegulatoryFramework:
             penalties={"max_fine": "S$125,000", "imprisonment": "3 years"},
             effective_date=datetime(2020, 1, 28),
         )
-
-        # PDPA Rules
         self._rules["sg_pdpa_consent"] = ComplianceRule(
             rule_id="sg_pdpa_consent",
             name="PDPA Personal Data Protection",
@@ -552,10 +501,8 @@ class RegulatoryFramework:
             effective_date=datetime(2014, 7, 2),
         )
 
-    def _add_hong_kong_rules(self):
+    def _add_hong_kong_rules(self) -> Any:
         """Add Hong Kong-specific compliance rules."""
-
-        # AMLO Rules
         self._rules["hk_amlo_cdd"] = ComplianceRule(
             rule_id="hk_amlo_cdd",
             name="AMLO Customer Due Diligence",
@@ -574,10 +521,8 @@ class RegulatoryFramework:
             effective_date=datetime(2012, 4, 1),
         )
 
-    def _add_global_rules(self):
+    def _add_global_rules(self) -> Any:
         """Add global/international compliance rules."""
-
-        # FATF Recommendations
         self._rules["global_fatf_40"] = ComplianceRule(
             rule_id="global_fatf_40",
             name="FATF 40 Recommendations",
@@ -604,22 +549,16 @@ class RegulatoryFramework:
         current_date: datetime = None,
     ) -> List[ComplianceRule]:
         """Get all applicable rules for a jurisdiction and entity type."""
-
         if current_date is None:
             current_date = datetime.utcnow()
-
         applicable_rules = []
-
         for rule in self._rules.values():
-            # Check jurisdiction match (including global rules)
             if (
                 rule.jurisdiction == jurisdiction
                 or rule.jurisdiction == Jurisdiction.GLOBAL
             ):
-                # Check if rule is applicable to entity type and date
                 if rule.is_applicable(entity_type, current_date):
                     applicable_rules.append(rule)
-
         return applicable_rules
 
     def get_rule(self, rule_id: str) -> Optional[ComplianceRule]:
@@ -640,9 +579,7 @@ class RegulatoryFramework:
         self, category: RuleCategory, jurisdiction: Jurisdiction = None
     ) -> List[ComplianceRule]:
         """Get rules filtered by category and optionally jurisdiction."""
-
         filtered_rules = []
-
         for rule in self._rules.values():
             if rule.category == category:
                 if (
@@ -651,16 +588,13 @@ class RegulatoryFramework:
                     or rule.jurisdiction == Jurisdiction.GLOBAL
                 ):
                     filtered_rules.append(rule)
-
         return filtered_rules
 
     def get_rules_by_severity(
         self, severity: RuleSeverity, jurisdiction: Jurisdiction = None
     ) -> List[ComplianceRule]:
         """Get rules filtered by severity and optionally jurisdiction."""
-
         filtered_rules = []
-
         for rule in self._rules.values():
             if rule.severity == severity:
                 if (
@@ -669,47 +603,37 @@ class RegulatoryFramework:
                     or rule.jurisdiction == Jurisdiction.GLOBAL
                 ):
                     filtered_rules.append(rule)
-
         return filtered_rules
 
-    def add_custom_rule(self, rule: ComplianceRule):
+    def add_custom_rule(self, rule: ComplianceRule) -> Any:
         """Add a custom compliance rule."""
         self._rules[rule.rule_id] = rule
 
     def update_rule(self, rule_id: str, updates: Dict[str, Any]) -> bool:
         """Update an existing rule."""
-
         if rule_id not in self._rules:
             return False
-
         rule = self._rules[rule_id]
-
         for key, value in updates.items():
             if hasattr(rule, key):
                 setattr(rule, key, value)
-
         return True
 
     def remove_rule(self, rule_id: str) -> bool:
         """Remove a rule."""
-
         if rule_id in self._rules:
             del self._rules[rule_id]
             return True
-
         return False
 
     def get_compliance_requirements(
         self, jurisdiction: Jurisdiction, entity_type: str
     ) -> Dict[str, Any]:
         """Get comprehensive compliance requirements for jurisdiction and entity type."""
-
         profile = self.get_jurisdiction_profile(jurisdiction)
         rules = self.get_applicable_rules(jurisdiction, entity_type)
-
         if not profile:
             return {}
-
         requirements = {
             "jurisdiction": jurisdiction.value,
             "jurisdiction_name": profile.name,
@@ -732,7 +656,6 @@ class RegulatoryFramework:
             "transaction_limits": profile.transaction_limits,
             "penalties": profile.penalties,
         }
-
         return requirements
 
     def validate_transaction_limits(
@@ -743,35 +666,24 @@ class RegulatoryFramework:
         transaction_type: str = "payment",
     ) -> Dict[str, Any]:
         """Validate transaction against jurisdiction limits."""
-
         profile = self.get_jurisdiction_profile(jurisdiction)
-
         if not profile:
             return {
                 "valid": False,
                 "reason": f"Unsupported jurisdiction: {jurisdiction.value}",
             }
-
         limits = profile.transaction_limits
-
-        # Convert amount to jurisdiction base currency if needed
-        # For simplicity, assuming 1:1 conversion here
-        # In practice, would use real-time exchange rates
-
         violations = []
-
         if "daily_limit" in limits and amount > limits["daily_limit"]:
             violations.append(f"Exceeds daily limit of {limits['daily_limit']}")
-
         if (
             "cash_transaction_limit" in limits
             and transaction_type == "cash"
-            and amount > limits["cash_transaction_limit"]
+            and (amount > limits["cash_transaction_limit"])
         ):
             violations.append(
                 f"Exceeds cash transaction limit of {limits['cash_transaction_limit']}"
             )
-
         return {
             "valid": len(violations) == 0,
             "violations": violations,
@@ -782,20 +694,14 @@ class RegulatoryFramework:
         self, jurisdiction: Jurisdiction, transaction_amount: float = None
     ) -> Dict[str, Any]:
         """Get reporting requirements for a jurisdiction and transaction amount."""
-
         profile = self.get_jurisdiction_profile(jurisdiction)
-
         if not profile:
             return {}
-
         reporting_reqs = profile.reporting_requirements.copy()
-
-        # Add transaction-specific requirements
         if transaction_amount:
             if "large_transaction_reporting" in reporting_reqs:
                 threshold = reporting_reqs["large_transaction_reporting"]
                 reporting_reqs["large_transaction_required"] = (
                     transaction_amount >= threshold
                 )
-
         return reporting_reqs

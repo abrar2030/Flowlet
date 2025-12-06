@@ -3,13 +3,11 @@ import io
 import logging
 from datetime import datetime, timezone
 from functools import wraps
-
 import jwt
 import pyotp
 import qrcode
 from flask import Blueprint, current_app, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
-
 from ..models.account import Account, AccountStatus, AccountType
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
@@ -20,29 +18,21 @@ from ..security.input_validator import InputValidator
 from ..security.password_security import hash_password
 from ..security.audit_logger import audit_logger
 
-# Create blueprint
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
-
-# Configure logging
 logger = logging.getLogger(__name__)
-
-# Initialize security components (using imported singletons or classes)
 token_manager = TokenManager()
-rate_limiter = RateLimiter()  # Placeholder for now
+rate_limiter = RateLimiter()
 
 
-def token_required(f):
+def token_required(f: Any) -> Any:
     """Enhanced JWT token validation decorator"""
 
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
-
-        # Get token from Authorization header
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
-
         if not token:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -59,12 +49,9 @@ def token_required(f):
                 ),
                 401,
             )
-
         try:
-            # Validate and decode token
             payload = token_manager.validate_access_token(token)
             current_user = db.session.get(User, payload["user_id"])
-
             if not current_user:
                 audit_logger.log_event(
                     event_type=AuditEventType.SECURITY_ALERT,
@@ -77,7 +64,6 @@ def token_required(f):
                     jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}),
                     401,
                 )
-
             if not current_user.is_active:
                 audit_logger.log_event(
                     event_type=AuditEventType.SECURITY_ALERT,
@@ -92,12 +78,8 @@ def token_required(f):
                     ),
                     401,
                 )
-
-            # Store current user in request context
             g.current_user = current_user
-
             return f(*args, **kwargs)
-
         except jwt.ExpiredSignatureError:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -105,7 +87,10 @@ def token_required(f):
                 severity=AuditSeverity.MEDIUM,
                 ip_address=request.remote_addr,
             )
-            return jsonify({"error": "Token has expired", "code": "TOKEN_EXPIRED"}), 401
+            return (
+                jsonify({"error": "Token has expired", "code": "TOKEN_EXPIRED"}),
+                401,
+            )
         except jwt.InvalidTokenError:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -113,7 +98,7 @@ def token_required(f):
                 severity=AuditSeverity.MEDIUM,
                 ip_address=request.remote_addr,
             )
-            return jsonify({"error": "Invalid token", "code": "TOKEN_INVALID"}), 401
+            return (jsonify({"error": "Invalid token", "code": "TOKEN_INVALID"}), 401)
         except Exception as e:
             logger.error(f"Token validation error: {str(e)}")
             return (
@@ -124,7 +109,7 @@ def token_required(f):
     return decorated
 
 
-def admin_required(f):
+def admin_required(f: Any) -> Any:
     """Decorator to require admin privileges"""
 
     @wraps(f)
@@ -154,7 +139,7 @@ def admin_required(f):
 
 @auth_bp.route("/register", methods=["POST"])
 @rate_limiter.limit("5 per minute")
-def register():
+def register() -> Any:
     """
     Enhanced user registration with comprehensive validation
     """
@@ -170,34 +155,26 @@ def register():
                 ),
                 400,
             )
-
-        # Validate required fields
         required_fields = ["email", "password", "first_name", "last_name"]
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             return (
                 jsonify(
                     {
-                        "error": f'Missing required fields: {", ".join(missing_fields)}',
+                        "error": f"Missing required fields: {', '.join(missing_fields)}",
                         "code": "MISSING_FIELDS",
                         "missing_fields": missing_fields,
                     }
                 ),
                 400,
             )
-
-        # Validate email format
         is_valid, message = InputValidator.validate_email(data["email"])
         if not is_valid:
-            return jsonify({"error": message, "code": "INVALID_EMAIL"}), 400
-        data["email"] = message  # Use the normalized email
-
-        # Validate password strength
+            return (jsonify({"error": message, "code": "INVALID_EMAIL"}), 400)
+        data["email"] = message
         is_valid, message = InputValidator.validate_password(data["password"])
         if not is_valid:
-            return jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400
-
-        # Check if user already exists
+            return (jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400)
         existing_user = db.session.execute(
             db.select(User).filter_by(email=data["email"])
         ).scalar_one_or_none()
@@ -217,12 +194,8 @@ def register():
                     }
                 ),
                 409,
-            )  # Use 409 Conflict
-
-        # Hash password securely
+            )
         password_hash = hash_password(data["password"])
-
-        # Create new user
         user = User(
             email=data["email"],
             first_name=data["first_name"],
@@ -235,30 +208,22 @@ def register():
             failed_login_attempts=0,
             password_changed_at=datetime.now(timezone.utc),
         )
-
-        # Set date of birth if provided
         if "date_of_birth" in data:
             is_valid, message, dob = InputValidator.validate_date(
                 data["date_of_birth"], "%Y-%m-%d"
             )
             if not is_valid:
-                return jsonify({"error": message, "code": "INVALID_DATE_FORMAT"}), 400
+                return (jsonify({"error": message, "code": "INVALID_DATE_FORMAT"}), 400)
             user.date_of_birth = dob
-
-        # Set address if provided
         if "address" in data and isinstance(data["address"], dict):
             address_data = data["address"]
-            # Basic sanitization, full validation should be done in a dedicated service
             user.address_street = address_data.get("street", "")
             user.address_city = address_data.get("city", "")
             user.address_state = address_data.get("state", "")
             user.address_postal_code = address_data.get("postal_code", "")
             user.address_country = address_data.get("country", "")
-
         db.session.add(user)
-        db.session.flush()  # Get the user ID
-
-        # Create default checking account for the user
+        db.session.flush()
         account = Account(
             user_id=user.id,
             account_name=f"{user.first_name}'s Checking Account",
@@ -266,14 +231,9 @@ def register():
             currency="USD",
             status=AccountStatus.ACTIVE,
         )
-
         db.session.add(account)
         db.session.commit()
-
-        # Generate email verification token (stub)
         verification_token = token_manager.generate_verification_token(user.id, "email")
-
-        # Log successful registration
         audit_logger.log_event(
             event_type=AuditEventType.USER_REGISTRATION,
             description="User registered successfully",
@@ -281,19 +241,17 @@ def register():
             severity=AuditSeverity.MEDIUM,
             ip_address=request.remote_addr,
         )
-
         return (
             jsonify(
                 {
                     "message": "User registered successfully. Please check your email for verification.",
                     "user_id": user.id,
                     "email": user.email,
-                    "verification_token": verification_token,  # Should be sent via email in production
+                    "verification_token": verification_token,
                 }
             ),
             201,
         )
-
     except IntegrityError:
         db.session.rollback()
         return (
@@ -321,7 +279,7 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 @rate_limiter.limit("10 per minute")
-def login():
+def login() -> Any:
     """
     User login endpoint with enhanced security features (2FA, brute-force protection)
     """
@@ -337,14 +295,11 @@ def login():
                 ),
                 400,
             )
-
         email = data["email"].lower()
         password = data["password"]
-
         user = db.session.execute(
             db.select(User).filter_by(email=email)
         ).scalar_one_or_none()
-
         if not user:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -359,8 +314,6 @@ def login():
                 ),
                 401,
             )
-
-        # Brute-force protection check
         if user.is_locked():
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -378,11 +331,9 @@ def login():
                 ),
                 401,
             )
-
         if not check_password(user.password_hash, password):
             user.failed_login_attempts += 1
             db.session.commit()
-
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
                 description="Login failed: incorrect password",
@@ -390,7 +341,6 @@ def login():
                 severity=AuditSeverity.MEDIUM,
                 ip_address=request.remote_addr,
             )
-
             if user.is_locked():
                 return (
                     jsonify(
@@ -401,24 +351,17 @@ def login():
                     ),
                     401,
                 )
-
             return (
                 jsonify(
                     {"error": "Invalid credentials", "code": "INVALID_CREDENTIALS"}
                 ),
                 401,
             )
-
-        # Successful password check, reset failed attempts
         user.failed_login_attempts = 0
         user.last_login_at = datetime.now(timezone.utc)
         db.session.commit()
-
-        # Check for 2FA requirement
         if user.two_factor_enabled:
-            # Generate a temporary token for 2FA verification
             temp_token = token_manager.generate_temp_token(user.id, "2fa_pending")
-
             audit_logger.log_event(
                 event_type=AuditEventType.USER_LOGIN,
                 description="Login successful, 2FA required",
@@ -426,7 +369,6 @@ def login():
                 severity=AuditSeverity.LOW,
                 ip_address=request.remote_addr,
             )
-
             return (
                 jsonify(
                     {
@@ -437,11 +379,8 @@ def login():
                 ),
                 202,
             )
-
-        # Generate final tokens
         access_token = token_manager.generate_access_token(user.id)
         refresh_token = token_manager.generate_refresh_token(user.id)
-
         audit_logger.log_event(
             event_type=AuditEventType.USER_LOGIN,
             description="Login successful",
@@ -449,7 +388,6 @@ def login():
             severity=AuditSeverity.LOW,
             ip_address=request.remote_addr,
         )
-
         return (
             jsonify(
                 {
@@ -462,7 +400,6 @@ def login():
             ),
             200,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Login error: {str(e)}", exc_info=True)
@@ -479,7 +416,7 @@ def login():
 
 @auth_bp.route("/2fa/verify", methods=["POST"])
 @rate_limiter.limit("10 per minute")
-def verify_2fa():
+def verify_2fa() -> Any:
     """Verify 2FA code and issue final tokens"""
     try:
         data = request.get_json()
@@ -488,15 +425,12 @@ def verify_2fa():
                 jsonify({"error": "Missing token or 2FA code", "code": "MISSING_DATA"}),
                 400,
             )
-
         temp_token = data["temp_token"]
         code = data["code"]
-
         try:
             payload = token_manager.validate_temp_token(temp_token)
             if payload.get("purpose") != "2fa_pending":
                 raise jwt.InvalidTokenError("Invalid token purpose")
-
             user = db.session.get(User, payload["user_id"])
             if not user or not user.two_factor_secret:
                 return (
@@ -508,7 +442,6 @@ def verify_2fa():
                     ),
                     400,
                 )
-
             totp = pyotp.TOTP(user.two_factor_secret)
             if not totp.verify(code):
                 audit_logger.log_event(
@@ -522,11 +455,8 @@ def verify_2fa():
                     jsonify({"error": "Invalid 2FA code", "code": "INVALID_2FA_CODE"}),
                     401,
                 )
-
-            # 2FA successful, generate final tokens
             access_token = token_manager.generate_access_token(user.id)
             refresh_token = token_manager.generate_refresh_token(user.id)
-
             audit_logger.log_event(
                 event_type=AuditEventType.USER_LOGIN,
                 description="2FA verification successful, user logged in",
@@ -534,7 +464,6 @@ def verify_2fa():
                 severity=AuditSeverity.LOW,
                 ip_address=request.remote_addr,
             )
-
             return (
                 jsonify(
                     {
@@ -547,7 +476,6 @@ def verify_2fa():
                 ),
                 200,
             )
-
         except jwt.ExpiredSignatureError:
             return (
                 jsonify({"error": "Temporary token expired", "code": "TOKEN_EXPIRED"}),
@@ -558,7 +486,6 @@ def verify_2fa():
                 jsonify({"error": "Invalid temporary token", "code": "TOKEN_INVALID"}),
                 401,
             )
-
     except Exception as e:
         logger.error(f"2FA verification error: {str(e)}", exc_info=True)
         return (
@@ -574,7 +501,7 @@ def verify_2fa():
 
 @auth_bp.route("/refresh", methods=["POST"])
 @rate_limiter.limit("5 per minute")
-def refresh_token():
+def refresh_token() -> Any:
     """Refresh access token using refresh token"""
     try:
         data = request.get_json()
@@ -583,14 +510,11 @@ def refresh_token():
                 jsonify({"error": "Missing refresh token", "code": "MISSING_TOKEN"}),
                 400,
             )
-
         refresh_token = data["refresh_token"]
-
         try:
             new_access_token, new_refresh_token, user_id = token_manager.refresh_tokens(
                 refresh_token
             )
-
             audit_logger.log_event(
                 event_type=AuditEventType.DATA_ACCESS,
                 description="Token refreshed successfully",
@@ -598,7 +522,6 @@ def refresh_token():
                 severity=AuditSeverity.LOW,
                 ip_address=request.remote_addr,
             )
-
             return (
                 jsonify(
                     {
@@ -611,7 +534,6 @@ def refresh_token():
                 ),
                 200,
             )
-
         except jwt.ExpiredSignatureError:
             return (
                 jsonify({"error": "Refresh token expired", "code": "TOKEN_EXPIRED"}),
@@ -622,7 +544,6 @@ def refresh_token():
                 jsonify({"error": "Invalid refresh token", "code": "TOKEN_INVALID"}),
                 401,
             )
-
     except Exception as e:
         logger.error(f"Token refresh error: {str(e)}", exc_info=True)
         return (
@@ -638,13 +559,8 @@ def refresh_token():
 
 @auth_bp.route("/logout", methods=["POST"])
 @token_required
-def logout():
+def logout() -> Any:
     """User logout (optional: blacklist token)"""
-    # In a stateless JWT system, logout is client-side.
-    # For security, we can optionally blacklist the access token.
-    # The current implementation relies on token expiry.
-
-    # Log the logout event
     audit_logger.log_event(
         event_type=AuditEventType.USER_LOGOUT,
         description="User logged out",
@@ -652,20 +568,15 @@ def logout():
         severity=AuditSeverity.LOW,
         ip_address=request.remote_addr,
     )
-
-    return jsonify({"message": "Logout successful"}), 200
-
-
-# --- 2FA Management Endpoints ---
+    return (jsonify({"message": "Logout successful"}), 200)
 
 
 @auth_bp.route("/2fa/setup", methods=["POST"])
 @token_required
-def setup_2fa():
+def setup_2fa() -> Any:
     """Initiate 2FA setup by generating a secret and QR code"""
     try:
         user = g.current_user
-
         if user.two_factor_enabled:
             return (
                 jsonify(
@@ -673,26 +584,14 @@ def setup_2fa():
                 ),
                 400,
             )
-
-        # Generate a new secret
         secret = pyotp.random_base32()
-
-        # Generate provisioning URI for QR code
         app_name = current_app.config.get("APP_NAME", "Flowlet")
         uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=user.email, issuer_name=app_name
         )
-
-        # Generate QR code image as base64 string
         img_buffer = io.BytesIO()
         qrcode.make(uri).save(img_buffer, format="PNG")
         qr_code_base64 = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
-
-        # Store the secret temporarily in the session or a temporary token
-        # For this stateless API, we'll return the secret and require it back for finalization
-        # NOTE: In a real app, this secret should be stored securely and temporarily.
-        # For now, we'll return it, but the client must treat it as highly sensitive.
-
         return (
             jsonify(
                 {
@@ -704,7 +603,6 @@ def setup_2fa():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"2FA setup error: {str(e)}", exc_info=True)
         return (
@@ -720,7 +618,7 @@ def setup_2fa():
 
 @auth_bp.route("/2fa/enable", methods=["POST"])
 @token_required
-def enable_2fa():
+def enable_2fa() -> Any:
     """Finalize 2FA setup by verifying the code and saving the secret"""
     try:
         data = request.get_json()
@@ -731,11 +629,9 @@ def enable_2fa():
                 ),
                 400,
             )
-
         user = g.current_user
         secret = data["secret"]
         code = data["code"]
-
         if user.two_factor_enabled:
             return (
                 jsonify(
@@ -743,8 +639,6 @@ def enable_2fa():
                 ),
                 400,
             )
-
-        # Verify the code with the provided secret
         totp = pyotp.TOTP(secret)
         if not totp.verify(code):
             audit_logger.log_event(
@@ -763,12 +657,9 @@ def enable_2fa():
                 ),
                 401,
             )
-
-        # Save the secret and enable 2FA
         user.two_factor_secret = secret
         user.two_factor_enabled = True
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
             description="2FA enabled successfully",
@@ -776,12 +667,10 @@ def enable_2fa():
             severity=AuditSeverity.MEDIUM,
             ip_address=request.remote_addr,
         )
-
         return (
             jsonify({"message": "Two-factor authentication enabled successfully"}),
             200,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"2FA enable error: {str(e)}", exc_info=True)
@@ -798,23 +687,19 @@ def enable_2fa():
 
 @auth_bp.route("/2fa/disable", methods=["POST"])
 @token_required
-def disable_2fa():
+def disable_2fa() -> Any:
     """Disable 2FA by verifying the code"""
     try:
         data = request.get_json()
         if not data or "code" not in data:
-            return jsonify({"error": "Missing 2FA code", "code": "MISSING_DATA"}), 400
-
+            return (jsonify({"error": "Missing 2FA code", "code": "MISSING_DATA"}), 400)
         user = g.current_user
         code = data["code"]
-
         if not user.two_factor_enabled:
             return (
                 jsonify({"error": "2FA is not enabled", "code": "2FA_NOT_ENABLED"}),
                 400,
             )
-
-        # Verify the code with the stored secret
         totp = pyotp.TOTP(user.two_factor_secret)
         if not totp.verify(code):
             audit_logger.log_event(
@@ -833,12 +718,9 @@ def disable_2fa():
                 ),
                 401,
             )
-
-        # Disable 2FA
         user.two_factor_secret = None
         user.two_factor_enabled = False
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
             description="2FA disabled successfully",
@@ -846,12 +728,10 @@ def disable_2fa():
             severity=AuditSeverity.MEDIUM,
             ip_address=request.remote_addr,
         )
-
         return (
             jsonify({"message": "Two-factor authentication disabled successfully"}),
             200,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"2FA disable error: {str(e)}", exc_info=True)
@@ -866,12 +746,9 @@ def disable_2fa():
         )
 
 
-# --- Password Management Endpoints ---
-
-
 @auth_bp.route("/password/change", methods=["POST"])
 @token_required
-def change_password():
+def change_password() -> Any:
     """Change user password"""
     try:
         data = request.get_json()
@@ -882,12 +759,9 @@ def change_password():
                 ),
                 400,
             )
-
         user = g.current_user
         old_password = data["old_password"]
         new_password = data["new_password"]
-
-        # 1. Verify old password
         if not check_password(user.password_hash, old_password):
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -902,13 +776,9 @@ def change_password():
                 ),
                 401,
             )
-
-        # 2. Validate new password strength
         is_valid, message = InputValidator.validate_password(new_password)
         if not is_valid:
-            return jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400
-
-        # 3. Check if new password is the same as old password
+            return (jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400)
         if check_password(user.password_hash, new_password):
             return (
                 jsonify(
@@ -919,12 +789,9 @@ def change_password():
                 ),
                 400,
             )
-
-        # 4. Hash and save new password
         user.password_hash = hash_password(new_password)
         user.password_changed_at = datetime.now(timezone.utc)
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.PASSWORD_CHANGE,
             description="Password changed successfully",
@@ -932,9 +799,7 @@ def change_password():
             severity=AuditSeverity.MEDIUM,
             ip_address=request.remote_addr,
         )
-
-        return jsonify({"message": "Password changed successfully"}), 200
-
+        return (jsonify({"message": "Password changed successfully"}), 200)
     except Exception as e:
         db.session.rollback()
         logger.error(f"Password change error: {str(e)}", exc_info=True)
@@ -951,19 +816,16 @@ def change_password():
 
 @auth_bp.route("/password/reset/request", methods=["POST"])
 @rate_limiter.limit("3 per hour")
-def request_password_reset():
+def request_password_reset() -> Any:
     """Request a password reset token via email"""
     try:
         data = request.get_json()
         if not data or "email" not in data:
-            return jsonify({"error": "Missing email", "code": "MISSING_DATA"}), 400
-
+            return (jsonify({"error": "Missing email", "code": "MISSING_DATA"}), 400)
         email = data["email"].lower()
         user = db.session.execute(
             db.select(User).filter_by(email=email)
         ).scalar_one_or_none()
-
-        # Always return a generic success message to prevent user enumeration
         generic_success = (
             jsonify(
                 {
@@ -972,7 +834,6 @@ def request_password_reset():
             ),
             200,
         )
-
         if not user:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
@@ -982,13 +843,7 @@ def request_password_reset():
                 ip_address=request.remote_addr,
             )
             return generic_success
-
-        # Generate a secure, time-limited reset token
         reset_token = token_manager.generate_reset_token(user.id)
-
-        # TODO: Send email with the reset token link
-        # notification_service.send_email(user.email, "Password Reset", f"Your reset link: {reset_token}")
-
         audit_logger.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
             description="Password reset token generated",
@@ -996,8 +851,6 @@ def request_password_reset():
             severity=AuditSeverity.MEDIUM,
             ip_address=request.remote_addr,
         )
-
-        # For development/testing, return the token
         if current_app.config.get("DEBUG"):
             return (
                 jsonify(
@@ -1008,9 +861,7 @@ def request_password_reset():
                 ),
                 200,
             )
-
         return generic_success
-
     except Exception as e:
         logger.error(f"Password reset request error: {str(e)}", exc_info=True)
         return (
@@ -1026,7 +877,7 @@ def request_password_reset():
 
 @auth_bp.route("/password/reset/confirm", methods=["POST"])
 @rate_limiter.limit("5 per hour")
-def confirm_password_reset():
+def confirm_password_reset() -> Any:
     """Confirm password reset with token and new password"""
     try:
         data = request.get_json()
@@ -1037,14 +888,11 @@ def confirm_password_reset():
                 ),
                 400,
             )
-
         reset_token = data["token"]
         new_password = data["new_password"]
-
         try:
             payload = token_manager.validate_reset_token(reset_token)
             user = db.session.get(User, payload["user_id"])
-
             if not user:
                 return (
                     jsonify(
@@ -1052,17 +900,12 @@ def confirm_password_reset():
                     ),
                     401,
                 )
-
-            # 1. Validate new password strength
             is_valid, message = InputValidator.validate_password(new_password)
             if not is_valid:
-                return jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400
-
-            # 2. Hash and save new password
+                return (jsonify({"error": message, "code": "WEAK_PASSWORD"}), 400)
             user.password_hash = hash_password(new_password)
             user.password_changed_at = datetime.now(timezone.utc)
             db.session.commit()
-
             audit_logger.log_event(
                 event_type=AuditEventType.PASSWORD_CHANGE,
                 description="Password reset confirmed successfully",
@@ -1070,7 +913,6 @@ def confirm_password_reset():
                 severity=AuditSeverity.HIGH,
                 ip_address=request.remote_addr,
             )
-
             return (
                 jsonify(
                     {
@@ -1079,7 +921,6 @@ def confirm_password_reset():
                 ),
                 200,
             )
-
         except jwt.ExpiredSignatureError:
             return (
                 jsonify(
@@ -1094,7 +935,6 @@ def confirm_password_reset():
                 ),
                 401,
             )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Password reset confirm error: {str(e)}", exc_info=True)
@@ -1109,26 +949,16 @@ def confirm_password_reset():
         )
 
 
-# --- Email Verification Endpoints ---
-
-
 @auth_bp.route("/verify/email/request", methods=["POST"])
 @token_required
 @rate_limiter.limit("1 per minute")
-def request_email_verification():
+def request_email_verification() -> Any:
     """Request a new email verification token"""
     try:
         user = g.current_user
-
         if user.email_verified:
-            return jsonify({"message": "Email is already verified"}), 200
-
-        # Generate email verification token
+            return (jsonify({"message": "Email is already verified"}), 200)
         verification_token = token_manager.generate_verification_token(user.id, "email")
-
-        # TODO: Send email with the verification token link
-        # notification_service.send_email(user.email, "Email Verification", f"Your verification link: {verification_token}")
-
         audit_logger.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
             description="Email verification token requested",
@@ -1136,8 +966,6 @@ def request_email_verification():
             severity=AuditSeverity.LOW,
             ip_address=request.remote_addr,
         )
-
-        # For development/testing, return the token
         if current_app.config.get("DEBUG"):
             return (
                 jsonify(
@@ -1148,12 +976,10 @@ def request_email_verification():
                 ),
                 200,
             )
-
         return (
             jsonify({"message": "Verification email sent. Please check your inbox."}),
             200,
         )
-
     except Exception as e:
         logger.error(f"Email verification request error: {str(e)}", exc_info=True)
         return (
@@ -1169,7 +995,7 @@ def request_email_verification():
 
 @auth_bp.route("/verify/email/confirm", methods=["POST"])
 @rate_limiter.limit("5 per hour")
-def confirm_email_verification():
+def confirm_email_verification() -> Any:
     """Confirm email verification with token"""
     try:
         data = request.get_json()
@@ -1180,13 +1006,10 @@ def confirm_email_verification():
                 ),
                 400,
             )
-
         verification_token = data["token"]
-
         try:
             payload = token_manager.validate_verification_token(verification_token)
             user = db.session.get(User, payload["user_id"])
-
             if not user or payload.get("purpose") != "email_verification":
                 return (
                     jsonify(
@@ -1194,13 +1017,10 @@ def confirm_email_verification():
                     ),
                     401,
                 )
-
             if user.email_verified:
-                return jsonify({"message": "Email is already verified"}), 200
-
+                return (jsonify({"message": "Email is already verified"}), 200)
             user.email_verified = True
             db.session.commit()
-
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,
                 description="Email verified successfully",
@@ -1208,9 +1028,7 @@ def confirm_email_verification():
                 severity=AuditSeverity.MEDIUM,
                 ip_address=request.remote_addr,
             )
-
-            return jsonify({"message": "Email verified successfully"}), 200
-
+            return (jsonify({"message": "Email verified successfully"}), 200)
         except jwt.ExpiredSignatureError:
             return (
                 jsonify(
@@ -1225,7 +1043,6 @@ def confirm_email_verification():
                 ),
                 401,
             )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Email verification confirm error: {str(e)}", exc_info=True)
@@ -1240,12 +1057,9 @@ def confirm_email_verification():
         )
 
 
-# --- Utility Endpoints ---
-
-
 @auth_bp.route("/status", methods=["GET"])
 @token_required
-def status():
+def status() -> Any:
     """Check user authentication status"""
     user = g.current_user
     return (

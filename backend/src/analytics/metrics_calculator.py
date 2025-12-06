@@ -4,11 +4,9 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 import numpy as np
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
-
 from .data_models import CustomerAnalytics, PerformanceMetrics, TransactionAnalytics
 
 
@@ -50,7 +48,7 @@ class MetricDefinition:
     filters: Dict[str, Any] = None
     parameters: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if self.filters is None:
             self.filters = {}
         if self.parameters is None:
@@ -70,7 +68,7 @@ class MetricResult:
     period_end: datetime
     metadata: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> Any:
         if self.metadata is None:
             self.metadata = {}
 
@@ -87,7 +85,7 @@ class MetricsCalculator:
     - Performance optimization
     """
 
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: Session) -> Any:
         self.db = db_session
         self.logger = logging.getLogger(__name__)
         self._metric_definitions = self._load_default_metrics()
@@ -112,39 +110,27 @@ class MetricsCalculator:
         Returns:
             MetricResult containing the calculated value and metadata
         """
-
         if metric_name not in self._metric_definitions:
             raise ValueError(f"Unknown metric: {metric_name}")
-
         metric_def = self._metric_definitions[metric_name]
-
-        # Merge filters
         combined_filters = {**metric_def.filters}
         if filters:
             combined_filters.update(filters)
-
         try:
-            # Calculate current value
             current_value = self._calculate_metric_value(
                 metric_def, start_date, end_date, combined_filters
             )
-
-            # Calculate previous period value for comparison
             period_duration = end_date - start_date
             prev_start = start_date - period_duration
             prev_end = start_date
-
             previous_value = self._calculate_metric_value(
                 metric_def, prev_start, prev_end, combined_filters
             )
-
-            # Calculate change percentage
             change_percentage = None
             if previous_value and previous_value != 0:
                 change_percentage = (
-                    (current_value - previous_value) / previous_value
-                ) * 100
-
+                    (current_value - previous_value) / previous_value * 100
+                )
             result = MetricResult(
                 metric_name=metric_name,
                 value=current_value,
@@ -159,10 +145,8 @@ class MetricsCalculator:
                     "filters_applied": combined_filters,
                 },
             )
-
             self.logger.info(f"Calculated metric {metric_name}: {current_value}")
             return result
-
         except Exception as e:
             self.logger.error(f"Error calculating metric {metric_name}: {str(e)}")
             raise
@@ -175,7 +159,6 @@ class MetricsCalculator:
         filters: Dict[str, Any] = None,
     ) -> List[MetricResult]:
         """Calculate multiple metrics in batch."""
-
         results = []
         for metric_name in metric_names:
             try:
@@ -185,8 +168,6 @@ class MetricsCalculator:
                 results.append(result)
             except Exception as e:
                 self.logger.error(f"Error calculating metric {metric_name}: {str(e)}")
-                # Continue with other metrics
-
         return results
 
     def _calculate_metric_value(
@@ -197,7 +178,6 @@ class MetricsCalculator:
         filters: Dict[str, Any],
     ) -> float:
         """Calculate the actual metric value based on definition."""
-
         if metric_def.data_source == "transactions":
             return self._calculate_transaction_metric(
                 metric_def, start_date, end_date, filters
@@ -221,16 +201,12 @@ class MetricsCalculator:
         filters: Dict[str, Any],
     ) -> float:
         """Calculate metrics based on transaction data."""
-
-        # Base query
         query = self.db.query(TransactionAnalytics).filter(
             and_(
                 TransactionAnalytics.transaction_date >= start_date,
                 TransactionAnalytics.transaction_date <= end_date,
             )
         )
-
-        # Apply filters
         if "currency" in filters:
             query = query.filter(TransactionAnalytics.currency.in_(filters["currency"]))
         if "transaction_type" in filters:
@@ -245,76 +221,58 @@ class MetricsCalculator:
             query = query.filter(TransactionAnalytics.amount >= filters["min_amount"])
         if "max_amount" in filters:
             query = query.filter(TransactionAnalytics.amount <= filters["max_amount"])
-
-        # Calculate based on metric name and aggregation
         if metric_def.name == "total_transaction_count":
             return float(query.count())
-
         elif metric_def.name == "total_transaction_volume":
             result = query.with_entities(func.sum(TransactionAnalytics.amount)).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "average_transaction_amount":
             result = query.with_entities(func.avg(TransactionAnalytics.amount)).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "median_transaction_amount":
             amounts = [float(t.amount) for t in query.all()]
             return float(np.median(amounts)) if amounts else 0.0
-
         elif metric_def.name == "transaction_volume_growth_rate":
-            # This requires comparison with previous period
             current_volume = query.with_entities(
                 func.sum(TransactionAnalytics.amount)
             ).scalar()
             return float(current_volume) if current_volume else 0.0
-
         elif metric_def.name == "high_risk_transaction_ratio":
             total_count = query.count()
             high_risk_count = query.filter(
                 TransactionAnalytics.risk_score > 0.7
             ).count()
-            return (high_risk_count / total_count) if total_count > 0 else 0.0
-
+            return high_risk_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "fraud_detection_rate":
             total_count = query.count()
             fraud_count = query.filter(
                 TransactionAnalytics.fraud_probability > 0.5
             ).count()
-            return (fraud_count / total_count) if total_count > 0 else 0.0
-
+            return fraud_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "average_risk_score":
             result = query.with_entities(
                 func.avg(TransactionAnalytics.risk_score)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "cross_border_transaction_ratio":
             total_count = query.count()
-            # Assuming domestic transactions have specific country codes
             cross_border_count = query.filter(
                 TransactionAnalytics.country_code.notin_(["US", "domestic"])
             ).count()
-            return (cross_border_count / total_count) if total_count > 0 else 0.0
-
+            return cross_border_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "large_transaction_count":
-            # Transactions over $10,000
             return float(query.filter(TransactionAnalytics.amount > 10000).count())
-
         elif metric_def.name == "suspicious_activity_ratio":
             total_count = query.count()
             suspicious_count = query.filter(
                 TransactionAnalytics.suspicious_activity == True
             ).count()
-            return (suspicious_count / total_count) if total_count > 0 else 0.0
-
+            return suspicious_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "revenue_estimate":
-            # Assuming 2.9% transaction fee
             total_volume = query.with_entities(
                 func.sum(TransactionAnalytics.amount)
             ).scalar()
             return float(total_volume * Decimal("0.029")) if total_volume else 0.0
-
         else:
             raise ValueError(f"Unknown transaction metric: {metric_def.name}")
 
@@ -326,10 +284,7 @@ class MetricsCalculator:
         filters: Dict[str, Any],
     ) -> float:
         """Calculate metrics based on customer data."""
-
         query = self.db.query(CustomerAnalytics)
-
-        # Apply filters
         if "lifecycle_stage" in filters:
             query = query.filter(
                 CustomerAnalytics.lifecycle_stage.in_(filters["lifecycle_stage"])
@@ -340,53 +295,44 @@ class MetricsCalculator:
             query = query.filter(
                 CustomerAnalytics.overall_risk_score <= filters["max_risk_score"]
             )
-
         if metric_def.name == "total_customer_count":
             return float(query.count())
-
         elif metric_def.name == "average_customer_ltv":
             result = query.with_entities(
                 func.avg(CustomerAnalytics.predicted_ltv)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "high_value_customer_ratio":
             total_count = query.count()
-            # Top 20% by LTV
             ltv_threshold = query.with_entities(
                 func.percentile_cont(0.8).within_group(CustomerAnalytics.predicted_ltv)
             ).scalar()
             high_value_count = query.filter(
                 CustomerAnalytics.predicted_ltv >= ltv_threshold
             ).count()
-            return (high_value_count / total_count) if total_count > 0 else 0.0
-
+            return high_value_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "customer_churn_risk":
             result = query.with_entities(
                 func.avg(CustomerAnalytics.churn_probability)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "active_customer_ratio":
             total_count = query.count()
             active_count = query.filter(
                 CustomerAnalytics.lifecycle_stage == "active"
             ).count()
-            return (active_count / total_count) if total_count > 0 else 0.0
-
+            return active_count / total_count if total_count > 0 else 0.0
         elif metric_def.name == "average_account_age":
             result = query.with_entities(
                 func.avg(CustomerAnalytics.account_age_days)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "kyc_completion_rate":
             total_count = query.count()
             completed_count = query.filter(
                 CustomerAnalytics.kyc_status == "completed"
             ).count()
-            return (completed_count / total_count) if total_count > 0 else 0.0
-
+            return completed_count / total_count if total_count > 0 else 0.0
         else:
             raise ValueError(f"Unknown customer metric: {metric_def.name}")
 
@@ -398,50 +344,41 @@ class MetricsCalculator:
         filters: Dict[str, Any],
     ) -> float:
         """Calculate metrics based on performance data."""
-
         query = self.db.query(PerformanceMetrics).filter(
             and_(
                 PerformanceMetrics.measurement_timestamp >= start_date,
                 PerformanceMetrics.measurement_timestamp <= end_date,
             )
         )
-
-        # Apply filters
         if "service_name" in filters:
             query = query.filter(
                 PerformanceMetrics.service_name.in_(filters["service_name"])
             )
-
         if metric_def.name == "average_response_time":
             result = query.with_entities(
                 func.avg(PerformanceMetrics.response_time_ms)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "system_availability":
             result = query.with_entities(
                 func.avg(PerformanceMetrics.transaction_success_rate)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "total_throughput":
             result = query.with_entities(
                 func.sum(PerformanceMetrics.throughput_rps)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "average_error_rate":
             result = query.with_entities(
                 func.avg(PerformanceMetrics.error_rate)
             ).scalar()
             return float(result) if result else 0.0
-
         elif metric_def.name == "peak_response_time":
             result = query.with_entities(
                 func.max(PerformanceMetrics.response_time_ms)
             ).scalar()
             return float(result) if result else 0.0
-
         else:
             raise ValueError(f"Unknown performance metric: {metric_def.name}")
 
@@ -459,8 +396,6 @@ class MetricsCalculator:
         Returns:
             Dictionary containing trend analysis results
         """
-
-        # Calculate period duration
         if period_type == "daily":
             period_delta = timedelta(days=1)
         elif period_type == "weekly":
@@ -469,15 +404,11 @@ class MetricsCalculator:
             period_delta = timedelta(days=30)
         else:
             raise ValueError(f"Unknown period type: {period_type}")
-
-        # Calculate metrics for each period
         end_date = datetime.utcnow()
         trend_data = []
-
         for i in range(periods):
-            period_end = end_date - (period_delta * i)
+            period_end = end_date - period_delta * i
             period_start = period_end - period_delta
-
             try:
                 result = self.calculate_metric(metric_name, period_start, period_end)
                 trend_data.append(
@@ -490,23 +421,13 @@ class MetricsCalculator:
                 )
             except Exception as e:
                 self.logger.error(f"Error calculating trend for period {i}: {str(e)}")
-
-        # Reverse to get chronological order
         trend_data.reverse()
-
-        # Calculate trend statistics
         values = [data["value"] for data in trend_data]
-
         if len(values) >= 2:
-            # Linear regression for trend
             x = np.arange(len(values))
             y = np.array(values)
             slope, intercept = np.polyfit(x, y, 1)
-
-            # Calculate correlation coefficient
             correlation = np.corrcoef(x, y)[0, 1] if len(values) > 1 else 0
-
-            # Determine trend direction
             if slope > 0:
                 trend_direction = "increasing"
             elif slope < 0:
@@ -517,7 +438,6 @@ class MetricsCalculator:
             slope = 0
             correlation = 0
             trend_direction = "insufficient_data"
-
         return {
             "metric_name": metric_name,
             "period_type": period_type,
@@ -553,9 +473,7 @@ class MetricsCalculator:
         Returns:
             Dictionary containing comparative analysis results
         """
-
         comparison_results = []
-
         for i, filters in enumerate(comparison_filters):
             try:
                 result = self.calculate_metric(
@@ -563,7 +481,7 @@ class MetricsCalculator:
                 )
                 comparison_results.append(
                     {
-                        "segment": f"Segment_{i+1}",
+                        "segment": f"Segment_{i + 1}",
                         "filters": filters,
                         "value": result.value,
                         "change_percentage": result.change_percentage,
@@ -573,14 +491,10 @@ class MetricsCalculator:
                 self.logger.error(
                     f"Error calculating comparative metric for segment {i}: {str(e)}"
                 )
-
-        # Calculate comparative statistics
         values = [result["value"] for result in comparison_results]
-
         if values:
             best_segment = max(comparison_results, key=lambda x: x["value"])
             worst_segment = min(comparison_results, key=lambda x: x["value"])
-
             return {
                 "metric_name": metric_name,
                 "period": {
@@ -623,17 +537,11 @@ class MetricsCalculator:
         Returns:
             Dictionary containing percentile analysis results
         """
-
         if percentiles is None:
             percentiles = [25, 50, 75, 90, 95, 99]
-
-        # Get the metric definition
         if metric_name not in self._metric_definitions:
             raise ValueError(f"Unknown metric: {metric_name}")
-
         metric_def = self._metric_definitions[metric_name]
-
-        # Get raw data for percentile calculation
         if metric_def.data_source == "transactions":
             query = self.db.query(TransactionAnalytics).filter(
                 and_(
@@ -641,21 +549,16 @@ class MetricsCalculator:
                     TransactionAnalytics.transaction_date <= end_date,
                 )
             )
-
             if metric_name == "transaction_amounts":
                 values = [float(t.amount) for t in query.all()]
             elif metric_name == "risk_scores":
                 values = [float(t.risk_score) for t in query.all() if t.risk_score]
             else:
-                # For other metrics, calculate individual values
                 values = []
                 for transaction in query.all():
-                    # This would need specific logic for each metric
                     pass
-
         elif metric_def.data_source == "customers":
             query = self.db.query(CustomerAnalytics)
-
             if metric_name == "customer_ltv":
                 values = [
                     float(c.predicted_ltv) for c in query.all() if c.predicted_ltv
@@ -668,21 +571,16 @@ class MetricsCalculator:
                 ]
             else:
                 values = []
-
         else:
             values = []
-
         if not values:
             return {
                 "metric_name": metric_name,
                 "error": "No data available for percentile analysis",
             }
-
-        # Calculate percentiles
         percentile_results = {}
         for p in percentiles:
             percentile_results[f"p{p}"] = float(np.percentile(values, p))
-
         return {
             "metric_name": metric_name,
             "period": {"start": start_date.isoformat(), "end": end_date.isoformat()},
@@ -699,10 +597,7 @@ class MetricsCalculator:
 
     def _load_default_metrics(self) -> Dict[str, MetricDefinition]:
         """Load default metric definitions."""
-
         metrics = {}
-
-        # Financial Metrics
         metrics["total_transaction_count"] = MetricDefinition(
             name="total_transaction_count",
             type=MetricType.FINANCIAL,
@@ -711,7 +606,6 @@ class MetricsCalculator:
             aggregation=AggregationType.COUNT,
             data_source="transactions",
         )
-
         metrics["total_transaction_volume"] = MetricDefinition(
             name="total_transaction_volume",
             type=MetricType.FINANCIAL,
@@ -720,7 +614,6 @@ class MetricsCalculator:
             aggregation=AggregationType.SUM,
             data_source="transactions",
         )
-
         metrics["average_transaction_amount"] = MetricDefinition(
             name="average_transaction_amount",
             type=MetricType.FINANCIAL,
@@ -729,7 +622,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="transactions",
         )
-
         metrics["revenue_estimate"] = MetricDefinition(
             name="revenue_estimate",
             type=MetricType.FINANCIAL,
@@ -738,8 +630,6 @@ class MetricsCalculator:
             aggregation=AggregationType.SUM,
             data_source="transactions",
         )
-
-        # Risk Metrics
         metrics["high_risk_transaction_ratio"] = MetricDefinition(
             name="high_risk_transaction_ratio",
             type=MetricType.RISK,
@@ -748,7 +638,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="transactions",
         )
-
         metrics["fraud_detection_rate"] = MetricDefinition(
             name="fraud_detection_rate",
             type=MetricType.RISK,
@@ -757,7 +646,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="transactions",
         )
-
         metrics["average_risk_score"] = MetricDefinition(
             name="average_risk_score",
             type=MetricType.RISK,
@@ -766,8 +654,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="transactions",
         )
-
-        # Customer Metrics
         metrics["total_customer_count"] = MetricDefinition(
             name="total_customer_count",
             type=MetricType.CUSTOMER,
@@ -776,7 +662,6 @@ class MetricsCalculator:
             aggregation=AggregationType.COUNT,
             data_source="customers",
         )
-
         metrics["average_customer_ltv"] = MetricDefinition(
             name="average_customer_ltv",
             type=MetricType.CUSTOMER,
@@ -785,7 +670,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="customers",
         )
-
         metrics["customer_churn_risk"] = MetricDefinition(
             name="customer_churn_risk",
             type=MetricType.CUSTOMER,
@@ -794,8 +678,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="customers",
         )
-
-        # Performance Metrics
         metrics["average_response_time"] = MetricDefinition(
             name="average_response_time",
             type=MetricType.PERFORMANCE,
@@ -804,7 +686,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="performance",
         )
-
         metrics["system_availability"] = MetricDefinition(
             name="system_availability",
             type=MetricType.PERFORMANCE,
@@ -813,8 +694,6 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="performance",
         )
-
-        # Compliance Metrics
         metrics["large_transaction_count"] = MetricDefinition(
             name="large_transaction_count",
             type=MetricType.COMPLIANCE,
@@ -824,7 +703,6 @@ class MetricsCalculator:
             data_source="transactions",
             filters={"min_amount": 10000},
         )
-
         metrics["suspicious_activity_ratio"] = MetricDefinition(
             name="suspicious_activity_ratio",
             type=MetricType.COMPLIANCE,
@@ -833,10 +711,9 @@ class MetricsCalculator:
             aggregation=AggregationType.AVERAGE,
             data_source="transactions",
         )
-
         return metrics
 
-    def add_custom_metric(self, metric_definition: MetricDefinition):
+    def add_custom_metric(self, metric_definition: MetricDefinition) -> Any:
         """Add a custom metric definition."""
         self._metric_definitions[metric_definition.name] = metric_definition
         self.logger.info(f"Added custom metric: {metric_definition.name}")
@@ -858,7 +735,6 @@ class MetricsCalculator:
         self, start_date: datetime, end_date: datetime
     ) -> Dict[str, Any]:
         """Calculate a comprehensive KPI dashboard."""
-
         key_metrics = [
             "total_transaction_count",
             "total_transaction_volume",
@@ -871,10 +747,7 @@ class MetricsCalculator:
             "average_response_time",
             "system_availability",
         ]
-
         results = self.calculate_multiple_metrics(key_metrics, start_date, end_date)
-
-        # Format for dashboard
         kpi_data = {}
         for result in results:
             kpi_data[result.metric_name] = {
@@ -887,7 +760,6 @@ class MetricsCalculator:
                     else "down"
                 ),
             }
-
         return {
             "period": {"start": start_date.isoformat(), "end": end_date.isoformat()},
             "kpis": kpi_data,

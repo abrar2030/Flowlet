@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
-
 from sqlalchemy import (
     Boolean,
     Column,
@@ -14,10 +13,9 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
-    BigInteger,  # Added BigInteger from app/
+    BigInteger,
 )
 from sqlalchemy.orm import relationship
-
 from .database import Base, db
 
 
@@ -36,45 +34,30 @@ class AccountStatus(PyEnum):
 
     ACTIVE = "active"
     INACTIVE = "inactive"
-    SUSPENDED = "suspended"  # From src/
+    SUSPENDED = "suspended"
     CLOSED = "closed"
     FROZEN = "frozen"
-    PENDING_APPROVAL = "pending_approval"  # From app/
+    PENDING_APPROVAL = "pending_approval"
 
 
 class Account(Base):
     """Account model with merged features"""
 
     __tablename__ = "accounts"
-
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-
-    # Relationships
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
-    user = relationship(
-        "User", back_populates="wallets"
-    )  # Assuming User model has 'wallets' relationship
+    user = relationship("User", back_populates="wallets")
     transactions = relationship("Transaction", back_populates="account", lazy="dynamic")
-    cards = relationship(
-        "Card", back_populates="account", lazy="dynamic"
-    )  # Added from app/
-
-    # Account identification
-    account_name = Column(String(100), nullable=False)  # From src/
-    account_number = Column(
-        String(20), unique=True, nullable=False, index=True
-    )  # From src/
-    account_type = Column(db.Enum(AccountType), nullable=False)  # From src/
-
-    # Account status and settings
+    cards = relationship("Card", back_populates="account", lazy="dynamic")
+    account_name = Column(String(100), nullable=False)
+    account_number = Column(String(20), unique=True, nullable=False, index=True)
+    account_type = Column(db.Enum(AccountType), nullable=False)
     status = Column(
         db.Enum(AccountStatus), default=AccountStatus.ACTIVE, nullable=False
-    )  # From src/
-    currency = Column(String(3), default="USD", nullable=False)  # From src/
-    is_primary = Column(Boolean, nullable=False, default=False)  # From app/
-    overdraft_protection = Column(Boolean, nullable=False, default=False)  # From app/
-
-    # Balances (using Numeric/Decimal from src/ for precision)
+    )
+    currency = Column(String(3), default="USD", nullable=False)
+    is_primary = Column(Boolean, nullable=False, default=False)
+    overdraft_protection = Column(Boolean, nullable=False, default=False)
     balance = Column(
         Numeric(precision=20, scale=8), default=Decimal("0.00000000"), nullable=False
     )
@@ -84,52 +67,34 @@ class Account(Base):
     pending_balance = Column(
         Numeric(precision=20, scale=8), default=Decimal("0.00000000"), nullable=False
     )
-
-    # Balances (using BigInteger from app/ for cents - keeping for now)
     available_balance_cents = Column(BigInteger, nullable=True, default=0)
     current_balance_cents = Column(BigInteger, nullable=True, default=0)
     pending_balance_cents = Column(BigInteger, nullable=True, default=0)
-
-    # Limits and restrictions (using Numeric/Decimal from src/)
     daily_limit = Column(Numeric(20, 2), default=Decimal("5000.00"), nullable=False)
     monthly_limit = Column(Numeric(20, 2), default=Decimal("50000.00"), nullable=False)
     yearly_limit = Column(Numeric(20, 2), default=Decimal("500000.00"), nullable=False)
-
-    # Limits (using BigInteger from app/ for cents - keeping for now)
     daily_limit_cents = Column(BigInteger, nullable=True)
     monthly_limit_cents = Column(BigInteger, nullable=True)
     yearly_limit_cents = Column(BigInteger, nullable=True)
-
-    # Interest and fees (for savings/credit accounts)
-    interest_rate = Column(Numeric(5, 4), default=Decimal("0.0000"))  # From src/
-    overdraft_limit = Column(Numeric(20, 2), default=Decimal("0.00"))  # From src/
-    minimum_balance = Column(Numeric(20, 2), default=Decimal("0.00"))  # From src/
-    monthly_fee_cents = Column(BigInteger, nullable=False, default=0)  # From app/
-
-    # Credit accounts specific fields (from app/)
+    interest_rate = Column(Numeric(5, 4), default=Decimal("0.0000"))
+    overdraft_limit = Column(Numeric(20, 2), default=Decimal("0.00"))
+    minimum_balance = Column(Numeric(20, 2), default=Decimal("0.00"))
+    monthly_fee_cents = Column(BigInteger, nullable=False, default=0)
     credit_limit_cents = Column(BigInteger, nullable=True, default=0)
     minimum_payment_cents = Column(BigInteger, nullable=True, default=0)
-
-    # Banking details (from app/)
     routing_number = Column(String(9), nullable=True)
     swift_code = Column(String(11), nullable=True)
     iban = Column(String(34), nullable=True)
-
-    # Compliance and risk management
-    risk_score = Column(Integer, default=0)  # From src/
+    risk_score = Column(Integer, default=0)
     last_activity_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )  # From src/
-    dormant_since = Column(DateTime(timezone=True), nullable=True)  # From src/
-
-    # Compliance and audit (from app/)
+    )
+    dormant_since = Column(DateTime(timezone=True), nullable=True)
     opened_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
     closed_at = Column(DateTime(timezone=True), nullable=True)
     last_statement_date = Column(DateTime(timezone=True), nullable=True)
-
-    # Audit fields
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -138,27 +103,21 @@ class Account(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
-
-    # Soft delete (from app/)
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-
-    # Indexes
     __table_args__ = (
         Index("idx_account_user_currency", "user_id", "currency"),
         Index("idx_account_status", "status"),
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> Any:
         super().__init__(**kwargs)
         if not self.account_number:
             self.account_number = self.generate_account_number()
 
     @staticmethod
-    def generate_account_number():
-        # In a real system, this would require a database check loop
+    def generate_account_number() -> Any:
         return "".join([str(random.randint(0, 9)) for _ in range(16)])
 
-    # Balance property methods (from app/ - using cents)
     @property
     def available_balance_cents_prop(self) -> Decimal:
         """Get available balance as Decimal from cents"""
@@ -205,7 +164,7 @@ class Account(Base):
     def daily_limit_cents_prop(self) -> Decimal:
         """Get daily limit as Decimal from cents"""
         if self.daily_limit_cents is None:
-            return Decimal("5000")  # Default $5,000
+            return Decimal("5000")
         return Decimal(self.daily_limit_cents) / 100
 
     @daily_limit_cents_prop.setter
@@ -213,7 +172,6 @@ class Account(Base):
         """Set daily limit from Decimal to cents"""
         self.daily_limit_cents = int(Decimal(str(value)) * 100)
 
-    # Methods from app/
     def format_currency(self, amount_cents: int) -> str:
         """Format currency amount for display"""
         amount = Decimal(amount_cents) / 100
@@ -223,12 +181,9 @@ class Account(Base):
         """Check if withdrawal is allowed"""
         if self.status != AccountStatus.ACTIVE:
             return False
-
         if self.account_type == AccountType.CREDIT:
-            # For credit accounts, check against credit limit
-            return amount <= (self.credit_limit - self.current_balance_cents_prop)
+            return amount <= self.credit_limit - self.current_balance_cents_prop
         else:
-            # For other accounts, check against available balance
             return amount <= self.available_balance_cents_prop
 
     def is_over_limit(self, amount: Decimal) -> bool:
@@ -245,7 +200,6 @@ class Account(Base):
         """Calculate available credit for credit accounts"""
         if self.account_type != AccountType.CREDIT:
             return Decimal("0")
-
         return self.credit_limit - self.current_balance_cents_prop
 
     def is_active(self) -> bool:
@@ -261,7 +215,7 @@ class Account(Base):
         """Freeze the account"""
         self.status = AccountStatus.FROZEN
 
-    def to_dict(self, include_sensitive=False):
+    def to_dict(self, include_sensitive: Any = False) -> Any:
         """Convert to dictionary with optional sensitive data - Merged from both"""
         data = {
             "id": self.id,
@@ -276,7 +230,6 @@ class Account(Base):
             "is_primary": self.is_primary,
             "opened_at": self.opened_at.isoformat() if self.opened_at else None,
         }
-
         if self.account_type == AccountType.CREDIT:
             data.update(
                 {
@@ -284,7 +237,6 @@ class Account(Base):
                     "available_credit": str(self.calculate_available_credit()),
                 }
             )
-
         if include_sensitive:
             data.update(
                 {
@@ -302,8 +254,7 @@ class Account(Base):
                     "risk_score": self.risk_score,
                 }
             )
-
         return data
 
-    def __repr__(self):
+    def __repr__(self) -> Any:
         return f"<Account {self.account_number} ({self.account_type.value})>"

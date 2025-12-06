@@ -2,11 +2,8 @@ import os
 import logging
 from decimal import Decimal
 from typing import Any, Dict
-
 import stripe
 from stripe import CardError, StripeError
-
-
 from ..services.payment_service_errors import PaymentProcessorError
 
 logger = logging.getLogger(__name__)
@@ -18,15 +15,11 @@ class StripeClient:
     API key is loaded from the STRIPE_SECRET_KEY environment variable.
     """
 
-    def __init__(self):
-        # Load API key from environment variable
+    def __init__(self) -> Any:
         self.api_key = os.environ.get("STRIPE_SECRET_KEY")
         if not self.api_key:
             logger.error("STRIPE_SECRET_KEY environment variable not set.")
-            # In a real application, this should raise a critical error
-            # For this refactoring, we'll proceed but log the issue
-            self.api_key = "sk_test_mock_key"  # Mock key for testing/dev
-
+            self.api_key = "sk_test_mock_key"
         stripe.api_key = self.api_key
         logger.info("Stripe client initialized.")
 
@@ -34,7 +27,7 @@ class StripeClient:
         self,
         amount: Decimal,
         currency: str,
-        source: str,  # Token or source ID
+        source: str,
         description: str,
         metadata: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
@@ -54,20 +47,16 @@ class StripeClient:
         Raises:
             PaymentProcessorError: If the Stripe API call fails.
         """
-        # Stripe expects amount in cents (or smallest currency unit)
-        # We need to handle the case where the amount is a Decimal
         try:
             amount_in_smallest_unit = int(amount * 100)
         except Exception:
             raise PaymentProcessorError(
                 "Invalid amount format for Stripe charge.", "INVALID_AMOUNT_FORMAT", 400
             )
-
         try:
             logger.info(
                 f"Attempting to create Stripe charge for {amount} {currency}..."
             )
-            # Mocking the Stripe call if the key is the mock key
             if self.api_key == "sk_test_mock_key":
                 logger.warning(
                     "Using mock Stripe client. No actual charge will be created."
@@ -80,7 +69,6 @@ class StripeClient:
                     "description": description,
                     "metadata": metadata or {},
                 }
-
             charge = stripe.Charge.create(
                 amount=amount_in_smallest_unit,
                 currency=currency.lower(),
@@ -90,7 +78,6 @@ class StripeClient:
             )
             logger.info(f"Stripe charge successful: {charge.id}")
             return charge.to_dict()
-
         except CardError as e:
             logger.warning(f"Stripe CardError: {e.user_message}")
             raise PaymentProcessorError(
@@ -119,11 +106,8 @@ class StripeClient:
         """
         Validates and processes a Stripe webhook event.
         """
-        # This is a placeholder as the original code didn't provide the webhook secret
-        # and the Flask request object is not available here.
         logger.info("Mocking Stripe webhook handling.")
         return {"status": "success", "event": "mock_event"}
 
 
-# Initialize the client globally or use a factory pattern
 stripe_client = StripeClient()

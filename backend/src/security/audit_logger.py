@@ -1,38 +1,26 @@
 import logging
 from typing import Any, Dict, Optional
-
 from sqlalchemy.exc import SQLAlchemyError
-
 from ..models.audit_log import AuditEventType, AuditLog, AuditSeverity
 from ..models.database import db
 
-"""
-Audit Logging Service for Flowlet Financial Backend
-This service provides functions to log events to the database using the AuditLog model.
-"""
-
-
-# Import the model and database instance
-
-# Configure logging
+"\nAudit Logging Service for Flowlet Financial Backend\nThis service provides functions to log events to the database using the AuditLog model.\n"
 logger = logging.getLogger(__name__)
 
 
 class AuditLogger:
     """Service class for logging audit events."""
 
-    def __init__(self, app=None):
-        # The logger can be initialized without an app, but logging to DB requires app context
+    def __init__(self, app: Any = None) -> Any:
         self.app = app
 
-    def _log_to_db(self, audit_log_instance: AuditLog):
+    def _log_to_db(self, audit_log_instance: AuditLog) -> Any:
         """Internal function to commit the AuditLog instance to the database."""
         if not self.app:
             logger.warning(
                 "AuditLogger not initialized with Flask app. Logging only to console."
             )
             return
-
         with self.app.app_context():
             try:
                 db.session.add(audit_log_instance)
@@ -52,7 +40,7 @@ class AuditLogger:
         severity: AuditSeverity = AuditSeverity.LOW,
         details: Optional[Dict[str, Any]] = None,
         **kwargs,
-    ):
+    ) -> Any:
         """
         Creates and logs a new audit event.
 
@@ -63,7 +51,6 @@ class AuditLogger:
         :param details: A dictionary of additional details to store as JSON.
         :param kwargs: Additional fields for the AuditLog model (e.g., ip_address, endpoint).
         """
-
         audit_log = AuditLog(
             event_type=event_type,
             description=description,
@@ -71,21 +58,14 @@ class AuditLogger:
             severity=severity,
             **kwargs,
         )
-
-        # Set details, which handles JSON serialization
         audit_log.set_details(details)
-
-        # Log to console/file for immediate visibility
         log_message = (
             f"AUDIT: [{severity.value.upper()}] {event_type.value} - {description}"
         )
         if user_id:
             log_message += f" (User: {user_id})"
         logger.info(log_message)
-
-        # Log to database
         self._log_to_db(audit_log)
-
         return audit_log
 
     def log_user_action(
@@ -95,7 +75,7 @@ class AuditLogger:
         resource_type: Optional[str] = None,
         resource_id: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> Any:
         """Log a user action."""
         return self.log_event(
             event_type=AuditEventType.DATA_ACCESS,
@@ -113,7 +93,7 @@ class AuditLogger:
         user_id: Optional[str] = None,
         severity: AuditSeverity = AuditSeverity.HIGH,
         details: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> Any:
         """Log a security-related event."""
         return self.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
@@ -129,7 +109,7 @@ class AuditLogger:
         action: str,
         user_id: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> Any:
         """Log a transaction-related event."""
         event_type = (
             AuditEventType.TRANSACTION_CREATED
@@ -147,5 +127,4 @@ class AuditLogger:
         )
 
 
-# Global instance of the logger (to be initialized with app later)
 audit_logger = AuditLogger()

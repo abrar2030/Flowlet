@@ -1,28 +1,23 @@
 import logging
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import select
-
 from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 from ..models.transaction import Transaction, TransactionType
 from ..models.user import User
 from ..security.audit_logger import audit_logger
-from .auth import Admin  # Assuming decorators are defined here for now
+from .auth import Admin
 
-# Create blueprint
 compliance_bp = Blueprint("compliance", __name__, url_prefix="/api/v1/compliance")
-
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
 @compliance_bp.route("/sar-report", methods=["POST"])
 @admin_required
-def generate_sar_report():
+def generate_sar_report() -> Any:
     """Generate a Suspicious Activity Report (SAR) for a user."""
     try:
         data = request.get_json()
@@ -36,24 +31,19 @@ def generate_sar_report():
             return (
                 jsonify(
                     {
-                        "error": f'Missing required fields: {", ".join(missing_fields)}',
+                        "error": f"Missing required fields: {', '.join(missing_fields)}",
                         "code": "MISSING_FIELDS",
                     }
                 ),
                 400,
             )
-
         user_id = data["user_id"]
         user = db.session.get(User, user_id)
         if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
-
-        # Get related transactions (last 90 days)
+            return (jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404)
         ninety_days_ago = datetime.now(timezone.utc) - timedelta(days=90)
-
         accounts_stmt = select(Account.id).filter_by(user_id=user_id)
         account_ids = db.session.execute(accounts_stmt).scalars().all()
-
         transactions_stmt = (
             select(Transaction)
             .filter(
@@ -63,10 +53,7 @@ def generate_sar_report():
             .order_by(Transaction.created_at.desc())
         )
         transactions = db.session.execute(transactions_stmt).scalars().all()
-
-        # Calculate summary metrics
-        total_amount = sum(t.amount for t in transactions)
-
+        total_amount = sum((t.amount for t in transactions))
         sar_data = {
             "report_id": f"SAR_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}",
             "report_date": datetime.now(timezone.utc).isoformat(),
@@ -93,7 +80,6 @@ def generate_sar_report():
                 "contact_user_id": g.current_user.id,
             },
         }
-
         audit_logger.log_event(
             event_type=AuditEventType.COMPLIANCE_REPORT,
             description=f"SAR report generated for user {user_id}",
@@ -102,9 +88,7 @@ def generate_sar_report():
             resource_type="sar_report",
             resource_id=sar_data["report_id"],
         )
-
-        return jsonify(sar_data), 200
-
+        return (jsonify(sar_data), 200)
     except Exception as e:
         logger.error(f"SAR report generation error: {str(e)}", exc_info=True)
         return (
@@ -115,15 +99,10 @@ def generate_sar_report():
 
 @compliance_bp.route("/ctr-report", methods=["GET"])
 @admin_required
-def get_ctr_report():
+def get_ctr_report() -> Any:
     """Generate a Currency Transaction Report (CTR) for transactions over $10,000 in a day."""
     try:
-        # This is a complex query, we will simplify it to find users with a single transaction > $10,000
-        # A proper CTR would aggregate all transactions for a user in a 24-hour period.
-
         ctr_threshold = Decimal("10000.00")
-
-        # Find transactions exceeding the threshold
         transactions_stmt = (
             select(Transaction)
             .filter(
@@ -135,9 +114,7 @@ def get_ctr_report():
             .order_by(Transaction.created_at.desc())
             .limit(100)
         )
-
         transactions = db.session.execute(transactions_stmt).scalars().all()
-
         ctr_reports = []
         for t in transactions:
             user = db.session.get(User, t.user_id)
@@ -155,7 +132,6 @@ def get_ctr_report():
                         "reason": f"Single transaction amount {float(t.amount)} exceeds ${float(ctr_threshold)} threshold.",
                     }
                 )
-
         audit_logger.log_event(
             event_type=AuditEventType.COMPLIANCE_REPORT,
             description=f"CTR report generated with {len(ctr_reports)} potential reports",
@@ -163,7 +139,6 @@ def get_ctr_report():
             severity=AuditSeverity.LOW,
             resource_type="ctr_report",
         )
-
         return (
             jsonify(
                 {
@@ -174,7 +149,6 @@ def get_ctr_report():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"CTR report generation error: {str(e)}", exc_info=True)
         return (
@@ -185,7 +159,7 @@ def get_ctr_report():
 
 @compliance_bp.route("/watchlist-screening", methods=["POST"])
 @admin_required
-def watchlist_screening():
+def watchlist_screening() -> Any:
     """Simulate screening a user against watchlists."""
     try:
         data = request.get_json()
@@ -195,24 +169,18 @@ def watchlist_screening():
             return (
                 jsonify(
                     {
-                        "error": f'Missing required fields: {", ".join(missing_fields)}',
+                        "error": f"Missing required fields: {', '.join(missing_fields)}",
                         "code": "MISSING_FIELDS",
                     }
                 ),
                 400,
             )
-
         user_id = data["user_id"]
         user = db.session.get(User, user_id)
         if not user:
-            return jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404
-
-        # --- Simplified Screening Logic ---
+            return (jsonify({"error": "User not found", "code": "USER_NOT_FOUND"}), 404)
         name = f"{user.first_name} {user.last_name}".strip().lower()
-
-        # Simulated high-risk names
         high_risk_names = ["john doe", "jane smith", "terrorist"]
-
         screening_results = {
             "user_id": user_id,
             "screening_date": datetime.now(timezone.utc).isoformat(),
@@ -220,8 +188,7 @@ def watchlist_screening():
             "matches": [],
             "overall_status": "clear",
         }
-
-        if any(hr_name in name for hr_name in high_risk_names):
+        if any((hr_name in name for hr_name in high_risk_names)):
             screening_results["matches"].append(
                 {
                     "source": "OFAC_SDN",
@@ -232,8 +199,6 @@ def watchlist_screening():
                 }
             )
             screening_results["overall_status"] = "blocked"
-
-        # Log the event
         audit_logger.log_event(
             event_type=AuditEventType.SECURITY_ALERT,
             description=f"Watchlist screening performed for user {user_id}. Status: {screening_results['overall_status']}",
@@ -246,9 +211,7 @@ def watchlist_screening():
             resource_type="user",
             resource_id=user_id,
         )
-
-        return jsonify(screening_results), 200
-
+        return (jsonify(screening_results), 200)
     except Exception as e:
         logger.error(f"Watchlist screening error: {str(e)}", exc_info=True)
         return (

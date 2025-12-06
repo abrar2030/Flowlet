@@ -1,42 +1,28 @@
 import logging
 from datetime import datetime, timezone
-
 from flask import Blueprint, jsonify
+from .auth import token_required
 
-from .auth import token_required  # Assuming decorators are defined here for now
-
-"""
-API Gateway Routes for Health Check and Documentation
-"""
-
-
-# Import refactored modules
-
-# Create blueprint
+"\nAPI Gateway Routes for Health Check and Documentation\n"
 api_gateway_bp = Blueprint("api_gateway", __name__, url_prefix="/api/v1")
-
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
 @api_gateway_bp.route("/status", methods=["GET"])
-def gateway_status():
+def gateway_status() -> Any:
     """Get API Gateway status and health information"""
     try:
-        # In a real application, this would check the health of all dependent services (DB, Redis, etc.)
         health_status = {
             "database": "healthy",
             "redis": "healthy",
             "openai_service": "healthy",
-            "payment_integrations": "partial_health",  # Since we only implemented Stripe
+            "payment_integrations": "partial_health",
         }
-
         overall_status = (
             "operational"
-            if all(s == "healthy" for s in health_status.values())
+            if all((s == "healthy" for s in health_status.values()))
             else "degraded"
         )
-
         return (
             jsonify(
                 {
@@ -49,7 +35,6 @@ def gateway_status():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Gateway status check error: {str(e)}", exc_info=True)
         return (
@@ -64,12 +49,8 @@ def gateway_status():
 
 
 @api_gateway_bp.route("/documentation", methods=["GET"])
-def api_documentation():
+def api_documentation() -> Any:
     """Provides a high-level overview of the API structure."""
-
-    # This is a placeholder for a proper OpenAPI/Swagger documentation endpoint
-    # which would be generated automatically from the route definitions.
-
     return (
         jsonify(
             {

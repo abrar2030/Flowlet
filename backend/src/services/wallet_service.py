@@ -1,11 +1,7 @@
 import logging
 from decimal import Decimal
-
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-
-# Assuming the following imports are available in the Flowlet environment
-# I'm assuming the models are accessible relative to the src directory
 from ..models.account import Account, AccountStatus, AccountType
 from ..models.transaction import (
     Transaction,
@@ -23,64 +19,66 @@ from ..schemas import (
 
 logger = logging.getLogger(__name__)
 
-# --- Custom Exceptions for Centralized Error Handling ---
-
 
 class WalletServiceError(Exception):
     """Base exception for wallet service errors."""
 
-    def __init__(self, message: str, error_code: str, status_code: int = 400):
+    def __init__(self, message: str, error_code: str, status_code: int = 400) -> Any:
         super().__init__(message)
         self.error_code = error_code
         self.status_code = status_code
 
 
 class AccountNotFound(WalletServiceError):
-    def __init__(self, account_id: str):
+
+    def __init__(self, account_id: str) -> Any:
         super().__init__(
             f"Account with ID {account_id} not found", "ACCOUNT_NOT_FOUND", 404
         )
 
 
 class UserNotFound(WalletServiceError):
-    def __init__(self, user_id: str):
+
+    def __init__(self, user_id: str) -> Any:
         super().__init__(f"User with ID {user_id} not found", "USER_NOT_FOUND", 404)
 
 
 class AccountInactive(WalletServiceError):
-    def __init__(self, account_id: str):
+
+    def __init__(self, account_id: str) -> Any:
         super().__init__(f"Account {account_id} is not active", "ACCOUNT_INACTIVE", 400)
 
 
 class InsufficientFunds(WalletServiceError):
-    def __init__(self, account_id: str):
+
+    def __init__(self, account_id: str) -> Any:
         super().__init__(
             f"Insufficient funds in account {account_id}", "INSUFFICIENT_FUNDS", 400
         )
 
 
 class CurrencyMismatch(WalletServiceError):
-    def __init__(self):
+
+    def __init__(self) -> Any:
         super().__init__(
             "Currency mismatch for internal transfer", "CURRENCY_MISMATCH", 400
         )
 
 
 class InvalidAccountType(WalletServiceError):
-    def __init__(self, account_type: str):
+
+    def __init__(self, account_type: str) -> Any:
         super().__init__(
             f"Invalid account type: {account_type}", "INVALID_ACCOUNT_TYPE", 400
         )
 
 
 class UnsupportedCurrency(WalletServiceError):
-    def __init__(self, currency: str):
+
+    def __init__(self, currency: str) -> Any:
         super().__init__(
             f"Unsupported currency: {currency}", "UNSUPPORTED_CURRENCY", 400
         )
-
-
-# --- Service Functions ---
 
 
 def get_account_by_id(session: Session, account_id: str) -> Account:
@@ -96,21 +94,15 @@ def create_wallet(session: Session, user_id: str, data: CreateWalletRequest) -> 
     user = session.get(User, user_id)
     if not user:
         raise UserNotFound(user_id)
-
-    # Validate account type
     account_type_str = data.account_type.lower()
     try:
         account_type = AccountType(account_type_str)
     except ValueError:
         raise InvalidAccountType(data.account_type)
-
-    # Validate currency (simplified check, should be more robust)
     supported_currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"]
     currency = data.currency.upper()
     if currency not in supported_currencies:
         raise UnsupportedCurrency(currency)
-
-    # Create new account
     account = Account(
         user_id=user.id,
         account_name=data.account_name,
@@ -118,20 +110,12 @@ def create_wallet(session: Session, user_id: str, data: CreateWalletRequest) -> 
         currency=currency,
         status=AccountStatus.ACTIVE,
     )
-
-    # Set initial balance if provided
     initial_deposit = data.initial_deposit
     if initial_deposit > Decimal("0.00"):
-        # Assuming account has methods to set balances
-        # The original wallet_mvp.py used set_available_balance and set_current_balance
-        # I will assume these methods exist on the Account model.
         account.set_available_balance(initial_deposit)
         account.set_current_balance(initial_deposit)
-
     session.add(account)
     session.flush()
-
-    # Create initial deposit transaction if amount > 0
     if initial_deposit > Decimal("0.00"):
         deposit_transaction = Transaction(
             user_id=user.id,
@@ -145,7 +129,6 @@ def create_wallet(session: Session, user_id: str, data: CreateWalletRequest) -> 
             amount=initial_deposit,
         )
         session.add(deposit_transaction)
-
     session.commit()
     logger.info(f"Created new wallet for user {user.id}: {account.id}")
     return account
@@ -156,16 +139,10 @@ def process_deposit(
 ) -> Transaction:
     """Handles the deposit of funds into an account."""
     account = get_account_by_id(session, account_id)
-
     if account.status != AccountStatus.ACTIVE:
         raise AccountInactive(account_id)
-
     amount = data.amount
-
-    # Update account balance
     account.credit(amount)
-
-    # Create deposit transaction
     transaction = Transaction(
         user_id=account.user_id,
         account_id=account.id,
@@ -177,10 +154,8 @@ def process_deposit(
         currency=account.currency,
         amount=amount,
     )
-
     session.add(transaction)
     session.commit()
-
     return transaction
 
 
@@ -189,20 +164,12 @@ def process_withdrawal(
 ) -> Transaction:
     """Handles the withdrawal of funds from an account."""
     account = get_account_by_id(session, account_id)
-
     if account.status != AccountStatus.ACTIVE:
         raise AccountInactive(account_id)
-
     amount = data.amount
-
-    # Check for sufficient funds
     if account.balance < amount:
         raise InsufficientFunds(account_id)
-
-    # Update account balance
     account.debit(amount)
-
-    # Create withdrawal transaction
     transaction = Transaction(
         user_id=account.user_id,
         account_id=account.id,
@@ -214,10 +181,8 @@ def process_withdrawal(
         currency=account.currency,
         amount=amount,
     )
-
     session.add(transaction)
     session.commit()
-
     return transaction
 
 
@@ -227,34 +192,22 @@ def process_transfer(
     """Handles the transfer of funds between two accounts."""
     source_account = get_account_by_id(session, source_account_id)
     destination_account = get_account_by_id(session, data.destination_account_id)
-
     if (
         source_account.status != AccountStatus.ACTIVE
         or destination_account.status != AccountStatus.ACTIVE
     ):
-        # Raise a more specific error if possible, but this is a good general check
         raise AccountInactive(f"{source_account_id} or {data.destination_account_id}")
-
     amount = data.amount
-
-    # Check for sufficient funds
     if source_account.balance < amount:
         raise InsufficientFunds(source_account_id)
-
-    # Check currency match
     if source_account.currency != destination_account.currency:
         raise CurrencyMismatch()
-
-    # Perform debit on source account and credit on destination account
     source_account.debit(amount)
     destination_account.credit(amount)
-
     description = (
         data.description
         or f"Transfer from {source_account.account_name} to {destination_account.account_name}"
     )
-
-    # Create two transactions (debit for source, credit for destination)
     debit_transaction = Transaction(
         user_id=source_account.user_id,
         account_id=source_account.id,
@@ -267,7 +220,6 @@ def process_transfer(
         amount=amount,
         related_account_id=destination_account.id,
     )
-
     credit_transaction = Transaction(
         user_id=destination_account.user_id,
         account_id=destination_account.id,
@@ -280,11 +232,9 @@ def process_transfer(
         amount=amount,
         related_account_id=source_account.id,
     )
-
     session.add_all([debit_transaction, credit_transaction])
     session.commit()
-
-    return debit_transaction, credit_transaction
+    return (debit_transaction, credit_transaction)
 
 
 def get_user_accounts(session: Session, user_id: str) -> list[Account]:
@@ -299,8 +249,6 @@ def get_account_details_with_transactions(
 ) -> tuple[Account, list[Transaction]]:
     """Gets account details and recent transactions."""
     account = get_account_by_id(session, account_id)
-
-    # Get recent transactions (last 10)
     recent_transactions_stmt = (
         select(Transaction)
         .filter_by(account_id=account.id)
@@ -308,5 +256,4 @@ def get_account_details_with_transactions(
         .limit(10)
     )
     recent_transactions = session.execute(recent_transactions_stmt).scalars().all()
-
-    return account, recent_transactions
+    return (account, recent_transactions)

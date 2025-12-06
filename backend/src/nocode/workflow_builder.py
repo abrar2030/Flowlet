@@ -6,16 +6,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 from sqlalchemy.orm import Session
 
-"""
-Workflow Builder
-===============
-
-Visual workflow builder for financial processes.
-Allows business users to create and manage complex workflows without coding.
-"""
+"\nWorkflow Builder\n===============\n\nVisual workflow builder for financial processes.\nAllows business users to create and manage complex workflows without coding.\n"
 
 
 class NodeType(Enum):
@@ -65,9 +58,9 @@ class WorkflowNode:
     name: str
     description: str
     config: Dict[str, Any] = field(default_factory=dict)
-    position: Dict[str, float] = field(default_factory=dict)  # x, y coordinates
-    inputs: List[str] = field(default_factory=list)  # Input connection IDs
-    outputs: List[str] = field(default_factory=list)  # Output connection IDs
+    position: Dict[str, float] = field(default_factory=dict)
+    inputs: List[str] = field(default_factory=list)
+    outputs: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -91,7 +84,7 @@ class WorkflowConnection:
     connection_id: str
     source_node_id: str
     target_node_id: str
-    condition: Optional[str] = None  # Condition for conditional connections
+    condition: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -189,41 +182,27 @@ class WorkflowBuilder:
     - Real-time execution monitoring
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Workflow storage
         self._workflows = {}
         self._executions = {}
         self._node_handlers = {}
         self._templates = {}
-
-        # Execution engine
         self._execution_queue = asyncio.Queue()
         self._execution_tasks = {}
-
-        # Initialize workflow builder
         self._initialize_workflow_builder()
 
-    def _initialize_workflow_builder(self):
+    def _initialize_workflow_builder(self) -> Any:
         """Initialize the workflow builder."""
-
-        # Register default node handlers
         self._register_default_node_handlers()
-
-        # Create default templates
         self._create_default_templates()
-
-        # Start execution engine
         self._start_execution_engine()
-
         self.logger.info("Workflow builder initialized successfully")
 
-    def _register_default_node_handlers(self):
+    def _register_default_node_handlers(self) -> Any:
         """Register default node execution handlers."""
-
         self._node_handlers[NodeType.START] = self._handle_start_node
         self._node_handlers[NodeType.END] = self._handle_end_node
         self._node_handlers[NodeType.TASK] = self._handle_task_node
@@ -236,24 +215,17 @@ class WorkflowBuilder:
         self._node_handlers[NodeType.APPROVAL] = self._handle_approval_node
         self._node_handlers[NodeType.API_CALL] = self._handle_api_call_node
 
-    def _create_default_templates(self):
+    def _create_default_templates(self) -> Any:
         """Create default workflow templates."""
-
-        # Payment processing workflow
         payment_workflow = self._create_payment_processing_template()
         self._templates[payment_workflow.workflow_id] = payment_workflow
-
-        # Customer onboarding workflow
         onboarding_workflow = self._create_customer_onboarding_template()
         self._templates[onboarding_workflow.workflow_id] = onboarding_workflow
-
-        # Loan approval workflow
         loan_workflow = self._create_loan_approval_template()
         self._templates[loan_workflow.workflow_id] = loan_workflow
 
     def _create_payment_processing_template(self) -> WorkflowDefinition:
         """Create payment processing workflow template."""
-
         nodes = [
             WorkflowNode(
                 node_id="start",
@@ -320,7 +292,6 @@ class WorkflowBuilder:
                 position={"x": 1100, "y": 100},
             ),
         ]
-
         connections = [
             WorkflowConnection("conn1", "start", "validate_payment"),
             WorkflowConnection("conn2", "validate_payment", "fraud_check"),
@@ -334,7 +305,6 @@ class WorkflowBuilder:
             WorkflowConnection("conn6", "manual_review", "send_confirmation"),
             WorkflowConnection("conn7", "send_confirmation", "end"),
         ]
-
         return WorkflowDefinition(
             workflow_id="payment_processing_template",
             name="Payment Processing",
@@ -348,7 +318,6 @@ class WorkflowBuilder:
 
     def _create_customer_onboarding_template(self) -> WorkflowDefinition:
         """Create customer onboarding workflow template."""
-
         nodes = [
             WorkflowNode(
                 node_id="start",
@@ -434,7 +403,6 @@ class WorkflowBuilder:
                 position={"x": 1500, "y": 100},
             ),
         ]
-
         connections = [
             WorkflowConnection("conn1", "start", "collect_info"),
             WorkflowConnection("conn2", "collect_info", "kyc_verification"),
@@ -450,7 +418,6 @@ class WorkflowBuilder:
             WorkflowConnection("conn8", "create_account", "welcome_email"),
             WorkflowConnection("conn9", "welcome_email", "end"),
         ]
-
         return WorkflowDefinition(
             workflow_id="customer_onboarding_template",
             name="Customer Onboarding",
@@ -464,7 +431,6 @@ class WorkflowBuilder:
 
     def _create_loan_approval_template(self) -> WorkflowDefinition:
         """Create loan approval workflow template."""
-
         nodes = [
             WorkflowNode(
                 node_id="start",
@@ -559,7 +525,6 @@ class WorkflowBuilder:
                 position={"x": 1700, "y": 100},
             ),
         ]
-
         connections = [
             WorkflowConnection("conn1", "start", "collect_application"),
             WorkflowConnection("conn2", "collect_application", "credit_check"),
@@ -576,7 +541,6 @@ class WorkflowBuilder:
             WorkflowConnection("conn9", "generate_documents", "send_approval"),
             WorkflowConnection("conn10", "send_approval", "end"),
         ]
-
         return WorkflowDefinition(
             workflow_id="loan_approval_template",
             name="Loan Approval",
@@ -588,11 +552,8 @@ class WorkflowBuilder:
             tags=["loan", "approval", "underwriting", "credit"],
         )
 
-    def _start_execution_engine(self):
+    def _start_execution_engine(self) -> Any:
         """Start the workflow execution engine."""
-
-        # In a real implementation, this would start background tasks
-        # for processing workflow executions
 
     def create_workflow(
         self,
@@ -613,9 +574,7 @@ class WorkflowBuilder:
         Returns:
             Workflow ID
         """
-
         workflow_id = str(uuid.uuid4())
-
         workflow = WorkflowDefinition(
             workflow_id=workflow_id,
             name=name,
@@ -624,15 +583,12 @@ class WorkflowBuilder:
             category=category,
             created_by=created_by,
         )
-
         self._workflows[workflow_id] = workflow
-
         self.logger.info(f"Created workflow: {name}")
         return workflow_id
 
     def get_workflow(self, workflow_id: str) -> Optional[WorkflowDefinition]:
         """Get workflow definition by ID."""
-
         return self._workflows.get(workflow_id)
 
     def add_node(
@@ -658,13 +614,10 @@ class WorkflowBuilder:
         Returns:
             Node ID
         """
-
         workflow = self._workflows.get(workflow_id)
         if not workflow:
             raise ValueError(f"Workflow not found: {workflow_id}")
-
         node_id = str(uuid.uuid4())
-
         node = WorkflowNode(
             node_id=node_id,
             node_type=node_type,
@@ -673,10 +626,8 @@ class WorkflowBuilder:
             config=config or {},
             position=position or {"x": 0, "y": 0},
         )
-
         workflow.nodes.append(node)
         workflow.updated_at = datetime.utcnow()
-
         self.logger.info(f"Added node {name} to workflow {workflow_id}")
         return node_id
 
@@ -699,41 +650,30 @@ class WorkflowBuilder:
         Returns:
             Connection ID
         """
-
         workflow = self._workflows.get(workflow_id)
         if not workflow:
             raise ValueError(f"Workflow not found: {workflow_id}")
-
-        # Verify nodes exist
         source_node = next(
             (n for n in workflow.nodes if n.node_id == source_node_id), None
         )
         target_node = next(
             (n for n in workflow.nodes if n.node_id == target_node_id), None
         )
-
         if not source_node:
             raise ValueError(f"Source node not found: {source_node_id}")
         if not target_node:
             raise ValueError(f"Target node not found: {target_node_id}")
-
         connection_id = str(uuid.uuid4())
-
         connection = WorkflowConnection(
             connection_id=connection_id,
             source_node_id=source_node_id,
             target_node_id=target_node_id,
             condition=condition,
         )
-
         workflow.connections.append(connection)
-
-        # Update node connections
         source_node.outputs.append(connection_id)
         target_node.inputs.append(connection_id)
-
         workflow.updated_at = datetime.utcnow()
-
         self.logger.info(f"Connected nodes {source_node_id} -> {target_node_id}")
         return connection_id
 
@@ -751,13 +691,10 @@ class WorkflowBuilder:
         Returns:
             Execution ID
         """
-
         workflow = self._workflows.get(workflow_id)
         if not workflow:
             raise ValueError(f"Workflow not found: {workflow_id}")
-
         execution_id = str(uuid.uuid4())
-
         execution = WorkflowExecution(
             execution_id=execution_id,
             workflow_id=workflow_id,
@@ -766,61 +703,43 @@ class WorkflowBuilder:
             started_by=started_by,
             context=context or {},
         )
-
         self._executions[execution_id] = execution
-
-        # Start execution (in real implementation, would be async)
         self._start_workflow_execution(execution_id)
-
         self.logger.info(f"Started workflow execution: {execution_id}")
         return execution_id
 
-    def _start_workflow_execution(self, execution_id: str):
+    def _start_workflow_execution(self, execution_id: str) -> Any:
         """Start workflow execution (simplified implementation)."""
-
         execution = self._executions.get(execution_id)
         if not execution:
             return
-
         workflow = self._workflows.get(execution.workflow_id)
         if not workflow:
             return
-
-        # Find start node
         start_nodes = [n for n in workflow.nodes if n.node_type == NodeType.START]
         if not start_nodes:
             execution.status = WorkflowStatus.FAILED
             execution.error_message = "No start node found"
             return
-
-        # Execute start node
         start_node = start_nodes[0]
         self._execute_node(execution_id, start_node.node_id)
 
-    def _execute_node(self, execution_id: str, node_id: str):
+    def _execute_node(self, execution_id: str, node_id: str) -> Any:
         """Execute a single workflow node."""
-
         execution = self._executions.get(execution_id)
         workflow = self._workflows.get(execution.workflow_id)
-
         node = next((n for n in workflow.nodes if n.node_id == node_id), None)
         if not node:
             return
-
-        # Update node execution status
         execution.node_executions[node_id] = {
             "status": NodeStatus.RUNNING.value,
             "started_at": datetime.utcnow().isoformat(),
             "attempts": 1,
         }
-
         try:
-            # Execute node handler
             handler = self._node_handlers.get(node.node_type)
             if handler:
                 result = handler(execution, node)
-
-                # Update execution status
                 execution.node_executions[node_id].update(
                     {
                         "status": NodeStatus.COMPLETED.value,
@@ -828,12 +747,9 @@ class WorkflowBuilder:
                         "result": result,
                     }
                 )
-
-                # Continue to next nodes
                 self._continue_execution(execution_id, node_id)
             else:
                 raise ValueError(f"No handler for node type: {node.node_type}")
-
         except Exception as e:
             execution.node_executions[node_id].update(
                 {
@@ -842,49 +758,33 @@ class WorkflowBuilder:
                     "error": str(e),
                 }
             )
-
             execution.status = WorkflowStatus.FAILED
             execution.error_message = f"Node {node_id} failed: {str(e)}"
 
-    def _continue_execution(self, execution_id: str, completed_node_id: str):
+    def _continue_execution(self, execution_id: str, completed_node_id: str) -> Any:
         """Continue workflow execution to next nodes."""
-
         execution = self._executions.get(execution_id)
         workflow = self._workflows.get(execution.workflow_id)
-
-        # Find outgoing connections
         outgoing_connections = [
             c for c in workflow.connections if c.source_node_id == completed_node_id
         ]
-
         for connection in outgoing_connections:
-            # Check connection condition if present
             if connection.condition:
                 if not self._evaluate_condition(
                     connection.condition, execution.context
                 ):
                     continue
-
-            # Execute target node
             self._execute_node(execution_id, connection.target_node_id)
 
     def _evaluate_condition(self, condition: str, context: Dict[str, Any]) -> bool:
         """Evaluate connection condition (simplified implementation)."""
-
-        # In a real implementation, would use a proper expression evaluator
-        # This is a simplified version for demonstration
-
         try:
-            # Replace context variables
             for key, value in context.items():
                 condition = condition.replace(key, str(value))
-
-            # Evaluate simple conditions
             return eval(condition)
         except Exception:
             return False
 
-    # Node handlers
     async def _handle_start_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
@@ -903,10 +803,7 @@ class WorkflowBuilder:
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle task node execution."""
-
-        # Execute task based on configuration
         task_type = node.config.get("task_type", "generic")
-
         if task_type == "validation":
             return await self._execute_validation_task(execution, node)
         elif task_type == "api_call":
@@ -918,139 +815,103 @@ class WorkflowBuilder:
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle decision node execution."""
-
         condition = node.config.get("condition", "true")
         result = self._evaluate_condition(condition, execution.context)
-
         return {"status": "completed", "decision": result}
 
     async def _handle_parallel_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle parallel node execution."""
-
-        # Execute multiple branches in parallel
         return {"status": "completed", "parallel_branches": "started"}
 
     async def _handle_merge_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle merge node execution."""
-
-        # Wait for all parallel branches to complete
         return {"status": "completed", "merged": True}
 
     async def _handle_delay_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle delay node execution."""
-
         delay_seconds = node.config.get("delay_seconds", 0)
         await asyncio.sleep(delay_seconds)
-
         return {"status": "completed", "delayed_seconds": delay_seconds}
 
     async def _handle_webhook_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle webhook node execution."""
-
         webhook_url = node.config.get("webhook_url", "")
         node.config.get("payload", {})
-
-        # In real implementation, would make HTTP request
         return {"status": "completed", "webhook_called": webhook_url}
 
     async def _handle_email_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle email node execution."""
-
         node.config.get("template", "")
         recipients = node.config.get("recipients", [])
-
-        # In real implementation, would send email
         return {"status": "completed", "email_sent": len(recipients)}
 
     async def _handle_approval_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle approval node execution."""
-
         approvers = node.config.get("approvers", [])
         node.config.get("timeout_hours", 24)
-
-        # In real implementation, would create approval request
         return {"status": "pending_approval", "approvers": approvers}
 
     async def _handle_api_call_node(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Handle API call node execution."""
-
         api_url = node.config.get("api_url", "")
         node.config.get("method", "GET")
-
-        # In real implementation, would make API call
         return {"status": "completed", "api_called": api_url}
 
     async def _execute_validation_task(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Execute validation task."""
-
         validation_rules = node.config.get("validation_rules", [])
-
-        # Perform validations
         validation_results = {}
         for rule in validation_rules:
-            validation_results[rule] = True  # Simplified
-
+            validation_results[rule] = True
         return {"status": "completed", "validations": validation_results}
 
     async def _execute_api_call_task(
         self, execution: WorkflowExecution, node: WorkflowNode
     ) -> Dict[str, Any]:
         """Execute API call task."""
-
         node.config.get("api_config", {})
-
-        # Make API call (simplified)
         return {"status": "completed", "api_response": "success"}
 
     def get_execution(self, execution_id: str) -> Optional[WorkflowExecution]:
         """Get workflow execution by ID."""
-
         return self._executions.get(execution_id)
 
     def list_workflows(self, category: str = None) -> List[WorkflowDefinition]:
         """List workflow definitions."""
-
         workflows = list(self._workflows.values())
-
         if category:
             workflows = [w for w in workflows if w.category == category]
-
         workflows.sort(key=lambda x: x.name)
         return workflows
 
     def list_templates(self) -> List[WorkflowDefinition]:
         """List workflow templates."""
-
         return list(self._templates.values())
 
     def create_from_template(
         self, template_id: str, name: str, description: str, created_by: str = None
     ) -> str:
         """Create workflow from template."""
-
         template = self._templates.get(template_id)
         if not template:
             raise ValueError(f"Template not found: {template_id}")
-
         workflow_id = str(uuid.uuid4())
-
-        # Copy template
         workflow = WorkflowDefinition(
             workflow_id=workflow_id,
             name=name,
@@ -1063,24 +924,18 @@ class WorkflowBuilder:
             tags=template.tags.copy(),
             created_by=created_by,
         )
-
         self._workflows[workflow_id] = workflow
-
         self.logger.info(f"Created workflow from template: {name}")
         return workflow_id
 
     def get_workflow_statistics(self) -> Dict[str, Any]:
         """Get workflow builder statistics."""
-
         workflow_categories = defaultdict(int)
         execution_statuses = defaultdict(int)
-
         for workflow in self._workflows.values():
             workflow_categories[workflow.category] += 1
-
         for execution in self._executions.values():
             execution_statuses[execution.status.value] += 1
-
         return {
             "total_workflows": len(self._workflows),
             "total_templates": len(self._templates),

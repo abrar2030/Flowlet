@@ -8,11 +8,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List
 
-"""
-AI-Powered Risk Assessment and Predictive Analytics System
-"""
-
-
+"\nAI-Powered Risk Assessment and Predictive Analytics System\n"
 logger = logging.getLogger(__name__)
 
 
@@ -83,41 +79,36 @@ class PredictiveInsight:
 class AIRiskAssessor:
     """AI-powered risk assessment system"""
 
-    def __init__(self):
-        # Risk factor weights by category
+    def __init__(self) -> Any:
         self.risk_weights = {
             RiskCategory.CREDIT_RISK: {
                 "payment_history": 0.35,
-                "credit_utilization": 0.30,
+                "credit_utilization": 0.3,
                 "account_age": 0.15,
-                "income_stability": 0.20,
+                "income_stability": 0.2,
             },
             RiskCategory.FRAUD_RISK: {
                 "transaction_patterns": 0.25,
-                "device_consistency": 0.20,
-                "location_patterns": 0.20,
-                "velocity_patterns": 0.20,
+                "device_consistency": 0.2,
+                "location_patterns": 0.2,
+                "velocity_patterns": 0.2,
                 "behavioral_anomalies": 0.15,
             },
             RiskCategory.LIQUIDITY_RISK: {
-                "cash_flow_patterns": 0.40,
-                "account_balances": 0.30,
-                "spending_volatility": 0.30,
+                "cash_flow_patterns": 0.4,
+                "account_balances": 0.3,
+                "spending_volatility": 0.3,
             },
             RiskCategory.OPERATIONAL_RISK: {
-                "system_usage_patterns": 0.30,
+                "system_usage_patterns": 0.3,
                 "error_rates": 0.25,
                 "security_incidents": 0.25,
-                "compliance_violations": 0.20,
+                "compliance_violations": 0.2,
             },
         }
-
-        # Historical data for ML models
         self.user_histories = {}
         self.market_data = {}
         self.fraud_patterns = {}
-
-        # Risk thresholds
         self.risk_thresholds = {
             RiskLevel.VERY_LOW: 0.2,
             RiskLevel.LOW: 0.4,
@@ -132,60 +123,37 @@ class AIRiskAssessor:
     ) -> RiskAssessment:
         """Perform comprehensive AI-powered risk assessment for a user"""
         assessment_context = assessment_context or {}
-
-        # Collect user data
         user_data = self._collect_user_data(user_id)
-
-        # Assess each risk category
         risk_factors = []
         category_scores = {}
-
-        # Credit Risk Assessment
         credit_factors = self._assess_credit_risk(user_data)
         risk_factors.extend(credit_factors)
         category_scores[RiskCategory.CREDIT_RISK.value] = (
             self._calculate_category_score(credit_factors)
         )
-
-        # Fraud Risk Assessment
         fraud_factors = self._assess_fraud_risk(user_data)
         risk_factors.extend(fraud_factors)
         category_scores[RiskCategory.FRAUD_RISK.value] = self._calculate_category_score(
             fraud_factors
         )
-
-        # Liquidity Risk Assessment
         liquidity_factors = self._assess_liquidity_risk(user_data)
         risk_factors.extend(liquidity_factors)
         category_scores[RiskCategory.LIQUIDITY_RISK.value] = (
             self._calculate_category_score(liquidity_factors)
         )
-
-        # Operational Risk Assessment
         operational_factors = self._assess_operational_risk(user_data)
         risk_factors.extend(operational_factors)
         category_scores[RiskCategory.OPERATIONAL_RISK.value] = (
             self._calculate_category_score(operational_factors)
         )
-
-        # Calculate overall risk score
         overall_risk_score = self._calculate_overall_risk_score(category_scores)
         overall_risk_level = self._determine_risk_level(overall_risk_score)
-
-        # Generate predictions
         predictions = self._generate_predictions(user_data, risk_factors)
-
-        # Generate recommendations
         recommendations = self._generate_risk_recommendations(
             risk_factors, overall_risk_level
         )
-
-        # Generate monitoring alerts
         monitoring_alerts = self._generate_monitoring_alerts(risk_factors, predictions)
-
-        # Calculate confidence score
         confidence_score = self._calculate_confidence_score(user_data, risk_factors)
-
         assessment = RiskAssessment(
             user_id=user_id,
             assessment_id=self._generate_assessment_id(user_id),
@@ -199,18 +167,14 @@ class AIRiskAssessor:
             monitoring_alerts=monitoring_alerts,
             confidence_score=confidence_score,
         )
-
-        # Store assessment for future reference
         self._store_assessment(assessment)
-
         return assessment
 
     def _collect_user_data(self, user_id: str) -> Dict[str, Any]:
         """Collect comprehensive user data for risk assessment"""
-        # In a real implementation, this would query various data sources
         user_data = {
             "user_id": user_id,
-            "account_age_days": 365,  # Placeholder
+            "account_age_days": 365,
             "transaction_history": self._get_transaction_history(user_id),
             "account_balances": self._get_account_balances(user_id),
             "payment_history": self._get_payment_history(user_id),
@@ -225,20 +189,14 @@ class AIRiskAssessor:
     def _assess_credit_risk(self, user_data: Dict[str, Any]) -> List[RiskFactor]:
         """Assess credit-related risk factors"""
         factors = []
-
-        # Payment History Analysis
         payment_history = user_data.get("payment_history", [])
-        late_payments = sum(1 for p in payment_history if p.get("status") == "late")
+        late_payments = sum((1 for p in payment_history if p.get("status") == "late"))
         total_payments = len(payment_history)
-
         if total_payments > 0:
             late_payment_ratio = late_payments / total_payments
-            payment_score = max(
-                0, 1 - (late_payment_ratio * 2)
-            )  # Penalize late payments
+            payment_score = max(0, 1 - late_payment_ratio * 2)
         else:
-            payment_score = 0.5  # Neutral score for no history
-
+            payment_score = 0.5
         factors.append(
             RiskFactor(
                 factor_name="payment_history",
@@ -262,25 +220,17 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Credit Utilization Analysis
         account_balances = user_data.get("account_balances", {})
         total_balance = sum(
-            Decimal(str(balance)) for balance in account_balances.values()
+            (Decimal(str(balance)) for balance in account_balances.values())
         )
-
-        # Simulate credit limit (in real implementation, get from credit data)
         estimated_credit_limit = Decimal("10000")
         utilization_ratio = (
             float(total_balance / estimated_credit_limit)
             if estimated_credit_limit > 0
             else 0
         )
-
-        utilization_score = max(
-            0, 1 - (utilization_ratio * 1.5)
-        )  # Penalize high utilization
-
+        utilization_score = max(0, 1 - utilization_ratio * 1.5)
         factors.append(
             RiskFactor(
                 factor_name="credit_utilization",
@@ -306,11 +256,8 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Account Age Analysis
         account_age_days = user_data.get("account_age_days", 0)
-        age_score = min(1.0, account_age_days / 365)  # Full score after 1 year
-
+        age_score = min(1.0, account_age_days / 365)
         factors.append(
             RiskFactor(
                 factor_name="account_age",
@@ -329,17 +276,13 @@ class AIRiskAssessor:
                 ),
             )
         )
-
         return factors
 
     def _assess_fraud_risk(self, user_data: Dict[str, Any]) -> List[RiskFactor]:
         """Assess fraud-related risk factors"""
         factors = []
-
-        # Transaction Pattern Analysis
         transactions = user_data.get("transaction_history", [])
         pattern_score = self._analyze_transaction_patterns(transactions)
-
         factors.append(
             RiskFactor(
                 factor_name="transaction_patterns",
@@ -365,11 +308,8 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Device Consistency Analysis
         device_history = user_data.get("device_history", [])
         device_score = self._analyze_device_consistency(device_history)
-
         factors.append(
             RiskFactor(
                 factor_name="device_consistency",
@@ -393,11 +333,8 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Location Pattern Analysis
         location_history = user_data.get("location_history", [])
         location_score = self._analyze_location_patterns(location_history)
-
         factors.append(
             RiskFactor(
                 factor_name="location_patterns",
@@ -421,17 +358,13 @@ class AIRiskAssessor:
                 ),
             )
         )
-
         return factors
 
     def _assess_liquidity_risk(self, user_data: Dict[str, Any]) -> List[RiskFactor]:
         """Assess liquidity-related risk factors"""
         factors = []
-
-        # Cash Flow Analysis
         transactions = user_data.get("transaction_history", [])
         cash_flow_score = self._analyze_cash_flow_patterns(transactions)
-
         factors.append(
             RiskFactor(
                 factor_name="cash_flow_patterns",
@@ -457,11 +390,8 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Account Balance Analysis
         account_balances = user_data.get("account_balances", {})
         balance_score = self._analyze_account_balances(account_balances)
-
         factors.append(
             RiskFactor(
                 factor_name="account_balances",
@@ -487,17 +417,13 @@ class AIRiskAssessor:
                 ),
             )
         )
-
         return factors
 
     def _assess_operational_risk(self, user_data: Dict[str, Any]) -> List[RiskFactor]:
         """Assess operational risk factors"""
         factors = []
-
-        # Security Incidents Analysis
         security_incidents = user_data.get("security_incidents", [])
-        security_score = max(0, 1 - (len(security_incidents) * 0.2))
-
+        security_score = max(0, 1 - len(security_incidents) * 0.2)
         factors.append(
             RiskFactor(
                 factor_name="security_incidents",
@@ -523,12 +449,9 @@ class AIRiskAssessor:
                 ),
             )
         )
-
-        # Compliance Records Analysis
         compliance_records = user_data.get("compliance_records", [])
         violations = [r for r in compliance_records if r.get("status") == "violation"]
-        compliance_score = max(0, 1 - (len(violations) * 0.3))
-
+        compliance_score = max(0, 1 - len(violations) * 0.3)
         factors.append(
             RiskFactor(
                 factor_name="compliance_violations",
@@ -554,132 +477,93 @@ class AIRiskAssessor:
                 ),
             )
         )
-
         return factors
 
     def _analyze_transaction_patterns(self, transactions: List[Dict]) -> float:
         """Analyze transaction patterns for fraud indicators"""
         if not transactions:
             return 0.5
-
-        # Analyze timing patterns
         timestamps = [datetime.fromisoformat(t["timestamp"]) for t in transactions]
         hours = [ts.hour for ts in timestamps]
-
-        # Check for unusual timing (e.g., many transactions at odd hours)
-        odd_hour_count = sum(1 for hour in hours if hour < 6 or hour > 23)
+        odd_hour_count = sum((1 for hour in hours if hour < 6 or hour > 23))
         odd_hour_ratio = odd_hour_count / len(hours)
-
-        # Analyze amount patterns
         amounts = [float(t["amount"]) for t in transactions]
-
-        # Check for round amounts (potential testing)
-        round_amounts = sum(1 for amount in amounts if amount % 10 == 0)
+        round_amounts = sum((1 for amount in amounts if amount % 10 == 0))
         round_ratio = round_amounts / len(amounts)
-
-        # Check for amount clustering
         amount_variance = statistics.variance(amounts) if len(amounts) > 1 else 0
         amount_mean = statistics.mean(amounts)
         cv = math.sqrt(amount_variance) / amount_mean if amount_mean > 0 else 0
-
-        # Calculate pattern score (higher = less suspicious)
         pattern_score = 1.0
-        pattern_score -= odd_hour_ratio * 0.3  # Penalize odd hours
-        pattern_score -= round_ratio * 0.2  # Penalize round amounts
-        pattern_score -= min(cv, 1.0) * 0.2  # Penalize high variance
-
+        pattern_score -= odd_hour_ratio * 0.3
+        pattern_score -= round_ratio * 0.2
+        pattern_score -= min(cv, 1.0) * 0.2
         return max(0, pattern_score)
 
     def _analyze_device_consistency(self, device_history: List[Dict]) -> float:
         """Analyze device usage consistency"""
         if not device_history:
             return 0.5
-
-        # Count unique devices
-        unique_devices = len(set(d["device_id"] for d in device_history))
-
-        # Calculate device consistency score
+        unique_devices = len(set((d["device_id"] for d in device_history)))
         if unique_devices == 1:
-            return 1.0  # Perfect consistency
+            return 1.0
         elif unique_devices <= 3:
-            return 0.8  # Good consistency
+            return 0.8
         elif unique_devices <= 5:
-            return 0.6  # Moderate consistency
+            return 0.6
         else:
-            return 0.3  # Poor consistency
+            return 0.3
 
     def _analyze_location_patterns(self, location_history: List[Dict]) -> float:
         """Analyze location usage patterns"""
         if not location_history:
             return 0.5
-
-        # Count unique countries
-        unique_countries = len(set(l["country"] for l in location_history))
-
-        # Check for impossible travel
+        unique_countries = len(set((l["country"] for l in location_history)))
         sorted_locations = sorted(location_history, key=lambda x: x["timestamp"])
         impossible_travel_count = 0
-
         for i in range(1, len(sorted_locations)):
             prev_loc = sorted_locations[i - 1]
             curr_loc = sorted_locations[i]
-
             if prev_loc["country"] != curr_loc["country"]:
                 time_diff = (
                     datetime.fromisoformat(curr_loc["timestamp"])
                     - datetime.fromisoformat(prev_loc["timestamp"])
                 ).total_seconds() / 3600
-
-                if time_diff < 2:  # Less than 2 hours between countries
+                if time_diff < 2:
                     impossible_travel_count += 1
-
-        # Calculate location score
         location_score = 1.0
-        location_score -= min(unique_countries / 10, 0.5)  # Penalize many countries
-        location_score -= impossible_travel_count * 0.3  # Penalize impossible travel
-
+        location_score -= min(unique_countries / 10, 0.5)
+        location_score -= impossible_travel_count * 0.3
         return max(0, location_score)
 
     def _analyze_cash_flow_patterns(self, transactions: List[Dict]) -> float:
         """Analyze cash flow patterns for liquidity risk"""
         if not transactions:
             return 0.5
-
-        # Separate income and expenses
         income_transactions = [t for t in transactions if float(t["amount"]) > 0]
         expense_transactions = [t for t in transactions if float(t["amount"]) < 0]
-
-        total_income = sum(float(t["amount"]) for t in income_transactions)
-        total_expenses = abs(sum(float(t["amount"]) for t in expense_transactions))
-
-        # Calculate cash flow ratio
+        total_income = sum((float(t["amount"]) for t in income_transactions))
+        total_expenses = abs(sum((float(t["amount"]) for t in expense_transactions)))
         if total_income == 0:
-            return 0.1  # Very poor if no income
-
+            return 0.1
         cash_flow_ratio = (total_income - total_expenses) / total_income
-
-        # Convert to score (0-1)
         if cash_flow_ratio > 0.3:
-            return 1.0  # Excellent cash flow
+            return 1.0
         elif cash_flow_ratio > 0.1:
-            return 0.8  # Good cash flow
+            return 0.8
         elif cash_flow_ratio > 0:
-            return 0.6  # Marginal cash flow
+            return 0.6
         elif cash_flow_ratio > -0.1:
-            return 0.4  # Poor cash flow
+            return 0.4
         else:
-            return 0.1  # Very poor cash flow
+            return 0.1
 
     def _analyze_account_balances(self, account_balances: Dict[str, Any]) -> float:
         """Analyze account balance levels"""
         if not account_balances:
             return 0.3
-
         total_balance = sum(
-            Decimal(str(balance)) for balance in account_balances.values()
+            (Decimal(str(balance)) for balance in account_balances.values())
         )
-
-        # Score based on balance levels
         if total_balance > Decimal("10000"):
             return 1.0
         elif total_balance > Decimal("5000"):
@@ -695,33 +579,25 @@ class AIRiskAssessor:
         """Calculate weighted score for a risk category"""
         if not factors:
             return 0.5
-
-        weighted_sum = sum(factor.score * factor.weight for factor in factors)
-        total_weight = sum(factor.weight for factor in factors)
-
+        weighted_sum = sum((factor.score * factor.weight for factor in factors))
+        total_weight = sum((factor.weight for factor in factors))
         return weighted_sum / total_weight if total_weight > 0 else 0.5
 
     def _calculate_overall_risk_score(self, category_scores: Dict[str, float]) -> float:
         """Calculate overall risk score from category scores"""
-        # Category weights for overall score
         category_weights = {
-            RiskCategory.CREDIT_RISK.value: 0.30,
+            RiskCategory.CREDIT_RISK.value: 0.3,
             RiskCategory.FRAUD_RISK.value: 0.25,
             RiskCategory.LIQUIDITY_RISK.value: 0.25,
-            RiskCategory.OPERATIONAL_RISK.value: 0.20,
+            RiskCategory.OPERATIONAL_RISK.value: 0.2,
         }
-
         weighted_sum = 0
         total_weight = 0
-
         for category, score in category_scores.items():
             weight = category_weights.get(category, 0.1)
             weighted_sum += score * weight
             total_weight += weight
-
-        # Convert to risk score (higher score = higher risk)
-        risk_score = 1 - (weighted_sum / total_weight) if total_weight > 0 else 0.5
-
+        risk_score = 1 - weighted_sum / total_weight if total_weight > 0 else 0.5
         return min(max(risk_score, 0), 1)
 
     def _determine_risk_level(self, risk_score: float) -> RiskLevel:
@@ -738,46 +614,36 @@ class AIRiskAssessor:
     ) -> Dict[str, Any]:
         """Generate AI predictions based on risk assessment"""
         predictions = {}
-
-        # Predict default probability
         credit_factors = [
             f for f in risk_factors if f.category == RiskCategory.CREDIT_RISK
         ]
         credit_score = self._calculate_category_score(credit_factors)
         default_probability = max(0, 1 - credit_score)
-
         predictions["default_probability"] = {
             "probability": round(default_probability, 3),
             "confidence": 0.75,
             "time_horizon": "12_months",
         }
-
-        # Predict fraud likelihood
         fraud_factors = [
             f for f in risk_factors if f.category == RiskCategory.FRAUD_RISK
         ]
         fraud_score = self._calculate_category_score(fraud_factors)
         fraud_probability = max(0, 1 - fraud_score)
-
         predictions["fraud_likelihood"] = {
             "probability": round(fraud_probability, 3),
-            "confidence": 0.80,
+            "confidence": 0.8,
             "time_horizon": "30_days",
         }
-
-        # Predict liquidity stress
         liquidity_factors = [
             f for f in risk_factors if f.category == RiskCategory.LIQUIDITY_RISK
         ]
         liquidity_score = self._calculate_category_score(liquidity_factors)
         liquidity_stress_probability = max(0, 1 - liquidity_score)
-
         predictions["liquidity_stress"] = {
             "probability": round(liquidity_stress_probability, 3),
-            "confidence": 0.70,
+            "confidence": 0.7,
             "time_horizon": "90_days",
         }
-
         return predictions
 
     def _generate_risk_recommendations(
@@ -785,8 +651,6 @@ class AIRiskAssessor:
     ) -> List[str]:
         """Generate risk mitigation recommendations"""
         recommendations = []
-
-        # Overall risk level recommendations
         if overall_risk_level in [
             RiskLevel.HIGH,
             RiskLevel.VERY_HIGH,
@@ -797,20 +661,15 @@ class AIRiskAssessor:
                 "Consider reducing credit limits or transaction limits"
             )
             recommendations.append("Implement enhanced monitoring and controls")
-
-        # Factor-specific recommendations
         high_risk_factors = [f for f in risk_factors if f.score < 0.5]
         for factor in high_risk_factors:
             recommendations.extend(factor.mitigation_suggestions)
-
-        # Remove duplicates while preserving order
         seen = set()
         unique_recommendations = []
         for rec in recommendations:
             if rec not in seen:
                 seen.add(rec)
                 unique_recommendations.append(rec)
-
         return unique_recommendations
 
     def _generate_monitoring_alerts(
@@ -818,36 +677,26 @@ class AIRiskAssessor:
     ) -> List[str]:
         """Generate monitoring alerts based on risk assessment"""
         alerts = []
-
-        # High-risk factor alerts
         critical_factors = [f for f in risk_factors if f.score < 0.3]
         for factor in critical_factors:
             alerts.append(
                 f"Critical risk detected in {factor.factor_name}: {factor.description}"
             )
-
-        # Prediction-based alerts
         if predictions.get("fraud_likelihood", {}).get("probability", 0) > 0.7:
             alerts.append(
                 "High fraud probability detected - implement additional verification"
             )
-
         if predictions.get("default_probability", {}).get("probability", 0) > 0.5:
             alerts.append("High default risk detected - review credit exposure")
-
         if predictions.get("liquidity_stress", {}).get("probability", 0) > 0.6:
             alerts.append("Liquidity stress risk detected - monitor cash flow closely")
-
         return alerts
 
     def _calculate_confidence_score(
         self, user_data: Dict[str, Any], risk_factors: List[RiskFactor]
     ) -> float:
         """Calculate confidence score for the risk assessment"""
-        # Base confidence on data availability and quality
         data_completeness = 0
-
-        # Check data availability
         if user_data.get("transaction_history"):
             data_completeness += 0.3
         if user_data.get("payment_history"):
@@ -858,11 +707,8 @@ class AIRiskAssessor:
             data_completeness += 0.15
         if user_data.get("location_history"):
             data_completeness += 0.15
-
-        # Adjust for account age (more history = higher confidence)
         account_age_days = user_data.get("account_age_days", 0)
         age_factor = min(1.0, account_age_days / 365)
-
         confidence = data_completeness * age_factor
         return round(confidence, 2)
 
@@ -872,12 +718,10 @@ class AIRiskAssessor:
         data = f"{user_id}_{timestamp}"
         return hashlib.sha256(data.encode()).hexdigest()[:16]
 
-    def _store_assessment(self, assessment: RiskAssessment):
+    def _store_assessment(self, assessment: RiskAssessment) -> Any:
         """Store risk assessment for future reference"""
-        # In production, store in database
         if assessment.user_id not in self.user_histories:
             self.user_histories[assessment.user_id] = []
-
         self.user_histories[assessment.user_id].append(
             {
                 "assessment_id": assessment.assessment_id,
@@ -887,59 +731,44 @@ class AIRiskAssessor:
                 "category_scores": assessment.category_scores,
             }
         )
-
-        # Keep only last 50 assessments per user
         if len(self.user_histories[assessment.user_id]) > 50:
             self.user_histories[assessment.user_id] = self.user_histories[
                 assessment.user_id
             ][-50:]
 
-    # Helper methods for data collection (placeholders for real implementation)
     def _get_transaction_history(self, user_id: str) -> List[Dict]:
         """Get user transaction history"""
-        # Placeholder - in real implementation, query transaction database
         return []
 
     def _get_account_balances(self, user_id: str) -> Dict[str, Any]:
         """Get user account balances"""
-        # Placeholder - in real implementation, query account database
         return {}
 
     def _get_payment_history(self, user_id: str) -> List[Dict]:
         """Get user payment history"""
-        # Placeholder - in real implementation, query payment database
         return []
 
     def _get_device_history(self, user_id: str) -> List[Dict]:
         """Get user device history"""
-        # Placeholder - in real implementation, query device tracking database
         return []
 
     def _get_location_history(self, user_id: str) -> List[Dict]:
         """Get user location history"""
-        # Placeholder - in real implementation, query location tracking database
         return []
 
     def _get_security_incidents(self, user_id: str) -> List[Dict]:
         """Get user security incidents"""
-        # Placeholder - in real implementation, query security incident database
         return []
 
     def _get_compliance_records(self, user_id: str) -> List[Dict]:
         """Get user compliance records"""
-        # Placeholder - in real implementation, query compliance database
         return []
 
     def generate_risk_report(self, user_id: str) -> Dict[str, Any]:
         """Generate comprehensive risk report for a user"""
         assessment = self.assess_user_risk(user_id)
-
-        # Get historical assessments
         historical_assessments = self.user_histories.get(user_id, [])
-
-        # Calculate risk trends
         risk_trend = self._calculate_risk_trend(historical_assessments)
-
         report = {
             "user_id": user_id,
             "report_date": datetime.now(timezone.utc).isoformat(),
@@ -966,36 +795,27 @@ class AIRiskAssessor:
             "risk_trend": risk_trend,
             "historical_assessments_count": len(historical_assessments),
         }
-
         return report
 
     def _calculate_risk_trend(self, historical_assessments: List[Dict]) -> str:
         """Calculate risk trend from historical assessments"""
         if len(historical_assessments) < 2:
             return "insufficient_data"
-
-        # Get last 5 assessments
         recent_assessments = historical_assessments[-5:]
         scores = [a["overall_risk_score"] for a in recent_assessments]
-
-        # Calculate trend
         if len(scores) >= 3:
             first_half = statistics.mean(scores[: len(scores) // 2])
             second_half = statistics.mean(scores[len(scores) // 2 :])
-
             change_ratio = (
                 (second_half - first_half) / first_half if first_half > 0 else 0
             )
-
             if change_ratio > 0.1:
                 return "increasing"
             elif change_ratio < -0.1:
                 return "decreasing"
             else:
                 return "stable"
-
         return "stable"
 
 
-# Global AI risk assessor instance
 ai_risk_assessor = AIRiskAssessor()

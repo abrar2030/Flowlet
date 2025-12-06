@@ -2,20 +2,13 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import func, select
-
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 
-# Create blueprint
 ledger_bp = Blueprint("ledger", __name__, url_prefix="/api/v1/ledger")
-
-# Configure logging
 logger = logging.getLogger(__name__)
-
-# --- Simplified Chart of Accounts (for demonstration) ---
 CHART_OF_ACCOUNTS = {
     "cash_and_equivalents": {
         "type": AccountType.ASSET,
@@ -35,7 +28,7 @@ CHART_OF_ACCOUNTS = {
 
 @ledger_bp.route("/entry", methods=["POST"])
 @admin_required
-def create_journal_entry():
+def create_journal_entry() -> Any:
     """Create a journal entry with multiple ledger entries (double-entry bookkeeping)"""
     try:
         data = request.get_json()
@@ -44,20 +37,14 @@ def create_journal_entry():
                 jsonify({"error": "Missing entries data", "code": "MISSING_DATA"}),
                 400,
             )
-
         entries_data = data["entries"]
-
-        # 1. Validate that debits equal credits
         total_debits = Decimal("0.00")
         total_credits = Decimal("0.00")
-
         for entry_data in entries_data:
             debit = Decimal(str(entry_data.get("debit_amount", "0.00")))
             credit = Decimal(str(entry_data.get("credit_amount", "0.00")))
             total_debits += debit
             total_credits += credit
-
-            # 2. Validate account name
             account_name = entry_data.get("account_name")
             if account_name not in CHART_OF_ACCOUNTS:
                 return (
@@ -69,8 +56,6 @@ def create_journal_entry():
                     ),
                     400,
                 )
-
-            # 3. Validate currency
             if not entry_data.get("currency"):
                 return (
                     jsonify(
@@ -81,7 +66,6 @@ def create_journal_entry():
                     ),
                     400,
                 )
-
         if total_debits != total_credits:
             return (
                 jsonify(
@@ -92,7 +76,6 @@ def create_journal_entry():
                 ),
                 400,
             )
-
         if len(entries_data) < 2:
             return (
                 jsonify(
@@ -103,15 +86,11 @@ def create_journal_entry():
                 ),
                 400,
             )
-
-        # 4. Create ledger entries
         journal_entry_id = str(uuid.uuid4())
         ledger_entries = []
-
         for entry_data in entries_data:
             account_name = entry_data["account_name"]
             account_info = CHART_OF_ACCOUNTS[account_name]
-
             ledger_entry = LedgerEntry(
                 transaction_id=data.get("transaction_id"),
                 journal_entry_id=journal_entry_id,
@@ -126,10 +105,8 @@ def create_journal_entry():
                 created_at=datetime.now(timezone.utc),
             )
             ledger_entries.append(ledger_entry)
-
         db.session.add_all(ledger_entries)
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.SYSTEM_EVENT,
             description=f"Journal entry created: {journal_entry_id}",
@@ -138,7 +115,6 @@ def create_journal_entry():
             resource_type="journal_entry",
             resource_id=journal_entry_id,
         )
-
         return (
             jsonify(
                 {
@@ -151,7 +127,6 @@ def create_journal_entry():
             ),
             201,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error creating journal entry: {str(e)}", exc_info=True)
@@ -163,7 +138,7 @@ def create_journal_entry():
 
 @ledger_bp.route("/balance/<account_name>", methods=["GET"])
 @admin_required
-def get_account_balance(account_name):
+def get_account_balance(account_name: Any) -> Any:
     """Get the current balance for a specific ledger account"""
     try:
         if account_name not in CHART_OF_ACCOUNTS:
@@ -176,35 +151,26 @@ def get_account_balance(account_name):
                 ),
                 404,
             )
-
         account_info = CHART_OF_ACCOUNTS[account_name]
-
-        # Determine if the account is a debit-normal or credit-normal account
         is_debit_normal = account_info["type"] in [
             AccountType.ASSET,
             AccountType.EXPENSE,
         ]
-
-        # Calculate balance
         balance_query = select(
             func.sum(LedgerEntry.debit_amount).label("total_debit"),
             func.sum(LedgerEntry.credit_amount).label("total_credit"),
         ).filter(LedgerEntry.account_name == account_name)
-
         result = db.session.execute(balance_query).one_or_none()
-
         total_debit = (
             result.total_debit if result and result.total_debit else Decimal("0.00")
         )
         total_credit = (
             result.total_credit if result and result.total_credit else Decimal("0.00")
         )
-
         if is_debit_normal:
             balance = total_debit - total_credit
         else:
             balance = total_credit - total_debit
-
         return (
             jsonify(
                 {
@@ -218,7 +184,6 @@ def get_account_balance(account_name):
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Error getting account balance: {str(e)}", exc_info=True)
         return (
@@ -229,26 +194,19 @@ def get_account_balance(account_name):
 
 @ledger_bp.route("/entries", methods=["GET"])
 @admin_required
-def get_ledger_entries():
+def get_ledger_entries() -> Any:
     """Get all ledger entries (Admin only)"""
     try:
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 50, type=int)
-
         stmt = select(LedgerEntry).order_by(LedgerEntry.created_at.desc())
-
         offset = (page - 1) * per_page
         paginated_stmt = stmt.limit(per_page).offset(offset)
-
         entries = db.session.execute(paginated_stmt).scalars().all()
-
-        # Get total count for pagination metadata
         count_stmt = select(func.count()).select_from(LedgerEntry)
         total_entries = db.session.execute(count_stmt).scalar_one()
         total_pages = (total_entries + per_page - 1) // per_page
-
         entry_list = [entry.to_dict() for entry in entries]
-
         return (
             jsonify(
                 {
@@ -263,7 +221,6 @@ def get_ledger_entries():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Error getting ledger entries: {str(e)}", exc_info=True)
         return (

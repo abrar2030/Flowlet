@@ -5,19 +5,16 @@ class FlowletUser(HttpUser):
     wait_time = between(1, 2)
 
     @task
-    def register_and_login(self):
-        # Simulate user registration
+    def register_and_login(self) -> Any:
         self.client.post(
             "/register", json={"username": "testuser", "password": "password123"}
         )
-        # Simulate user login
         self.client.post(
             "/login", json={"username": "testuser", "password": "password123"}
         )
 
     @task
-    def wallet_operations(self):
-        # Simulate wallet creation, deposit, and withdrawal
+    def wallet_operations(self) -> Any:
         self.client.post(
             "/wallet/create", json={"user_id": "testuser", "currency": "USD"}
         )
@@ -29,8 +26,7 @@ class FlowletUser(HttpUser):
         )
 
     @task
-    def make_payment(self):
-        # Simulate making a payment
+    def make_payment(self) -> Any:
         self.client.post(
             "/payment/make",
             json={
@@ -42,11 +38,9 @@ class FlowletUser(HttpUser):
         )
 
     @task
-    def load_spike_scenario(self):
-        # Simulate a sudden increase in load for a short period
+    def load_spike_scenario(self) -> Any:
         self.client.post("/spike_endpoint", json={"data": "high_volume_request"})
 
     @task
-    def long_duration_scenario(self):
-        # Simulate sustained load over a longer period
+    def long_duration_scenario(self) -> Any:
         self.client.get("/health_check")

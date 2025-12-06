@@ -1,34 +1,25 @@
 import os
 import sys
-
 from src.main import app
 from src.models.database import db
-
 from core.logging import get_logger
 
 logger = get_logger(__name__)
-
-#!/usr/bin/env python3
-
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 
-def test_app_creation():
+def test_app_creation() -> Any:
     """Test that the Flask app can be created"""
     logger.info("✓ Flask app created successfully")
     return True
 
 
-def test_database_models():
+def test_database_models() -> Any:
     """Test database model creation"""
     try:
         with app.app_context():
-            # Test that all tables can be created
             db.create_all()
             logger.info("✓ Database models created successfully")
-            # Test importing all models
-
             logger.info("✓ All database models imported successfully")
             return True
     except Exception as e:
@@ -36,11 +27,10 @@ def test_database_models():
         return False
 
 
-def test_route_imports():
+def test_route_imports() -> Any:
     """Test that all route blueprints can be imported"""
     try:
         pass
-
         logger.info("✓ All route blueprints imported successfully")
         return True
     except Exception as e:
@@ -48,14 +38,11 @@ def test_route_imports():
         return False
 
 
-def test_service_functionality():
+def test_service_functionality() -> Any:
     """Test basic service functionality without HTTP requests"""
     try:
         with app.app_context():
-            # Test user creation
-            # Create a test user with unique email
             import uuid
-
             from src.models.database import User, Wallet, db
 
             unique_email = f"test_{str(uuid.uuid4())[:8]}@example.com"
@@ -68,20 +55,18 @@ def test_service_functionality():
             db.session.add(user)
             db.session.commit()
             logger.info(f"✓ User created with ID: {user.id}")
-            # Create a test wallet
             wallet = Wallet(
                 user_id=user.id,
                 wallet_type="user",
                 currency="USD",
-                balance=0.00,
-                available_balance=0.00,
+                balance=0.0,
+                available_balance=0.0,
             )
             db.session.add(wallet)
             db.session.commit()
             logger.info(f"✓ Wallet created with ID: {wallet.id}")
-            # Test wallet balance update
-            wallet.balance = 100.00
-            wallet.available_balance = 100.00
+            wallet.balance = 100.0
+            wallet.available_balance = 100.0
             db.session.commit()
             logger.info(f"✓ Wallet balance updated to: ${wallet.balance}")
             return True
@@ -90,10 +75,9 @@ def test_service_functionality():
         return False
 
 
-def test_ai_algorithms():
+def test_ai_algorithms() -> Any:
     """Test AI service algorithms"""
     try:
-        # Test basic AI functionality without complex imports
         logger.info("✓ AI algorithms validated (fraud detection, risk scoring)")
         return True
     except Exception as e:
@@ -101,15 +85,13 @@ def test_ai_algorithms():
         return False
 
 
-def test_security_functions():
+def test_security_functions() -> Any:
     """Test security service functions"""
     try:
         from src.routes.security import generate_api_key, hash_api_key
 
-        # Test API key generation
         api_key = generate_api_key()
         logger.info(f"✓ API key generated: {api_key[:10]}...")
-        # Test API key hashing
         key_hash = hash_api_key(api_key)
         logger.info(f"✓ API key hashed: {key_hash[:10]}...")
         return True
@@ -118,7 +100,7 @@ def test_security_functions():
         return False
 
 
-def main():
+def main() -> Any:
     """Run all offline tests"""
     logger.info("🧪 Running Flowlet Backend Offline Tests\n")
     tests = [
@@ -129,10 +111,8 @@ def main():
         ("AI Algorithms", test_ai_algorithms),
         ("Security Functions", test_security_functions),
     ]
-
     passed = 0
     total = len(tests)
-
     for test_name, test_func in tests:
         logger.info(f"\n📋 Testing {test_name}:")
         try:

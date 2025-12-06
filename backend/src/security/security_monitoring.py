@@ -8,13 +8,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-"""
-Security Monitoring Service
-===========================
-
-Comprehensive security monitoring and incident response system.
-Provides real-time security event monitoring, alerting, and forensic capabilities.
-"""
+"\nSecurity Monitoring Service\n===========================\n\nComprehensive security monitoring and incident response system.\nProvides real-time security event monitoring, alerting, and forensic capabilities.\n"
 
 
 class EventSeverity(Enum):
@@ -137,12 +131,8 @@ class AlertRule:
 
     def matches(self, event: SecurityEvent) -> bool:
         """Check if event matches this alert rule."""
-
-        # Check event type
         if self.event_type != "*" and event.event_type != self.event_type:
             return False
-
-        # Check severity threshold
         severity_levels = {
             EventSeverity.INFO: 1,
             EventSeverity.LOW: 2,
@@ -150,11 +140,8 @@ class AlertRule:
             EventSeverity.HIGH: 4,
             EventSeverity.CRITICAL: 5,
         }
-
         if severity_levels[event.severity] < severity_levels[self.severity_threshold]:
             return False
-
-        # Check additional conditions
         for condition_key, condition_value in self.conditions.items():
             if condition_key == "source" and event.source != condition_value:
                 return False
@@ -166,7 +153,6 @@ class AlertRule:
                 return False
             elif condition_key == "ip_address" and event.ip_address != condition_value:
                 return False
-
         return True
 
 
@@ -185,47 +171,30 @@ class SecurityMonitoringService:
     - Incident response workflow management
     """
 
-    def __init__(self, db_client: Any, config: Dict[str, Any] = None):
+    def __init__(self, db_client: Any, config: Dict[str, Any] = None) -> Any:
         self.db = db_client
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Monitoring components
-        self._events = deque(maxlen=10000)  # Recent events buffer
+        self._events = deque(maxlen=10000)
         self._incidents = {}
         self._alert_rules = {}
         self._event_handlers = {}
         self._correlation_rules = {}
         self._metrics = defaultdict(int)
-
-        # Event processing
         self._event_queue = asyncio.Queue()
         self._processing_task = None
-
-        # Initialize monitoring service
         self._initialize_monitoring_service()
 
-    def _initialize_monitoring_service(self):
+    def _initialize_monitoring_service(self) -> Any:
         """Initialize the security monitoring service."""
-
-        # Set up default alert rules
         self._setup_default_alert_rules()
-
-        # Initialize correlation rules
         self._setup_correlation_rules()
-
-        # Register default event handlers
         self._register_default_handlers()
-
-        # Start event processing
         self._start_event_processing()
-
         self.logger.info("Security monitoring service initialized successfully")
 
-    def _setup_default_alert_rules(self):
+    def _setup_default_alert_rules(self) -> Any:
         """Set up default security alert rules."""
-
-        # Failed login attempts
         self._alert_rules["failed_login_attempts"] = AlertRule(
             rule_id="failed_login_attempts",
             name="Multiple Failed Login Attempts",
@@ -236,8 +205,6 @@ class SecurityMonitoringService:
             time_window=timedelta(minutes=15),
             max_events=5,
         )
-
-        # Privilege escalation
         self._alert_rules["privilege_escalation"] = AlertRule(
             rule_id="privilege_escalation",
             name="Privilege Escalation Detected",
@@ -248,8 +215,6 @@ class SecurityMonitoringService:
             time_window=timedelta(minutes=5),
             max_events=1,
         )
-
-        # Data access anomaly
         self._alert_rules["data_access_anomaly"] = AlertRule(
             rule_id="data_access_anomaly",
             name="Unusual Data Access Pattern",
@@ -260,8 +225,6 @@ class SecurityMonitoringService:
             time_window=timedelta(hours=1),
             max_events=10,
         )
-
-        # Critical system events
         self._alert_rules["critical_system_events"] = AlertRule(
             rule_id="critical_system_events",
             name="Critical System Events",
@@ -272,8 +235,6 @@ class SecurityMonitoringService:
             time_window=timedelta(minutes=1),
             max_events=1,
         )
-
-        # Fraud detection alerts
         self._alert_rules["fraud_detection"] = AlertRule(
             rule_id="fraud_detection",
             name="Fraud Detection Alerts",
@@ -285,9 +246,8 @@ class SecurityMonitoringService:
             max_events=1,
         )
 
-    def _setup_correlation_rules(self):
+    def _setup_correlation_rules(self) -> Any:
         """Set up event correlation rules."""
-
         self._correlation_rules = {
             "account_takeover_pattern": {
                 "description": "Detect account takeover patterns",
@@ -313,41 +273,31 @@ class SecurityMonitoringService:
             },
         }
 
-    def _register_default_handlers(self):
+    def _register_default_handlers(self) -> Any:
         """Register default event handlers."""
-
-        # Authentication event handlers
         self.register_event_handler("login_success", self._handle_login_success)
         self.register_event_handler("login_failed", self._handle_login_failed)
         self.register_event_handler("logout", self._handle_logout)
-
-        # Authorization event handlers
         self.register_event_handler("access_denied", self._handle_access_denied)
         self.register_event_handler(
             "privilege_escalation", self._handle_privilege_escalation
         )
-
-        # Data access event handlers
         self.register_event_handler(
             "sensitive_data_access", self._handle_sensitive_data_access
         )
         self.register_event_handler("data_export", self._handle_data_export)
-
-        # System event handlers
         self.register_event_handler("system_error", self._handle_system_error)
         self.register_event_handler(
             "configuration_change", self._handle_configuration_change
         )
 
-    def _start_event_processing(self):
+    def _start_event_processing(self) -> Any:
         """Start asynchronous event processing."""
-
         if self._processing_task is None or self._processing_task.done():
             self._processing_task = asyncio.create_task(self._process_events())
 
     async def _process_events(self):
         """Process security events from the queue."""
-
         while True:
             try:
                 event = await self._event_queue.get()
@@ -389,7 +339,6 @@ class SecurityMonitoringService:
         Returns:
             SecurityEvent object
         """
-
         event = SecurityEvent(
             event_id=str(uuid.uuid4()),
             event_type=event_type,
@@ -405,72 +354,47 @@ class SecurityMonitoringService:
             ip_address=ip_address,
             user_agent=user_agent,
         )
-
-        # Add to events buffer
         self._events.append(event)
-
-        # Queue for processing
         await self._event_queue.put(event)
-
-        # Update metrics
         self._metrics[f"events_{category.value}"] += 1
         self._metrics[f"events_{severity.value}"] += 1
         self._metrics["total_events"] += 1
-
         self.logger.info(f"Security event logged: {event_type} - {severity.value}")
         return event
 
     async def _process_single_event(self, event: SecurityEvent):
         """Process a single security event."""
-
         try:
-            # Check alert rules
             await self._check_alert_rules(event)
-
-            # Run event correlation
             await self._correlate_events(event)
-
-            # Execute event handlers
             await self._execute_event_handlers(event)
-
-            # Update incident tracking
             await self._update_incident_tracking(event)
-
         except Exception as e:
             self.logger.error(f"Error processing event {event.event_id}: {str(e)}")
 
     async def _check_alert_rules(self, event: SecurityEvent):
         """Check if event triggers any alert rules."""
-
         for rule_id, rule in self._alert_rules.items():
             if not rule.enabled:
                 continue
-
             if rule.matches(event):
-                # Check if we've exceeded the threshold within the time window
                 recent_events = self._get_recent_events_for_rule(rule)
-
                 if len(recent_events) >= rule.max_events:
                     await self._trigger_alert(rule, recent_events)
 
     def _get_recent_events_for_rule(self, rule: AlertRule) -> List[SecurityEvent]:
         """Get recent events that match the alert rule."""
-
         cutoff_time = datetime.utcnow() - rule.time_window
         matching_events = []
-
         for event in reversed(self._events):
             if event.timestamp < cutoff_time:
                 break
-
             if rule.matches(event):
                 matching_events.append(event)
-
         return matching_events
 
     async def _trigger_alert(self, rule: AlertRule, events: List[SecurityEvent]):
         """Trigger a security alert."""
-
         alert_data = {
             "alert_id": str(uuid.uuid4()),
             "rule_id": rule.rule_id,
@@ -482,33 +406,17 @@ class SecurityMonitoringService:
             "events": [event.event_id for event in events],
             "timestamp": datetime.utcnow().isoformat(),
         }
-
-        # Send alert notification
         await self._send_alert_notification(alert_data)
-
-        # Create or update incident
         await self._create_or_update_incident(rule, events)
-
         self.logger.warning(f"Security alert triggered: {rule.name}")
 
     async def _send_alert_notification(self, alert_data: Dict[str, Any]):
         """Send alert notification to configured channels."""
-
-        # In practice, this would send notifications via:
-        # - Email
-        # - Slack/Teams
-        # - SMS
-        # - SIEM systems
-        # - Webhook endpoints
-
         self.logger.warning(f"Security alert: {json.dumps(alert_data)}")
-
-        # Update metrics
         self._metrics["alerts_sent"] += 1
 
     async def _correlate_events(self, event: SecurityEvent):
         """Perform event correlation analysis."""
-
         for pattern_name, pattern_config in self._correlation_rules.items():
             if event.event_type in pattern_config["events"]:
                 await self._check_correlation_pattern(
@@ -519,14 +427,9 @@ class SecurityMonitoringService:
         self, event: SecurityEvent, pattern_name: str, pattern_config: Dict[str, Any]
     ):
         """Check if event matches a correlation pattern."""
-
         time_window = pattern_config["time_window"]
         cutoff_time = datetime.utcnow() - time_window
-
-        # Get recent events within time window
         recent_events = [e for e in self._events if e.timestamp >= cutoff_time]
-
-        # Apply pattern-specific logic
         if pattern_name == "account_takeover_pattern":
             await self._check_account_takeover_pattern(
                 event, recent_events, pattern_config
@@ -545,25 +448,18 @@ class SecurityMonitoringService:
         pattern_config: Dict[str, Any],
     ):
         """Check for account takeover patterns."""
-
         if not event.user_id:
             return
-
-        # Look for sequence: failed logins -> successful login -> password change
         user_events = [e for e in recent_events if e.user_id == event.user_id]
-
         failed_logins = [e for e in user_events if e.event_type == "login_failed"]
         successful_logins = [e for e in user_events if e.event_type == "login_success"]
         password_changes = [e for e in user_events if e.event_type == "password_change"]
-
-        # Check for different IP addresses
-        ip_addresses = set(e.ip_address for e in user_events if e.ip_address)
-
+        ip_addresses = set((e.ip_address for e in user_events if e.ip_address))
         if (
             len(failed_logins) >= 3
             and len(successful_logins) >= 1
-            and len(password_changes) >= 1
-            and len(ip_addresses) > 1
+            and (len(password_changes) >= 1)
+            and (len(ip_addresses) > 1)
         ):
             await self._create_correlation_incident(
                 "Account Takeover Detected",
@@ -580,13 +476,9 @@ class SecurityMonitoringService:
         pattern_config: Dict[str, Any],
     ):
         """Check for data exfiltration patterns."""
-
         if not event.user_id:
             return
-
         user_events = [e for e in recent_events if e.user_id == event.user_id]
-
-        # Look for large data access followed by downloads/transfers
         data_access_events = [
             e for e in user_events if e.event_type == "large_data_access"
         ]
@@ -594,7 +486,6 @@ class SecurityMonitoringService:
         transfer_events = [
             e for e in user_events if e.event_type == "external_transfer"
         ]
-
         if len(data_access_events) >= 1 and (
             len(download_events) >= 3 or len(transfer_events) >= 1
         ):
@@ -613,19 +504,14 @@ class SecurityMonitoringService:
         pattern_config: Dict[str, Any],
     ):
         """Check for brute force attack patterns."""
-
         if not event.ip_address:
             return
-
-        # Count failed login attempts from same IP
         failed_logins = [
             e
             for e in recent_events
             if e.event_type == "login_failed" and e.ip_address == event.ip_address
         ]
-
         min_count = pattern_config["conditions"].get("min_count", 10)
-
         if len(failed_logins) >= min_count:
             await self._create_correlation_incident(
                 "Brute Force Attack Detected",
@@ -644,7 +530,6 @@ class SecurityMonitoringService:
         events: List[SecurityEvent],
     ):
         """Create incident from correlated events."""
-
         incident = SecurityIncident(
             incident_id=str(uuid.uuid4()),
             title=title,
@@ -654,10 +539,7 @@ class SecurityMonitoringService:
             category=category,
             events=events,
         )
-
         self._incidents[incident.incident_id] = incident
-
-        # Send high-priority alert
         await self._send_alert_notification(
             {
                 "alert_type": "correlation_incident",
@@ -668,14 +550,11 @@ class SecurityMonitoringService:
                 "timestamp": datetime.utcnow().isoformat(),
             }
         )
-
         self.logger.critical(f"Correlation incident created: {title}")
 
     async def _execute_event_handlers(self, event: SecurityEvent):
         """Execute registered event handlers."""
-
         handlers = self._event_handlers.get(event.event_type, [])
-
         for handler in handlers:
             try:
                 await handler(event)
@@ -686,8 +565,6 @@ class SecurityMonitoringService:
 
     async def _update_incident_tracking(self, event: SecurityEvent):
         """Update incident tracking based on event."""
-
-        # Auto-escalate critical events to incidents
         if event.severity == EventSeverity.CRITICAL:
             incident = SecurityIncident(
                 incident_id=str(uuid.uuid4()),
@@ -698,7 +575,6 @@ class SecurityMonitoringService:
                 category=event.category,
                 events=[event],
             )
-
             self._incidents[incident.incident_id] = incident
             self.logger.critical(
                 f"Auto-created incident for critical event: {event.event_id}"
@@ -708,8 +584,6 @@ class SecurityMonitoringService:
         self, rule: AlertRule, events: List[SecurityEvent]
     ):
         """Create or update incident based on alert rule."""
-
-        # Check if there's an existing open incident for this rule
         existing_incident = None
         for incident in self._incidents.values():
             if (
@@ -718,16 +592,13 @@ class SecurityMonitoringService:
             ):
                 existing_incident = incident
                 break
-
         if existing_incident:
-            # Update existing incident
             existing_incident.events.extend(events)
             existing_incident.updated_at = datetime.utcnow()
             existing_incident.description += (
                 f"\n\nAdditional events detected by rule: {rule.name}"
             )
         else:
-            # Create new incident
             incident = SecurityIncident(
                 incident_id=str(uuid.uuid4()),
                 title=f"Security Alert: {rule.name}",
@@ -737,49 +608,33 @@ class SecurityMonitoringService:
                 category=events[0].category,
                 events=events,
             )
-
             self._incidents[incident.incident_id] = incident
 
-    def register_event_handler(self, event_type: str, handler: Callable):
+    def register_event_handler(self, event_type: str, handler: Callable) -> Any:
         """Register a custom event handler."""
-
         if event_type not in self._event_handlers:
             self._event_handlers[event_type] = []
-
         self._event_handlers[event_type].append(handler)
         self.logger.info(f"Registered event handler for: {event_type}")
 
-    # Default event handlers
     async def _handle_login_success(self, event: SecurityEvent):
         """Handle successful login events."""
-
-        # Track login patterns
         if event.user_id and event.ip_address:
-            # In practice, would update user behavior profiles
             pass
 
     async def _handle_login_failed(self, event: SecurityEvent):
         """Handle failed login events."""
-
-        # Track failed login attempts
         if event.ip_address:
-            # In practice, would implement account lockout logic
             pass
 
     async def _handle_logout(self, event: SecurityEvent):
         """Handle logout events."""
 
-        # Track session duration
-
     async def _handle_access_denied(self, event: SecurityEvent):
         """Handle access denied events."""
 
-        # Track unauthorized access attempts
-
     async def _handle_privilege_escalation(self, event: SecurityEvent):
         """Handle privilege escalation events."""
-
-        # Immediately escalate to incident
         incident = SecurityIncident(
             incident_id=str(uuid.uuid4()),
             title="Privilege Escalation Detected",
@@ -789,28 +644,19 @@ class SecurityMonitoringService:
             category=EventCategory.AUTHORIZATION,
             events=[event],
         )
-
         self._incidents[incident.incident_id] = incident
 
     async def _handle_sensitive_data_access(self, event: SecurityEvent):
         """Handle sensitive data access events."""
 
-        # Track data access patterns
-
     async def _handle_data_export(self, event: SecurityEvent):
         """Handle data export events."""
-
-        # Monitor for potential data exfiltration
 
     async def _handle_system_error(self, event: SecurityEvent):
         """Handle system error events."""
 
-        # Track system health and potential attacks
-
     async def _handle_configuration_change(self, event: SecurityEvent):
         """Handle configuration change events."""
-
-        # Track configuration changes for compliance
 
     def get_recent_events(
         self,
@@ -820,23 +666,14 @@ class SecurityMonitoringService:
         time_range: timedelta = None,
     ) -> List[SecurityEvent]:
         """Get recent security events with optional filtering."""
-
         events = list(self._events)
-
-        # Apply time range filter
         if time_range:
             cutoff_time = datetime.utcnow() - time_range
             events = [e for e in events if e.timestamp >= cutoff_time]
-
-        # Apply category filter
         if category:
             events = [e for e in events if e.category == category]
-
-        # Apply severity filter
         if severity:
             events = [e for e in events if e.severity == severity]
-
-        # Sort by timestamp (most recent first) and limit
         events.sort(key=lambda x: x.timestamp, reverse=True)
         return events[:limit]
 
@@ -847,20 +684,13 @@ class SecurityMonitoringService:
         category: EventCategory = None,
     ) -> List[SecurityIncident]:
         """Get security incidents with optional filtering."""
-
         incidents = list(self._incidents.values())
-
-        # Apply filters
         if status:
             incidents = [i for i in incidents if i.status == status]
-
         if severity:
             incidents = [i for i in incidents if i.severity == severity]
-
         if category:
             incidents = [i for i in incidents if i.category == category]
-
-        # Sort by creation time (most recent first)
         incidents.sort(key=lambda x: x.created_at, reverse=True)
         return incidents
 
@@ -872,21 +702,16 @@ class SecurityMonitoringService:
         notes: str = None,
     ) -> bool:
         """Update incident status and assignment."""
-
         if incident_id not in self._incidents:
             return False
-
         incident = self._incidents[incident_id]
         incident.status = status
         incident.updated_at = datetime.utcnow()
-
         if assigned_to:
             incident.assigned_to = assigned_to
-
         if status == IncidentStatus.RESOLVED:
             incident.resolved_at = datetime.utcnow()
             incident.resolution_notes = notes
-
         self.logger.info(f"Updated incident {incident_id} status to {status.value}")
         return True
 
@@ -901,9 +726,7 @@ class SecurityMonitoringService:
         max_events: int,
     ) -> str:
         """Create a new alert rule."""
-
         rule_id = str(uuid.uuid4())
-
         rule = AlertRule(
             rule_id=rule_id,
             name=name,
@@ -914,14 +737,12 @@ class SecurityMonitoringService:
             time_window=time_window,
             max_events=max_events,
         )
-
         self._alert_rules[rule_id] = rule
         self.logger.info(f"Created alert rule: {name}")
         return rule_id
 
     def enable_alert_rule(self, rule_id: str) -> bool:
         """Enable an alert rule."""
-
         if rule_id in self._alert_rules:
             self._alert_rules[rule_id].enabled = True
             return True
@@ -929,7 +750,6 @@ class SecurityMonitoringService:
 
     def disable_alert_rule(self, rule_id: str) -> bool:
         """Disable an alert rule."""
-
         if rule_id in self._alert_rules:
             self._alert_rules[rule_id].enabled = False
             return True
@@ -937,8 +757,6 @@ class SecurityMonitoringService:
 
     def get_security_metrics(self) -> Dict[str, Any]:
         """Get security monitoring metrics."""
-
-        # Calculate incident metrics
         open_incidents = len(
             [i for i in self._incidents.values() if i.status == IncidentStatus.OPEN]
         )
@@ -949,8 +767,6 @@ class SecurityMonitoringService:
                 if i.severity == EventSeverity.CRITICAL
             ]
         )
-
-        # Calculate event metrics by time period
         now = datetime.utcnow()
         last_hour_events = len(
             [e for e in self._events if e.timestamp >= now - timedelta(hours=1)]
@@ -958,7 +774,6 @@ class SecurityMonitoringService:
         last_day_events = len(
             [e for e in self._events if e.timestamp >= now - timedelta(days=1)]
         )
-
         return {
             "total_events": self._metrics["total_events"],
             "events_last_hour": last_hour_events,
@@ -986,37 +801,27 @@ class SecurityMonitoringService:
         self, time_range: timedelta = timedelta(days=7)
     ) -> Dict[str, Any]:
         """Generate comprehensive security report."""
-
         cutoff_time = datetime.utcnow() - time_range
-
-        # Filter events and incidents by time range
         period_events = [e for e in self._events if e.timestamp >= cutoff_time]
         period_incidents = [
             i for i in self._incidents.values() if i.created_at >= cutoff_time
         ]
-
-        # Calculate statistics
         event_stats = defaultdict(int)
         for event in period_events:
             event_stats[f"category_{event.category.value}"] += 1
             event_stats[f"severity_{event.severity.value}"] += 1
-
         incident_stats = defaultdict(int)
         for incident in period_incidents:
             incident_stats[f"category_{incident.category.value}"] += 1
             incident_stats[f"severity_{incident.severity.value}"] += 1
             incident_stats[f"status_{incident.status.value}"] += 1
-
-        # Top sources and targets
         sources = defaultdict(int)
         targets = defaultdict(int)
         for event in period_events:
             sources[event.source] += 1
             targets[event.target] += 1
-
         top_sources = sorted(sources.items(), key=lambda x: x[1], reverse=True)[:10]
         top_targets = sorted(targets.items(), key=lambda x: x[1], reverse=True)[:10]
-
         return {
             "report_period": {
                 "start": cutoff_time.isoformat(),

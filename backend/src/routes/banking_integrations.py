@@ -1,39 +1,22 @@
 import logging
 from datetime import datetime, timezone
-
 from flask import Blueprint, jsonify
+from .auth import token_required
 
-from .auth import token_required  # Assuming decorators are defined here for now
-
-"""
-Banking Integrations Routes (Placeholder for External Banking APIs)
-"""
-
-
-# Import refactored modules
-
-# Create blueprint
+"\nBanking Integrations Routes (Placeholder for External Banking APIs)\n"
 banking_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")
-
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
 @banking_bp.route("/health", methods=["GET"])
-def health_check():
+def health_check() -> Any:
     """Health check endpoint for banking integrations"""
     try:
-        # Since the actual banking integration logic is complex and requires external APIs,
-        # this endpoint serves as a placeholder for the health of the integration layer.
-
-        # In a real application, this would check connectivity to Plaid, Yodlee, or similar services.
-
         status = {
             "plaid_integration": "unconfigured",
             "swift_api": "unconfigured",
             "overall_status": "placeholder_active",
         }
-
         return (
             jsonify(
                 {
@@ -45,7 +28,6 @@ def health_check():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Banking health check failed: {str(e)}", exc_info=True)
         return (

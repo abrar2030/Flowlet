@@ -6,16 +6,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
-
 from sqlalchemy.orm import Session
 
-"""
-Configuration Engine
-===================
-
-Visual configuration system for financial applications.
-Allows business users to configure complex settings without coding.
-"""
+"\nConfiguration Engine\n===================\n\nVisual configuration system for financial applications.\nAllows business users to configure complex settings without coding.\n"
 
 
 class ConfigType(Enum):
@@ -55,7 +48,7 @@ class ConfigField:
     default_value: Any = None
     required: bool = False
     validation_rules: Dict[str, Any] = field(default_factory=dict)
-    options: List[Any] = field(default_factory=list)  # For enum types
+    options: List[Any] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -167,54 +160,35 @@ class ConfigurationEngine:
     - Environment-specific configurations
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Configuration storage
         self._templates = {}
         self._instances = {}
         self._validators = {}
         self._change_listeners = defaultdict(list)
-
-        # Initialize configuration engine
         self._initialize_config_engine()
 
-    def _initialize_config_engine(self):
+    def _initialize_config_engine(self) -> Any:
         """Initialize the configuration engine."""
-
-        # Create default templates
         self._create_default_templates()
-
-        # Register default validators
         self._register_default_validators()
-
         self.logger.info("Configuration engine initialized successfully")
 
-    def _create_default_templates(self):
+    def _create_default_templates(self) -> Any:
         """Create default configuration templates."""
-
-        # Payment processing configuration
         payment_template = self._create_payment_processing_template()
         self._templates[payment_template.template_id] = payment_template
-
-        # Risk management configuration
         risk_template = self._create_risk_management_template()
         self._templates[risk_template.template_id] = risk_template
-
-        # Compliance configuration
         compliance_template = self._create_compliance_template()
         self._templates[compliance_template.template_id] = compliance_template
-
-        # Analytics configuration
         analytics_template = self._create_analytics_template()
         self._templates[analytics_template.template_id] = analytics_template
 
     def _create_payment_processing_template(self) -> ConfigTemplate:
         """Create payment processing configuration template."""
-
-        # Payment gateway section
         gateway_section = ConfigSection(
             section_id="payment_gateway",
             name="Payment Gateway",
@@ -241,7 +215,7 @@ class ConfigurationEngine:
                     name="Webhook URL",
                     description="URL for payment webhooks",
                     field_type=ConfigType.STRING,
-                    validation_rules={ValidationRule.REGEX.value: r"^https?://.*"},
+                    validation_rules={ValidationRule.REGEX.value: "^https?://.*"},
                 ),
                 ConfigField(
                     field_id="test_mode",
@@ -252,8 +226,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
-        # Transaction limits section
         limits_section = ConfigSection(
             section_id="transaction_limits",
             name="Transaction Limits",
@@ -285,7 +257,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
         return ConfigTemplate(
             template_id="payment_processing",
             name="Payment Processing Configuration",
@@ -296,8 +267,6 @@ class ConfigurationEngine:
 
     def _create_risk_management_template(self) -> ConfigTemplate:
         """Create risk management configuration template."""
-
-        # Risk scoring section
         scoring_section = ConfigSection(
             section_id="risk_scoring",
             name="Risk Scoring",
@@ -345,8 +314,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
-        # Fraud detection section
         fraud_section = ConfigSection(
             section_id="fraud_detection",
             name="Fraud Detection",
@@ -384,7 +351,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
         return ConfigTemplate(
             template_id="risk_management",
             name="Risk Management Configuration",
@@ -395,8 +361,6 @@ class ConfigurationEngine:
 
     def _create_compliance_template(self) -> ConfigTemplate:
         """Create compliance configuration template."""
-
-        # Regulatory settings section
         regulatory_section = ConfigSection(
             section_id="regulatory_settings",
             name="Regulatory Settings",
@@ -429,13 +393,11 @@ class ConfigurationEngine:
                     name="Data Retention Period (days)",
                     description="Number of days to retain customer data",
                     field_type=ConfigType.INTEGER,
-                    default_value=2555,  # 7 years
+                    default_value=2555,
                     validation_rules={ValidationRule.MIN_VALUE.value: 1},
                 ),
             ],
         )
-
-        # AML/KYC section
         aml_section = ConfigSection(
             section_id="aml_kyc",
             name="AML/KYC Settings",
@@ -473,7 +435,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
         return ConfigTemplate(
             template_id="compliance",
             name="Compliance Configuration",
@@ -484,8 +445,6 @@ class ConfigurationEngine:
 
     def _create_analytics_template(self) -> ConfigTemplate:
         """Create analytics configuration template."""
-
-        # Reporting section
         reporting_section = ConfigSection(
             section_id="reporting",
             name="Reporting Settings",
@@ -522,8 +481,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
-        # Dashboard section
         dashboard_section = ConfigSection(
             section_id="dashboard",
             name="Dashboard Settings",
@@ -554,7 +511,6 @@ class ConfigurationEngine:
                 ),
             ],
         )
-
         return ConfigTemplate(
             template_id="analytics",
             name="Analytics Configuration",
@@ -563,7 +519,7 @@ class ConfigurationEngine:
             sections=[reporting_section, dashboard_section],
         )
 
-    def _register_default_validators(self):
+    def _register_default_validators(self) -> Any:
         """Register default field validators."""
 
         def validate_required(value: Any, rule_value: bool) -> bool:
@@ -614,9 +570,7 @@ class ConfigurationEngine:
         Returns:
             Template ID
         """
-
         template_id = str(uuid.uuid4())
-
         template = ConfigTemplate(
             template_id=template_id,
             name=name,
@@ -624,15 +578,12 @@ class ConfigurationEngine:
             category=category,
             sections=sections,
         )
-
         self._templates[template_id] = template
-
         self.logger.info(f"Created configuration template: {name}")
         return template_id
 
     def get_template(self, template_id: str) -> Optional[ConfigTemplate]:
         """Get configuration template by ID."""
-
         return self._templates.get(template_id)
 
     def list_templates(self, category: str = None) -> List[ConfigTemplate]:
@@ -645,13 +596,9 @@ class ConfigurationEngine:
         Returns:
             List of templates
         """
-
         templates = list(self._templates.values())
-
         if category:
             templates = [t for t in templates if t.category == category]
-
-        # Sort by name
         templates.sort(key=lambda x: x.name)
         return templates
 
@@ -676,18 +623,13 @@ class ConfigurationEngine:
         Returns:
             Instance ID
         """
-
         if template_id not in self._templates:
             raise ValueError(f"Template not found: {template_id}")
-
         instance_id = str(uuid.uuid4())
-
-        # Validate initial values
         if values:
             validation_errors = self.validate_values(template_id, values)
             if validation_errors:
                 raise ValueError(f"Validation errors: {validation_errors}")
-
         instance = ConfigInstance(
             instance_id=instance_id,
             template_id=template_id,
@@ -696,18 +638,13 @@ class ConfigurationEngine:
             values=values or {},
             created_by=created_by,
         )
-
         self._instances[instance_id] = instance
-
-        # Notify listeners
         self._notify_change_listeners(instance_id, "created", instance.values)
-
         self.logger.info(f"Created configuration instance: {name}")
         return instance_id
 
     def get_instance(self, instance_id: str) -> Optional[ConfigInstance]:
         """Get configuration instance by ID."""
-
         return self._instances.get(instance_id)
 
     def update_instance(
@@ -724,29 +661,18 @@ class ConfigurationEngine:
         Returns:
             True if updated successfully
         """
-
         if instance_id not in self._instances:
             return False
-
         instance = self._instances[instance_id]
-
-        # Validate new values
         validation_errors = self.validate_values(instance.template_id, values)
         if validation_errors:
             raise ValueError(f"Validation errors: {validation_errors}")
-
-        # Store old values for change notification
         old_values = copy.deepcopy(instance.values)
-
-        # Update instance
         instance.values.update(values)
         instance.updated_at = datetime.utcnow()
-
-        # Notify listeners
         self._notify_change_listeners(
             instance_id, "updated", instance.values, old_values
         )
-
         self.logger.info(f"Updated configuration instance: {instance_id}")
         return True
 
@@ -761,60 +687,42 @@ class ConfigurationEngine:
         Returns:
             List of validation error messages
         """
-
         template = self._templates.get(template_id)
         if not template:
             return [f"Template not found: {template_id}"]
-
         errors = []
-
-        # Get all fields from template
         all_fields = {}
         for section in template.sections:
             self._collect_fields(section, all_fields)
-
-        # Validate each field
         for field_id, field in all_fields.items():
             value = values.get(field_id)
-
-            # Check required fields
             if field.required and (value is None or value == ""):
                 errors.append(f"Field '{field.name}' is required")
                 continue
-
-            # Skip validation if value is None/empty and not required
             if value is None or value == "":
                 continue
-
-            # Type validation
             if not self._validate_type(value, field.field_type):
                 errors.append(f"Field '{field.name}' has invalid type")
                 continue
-
-            # Validation rules
             for rule_name, rule_value in field.validation_rules.items():
                 validator = self._validators.get(rule_name)
-                if validator and not validator(value, rule_value):
+                if validator and (not validator(value, rule_value)):
                     errors.append(
                         f"Field '{field.name}' failed validation rule: {rule_name}"
                     )
-
         return errors
 
     def _collect_fields(
         self, section: ConfigSection, fields_dict: Dict[str, ConfigField]
-    ):
+    ) -> Any:
         """Recursively collect all fields from section and subsections."""
-
         for field in section.fields:
             fields_dict[field.field_id] = field
-
         for subsection in section.subsections:
             self._collect_fields(subsection, fields_dict)
 
     def _validate_type(self, value: Any, field_type: ConfigType) -> bool:
         """Validate value type."""
-
         try:
             if field_type == ConfigType.STRING:
                 return isinstance(value, str)
@@ -838,15 +746,14 @@ class ConfigurationEngine:
             elif field_type == ConfigType.OBJECT:
                 return isinstance(value, dict)
             elif field_type == ConfigType.ENUM:
-                return True  # Enum validation handled separately
+                return True
             else:
                 return True
         except Exception:
             return False
 
-    def register_change_listener(self, instance_id: str, callback: Callable):
+    def register_change_listener(self, instance_id: str, callback: Callable) -> Any:
         """Register a callback for configuration changes."""
-
         self._change_listeners[instance_id].append(callback)
 
     def _notify_change_listeners(
@@ -855,9 +762,8 @@ class ConfigurationEngine:
         action: str,
         new_values: Dict[str, Any],
         old_values: Dict[str, Any] = None,
-    ):
+    ) -> Any:
         """Notify registered change listeners."""
-
         for callback in self._change_listeners[instance_id]:
             try:
                 callback(instance_id, action, new_values, old_values)
@@ -866,13 +772,10 @@ class ConfigurationEngine:
 
     def export_instance(self, instance_id: str) -> Dict[str, Any]:
         """Export configuration instance to dictionary."""
-
         instance = self._instances.get(instance_id)
         if not instance:
             return {}
-
         template = self._templates.get(instance.template_id)
-
         return {
             "instance": instance.to_dict(),
             "template": template.to_dict() if template else None,
@@ -880,16 +783,11 @@ class ConfigurationEngine:
 
     def import_instance(self, data: Dict[str, Any], created_by: str = None) -> str:
         """Import configuration instance from dictionary."""
-
         instance_data = data.get("instance", {})
         template_data = data.get("template")
-
-        # Import template if provided and doesn't exist
         template_id = instance_data.get("template_id")
         if template_data and template_id not in self._templates:
             self._import_template(template_data)
-
-        # Create instance
         instance_id = self.create_instance(
             template_id=template_id,
             name=instance_data.get("name", "Imported Configuration"),
@@ -897,18 +795,14 @@ class ConfigurationEngine:
             values=instance_data.get("values", {}),
             created_by=created_by,
         )
-
         return instance_id
 
-    def _import_template(self, template_data: Dict[str, Any]):
+    def _import_template(self, template_data: Dict[str, Any]) -> Any:
         """Import template from dictionary."""
-
-        # Convert sections
         sections = []
         for section_data in template_data.get("sections", []):
             section = self._dict_to_section(section_data)
             sections.append(section)
-
         template = ConfigTemplate(
             template_id=template_data["template_id"],
             name=template_data["name"],
@@ -918,13 +812,10 @@ class ConfigurationEngine:
             version=template_data.get("version", "1.0.0"),
             metadata=template_data.get("metadata", {}),
         )
-
         self._templates[template.template_id] = template
 
     def _dict_to_section(self, section_data: Dict[str, Any]) -> ConfigSection:
         """Convert dictionary to ConfigSection."""
-
-        # Convert fields
         fields = []
         for field_data in section_data.get("fields", []):
             field = ConfigField(
@@ -939,13 +830,10 @@ class ConfigurationEngine:
                 metadata=field_data.get("metadata", {}),
             )
             fields.append(field)
-
-        # Convert subsections
         subsections = []
         for subsection_data in section_data.get("subsections", []):
             subsection = self._dict_to_section(subsection_data)
             subsections.append(subsection)
-
         return ConfigSection(
             section_id=section_data["section_id"],
             name=section_data["name"],
@@ -968,46 +856,32 @@ class ConfigurationEngine:
         Returns:
             List of instances
         """
-
         instances = list(self._instances.values())
-
         if template_id:
             instances = [i for i in instances if i.template_id == template_id]
-
         if status:
             instances = [i for i in instances if i.status == status]
-
-        # Sort by creation date (newest first)
         instances.sort(key=lambda x: x.created_at, reverse=True)
         return instances
 
     def delete_instance(self, instance_id: str) -> bool:
         """Delete configuration instance."""
-
         if instance_id not in self._instances:
             return False
-
         del self._instances[instance_id]
-
-        # Clean up change listeners
         if instance_id in self._change_listeners:
             del self._change_listeners[instance_id]
-
         self.logger.info(f"Deleted configuration instance: {instance_id}")
         return True
 
     def get_configuration_statistics(self) -> Dict[str, Any]:
         """Get configuration engine statistics."""
-
         template_categories = defaultdict(int)
         instance_statuses = defaultdict(int)
-
         for template in self._templates.values():
             template_categories[template.category] += 1
-
         for instance in self._instances.values():
             instance_statuses[instance.status] += 1
-
         return {
             "total_templates": len(self._templates),
             "total_instances": len(self._instances),
@@ -1015,7 +889,7 @@ class ConfigurationEngine:
             "instance_statuses": dict(instance_statuses),
             "registered_validators": len(self._validators),
             "change_listeners": sum(
-                len(listeners) for listeners in self._change_listeners.values()
+                (len(listeners) for listeners in self._change_listeners.values())
             ),
             "last_updated": datetime.utcnow().isoformat(),
         }

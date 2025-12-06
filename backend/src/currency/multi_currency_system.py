@@ -6,23 +6,15 @@ from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 import numpy as np
 import redis
 from sqlalchemy import Boolean, Column, DateTime, Numeric, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-"""
-Enhanced Multi-Currency and Exchange Rate Management System
-Implements real-time exchange rates, accurate conversion, and FX accounting
-"""
-
-
-# Configure logging
+"\nEnhanced Multi-Currency and Exchange Rate Management System\nImplements real-time exchange rates, accurate conversion, and FX accounting\n"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 Base = declarative_base()
 
 
@@ -57,8 +49,8 @@ class ExchangeRateProvider(Enum):
     FIXER_IO = "fixer_io"
     OPEN_EXCHANGE_RATES = "open_exchange_rates"
     CURRENCY_API = "currency_api"
-    ECB = "ecb"  # European Central Bank
-    FED = "fed"  # Federal Reserve
+    ECB = "ecb"
+    FED = "fed"
     INTERNAL = "internal"
 
 
@@ -120,7 +112,6 @@ class ExchangeRateModel(Base):
     """Database model for exchange rates"""
 
     __tablename__ = "exchange_rates"
-
     id = Column(String, primary_key=True)
     base_currency = Column(String(3), nullable=False)
     target_currency = Column(String(3), nullable=False)
@@ -138,7 +129,6 @@ class CurrencyConversionModel(Base):
     """Database model for currency conversions"""
 
     __tablename__ = "currency_conversions"
-
     conversion_id = Column(String, primary_key=True)
     from_currency = Column(String(3), nullable=False)
     to_currency = Column(String(3), nullable=False)
@@ -157,7 +147,6 @@ class FXPositionModel(Base):
     """Database model for FX positions"""
 
     __tablename__ = "fx_positions"
-
     id = Column(String, primary_key=True)
     user_id = Column(String, nullable=False)
     currency = Column(String(3), nullable=False)
@@ -174,25 +163,22 @@ class ExchangeRateService:
     Real-time exchange rate service with multiple providers
     """
 
-    def __init__(self, database_url: str, redis_url: str = "redis://localhost:6379/9"):
+    def __init__(
+        self, database_url: str, redis_url: str = "redis://localhost:6379/9"
+    ) -> Any:
         self.engine = create_engine(database_url)
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
-
         self.redis_client = redis.from_url(redis_url)
         self.providers = {
             ExchangeRateProvider.FIXER_IO: self._fetch_fixer_io_rates,
             ExchangeRateProvider.OPEN_EXCHANGE_RATES: self._fetch_oxr_rates,
             ExchangeRateProvider.ECB: self._fetch_ecb_rates,
         }
-
-        # Configuration
         self.base_currency = CurrencyCode.USD
         self.supported_currencies = list(CurrencyCode)
-        self.rate_cache_ttl = 300  # 5 minutes
-        self.conversion_fee_rate = Decimal("0.0025")  # 0.25%
-
-        # Start background rate updates
+        self.rate_cache_ttl = 300
+        self.conversion_fee_rate = Decimal("0.0025")
         asyncio.create_task(self._start_rate_updates())
 
     async def get_exchange_rate(
@@ -203,10 +189,8 @@ class ExchangeRateService:
     ) -> Optional[ExchangeRate]:
         """Get current exchange rate between two currencies"""
         try:
-            # Check cache first
             cache_key = f"rate:{from_currency}:{to_currency}"
             cached_rate = self.redis_client.get(cache_key)
-
             if cached_rate:
                 rate_data = json.loads(cached_rate)
                 return ExchangeRate(
@@ -236,8 +220,6 @@ class ExchangeRateService:
                         else None
                     ),
                 )
-
-            # Fetch from database
             session = self.Session()
             try:
                 rate_record = (
@@ -250,7 +232,6 @@ class ExchangeRateService:
                     .order_by(ExchangeRateModel.timestamp.desc())
                     .first()
                 )
-
                 if rate_record:
                     rate = ExchangeRate(
                         base_currency=rate_record.base_currency,
@@ -263,22 +244,15 @@ class ExchangeRateService:
                         mid_rate=rate_record.mid_rate,
                         spread=rate_record.spread,
                     )
-
-                    # Cache the rate
                     await self._cache_exchange_rate(rate)
                     return rate
-
-                # If not in database, fetch from provider
                 if provider:
                     return await self._fetch_rate_from_provider(
                         from_currency, to_currency, provider
                     )
-
                 return None
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error getting exchange rate: {str(e)}")
             return None
@@ -288,19 +262,13 @@ class ExchangeRateService:
     ) -> Optional[CurrencyConversion]:
         """Convert amount from one currency to another"""
         try:
-            # Get exchange rate
             rate = await self.get_exchange_rate(from_currency, to_currency)
             if not rate:
                 raise ValueError(
                     f"Exchange rate not available for {from_currency} to {to_currency}"
                 )
-
-            # Calculate conversion using Decimal for precision
             converted_amount = amount * rate.rate
-
-            # Ensure all calculations use Decimal and are rounded to a consistent precision (e.g., 8 decimal places)
             precision = Decimal("0.00000001")
-
             conversion_fee = (converted_amount * self.conversion_fee_rate).quantize(
                 precision, rounding=ROUND_HALF_UP
             )
@@ -310,8 +278,6 @@ class ExchangeRateService:
             converted_amount = converted_amount.quantize(
                 precision, rounding=ROUND_HALF_UP
             )
-
-            # Create conversion record
             conversion = CurrencyConversion(
                 conversion_id=f"conv_{datetime.now().strftime('%Y%m%d%H%M%S')}_{user_id}",
                 from_currency=from_currency,
@@ -324,19 +290,13 @@ class ExchangeRateService:
                 timestamp=datetime.now(timezone.utc),
                 rate_provider=rate.provider,
             )
-
-            # Store in database
             await self._store_conversion(conversion, user_id)
-
-            # Update FX positions
             await self._update_fx_positions(user_id, from_currency, -amount, rate.rate)
             await self._update_fx_positions(
                 user_id, to_currency, net_amount, Decimal("1.0")
             )
-
             logger.info(f"Currency conversion completed: {conversion.conversion_id}")
             return conversion
-
         except Exception as e:
             logger.error(f"Error converting currency: {str(e)}")
             return None
@@ -356,9 +316,7 @@ class ExchangeRateService:
                     )
                     .first()
                 )
-
                 if position_record:
-                    # Update unrealized P&L
                     current_rate = await self.get_exchange_rate(
                         currency, self.base_currency.value
                     )
@@ -367,12 +325,9 @@ class ExchangeRateService:
                         unrealized_pnl = (
                             current_value - position_record.base_currency_value
                         )
-
-                        # Update in database
                         position_record.unrealized_pnl = unrealized_pnl
                         position_record.last_updated = datetime.now(timezone.utc)
                         session.commit()
-
                         return FXPosition(
                             currency=position_record.currency,
                             amount=position_record.amount,
@@ -382,12 +337,9 @@ class ExchangeRateService:
                             average_rate=position_record.average_rate,
                             last_updated=position_record.last_updated,
                         )
-
                 return None
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error getting FX position: {str(e)}")
             return None
@@ -402,18 +354,14 @@ class ExchangeRateService:
                     .filter(FXPositionModel.user_id == user_id)
                     .all()
                 )
-
                 positions = []
                 for record in position_records:
                     position = await self.get_fx_position(user_id, record.currency)
                     if position:
                         positions.append(position)
-
                 return positions
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error getting FX positions: {str(e)}")
             return []
@@ -422,28 +370,24 @@ class ExchangeRateService:
         """Calculate total FX exposure for user"""
         try:
             positions = await self.get_all_fx_positions(user_id)
-
             total_exposure = Decimal("0")
             total_unrealized_pnl = Decimal("0")
             total_realized_pnl = Decimal("0")
             currency_breakdown = {}
-
             for position in positions:
                 total_exposure += abs(position.base_currency_value)
                 total_unrealized_pnl += position.unrealized_pnl
                 total_realized_pnl += position.realized_pnl
-
                 currency_breakdown[position.currency] = {
                     "amount": float(position.amount),
                     "base_currency_value": float(position.base_currency_value),
                     "unrealized_pnl": float(position.unrealized_pnl),
                     "percentage_of_total": float(
-                        (abs(position.base_currency_value) / total_exposure * 100)
+                        abs(position.base_currency_value) / total_exposure * 100
                         if total_exposure > 0
                         else 0
                     ),
                 }
-
             return {
                 "user_id": user_id,
                 "base_currency": self.base_currency.value,
@@ -454,7 +398,6 @@ class ExchangeRateService:
                 "currency_breakdown": currency_breakdown,
                 "calculated_at": datetime.now(timezone.utc).isoformat(),
             }
-
         except Exception as e:
             logger.error(f"Error calculating FX exposure: {str(e)}")
             return {}
@@ -466,21 +409,15 @@ class ExchangeRateService:
         try:
             if provider in self.providers:
                 rates = await self.providers[provider]()
-
-                # Find the specific rate
                 for rate in rates:
                     if (
                         rate.base_currency == from_currency
                         and rate.target_currency == to_currency
                     ):
-                        # Store in database
                         await self._store_exchange_rate(rate)
-                        # Cache the rate
                         await self._cache_exchange_rate(rate)
                         return rate
-
             return None
-
         except Exception as e:
             logger.error(f"Error fetching rate from provider {provider}: {str(e)}")
             return None
@@ -488,8 +425,6 @@ class ExchangeRateService:
     async def _fetch_fixer_io_rates(self) -> List[ExchangeRate]:
         """Fetch rates from Fixer.io API"""
         try:
-            # This would use actual Fixer.io API
-            # For demo, returning mock data
             base_currency = "USD"
             rates_data = {
                 "EUR": 0.85,
@@ -498,10 +433,8 @@ class ExchangeRateService:
                 "CAD": 1.25,
                 "AUD": 1.35,
             }
-
             rates = []
             timestamp = datetime.now(timezone.utc)
-
             for target_currency, rate_value in rates_data.items():
                 rate = ExchangeRate(
                     base_currency=base_currency,
@@ -510,18 +443,13 @@ class ExchangeRateService:
                     timestamp=timestamp,
                     provider=ExchangeRateProvider.FIXER_IO,
                     mid_rate=Decimal(str(rate_value)),
-                    spread=Decimal("0.001"),  # 0.1% spread
+                    spread=Decimal("0.001"),
                 )
-
-                # Calculate bid/ask from mid and spread
                 spread_amount = rate.mid_rate * rate.spread / 2
                 rate.bid_rate = rate.mid_rate - spread_amount
                 rate.ask_rate = rate.mid_rate + spread_amount
-
                 rates.append(rate)
-
             return rates
-
         except Exception as e:
             logger.error(f"Error fetching Fixer.io rates: {str(e)}")
             return []
@@ -529,7 +457,6 @@ class ExchangeRateService:
     async def _fetch_oxr_rates(self) -> List[ExchangeRate]:
         """Fetch rates from Open Exchange Rates API"""
         try:
-            # Mock implementation
             base_currency = "USD"
             rates_data = {
                 "EUR": 0.851,
@@ -538,10 +465,8 @@ class ExchangeRateService:
                 "CAD": 1.248,
                 "AUD": 1.352,
             }
-
             rates = []
             timestamp = datetime.now(timezone.utc)
-
             for target_currency, rate_value in rates_data.items():
                 rate = ExchangeRate(
                     base_currency=base_currency,
@@ -550,17 +475,13 @@ class ExchangeRateService:
                     timestamp=timestamp,
                     provider=ExchangeRateProvider.OPEN_EXCHANGE_RATES,
                     mid_rate=Decimal(str(rate_value)),
-                    spread=Decimal("0.0015"),  # 0.15% spread
+                    spread=Decimal("0.0015"),
                 )
-
                 spread_amount = rate.mid_rate * rate.spread / 2
                 rate.bid_rate = rate.mid_rate - spread_amount
                 rate.ask_rate = rate.mid_rate + spread_amount
-
                 rates.append(rate)
-
             return rates
-
         except Exception as e:
             logger.error(f"Error fetching OXR rates: {str(e)}")
             return []
@@ -568,7 +489,6 @@ class ExchangeRateService:
     async def _fetch_ecb_rates(self) -> List[ExchangeRate]:
         """Fetch rates from European Central Bank"""
         try:
-            # Mock implementation for ECB rates
             base_currency = "EUR"
             rates_data = {
                 "USD": 1.18,
@@ -577,10 +497,8 @@ class ExchangeRateService:
                 "CAD": 1.47,
                 "AUD": 1.59,
             }
-
             rates = []
             timestamp = datetime.now(timezone.utc)
-
             for target_currency, rate_value in rates_data.items():
                 rate = ExchangeRate(
                     base_currency=base_currency,
@@ -589,17 +507,13 @@ class ExchangeRateService:
                     timestamp=timestamp,
                     provider=ExchangeRateProvider.ECB,
                     mid_rate=Decimal(str(rate_value)),
-                    spread=Decimal("0.0008"),  # 0.08% spread
+                    spread=Decimal("0.0008"),
                 )
-
                 spread_amount = rate.mid_rate * rate.spread / 2
                 rate.bid_rate = rate.mid_rate - spread_amount
                 rate.ask_rate = rate.mid_rate + spread_amount
-
                 rates.append(rate)
-
             return rates
-
         except Exception as e:
             logger.error(f"Error fetching ECB rates: {str(e)}")
             return []
@@ -621,13 +535,10 @@ class ExchangeRateService:
                     provider=rate.provider.value,
                     timestamp=rate.timestamp,
                 )
-
                 session.add(rate_record)
                 session.commit()
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error storing exchange rate: {str(e)}")
 
@@ -646,11 +557,9 @@ class ExchangeRateService:
                 "mid_rate": str(rate.mid_rate) if rate.mid_rate else None,
                 "spread": str(rate.spread) if rate.spread else None,
             }
-
             self.redis_client.setex(
                 cache_key, self.rate_cache_ttl, json.dumps(cache_data)
             )
-
         except Exception as e:
             logger.error(f"Error caching exchange rate: {str(e)}")
 
@@ -672,13 +581,10 @@ class ExchangeRateService:
                     timestamp=conversion.timestamp,
                     user_id=user_id,
                 )
-
                 session.add(conversion_record)
                 session.commit()
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error storing conversion: {str(e)}")
 
@@ -697,26 +603,20 @@ class ExchangeRateService:
                     )
                     .first()
                 )
-
                 if position_record:
-                    # Update existing position
                     old_amount = position_record.amount
                     new_amount = old_amount + amount
-
                     if new_amount != 0:
-                        # Calculate new average rate
                         old_value = old_amount * position_record.average_rate
                         new_value = amount * rate
                         total_value = old_value + new_value
                         new_average_rate = total_value / new_amount
-
                         position_record.amount = new_amount
                         position_record.average_rate = new_average_rate
                         position_record.base_currency_value = (
                             new_amount * new_average_rate
                         )
                     else:
-                        # Position closed
                         realized_pnl = position_record.amount * (
                             rate - position_record.average_rate
                         )
@@ -724,11 +624,8 @@ class ExchangeRateService:
                         position_record.amount = Decimal("0")
                         position_record.base_currency_value = Decimal("0")
                         position_record.unrealized_pnl = Decimal("0")
-
                     position_record.last_updated = datetime.now(timezone.utc)
-
                 else:
-                    # Create new position
                     position_record = FXPositionModel(
                         id=f"{user_id}_{currency}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                         user_id=user_id,
@@ -739,12 +636,9 @@ class ExchangeRateService:
                         last_updated=datetime.now(timezone.utc),
                     )
                     session.add(position_record)
-
                 session.commit()
-
             finally:
                 session.close()
-
         except Exception as e:
             logger.error(f"Error updating FX positions: {str(e)}")
 
@@ -752,21 +646,16 @@ class ExchangeRateService:
         """Start background task for rate updates"""
         while True:
             try:
-                # Update rates from all providers
                 for provider in self.providers.keys():
                     rates = await self.providers[provider]()
                     for rate in rates:
                         await self._store_exchange_rate(rate)
                         await self._cache_exchange_rate(rate)
-
                 logger.info("Exchange rates updated successfully")
-
-                # Wait 5 minutes before next update
                 await asyncio.sleep(300)
-
             except Exception as e:
                 logger.error(f"Error in rate updates: {str(e)}")
-                await asyncio.sleep(60)  # Wait 1 minute on error
+                await asyncio.sleep(60)
 
 
 class FXRiskManager:
@@ -774,11 +663,11 @@ class FXRiskManager:
     Foreign exchange risk management system
     """
 
-    def __init__(self, exchange_rate_service: ExchangeRateService):
+    def __init__(self, exchange_rate_service: ExchangeRateService) -> Any:
         self.exchange_rate_service = exchange_rate_service
-        self.var_confidence_level = 0.95  # 95% VaR
-        self.max_position_limit = Decimal("1000000")  # $1M per currency
-        self.max_total_exposure = Decimal("10000000")  # $10M total
+        self.var_confidence_level = 0.95
+        self.max_position_limit = Decimal("1000000")
+        self.max_total_exposure = Decimal("10000000")
 
     async def calculate_value_at_risk(
         self, user_id: str, time_horizon_days: int = 1
@@ -786,31 +675,23 @@ class FXRiskManager:
         """Calculate Value at Risk for FX positions"""
         try:
             positions = await self.exchange_rate_service.get_all_fx_positions(user_id)
-
             if not positions:
                 return {"var": 0.0, "positions": []}
-
-            # Get historical volatilities (simplified calculation)
             var_by_currency = {}
             total_var = Decimal("0")
-
             for position in positions:
-                # Simplified VaR calculation using historical volatility
                 volatility = await self._get_currency_volatility(position.currency)
                 position_var = (
                     abs(position.base_currency_value)
                     * volatility
                     * Decimal(str(np.sqrt(time_horizon_days)))
                 )
-
                 var_by_currency[position.currency] = {
                     "position_value": float(position.base_currency_value),
                     "volatility": float(volatility),
                     "var": float(position_var),
                 }
-
                 total_var += position_var
-
             return {
                 "user_id": user_id,
                 "time_horizon_days": time_horizon_days,
@@ -819,7 +700,6 @@ class FXRiskManager:
                 "var_by_currency": var_by_currency,
                 "calculated_at": datetime.now(timezone.utc).isoformat(),
             }
-
         except Exception as e:
             logger.error(f"Error calculating VaR: {str(e)}")
             return {}
@@ -829,10 +709,7 @@ class FXRiskManager:
         try:
             positions = await self.exchange_rate_service.get_all_fx_positions(user_id)
             exposure = await self.exchange_rate_service.calculate_fx_exposure(user_id)
-
             limit_violations = []
-
-            # Check individual currency limits
             for position in positions:
                 if abs(position.base_currency_value) > self.max_position_limit:
                     limit_violations.append(
@@ -847,8 +724,6 @@ class FXRiskManager:
                             ),
                         }
                     )
-
-            # Check total exposure limit
             total_exposure = Decimal(str(exposure.get("total_exposure", 0)))
             if total_exposure > self.max_total_exposure:
                 limit_violations.append(
@@ -859,33 +734,28 @@ class FXRiskManager:
                         "excess": float(total_exposure - self.max_total_exposure),
                     }
                 )
-
             return {
                 "user_id": user_id,
                 "within_limits": len(limit_violations) == 0,
                 "violations": limit_violations,
                 "checked_at": datetime.now(timezone.utc).isoformat(),
             }
-
         except Exception as e:
             logger.error(f"Error checking position limits: {str(e)}")
             return {}
 
     async def _get_currency_volatility(self, currency: str) -> Decimal:
         """Get historical volatility for currency (simplified)"""
-        # In production, this would calculate from historical data
         volatility_map = {
-            "EUR": Decimal("0.08"),  # 8% annual volatility
-            "GBP": Decimal("0.12"),  # 12% annual volatility
-            "JPY": Decimal("0.10"),  # 10% annual volatility
-            "CAD": Decimal("0.09"),  # 9% annual volatility
-            "AUD": Decimal("0.14"),  # 14% annual volatility
+            "EUR": Decimal("0.08"),
+            "GBP": Decimal("0.12"),
+            "JPY": Decimal("0.10"),
+            "CAD": Decimal("0.09"),
+            "AUD": Decimal("0.14"),
         }
+        return volatility_map.get(currency, Decimal("0.15"))
 
-        return volatility_map.get(currency, Decimal("0.15"))  # Default 15%
 
-
-# Export main classes
 __all__ = [
     "ExchangeRateService",
     "FXRiskManager",

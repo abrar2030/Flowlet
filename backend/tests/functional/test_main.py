@@ -1,24 +1,20 @@
 import json
-
 from src.main import create_app
 
-"""
-Test the enhanced main application
-"""
+"\nTest the enhanced main application\n"
 
 
-def test_app_creation():
+def test_app_creation() -> Any:
     """Test that the app can be created."""
     app = create_app("testing")
     assert app is not None
     assert app.config["TESTING"] is True
 
 
-def test_health_check(client):
+def test_health_check(client: Any) -> Any:
     """Test the health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
-
     data = json.loads(response.data)
     assert "status" in data
     assert "timestamp" in data
@@ -26,11 +22,10 @@ def test_health_check(client):
     assert "services" in data
 
 
-def test_api_info(client):
+def test_api_info(client: Any) -> Any:
     """Test the API info endpoint."""
     response = client.get("/api/v1/info")
     assert response.status_code == 200
-
     data = json.loads(response.data)
     assert "api_name" in data
     assert "version" in data
@@ -38,40 +33,35 @@ def test_api_info(client):
     assert "security_features" in data
 
 
-def test_security_headers(client):
+def test_security_headers(client: Any) -> Any:
     """Test that security headers are present."""
     response = client.get("/api/v1/info")
-
-    # Check for security headers
     assert "X-Content-Type-Options" in response.headers
     assert response.headers["X-Content-Type-Options"] == "nosniff"
-
     assert "X-Frame-Options" in response.headers
     assert response.headers["X-Frame-Options"] == "DENY"
-
     assert "X-XSS-Protection" in response.headers
     assert "Strict-Transport-Security" in response.headers
     assert "Content-Security-Policy" in response.headers
 
 
-def test_404_error_handling(client):
+def test_404_error_handling(client: Any) -> Any:
     """Test 404 error handling."""
     response = client.get("/nonexistent-endpoint")
     assert response.status_code == 404
-
     data = json.loads(response.data)
     assert data["error"] == "Not Found"
     assert data["code"] == "NOT_FOUND"
     assert "timestamp" in data
 
 
-def test_cors_headers(client):
+def test_cors_headers(client: Any) -> Any:
     """Test CORS headers are present."""
     response = client.options("/api/v1/info")
     assert "Access-Control-Allow-Origin" in response.headers
 
 
-def test_json_content_type_validation(client):
+def test_json_content_type_validation(client: Any) -> Any:
     """Test that non-JSON requests to POST endpoints are rejected."""
     response = client.post(
         "/api/v1/auth/login", data="not json", content_type="text/plain"

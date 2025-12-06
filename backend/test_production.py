@@ -2,27 +2,26 @@ import sys
 import time
 import uuid
 from datetime import datetime
-
 import requests
-
 from core.logging import get_logger
 
 logger = get_logger(__name__)
-
-# Configuration
 BASE_URL = "http://localhost:5001"
 API_BASE = f"{BASE_URL}/api/v1"
 
 
 class FlowletProductionTester:
-    def __init__(self):
+
+    def __init__(self) -> Any:
         self.test_results = []
         self.access_token = None
         self.test_user_id = None
         self.test_accounts = []
         self.test_transactions = []
 
-    def log_test(self, test_name, success, message="", data=None):
+    def log_test(
+        self, test_name: Any, success: Any, message: Any = "", data: Any = None
+    ) -> Any:
         status = "✅ PASS" if success else "❌ FAIL"
         logger.info(f"{status} {test_name}: {message}")
         self.test_results.append(
@@ -34,18 +33,16 @@ class FlowletProductionTester:
                 "timestamp": datetime.now().isoformat(),
             }
         )
-
         if not success and data:
             logger.info(f"   Error details: {data}")
 
-    def make_request(self, method, endpoint, data=None, auth=True):
+    def make_request(
+        self, method: Any, endpoint: Any, data: Any = None, auth: Any = True
+    ) -> Any:
         headers = {"Content-Type": "application/json"}
-
         if auth and self.access_token:
             headers["Authorization"] = f"Bearer {self.access_token}"
-
         url = f"{API_BASE}{endpoint}" if not endpoint.startswith("http") else endpoint
-
         try:
             if method.upper() == "GET":
                 response = requests.get(url, headers=headers, timeout=10)
@@ -57,14 +54,12 @@ class FlowletProductionTester:
                 response = requests.delete(url, headers=headers, timeout=10)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
-
             return response
         except Exception:
             return None
 
-    def test_health_and_info(self):
+    def test_health_and_info(self) -> Any:
         logger.info("\n🏥 Testing Health and API Information...")
-        # Health check
         try:
             response = requests.get(f"{BASE_URL}/health", timeout=10)
             if response.status_code == 200:
@@ -78,8 +73,6 @@ class FlowletProductionTester:
         except Exception as e:
             self.log_test("Health Check", False, f"Connection failed: {str(e)}")
             return False
-
-        # API Info
         try:
             response = requests.get(f"{API_BASE}/info", timeout=10)
             if response.status_code == 200:
@@ -90,10 +83,9 @@ class FlowletProductionTester:
                 self.log_test("API Info", False, f"HTTP {response.status_code}")
         except Exception as e:
             self.log_test("API Info", False, f"Request failed: {str(e)}")
-
         return True
 
-    def test_user_registration(self):
+    def test_user_registration(self) -> Any:
         logger.info("\n👤 Testing User Registration...")
         test_email = f"test_{uuid.uuid4().hex[:8]}@flowlet.com"
         registration_data = {
@@ -103,16 +95,13 @@ class FlowletProductionTester:
             "last_name": "User",
             "phone_number": "+1234567890",
         }
-
         response = self.make_request(
             "POST", "/auth/register", registration_data, auth=False
         )
-
         if response and response.status_code == 201:
             result = response.json()
             self.access_token = result.get("tokens", {}).get("access_token")
             self.test_user_id = result.get("user", {}).get("id")
-
             if self.access_token and self.test_user_id:
                 self.log_test(
                     "User Registration", True, f"User ID: {self.test_user_id}"
@@ -128,22 +117,17 @@ class FlowletProductionTester:
             self.log_test(
                 "User Registration",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
             return False
 
-    def test_user_login(self):
+    def test_user_login(self) -> Any:
         logger.info("\n🔐 Testing User Authentication...")
-        # For this test, we'll use the registered user
         if not self.test_user_id:
             self.log_test("User Login", False, "No test user available")
             return False
-
-        # Login would require the same credentials, but since we already have a token from registration,
-        # we'll test token validation instead
         response = self.make_request("GET", "/accounts", auth=True)
-
         if response and response.status_code == 200:
             self.log_test("Token Authentication", True, "Token is valid")
             return True
@@ -151,11 +135,11 @@ class FlowletProductionTester:
             self.log_test(
                 "Token Authentication",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
             )
             return False
 
-    def test_account_creation(self):
+    def test_account_creation(self) -> Any:
         logger.info("\n🏦 Testing Account Management...")
         account_data = {
             "account_name": "Test Checking Account",
@@ -163,14 +147,11 @@ class FlowletProductionTester:
             "currency": "USD",
             "initial_deposit": "1000.00",
         }
-
         response = self.make_request("POST", "/accounts", account_data)
-
         if response and response.status_code == 201:
             result = response.json()
             account = result.get("account", {})
             account_id = account.get("id")
-
             if account_id:
                 self.test_accounts.append(account_id)
                 self.log_test("Account Creation", True, f"Account ID: {account_id}")
@@ -185,20 +166,17 @@ class FlowletProductionTester:
             self.log_test(
                 "Account Creation",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
             return None
 
-    def test_balance_operations(self, account_id):
+    def test_balance_operations(self, account_id: Any) -> Any:
         logger.info("\n💰 Testing Balance Operations...")
         if not account_id:
             self.log_test("Balance Operations", False, "No account ID provided")
             return False
-
-        # Test balance inquiry
         response = self.make_request("GET", f"/accounts/{account_id}/balance")
-
         if response and response.status_code == 200:
             balance_data = response.json()
             current_balance = balance_data.get("current_balance", "0")
@@ -207,26 +185,21 @@ class FlowletProductionTester:
             self.log_test(
                 "Balance Inquiry",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
             )
             return False
-
-        # Test deposit
         deposit_data = {
             "amount": "500.00",
             "description": "Test deposit",
             "reference": f"TEST_DEP_{uuid.uuid4().hex[:8]}",
         }
-
         response = self.make_request(
             "POST", f"/accounts/{account_id}/deposit", deposit_data
         )
-
         if response and response.status_code == 200:
             result = response.json()
             transaction = result.get("transaction", {})
             new_balance = result.get("new_balance", "0")
-
             if transaction.get("id"):
                 self.test_transactions.append(transaction["id"])
                 self.log_test(
@@ -243,26 +216,21 @@ class FlowletProductionTester:
             self.log_test(
                 "Fund Deposit",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
-
-        # Test withdrawal
         withdrawal_data = {
             "amount": "200.00",
             "description": "Test withdrawal",
             "reference": f"TEST_WD_{uuid.uuid4().hex[:8]}",
         }
-
         response = self.make_request(
             "POST", f"/accounts/{account_id}/withdraw", withdrawal_data
         )
-
         if response and response.status_code == 200:
             result = response.json()
             transaction = result.get("transaction", {})
             new_balance = result.get("new_balance", "0")
-
             if transaction.get("id"):
                 self.test_transactions.append(transaction["id"])
                 self.log_test(
@@ -279,30 +247,25 @@ class FlowletProductionTester:
             self.log_test(
                 "Fund Withdrawal",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
-
         return True
 
-    def test_transfers(self):
+    def test_transfers(self) -> Any:
         logger.info("\n💸 Testing Fund Transfers...")
         if len(self.test_accounts) < 2:
-            # Create a second account for transfer testing
             second_account_data = {
                 "account_name": "Test Savings Account",
                 "account_type": "savings",
                 "currency": "USD",
                 "initial_deposit": "500.00",
             }
-
             response = self.make_request("POST", "/accounts", second_account_data)
-
             if response and response.status_code == 201:
                 result = response.json()
                 account = result.get("account", {})
                 account_id = account.get("id")
-
                 if account_id:
                     self.test_accounts.append(account_id)
                 else:
@@ -315,23 +278,18 @@ class FlowletProductionTester:
                     "Transfer Setup", False, "Could not create second account"
                 )
                 return False
-
-        # Test transfer between accounts
         transfer_data = {
             "from_account_id": self.test_accounts[0],
             "to_account_id": self.test_accounts[1],
             "amount": "300.00",
             "description": "Test transfer between accounts",
         }
-
         response = self.make_request("POST", "/transfers", transfer_data)
-
         if response and response.status_code == 200:
             result = response.json()
             transfer = result.get("transfer", {})
             debit_tx = transfer.get("debit_transaction", {})
             credit_tx = transfer.get("credit_transaction", {})
-
             if debit_tx.get("id") and credit_tx.get("id"):
                 self.test_transactions.extend([debit_tx["id"], credit_tx["id"]])
                 self.log_test("Fund Transfer", True, f"Amount: $300.00")
@@ -342,72 +300,59 @@ class FlowletProductionTester:
             self.log_test(
                 "Fund Transfer",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
-
         return True
 
-    def test_transaction_history(self):
+    def test_transaction_history(self) -> Any:
         logger.info("\n📊 Testing Transaction History...")
         if not self.test_accounts:
             self.log_test("Transaction History", False, "No test accounts available")
             return False
-
         account_id = self.test_accounts[0]
         response = self.make_request("GET", f"/accounts/{account_id}/transactions")
-
         if response and response.status_code == 200:
             result = response.json()
             transactions = result.get("transactions", [])
             pagination = result.get("pagination", {})
-
             self.log_test(
                 "Transaction History", True, f"Found {len(transactions)} transactions"
             )
-
-            # Test pagination
             if pagination.get("total", 0) > 0:
                 self.log_test(
                     "Transaction Pagination", True, f"Total: {pagination['total']}"
                 )
-
             return True
         else:
             error_data = response.json() if response else None
             self.log_test(
                 "Transaction History",
                 False,
-                f"HTTP {response.status_code if response else 'No response'}",
+                f"HTTP {(response.status_code if response else 'No response')}",
                 error_data,
             )
             return False
 
-    def test_error_handling(self):
+    def test_error_handling(self) -> Any:
         logger.info("\n🛡️ Testing Error Handling...")
-        # Test invalid account access
         response = self.make_request("GET", "/accounts/invalid-account-id/balance")
-
         if response and response.status_code == 404:
             self.log_test("Invalid Account Error", True, "Correctly returned 404")
         else:
             self.log_test(
                 "Invalid Account Error",
                 False,
-                f"Expected 404, got {response.status_code if response else 'No response'}",
+                f"Expected 404, got {(response.status_code if response else 'No response')}",
             )
-
-        # Test insufficient funds
         if self.test_accounts:
             withdrawal_data = {
                 "amount": "999999.00",
                 "description": "Test insufficient funds",
             }
-
             response = self.make_request(
                 "POST", f"/accounts/{self.test_accounts[0]}/withdraw", withdrawal_data
             )
-
             if response and response.status_code == 400:
                 error_data = response.json()
                 if error_data.get("code") == "INSUFFICIENT_FUNDS":
@@ -426,22 +371,18 @@ class FlowletProductionTester:
                 self.log_test(
                     "Insufficient Funds Error",
                     False,
-                    f"Expected 400, got {response.status_code if response else 'No response'}",
+                    f"Expected 400, got {(response.status_code if response else 'No response')}",
                 )
-
-        # Test invalid amount format
         if self.test_accounts:
             invalid_deposit_data = {
                 "amount": "invalid_amount",
                 "description": "Test invalid amount",
             }
-
             response = self.make_request(
                 "POST",
                 f"/accounts/{self.test_accounts[0]}/deposit",
                 invalid_deposit_data,
             )
-
             if response and response.status_code == 400:
                 self.log_test(
                     "Invalid Amount Error", True, "Correctly rejected invalid amount"
@@ -450,15 +391,11 @@ class FlowletProductionTester:
                 self.log_test(
                     "Invalid Amount Error",
                     False,
-                    f"Expected 400, got {response.status_code if response else 'No response'}",
+                    f"Expected 400, got {(response.status_code if response else 'No response')}",
                 )
-
-        # Test unauthorized access
         old_token = self.access_token
         self.access_token = "invalid_token"
-
         response = self.make_request("GET", "/accounts")
-
         if response and response.status_code == 401:
             self.log_test(
                 "Unauthorized Access Error", True, "Correctly rejected invalid token"
@@ -467,19 +404,14 @@ class FlowletProductionTester:
             self.log_test(
                 "Unauthorized Access Error",
                 False,
-                f"Expected 401, got {response.status_code if response else 'No response'}",
+                f"Expected 401, got {(response.status_code if response else 'No response')}",
             )
-
-        # Restore valid token
         self.access_token = old_token
-
         return True
 
-    def test_security_features(self):
+    def test_security_features(self) -> Any:
         logger.info("\n🔒 Testing Security Features...")
-        # Test security headers
         response = requests.get(f"{BASE_URL}/health", timeout=10)
-
         if response:
             headers = response.headers
             security_headers = [
@@ -489,73 +421,54 @@ class FlowletProductionTester:
                 "Strict-Transport-Security",
                 "Content-Security-Policy",
             ]
-
             missing_headers = [h for h in security_headers if h not in headers]
-
             if not missing_headers:
                 self.log_test("Security Headers", True, "All security headers present")
             else:
                 self.log_test(
                     "Security Headers", False, f"Missing headers: {missing_headers}"
                 )
-
-        # Test rate limiting (simplified)
         rate_limit_test = True
         for i in range(3):
             response = self.make_request("GET", "/accounts")
             if not response or response.status_code not in [200, 429]:
                 rate_limit_test = False
                 break
-
         self.log_test("Rate Limiting", rate_limit_test, "Rate limiting is active")
-
         return True
 
-    def run_comprehensive_test_suite(self):
+    def run_comprehensive_test_suite(self) -> Any:
         logger.info("🚀 Starting Flowlet Production Test Suite")
         logger.info("=" * 70)
         logger.info("Testing enterprise-grade financial backend implementation")
         logger.info("=" * 70)
-        # Wait for server to be ready
         logger.info("\n⏳ Waiting for server to be ready...")
         time.sleep(3)
-
-        # Test basic connectivity
         if not self.test_health_and_info():
             logger.info("❌ Basic connectivity failed. Cannot continue.")
             return False
-
-        # Test authentication
         if not self.test_user_registration():
             logger.info("❌ User registration failed. Cannot continue.")
             return False
-
         if not self.test_user_login():
             logger.info("❌ Authentication failed. Cannot continue.")
             return False
-
-        # Test core functionality
         account_id = self.test_account_creation()
         if account_id:
             self.test_balance_operations(account_id)
             self.test_transfers()
             self.test_transaction_history()
-
-        # Test error handling and security
         self.test_error_handling()
         self.test_security_features()
-
-        # Generate comprehensive report
         logger.info("\n📊 Production Test Results Summary")
         logger.info("=" * 70)
         total_tests = len(self.test_results)
-        passed_tests = sum(1 for result in self.test_results if result["success"])
+        passed_tests = sum((1 for result in self.test_results if result["success"]))
         failed_tests = total_tests - passed_tests
-
         logger.info(f"Total Tests Executed: {total_tests}")
         logger.info(f"Passed: {passed_tests} ✅")
         logger.info(f"Failed: {failed_tests} ❌")
-        logger.info(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+        logger.info(f"Success Rate: {passed_tests / total_tests * 100:.1f}%")
         if failed_tests > 0:
             logger.info("\n❌ Failed Tests:")
             for result in self.test_results:
@@ -568,23 +481,21 @@ class FlowletProductionTester:
         logger.info(f"\n🏆 Production Readiness Assessment:")
         if passed_tests / total_tests >= 0.95:
             logger.info("   ✅ EXCELLENT - Ready for production deployment")
-        elif passed_tests / total_tests >= 0.90:
+        elif passed_tests / total_tests >= 0.9:
             logger.info("   ✅ GOOD - Ready for production with minor fixes")
-        elif passed_tests / total_tests >= 0.80:
+        elif passed_tests / total_tests >= 0.8:
             logger.info("   ⚠️ FAIR - Needs improvements before production")
         else:
             logger.info("   ❌ POOR - Significant issues need resolution")
         return failed_tests == 0
 
 
-def main():
+def main() -> Any:
     logger.info("Flowlet Production Test Suite")
     logger.info("Enterprise Financial Backend Validation")
     logger.info("Testing comprehensive functionality and security")
-    # Create and run test suite
     tester = FlowletProductionTester()
     success = tester.run_comprehensive_test_suite()
-
     if success:
         logger.info(
             "\n🎉 All tests passed! Production backend is ready for deployment."

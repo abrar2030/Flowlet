@@ -2,31 +2,19 @@ import logging
 from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Dict
-
 from flask import Blueprint, g, jsonify, request
 from sqlalchemy import select
-
 from ..models.account import Account
 from ..models.database import db
 from ..models.transaction import Transaction
 from ..security.audit_logger import audit_logger
-from .auth import token_required  # Assuming decorators are defined here for now
+from .auth import token_required
 
-"""
-Multi-Currency and Exchange Rate Routes
-"""
-
-
-# Import refactored modules
-
-# Create blueprint
+"\nMulti-Currency and Exchange Rate Routes\n"
 multicurrency_bp = Blueprint("multicurrency", __name__, url_prefix="/api/v1/currency")
-
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
-# --- Simplified Exchange Rate Manager (Stub) ---
 class ExchangeRateManager:
     SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD"]
 
@@ -35,8 +23,6 @@ class ExchangeRateManager:
         """Simulate getting a real-time exchange rate."""
         if from_currency == to_currency:
             return Decimal("1.0")
-
-        # Mock rates (USD as base)
         rates = {
             "USD": {
                 "EUR": Decimal("0.92"),
@@ -50,21 +36,15 @@ class ExchangeRateManager:
                 "JPY": Decimal("168.00"),
                 "CAD": Decimal("1.49"),
             },
-            # ... other inverse rates would be calculated
         }
-
         if from_currency in rates and to_currency in rates[from_currency]:
             return rates[from_currency][to_currency]
-
-        # Fallback: calculate via USD if possible
         if from_currency != "USD" and to_currency != "USD":
             rate_from_usd = Decimal("1.0") / ExchangeRateManager.get_exchange_rate(
                 "USD", from_currency
             )
             rate_to_usd = ExchangeRateManager.get_exchange_rate("USD", to_currency)
             return rate_from_usd * rate_to_usd
-
-        # Default fallback rate
         return Decimal("1.0")
 
     @staticmethod
@@ -73,22 +53,13 @@ class ExchangeRateManager:
     ) -> Dict[str, Any]:
         """Convert amount between currencies with a simulated fee."""
         rate = ExchangeRateManager.get_exchange_rate(from_currency, to_currency)
-
-        # 0.5% conversion fee
         conversion_fee_rate = Decimal("0.005")
         fee_in_from_currency = amount * conversion_fee_rate
-
-        # Net amount to convert
         net_amount_to_convert = amount - fee_in_from_currency
-
-        # Converted amount
         converted_amount = net_amount_to_convert * rate
-
-        # Rounding
         converted_amount = converted_amount.quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
-
         return {
             "original_amount": float(amount),
             "original_currency": from_currency,
@@ -102,17 +73,13 @@ class ExchangeRateManager:
         }
 
 
-# --- Routes ---
-
-
 @multicurrency_bp.route("/rate", methods=["GET"])
 @token_required
-def get_rate():
+def get_rate() -> Any:
     """Get the exchange rate between two currencies."""
     try:
         from_currency = request.args.get("from", "USD").upper()
         to_currency = request.args.get("to", "EUR").upper()
-
         if (
             from_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES
             or to_currency not in ExchangeRateManager.SUPPORTED_CURRENCIES
@@ -123,9 +90,7 @@ def get_rate():
                 ),
                 400,
             )
-
         rate = ExchangeRateManager.get_exchange_rate(from_currency, to_currency)
-
         return (
             jsonify(
                 {
@@ -138,7 +103,6 @@ def get_rate():
             ),
             200,
         )
-
     except Exception as e:
         logger.error(f"Error getting exchange rate: {str(e)}", exc_info=True)
         return (
@@ -149,7 +113,7 @@ def get_rate():
 
 @multicurrency_bp.route("/convert", methods=["POST"])
 @token_required
-def convert_funds():
+def convert_funds() -> Any:
     """Convert funds between two currencies."""
     try:
         data = request.get_json()
@@ -159,25 +123,21 @@ def convert_funds():
             return (
                 jsonify(
                     {
-                        "error": f'Missing required fields: {", ".join(missing_fields)}',
+                        "error": f"Missing required fields: {', '.join(missing_fields)}",
                         "code": "MISSING_FIELDS",
                     }
                 ),
                 400,
             )
-
         amount = Decimal(str(data["amount"]))
         from_currency = data["from_currency"].upper()
         to_currency = data["to_currency"].upper()
         from_account_id = data["from_account_id"]
-
         if amount <= 0:
             return (
                 jsonify({"error": "Amount must be positive", "code": "INVALID_AMOUNT"}),
                 400,
             )
-
-        # 1. Check source account and balance
         from_account = db.session.get(Account, from_account_id)
         if not from_account or from_account.user_id != g.current_user.id:
             return (
@@ -189,7 +149,6 @@ def convert_funds():
                 ),
                 403,
             )
-
         if from_account.currency != from_currency:
             return (
                 jsonify(
@@ -200,7 +159,6 @@ def convert_funds():
                 ),
                 400,
             )
-
         if from_account.balance < amount:
             return (
                 jsonify(
@@ -208,22 +166,16 @@ def convert_funds():
                 ),
                 400,
             )
-
-        # 2. Perform conversion
         conversion_result = ExchangeRateManager.convert_amount(
             amount, from_currency, to_currency
         )
         converted_amount = Decimal(str(conversion_result["converted_amount"]))
         fee = Decimal(str(conversion_result["conversion_fee"]))
-
-        # 3. Find or create destination account
         to_account_stmt = select(Account).filter_by(
             user_id=g.current_user.id, currency=to_currency
         )
         to_account = db.session.execute(to_account_stmt).scalar_one_or_none()
-
         if not to_account:
-            # Create new account for the target currency
             to_account = Account(
                 user_id=g.current_user.id,
                 account_type="currency_exchange",
@@ -233,19 +185,10 @@ def convert_funds():
             )
             db.session.add(to_account)
             db.session.flush()
-
-        # 4. Update balances and create transactions (Simplified)
-
-        # Debit source account (amount + fee)
         from_account.balance -= amount
         from_account.available_balance -= amount
-
-        # Credit destination account (converted_amount)
         to_account.balance += converted_amount
         to_account.available_balance += converted_amount
-
-        # Create transactions
-        # Debit Transaction
         db.session.add(
             Transaction(
                 account_id=from_account.id,
@@ -258,8 +201,6 @@ def convert_funds():
                 fees=fee,
             )
         )
-
-        # Credit Transaction
         db.session.add(
             Transaction(
                 account_id=to_account.id,
@@ -272,9 +213,7 @@ def convert_funds():
                 fees=Decimal("0.00"),
             )
         )
-
         db.session.commit()
-
         audit_logger.log_event(
             event_type=AuditEventType.FINANCIAL_TRANSACTION,
             description=f"Currency conversion from {from_currency} to {to_currency} for user {g.current_user.id}",
@@ -283,7 +222,6 @@ def convert_funds():
             resource_type="account",
             resource_id=from_account.id,
         )
-
         return (
             jsonify(
                 {
@@ -296,7 +234,6 @@ def convert_funds():
             ),
             200,
         )
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error converting funds: {str(e)}", exc_info=True)

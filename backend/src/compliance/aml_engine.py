@@ -4,16 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List
-
 from sqlalchemy.orm import Session
 
-"""
-AML Engine
-==========
-
-Advanced Anti-Money Laundering engine for financial compliance.
-Provides comprehensive AML screening, monitoring, and reporting capabilities.
-"""
+"\nAML Engine\n==========\n\nAdvanced Anti-Money Laundering engine for financial compliance.\nProvides comprehensive AML screening, monitoring, and reporting capabilities.\n"
 
 
 class AMLStatus(Enum):
@@ -115,7 +108,6 @@ class TransactionPattern:
 
     def matches(self, transactions: List[Dict[str, Any]]) -> bool:
         """Check if transactions match this pattern."""
-        # Implementation would depend on specific pattern logic
         return False
 
 
@@ -134,47 +126,30 @@ class AMLEngine:
     - Case management
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # AML data and configurations
         self._sanctions_lists = {}
         self._pep_lists = {}
         self._adverse_media_sources = []
         self._transaction_patterns = {}
         self._risk_rules = {}
-
-        # Screening thresholds
         self._name_match_threshold = 0.85
-        self._address_match_threshold = 0.80
-        self._date_match_threshold = 0.90
-
-        # Initialize AML engine
+        self._address_match_threshold = 0.8
+        self._date_match_threshold = 0.9
         self._initialize_aml_engine()
 
-    def _initialize_aml_engine(self):
+    def _initialize_aml_engine(self) -> Any:
         """Initialize the AML engine with default configurations."""
-
-        # Load sanctions lists
         self._load_sanctions_lists()
-
-        # Load PEP lists
         self._load_pep_lists()
-
-        # Initialize transaction patterns
         self._initialize_transaction_patterns()
-
-        # Initialize risk rules
         self._initialize_risk_rules()
-
         self.logger.info("AML engine initialized successfully")
 
-    def _load_sanctions_lists(self):
+    def _load_sanctions_lists(self) -> Any:
         """Load sanctions lists from various sources."""
-
-        # OFAC SDN List (mock data)
         self._sanctions_lists[SanctionsListType.OFAC_SDN] = {
             "name": "OFAC Specially Designated Nationals",
             "source": "US Treasury OFAC",
@@ -190,11 +165,8 @@ class AMLEngine:
                     "program": "TERRORISM",
                     "remarks": "Designated for terrorism activities",
                 }
-                # More entries would be loaded from actual OFAC data
             ],
         }
-
-        # EU Sanctions List (mock data)
         self._sanctions_lists[SanctionsListType.EU_SANCTIONS] = {
             "name": "EU Consolidated Sanctions List",
             "source": "European Union",
@@ -213,9 +185,8 @@ class AMLEngine:
             ],
         }
 
-    def _load_pep_lists(self):
+    def _load_pep_lists(self) -> Any:
         """Load Politically Exposed Person lists."""
-
         self._pep_lists = {
             "global_peps": {
                 "name": "Global PEP Database",
@@ -237,10 +208,8 @@ class AMLEngine:
             }
         }
 
-    def _initialize_transaction_patterns(self):
+    def _initialize_transaction_patterns(self) -> Any:
         """Initialize suspicious transaction patterns."""
-
-        # Structuring pattern
         self._transaction_patterns["structuring"] = TransactionPattern(
             pattern_id="structuring",
             pattern_type="structuring",
@@ -257,8 +226,6 @@ class AMLEngine:
             },
             time_window=timedelta(hours=24),
         )
-
-        # Rapid movement pattern
         self._transaction_patterns["rapid_movement"] = TransactionPattern(
             pattern_id="rapid_movement",
             pattern_type="rapid_movement",
@@ -266,13 +233,11 @@ class AMLEngine:
             risk_indicators=["multiple_accounts", "quick_succession", "round_amounts"],
             threshold_rules={
                 "min_accounts": 3,
-                "max_time_between_transactions": 60,  # minutes
+                "max_time_between_transactions": 60,
                 "min_total_amount": 50000,
             },
             time_window=timedelta(hours=6),
         )
-
-        # Unusual geographic pattern
         self._transaction_patterns["geographic_risk"] = TransactionPattern(
             pattern_id="geographic_risk",
             pattern_type="geographic_risk",
@@ -289,9 +254,8 @@ class AMLEngine:
             time_window=timedelta(days=1),
         )
 
-    def _initialize_risk_rules(self):
+    def _initialize_risk_rules(self) -> Any:
         """Initialize risk scoring rules."""
-
         self._risk_rules = {
             "customer_risk_factors": {
                 "pep_status": {"weight": 0.4, "high_risk_score": 0.8},
@@ -319,20 +283,15 @@ class AMLEngine:
         Returns:
             AMLResult containing screening results
         """
-
         customer_id = customer_data.get(
             "user_id", customer_data.get("customer_id", "unknown")
         )
-
         try:
             self.logger.info(f"Starting AML screening for customer {customer_id}")
-
             flags = []
             sanctions_matches = []
             pep_matches = []
             adverse_media_matches = []
-
-            # Sanctions screening
             sanctions_result = await self._screen_sanctions(customer_data)
             if sanctions_result["matches"]:
                 sanctions_matches = sanctions_result["matches"]
@@ -347,8 +306,6 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # PEP screening
             pep_result = await self._screen_pep(customer_data)
             if pep_result["matches"]:
                 pep_matches = pep_result["matches"]
@@ -363,8 +320,6 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Adverse media screening
             adverse_media_result = await self._screen_adverse_media(customer_data)
             if adverse_media_result["matches"]:
                 adverse_media_matches = adverse_media_result["matches"]
@@ -379,14 +334,9 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Calculate risk score
             risk_score = self._calculate_customer_risk_score(customer_data, flags)
             risk_level = self._determine_risk_level(risk_score)
-
-            # Determine overall status
             status = self._determine_aml_status(flags, risk_score)
-
             result = AMLResult(
                 entity_id=customer_id,
                 entity_type="customer",
@@ -404,17 +354,14 @@ class AMLEngine:
                     "pep_lists_checked": list(self._pep_lists.keys()),
                 },
             )
-
             self.logger.info(
                 f"AML screening completed for customer {customer_id}: {status}"
             )
             return result
-
         except Exception as e:
             self.logger.error(
                 f"Error in AML screening for customer {customer_id}: {str(e)}"
             )
-
             return AMLResult(
                 entity_id=customer_id,
                 entity_type="customer",
@@ -449,37 +396,21 @@ class AMLEngine:
         Returns:
             AMLResult containing screening results
         """
-
         transaction_id = transaction_data.get("transaction_id", "unknown")
-
         try:
             self.logger.info(f"Starting AML screening for transaction {transaction_id}")
-
             flags = []
-
-            # Transaction amount analysis
             amount_flags = await self._analyze_transaction_amount(transaction_data)
             flags.extend(amount_flags)
-
-            # Geographic risk analysis
             geo_flags = await self._analyze_geographic_risk(transaction_data)
             flags.extend(geo_flags)
-
-            # Pattern analysis
             pattern_flags = await self._analyze_transaction_patterns(transaction_data)
             flags.extend(pattern_flags)
-
-            # Counterparty screening
             counterparty_flags = await self._screen_counterparties(transaction_data)
             flags.extend(counterparty_flags)
-
-            # Calculate risk score
             risk_score = self._calculate_transaction_risk_score(transaction_data, flags)
             risk_level = self._determine_risk_level(risk_score)
-
-            # Determine overall status
             status = self._determine_aml_status(flags, risk_score)
-
             result = AMLResult(
                 entity_id=transaction_id,
                 entity_type="transaction",
@@ -497,17 +428,14 @@ class AMLEngine:
                     "transaction_type": transaction_data.get("transaction_type"),
                 },
             )
-
             self.logger.info(
                 f"AML screening completed for transaction {transaction_id}: {status}"
             )
             return result
-
         except Exception as e:
             self.logger.error(
                 f"Error in AML screening for transaction {transaction_id}: {str(e)}"
             )
-
             return AMLResult(
                 entity_id=transaction_id,
                 entity_type="transaction",
@@ -524,24 +452,17 @@ class AMLEngine:
 
     async def _screen_sanctions(self, entity_data: Dict[str, Any]) -> Dict[str, Any]:
         """Screen entity against sanctions lists."""
-
         name = entity_data.get("name", entity_data.get("full_name", ""))
         address = entity_data.get("address", "")
         date_of_birth = entity_data.get("date_of_birth", "")
-
         matches = []
-
         for list_type, sanctions_list in self._sanctions_lists.items():
             for entry in sanctions_list["entries"]:
                 match_score = self._calculate_name_match_score(name, entry["name"])
-
-                # Check aliases
                 for alias in entry.get("aliases", []):
                     alias_score = self._calculate_name_match_score(name, alias)
                     match_score = max(match_score, alias_score)
-
                 if match_score >= self._name_match_threshold:
-                    # Additional verification for high-confidence matches
                     address_score = 0.0
                     if address and entry.get("addresses"):
                         for entry_address in entry["addresses"]:
@@ -549,13 +470,11 @@ class AMLEngine:
                                 address, entry_address
                             )
                             address_score = max(address_score, addr_score)
-
                     date_score = 0.0
                     if date_of_birth and entry.get("date_of_birth"):
                         date_score = self._calculate_date_match_score(
                             date_of_birth, entry["date_of_birth"]
                         )
-
                     matches.append(
                         {
                             "list_type": list_type.value,
@@ -572,27 +491,21 @@ class AMLEngine:
                             "remarks": entry.get("remarks"),
                         }
                     )
-
         return {
             "matches": matches,
             "lists_checked": len(self._sanctions_lists),
             "total_entries_checked": sum(
-                len(sl["entries"]) for sl in self._sanctions_lists.values()
+                (len(sl["entries"]) for sl in self._sanctions_lists.values())
             ),
         }
 
     async def _screen_pep(self, entity_data: Dict[str, Any]) -> Dict[str, Any]:
         """Screen entity against PEP lists."""
-
         name = entity_data.get("name", entity_data.get("full_name", ""))
-
         matches = []
-
         for list_name, pep_list in self._pep_lists.items():
             for entry in pep_list["entries"]:
                 match_score = self._calculate_name_match_score(name, entry["name"])
-
-                # Check family members
                 for family_member in entry.get("family_members", []):
                     family_score = self._calculate_name_match_score(name, family_member)
                     if family_score >= self._name_match_threshold:
@@ -609,8 +522,6 @@ class AMLEngine:
                                 "risk_level": entry["risk_level"],
                             }
                         )
-
-                # Check close associates
                 for associate in entry.get("close_associates", []):
                     associate_score = self._calculate_name_match_score(name, associate)
                     if associate_score >= self._name_match_threshold:
@@ -627,8 +538,6 @@ class AMLEngine:
                                 "risk_level": entry["risk_level"],
                             }
                         )
-
-                # Direct PEP match
                 if match_score >= self._name_match_threshold:
                     matches.append(
                         {
@@ -642,23 +551,14 @@ class AMLEngine:
                             "risk_level": entry["risk_level"],
                         }
                     )
-
         return {"matches": matches, "lists_checked": len(self._pep_lists)}
 
     async def _screen_adverse_media(
         self, entity_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Screen entity against adverse media sources."""
-
-        # Mock adverse media screening
-        # In practice, this would integrate with news APIs and media monitoring services
-
         name = entity_data.get("name", entity_data.get("full_name", ""))
-
-        # Simulate adverse media check
         matches = []
-
-        # Mock adverse media entry
         if "suspicious" in name.lower() or "criminal" in name.lower():
             matches.append(
                 {
@@ -670,7 +570,6 @@ class AMLEngine:
                     "categories": ["financial_crime", "investigation"],
                 }
             )
-
         return {
             "matches": matches,
             "sources_checked": ["Financial News Network", "Global Media Monitor"],
@@ -680,13 +579,10 @@ class AMLEngine:
         self, transaction_data: Dict[str, Any]
     ) -> List[AMLFlag]:
         """Analyze transaction amount for suspicious patterns."""
-
         flags = []
         amount = transaction_data.get("amount", 0)
         currency = transaction_data.get("currency", "USD")
-
-        # Large transaction flag
-        if amount >= 10000:  # CTR threshold
+        if amount >= 10000:
             flags.append(
                 AMLFlag(
                     flag_id=f"large_amount_{int(datetime.utcnow().timestamp())}",
@@ -703,8 +599,6 @@ class AMLEngine:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Round amount flag (potential structuring indicator)
         if amount % 1000 == 0 and amount >= 5000:
             flags.append(
                 AMLFlag(
@@ -717,8 +611,6 @@ class AMLEngine:
                     timestamp=datetime.utcnow(),
                 )
             )
-
-        # Just below threshold flag
         if 9000 <= amount < 10000:
             flags.append(
                 AMLFlag(
@@ -736,20 +628,15 @@ class AMLEngine:
                     timestamp=datetime.utcnow(),
                 )
             )
-
         return flags
 
     async def _analyze_geographic_risk(
         self, transaction_data: Dict[str, Any]
     ) -> List[AMLFlag]:
         """Analyze geographic risk factors."""
-
         flags = []
         country_code = transaction_data.get("country_code", "")
-
-        # High-risk countries (mock list)
-        high_risk_countries = ["XX", "YY", "ZZ"]  # ISO country codes
-
+        high_risk_countries = ["XX", "YY", "ZZ"]
         if country_code in high_risk_countries:
             flags.append(
                 AMLFlag(
@@ -765,24 +652,18 @@ class AMLEngine:
                     timestamp=datetime.utcnow(),
                 )
             )
-
         return flags
 
     async def _analyze_transaction_patterns(
         self, transaction_data: Dict[str, Any]
     ) -> List[AMLFlag]:
         """Analyze transaction for suspicious patterns."""
-
         flags = []
-
-        # Get recent transactions for pattern analysis
         user_id = transaction_data.get("user_id")
         if user_id:
             recent_transactions = await self._get_recent_transactions(
                 user_id, timedelta(days=7)
             )
-
-            # Check for structuring pattern
             if self._detect_structuring_pattern(recent_transactions):
                 flags.append(
                     AMLFlag(
@@ -799,8 +680,6 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
-            # Check for rapid movement pattern
             if self._detect_rapid_movement_pattern(recent_transactions):
                 flags.append(
                     AMLFlag(
@@ -816,22 +695,17 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return flags
 
     async def _screen_counterparties(
         self, transaction_data: Dict[str, Any]
     ) -> List[AMLFlag]:
         """Screen transaction counterparties."""
-
         flags = []
-
-        # Screen beneficiary if present
         beneficiary_name = transaction_data.get("beneficiary_name")
         if beneficiary_name:
             beneficiary_data = {"name": beneficiary_name}
             sanctions_result = await self._screen_sanctions(beneficiary_data)
-
             if sanctions_result["matches"]:
                 flags.append(
                     AMLFlag(
@@ -847,72 +721,49 @@ class AMLEngine:
                         timestamp=datetime.utcnow(),
                     )
                 )
-
         return flags
 
     def _calculate_name_match_score(self, name1: str, name2: str) -> float:
         """Calculate name matching score using fuzzy matching."""
-
         if not name1 or not name2:
             return 0.0
-
-        # Simple implementation - in practice would use sophisticated fuzzy matching
-        name1_clean = re.sub(r"[^a-zA-Z\s]", "", name1.lower()).strip()
-        name2_clean = re.sub(r"[^a-zA-Z\s]", "", name2.lower()).strip()
-
+        name1_clean = re.sub("[^a-zA-Z\\s]", "", name1.lower()).strip()
+        name2_clean = re.sub("[^a-zA-Z\\s]", "", name2.lower()).strip()
         if name1_clean == name2_clean:
             return 1.0
-
-        # Simple Jaccard similarity
         words1 = set(name1_clean.split())
         words2 = set(name2_clean.split())
-
         if not words1 or not words2:
             return 0.0
-
         intersection = words1.intersection(words2)
         union = words1.union(words2)
-
         return len(intersection) / len(union)
 
     def _calculate_address_match_score(self, address1: str, address2: str) -> float:
         """Calculate address matching score."""
-
         if not address1 or not address2:
             return 0.0
-
-        # Simple implementation
-        addr1_clean = re.sub(r"[^a-zA-Z0-9\s]", "", address1.lower()).strip()
-        addr2_clean = re.sub(r"[^a-zA-Z0-9\s]", "", address2.lower()).strip()
-
+        addr1_clean = re.sub("[^a-zA-Z0-9\\s]", "", address1.lower()).strip()
+        addr2_clean = re.sub("[^a-zA-Z0-9\\s]", "", address2.lower()).strip()
         words1 = set(addr1_clean.split())
         words2 = set(addr2_clean.split())
-
         if not words1 or not words2:
             return 0.0
-
         intersection = words1.intersection(words2)
         union = words1.union(words2)
-
         return len(intersection) / len(union)
 
     def _calculate_date_match_score(self, date1: str, date2: str) -> float:
         """Calculate date matching score."""
-
         if not date1 or not date2:
             return 0.0
-
-        # Exact match for dates
         return 1.0 if date1 == date2 else 0.0
 
     def _calculate_customer_risk_score(
         self, customer_data: Dict[str, Any], flags: List[AMLFlag]
     ) -> float:
         """Calculate overall risk score for a customer."""
-
-        base_score = 0.1  # Base risk score
-
-        # Add risk based on flags
+        base_score = 0.1
         for flag in flags:
             if flag.severity == RiskLevel.LOW:
                 base_score += 0.1
@@ -922,23 +773,16 @@ class AMLEngine:
                 base_score += 0.6
             elif flag.severity == RiskLevel.CRITICAL:
                 base_score += 1.0
-
-        # Add risk based on customer attributes
         country_code = customer_data.get("country_code", "")
-        if country_code in ["XX", "YY"]:  # High-risk countries
+        if country_code in ["XX", "YY"]:
             base_score += 0.3
-
-        # Cap at 1.0
         return min(base_score, 1.0)
 
     def _calculate_transaction_risk_score(
         self, transaction_data: Dict[str, Any], flags: List[AMLFlag]
     ) -> float:
         """Calculate overall risk score for a transaction."""
-
-        base_score = 0.05  # Base risk score
-
-        # Add risk based on flags
+        base_score = 0.05
         for flag in flags:
             if flag.severity == RiskLevel.LOW:
                 base_score += 0.1
@@ -948,20 +792,15 @@ class AMLEngine:
                 base_score += 0.4
             elif flag.severity == RiskLevel.CRITICAL:
                 base_score += 0.8
-
-        # Add risk based on transaction attributes
         amount = transaction_data.get("amount", 0)
         if amount > 50000:
             base_score += 0.2
         elif amount > 10000:
             base_score += 0.1
-
-        # Cap at 1.0
         return min(base_score, 1.0)
 
     def _determine_risk_level(self, risk_score: float) -> RiskLevel:
         """Determine risk level based on risk score."""
-
         if risk_score >= 0.8:
             return RiskLevel.CRITICAL
         elif risk_score >= 0.6:
@@ -973,32 +812,22 @@ class AMLEngine:
 
     def _determine_aml_status(self, flags: List[AMLFlag], risk_score: float) -> str:
         """Determine overall AML status."""
-
-        # Check for critical flags
         critical_flags = [f for f in flags if f.severity == RiskLevel.CRITICAL]
         if critical_flags:
             return AMLStatus.BLOCKED.value
-
-        # Check for high-risk flags or score
         high_risk_flags = [f for f in flags if f.severity == RiskLevel.HIGH]
         if high_risk_flags or risk_score >= 0.7:
             return AMLStatus.REVIEW.value
-
-        # Check for medium-risk flags or score
         medium_risk_flags = [f for f in flags if f.severity == RiskLevel.MEDIUM]
         if medium_risk_flags or risk_score >= 0.4:
             return AMLStatus.REVIEW.value
-
         return AMLStatus.CLEAR.value
 
     async def _get_recent_transactions(
         self, user_id: str, time_window: timedelta
     ) -> List[Dict[str, Any]]:
         """Get recent transactions for a user."""
-
-        # Mock implementation - would query actual transaction database
         datetime.utcnow() - time_window
-
         return [
             {
                 "transaction_id": "tx_001",
@@ -1018,51 +847,36 @@ class AMLEngine:
 
     def _detect_structuring_pattern(self, transactions: List[Dict[str, Any]]) -> bool:
         """Detect potential structuring pattern in transactions."""
-
         if len(transactions) < 3:
             return False
-
-        # Check for multiple transactions just below threshold
         below_threshold_count = 0
         for tx in transactions:
             amount = tx.get("amount", 0)
             if 9000 <= amount < 10000:
                 below_threshold_count += 1
-
         return below_threshold_count >= 3
 
     def _detect_rapid_movement_pattern(
         self, transactions: List[Dict[str, Any]]
     ) -> bool:
         """Detect rapid movement of funds pattern."""
-
         if len(transactions) < 2:
             return False
-
-        # Sort by timestamp
         sorted_txs = sorted(
             transactions, key=lambda x: x.get("timestamp", datetime.min)
         )
-
-        # Check for rapid succession
         for i in range(1, len(sorted_txs)):
             time_diff = sorted_txs[i]["timestamp"] - sorted_txs[i - 1]["timestamp"]
             if time_diff < timedelta(minutes=30):
                 return True
-
         return False
 
     async def monitor_ongoing_transactions(self, user_id: str) -> Dict[str, Any]:
         """Monitor ongoing transactions for a user."""
-
-        # Get recent transactions
         recent_transactions = await self._get_recent_transactions(
             user_id, timedelta(days=30)
         )
-
         alerts = []
-
-        # Check for suspicious patterns
         if self._detect_structuring_pattern(recent_transactions):
             alerts.append(
                 {
@@ -1072,7 +886,6 @@ class AMLEngine:
                     "transaction_count": len(recent_transactions),
                 }
             )
-
         return {
             "user_id": user_id,
             "monitoring_period": "30 days",
@@ -1083,15 +896,13 @@ class AMLEngine:
 
     def update_sanctions_lists(
         self, list_type: SanctionsListType, new_data: Dict[str, Any]
-    ):
+    ) -> Any:
         """Update sanctions lists with new data."""
-
         self._sanctions_lists[list_type] = new_data
         self.logger.info(f"Updated sanctions list: {list_type.value}")
 
     def get_aml_statistics(self) -> Dict[str, Any]:
         """Get AML engine statistics."""
-
         return {
             "sanctions_lists": len(self._sanctions_lists),
             "pep_lists": len(self._pep_lists),

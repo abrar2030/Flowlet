@@ -1,31 +1,20 @@
 import uuid
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
-
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Index,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Boolean, Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import relationship
-
-# Assuming password security functions are available in this path
 from ..security.password_security import check_password, hash_password
-from .database import Base, db  # Import Base and db from the local database setup
+from .database import Base, db
 
 
 class UserRole(PyEnum):
     """User roles for RBAC - Merged from both"""
 
     ADMIN = "admin"
-    USER = "user"  # Renamed from CUSTOMER to USER for consistency with src/
+    USER = "user"
     AUDITOR = "auditor"
-    SUPPORT = "support"  # Added from app/
-    COMPLIANCE = "compliance"  # Added from app/
+    SUPPORT = "support"
+    COMPLIANCE = "compliance"
 
 
 class UserStatus(PyEnum):
@@ -34,9 +23,9 @@ class UserStatus(PyEnum):
     ACTIVE = "active"
     SUSPENDED = "suspended"
     CLOSED = "closed"
-    INACTIVE = "inactive"  # Added from app/
-    PENDING_VERIFICATION = "pending_verification"  # Added from app/
-    LOCKED = "locked"  # Added from app/
+    INACTIVE = "inactive"
+    PENDING_VERIFICATION = "pending_verification"
+    LOCKED = "locked"
 
 
 class KYCStatus(PyEnum):
@@ -53,137 +42,87 @@ class User(Base):
     """Enhanced User model with merged security and compliance features"""
 
     __tablename__ = "users"
-
-    # Primary key
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-
-    # Authentication
     email = Column(String(255), unique=True, nullable=False, index=True)
-    email_verified = Column(Boolean, default=False)  # From src/
-    email_verification_token = Column(String(100), nullable=True)  # From src/
-    email_verified_at = Column(DateTime(timezone=True), nullable=True)  # From app/
-
-    # Enhanced password security (from src/)
+    email_verified = Column(Boolean, default=False)
+    email_verification_token = Column(String(100), nullable=True)
+    email_verified_at = Column(DateTime(timezone=True), nullable=True)
     password_hash = Column(String(255), nullable=False)
-    password_history = Column(Text, nullable=True)  # JSON array of previous hashes
-    password_changed_at = Column(
-        DateTime(timezone=True), nullable=True
-    )  # Using timezone=True from app/
-    password_expires_at = Column(
-        DateTime(timezone=True), nullable=True
-    )  # Using timezone=True from app/
+    password_history = Column(Text, nullable=True)
+    password_changed_at = Column(DateTime(timezone=True), nullable=True)
+    password_expires_at = Column(DateTime(timezone=True), nullable=True)
     failed_login_attempts = Column(Integer, default=0)
-    account_locked_until = Column(
-        DateTime(timezone=True), nullable=True
-    )  # Using timezone=True from app/
-    last_failed_login = Column(DateTime(timezone=True), nullable=True)  # From app/
-
-    # Personal information (encrypted in src/, PII fields from src/)
+    account_locked_until = Column(DateTime(timezone=True), nullable=True)
+    last_failed_login = Column(DateTime(timezone=True), nullable=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
-    phone = Column(String(20), nullable=True)  # From src/
-    phone_verified = Column(Boolean, default=False)  # From src/
-    phone_verification_token = Column(String(10), nullable=True)  # From src/
-    phone_verified_at = Column(
-        DateTime(timezone=True), nullable=True
-    )  # From app/ (using phone_verified_at instead of phone_verified)
-
-    # Encrypted PII fields (from src/)
+    phone = Column(String(20), nullable=True)
+    phone_verified = Column(Boolean, default=False)
+    phone_verification_token = Column(String(10), nullable=True)
+    phone_verified_at = Column(DateTime(timezone=True), nullable=True)
     date_of_birth_encrypted = Column(Text, nullable=True)
     ssn_encrypted = Column(Text, nullable=True)
     address_encrypted = Column(Text, nullable=True)
-
-    # Address information (from app/ - assuming these are for unencrypted/less sensitive address)
     street_address = Column(String(255), nullable=True)
     city = Column(String(100), nullable=True)
     state = Column(String(50), nullable=True)
     postal_code = Column(String(20), nullable=True)
     country = Column(String(2), nullable=True, default="US")
-
-    # Account status and security
     role = Column(db.Enum(UserRole), default=UserRole.USER, nullable=False)
     status = Column(db.Enum(UserStatus), default=UserStatus.ACTIVE, nullable=False)
     kyc_status = Column(
         db.Enum(KYCStatus), default=KYCStatus.NOT_STARTED, nullable=False
-    )  # Using Enum from app/
-    account_status = Column(
-        String(20), default="active"
-    )  # From src/ (redundant with status, but keeping for now)
-    risk_score = Column(Integer, default=0)  # From src/
-    is_suspicious = Column(Boolean, default=False)  # From src/
-    is_active = Column(
-        Boolean, nullable=False, default=True
-    )  # From app/ (redundant with status, but keeping for now)
-
-    # Two-factor authentication (from src/ and app/)
-    two_factor_enabled = Column(Boolean, default=False)  # From src/
-    two_factor_secret = Column(String(32), nullable=True)  # From src/
-    backup_codes = Column(Text, nullable=True)  # JSON array (from src/)
-    mfa_enabled = Column(
-        Boolean, nullable=False, default=False
-    )  # From app/ (redundant with two_factor_enabled, keeping src/ version)
-    mfa_secret = Column(
-        String(32), nullable=True
-    )  # From app/ (redundant with two_factor_secret, keeping src/ version)
-
-    # Session management (from src/)
+    )
+    account_status = Column(String(20), default="active")
+    risk_score = Column(Integer, default=0)
+    is_suspicious = Column(Boolean, default=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    two_factor_enabled = Column(Boolean, default=False)
+    two_factor_secret = Column(String(32), nullable=True)
+    backup_codes = Column(Text, nullable=True)
+    mfa_enabled = Column(Boolean, nullable=False, default=False)
+    mfa_secret = Column(String(32), nullable=True)
     max_concurrent_sessions = Column(Integer, default=3)
     force_logout_all = Column(Boolean, default=False)
-
-    # Compliance and audit (from app/)
     terms_accepted_at = Column(DateTime(timezone=True), nullable=True)
     privacy_accepted_at = Column(DateTime(timezone=True), nullable=True)
     marketing_consent = Column(Boolean, nullable=False, default=False)
-
-    # Audit fields
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )  # Using app/ style for timezone
+    )
     updated_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
-    )  # Using app/ style for timezone
-    last_login_at = Column(
-        DateTime(timezone=True), nullable=True
-    )  # Using timezone=True from app/
-    last_login_ip = Column(String(45), nullable=True)  # From src/
-
-    # Soft delete (from app/)
+    )
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
+    last_login_ip = Column(String(45), nullable=True)
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-
-    # Relationships (from src/)
     wallets = relationship(
         "Account", back_populates="user", cascade="all, delete-orphan"
-    )  # Renamed from 'wallets' to 'accounts' in src/account.py, but keeping 'wallets' here for now.
+    )
     kyc_records = relationship(
         "KYCRecord", back_populates="user", cascade="all, delete-orphan"
     )
-
-    # Indexes for performance (from src/)
     __table_args__ = (
-        Index(
-            "idx_user_email_status", "email", "status"
-        ),  # Changed account_status to status
+        Index("idx_user_email_status", "email", "status"),
         Index("idx_user_kyc_status", "kyc_status"),
         Index("idx_user_risk_score", "risk_score"),
     )
 
-    def set_password(self, password):
+    def set_password(self, password: Any) -> Any:
         """Sets the password hash securely"""
         self.password_hash = hash_password(password)
-        self.password_changed_at = datetime.now(timezone.utc)  # Added from app/
+        self.password_changed_at = datetime.now(timezone.utc)
 
-    def check_password(self, password):
+    def check_password(self, password: Any) -> Any:
         """Checks the password against the stored hash"""
         return check_password(self.password_hash, password)
 
-    # Methods from app/
     def is_password_expired(self, max_age_days: int = 90) -> bool:
         """Check if password has expired"""
         if not self.password_changed_at:
             return True
-
         age = datetime.now(timezone.utc) - self.password_changed_at
         return age.days > max_age_days
 
@@ -191,8 +130,6 @@ class User(Base):
         """Increment failed login attempts"""
         self.failed_login_attempts += 1
         self.last_failed_login = datetime.now(timezone.utc)
-
-        # Lock account after 5 failed attempts
         if self.failed_login_attempts >= 5:
             self.status = UserStatus.LOCKED
 
@@ -201,8 +138,6 @@ class User(Base):
         self.failed_login_attempts = 0
         self.last_failed_login = None
         self.last_login_at = datetime.now(timezone.utc)
-
-        # Unlock account if it was locked due to failed attempts
         if self.status == UserStatus.LOCKED:
             self.status = UserStatus.ACTIVE
 
@@ -215,7 +150,7 @@ class User(Base):
         return (
             self.is_active
             and self.status in [UserStatus.ACTIVE, UserStatus.PENDING_VERIFICATION]
-            and not self.is_locked()
+            and (not self.is_locked())
         )
 
     @property
@@ -262,7 +197,6 @@ class User(Base):
                 self.last_login_at.isoformat() if self.last_login_at else None
             ),
         }
-
         if include_sensitive:
             data.update(
                 {
@@ -282,8 +216,7 @@ class User(Base):
                     "is_suspicious": self.is_suspicious,
                 }
             )
-
         return data
 
-    def __repr__(self):
+    def __repr__(self) -> Any:
         return f"<User {self.email}>"

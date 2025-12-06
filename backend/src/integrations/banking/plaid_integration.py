@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-
 import aiohttp
 
 
@@ -11,13 +10,11 @@ class PlaidIntegration(BankingIntegrationBase):
     Supports Link, Auth, Transactions, and Identity products
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> Any:
         super().__init__(config)
         self.client_id = config.get("client_id")
         self.secret = config.get("secret")
-        self.environment = config.get(
-            "environment", "sandbox"
-        )  # sandbox, development, production
+        self.environment = config.get("environment", "sandbox")
         self.base_url = self._get_base_url()
         self.session = None
 
@@ -36,19 +33,13 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         try:
             self.session = aiohttp.ClientSession()
-
-            # Test authentication with a simple API call
-            headers = {
-                "Content-Type": "application/json",
-            }
-
+            headers = {"Content-Type": "application/json"}
             data = {
                 "client_id": self.client_id,
                 "secret": self.secret,
                 "country_codes": ["US"],
                 "user": {"client_user_id": "test_user"},
             }
-
             async with self.session.post(
                 f"{self.base_url}/link/token/create", headers=headers, json=data
             ) as response:
@@ -62,7 +53,6 @@ class PlaidIntegration(BankingIntegrationBase):
                     raise AuthenticationError(
                         f"Plaid authentication failed: {error_data}"
                     )
-
         except Exception as e:
             self.logger.error(f"Plaid authentication error: {str(e)}")
             raise AuthenticationError(f"Plaid authentication error: {str(e)}")
@@ -73,13 +63,11 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
             "public_token": public_token,
         }
-
         async with self.session.post(
             f"{self.base_url}/link/token/exchange", json=data
         ) as response:
@@ -96,20 +84,17 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
             "access_token": access_token,
         }
-
         async with self.session.post(
             f"{self.base_url}/auth/get", json=data
         ) as response:
             if response.status == 200:
                 result = await response.json()
                 accounts = []
-
                 for account_data in result["accounts"]:
                     account = BankAccount(
                         account_id=account_data["account_id"],
@@ -123,7 +108,6 @@ class PlaidIntegration(BankingIntegrationBase):
                         account_holder_name=account_data.get("name", ""),
                     )
                     accounts.append(account)
-
                 return accounts
             else:
                 error_data = await response.json()
@@ -137,14 +121,12 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
             "access_token": access_token,
             "options": {"account_ids": [account_id]},
         }
-
         async with self.session.post(
             f"{self.base_url}/accounts/balance/get", json=data
         ) as response:
@@ -175,12 +157,10 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         if not start_date:
             start_date = datetime.now() - timedelta(days=30)
         if not end_date:
             end_date = datetime.now()
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
@@ -189,26 +169,21 @@ class PlaidIntegration(BankingIntegrationBase):
             "end_date": end_date.strftime("%Y-%m-%d"),
             "count": limit or 100,
         }
-
         if account_id:
             data["options"] = {"account_ids": [account_id]}
-
         async with self.session.post(
             f"{self.base_url}/transactions/get", json=data
         ) as response:
             if response.status == 200:
                 result = await response.json()
                 transactions = []
-
                 for txn_data in result["transactions"]:
-                    # Determine transaction type based on amount
                     amount = abs(txn_data["amount"])
                     txn_type = (
                         TransactionType.DEBIT
                         if txn_data["amount"] > 0
                         else TransactionType.CREDIT
                     )
-
                     transaction = Transaction(
                         transaction_id=txn_data["transaction_id"],
                         account_id=txn_data["account_id"],
@@ -226,7 +201,6 @@ class PlaidIntegration(BankingIntegrationBase):
                         },
                     )
                     transactions.append(transaction)
-
                 return transactions
             else:
                 error_data = await response.json()
@@ -239,8 +213,6 @@ class PlaidIntegration(BankingIntegrationBase):
         Initiate payment using Plaid Transfer (requires additional setup)
         Note: This is a simplified implementation
         """
-        # Plaid Transfer requires additional authorization and setup
-        # This is a placeholder implementation
         raise NotImplementedError(
             "Plaid Transfer integration requires additional setup"
         )
@@ -267,13 +239,11 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
             "access_token": access_token,
         }
-
         async with self.session.post(
             f"{self.base_url}/identity/get", json=data
         ) as response:
@@ -290,10 +260,8 @@ class PlaidIntegration(BankingIntegrationBase):
         """
         if not self._authenticated:
             await self.authenticate()
-
         if not products:
             products = ["auth", "transactions", "identity"]
-
         data = {
             "client_id": self.client_id,
             "secret": self.secret,
@@ -303,7 +271,6 @@ class PlaidIntegration(BankingIntegrationBase):
             "user": {"client_user_id": user_id},
             "products": products,
         }
-
         async with self.session.post(
             f"{self.base_url}/link/token/create", json=data
         ) as response:
@@ -321,7 +288,7 @@ class PlaidIntegration(BankingIntegrationBase):
         if self.session:
             await self.session.close()
 
-    def __del__(self):
+    def __del__(self) -> Any:
         """Cleanup on deletion"""
-        if self.session and not self.session.closed:
+        if self.session and (not self.session.closed):
             asyncio.create_task(self.session.close())

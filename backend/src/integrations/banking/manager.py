@@ -1,7 +1,6 @@
 import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
-
 from . import (
     BankAccount,
     BankingIntegrationBase,
@@ -31,7 +30,7 @@ class BankingIntegrationManager:
     Provides a unified interface for different banking APIs
     """
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.integrations: Dict[str, BankingIntegrationBase] = {}
         self.integration_classes: Dict[
             IntegrationType, Type[BankingIntegrationBase]
@@ -102,7 +101,7 @@ class BankingIntegrationManager:
                 result = await integration.authenticate()
                 results[name] = result
                 self.logger.info(
-                    f"Authentication {'successful' if result else 'failed'} for '{name}'"
+                    f"Authentication {('successful' if result else 'failed')} for '{name}'"
                 )
             except Exception as e:
                 results[name] = False
@@ -134,7 +133,7 @@ class BankingIntegrationManager:
 
     async def get_all_transactions(
         self,
-        account_mappings: Dict[str, str],  # integration_name -> account_id
+        account_mappings: Dict[str, str],
         start_date: Optional[Any] = None,
         end_date: Optional[Any] = None,
         limit: Optional[int] = None,
@@ -156,7 +155,6 @@ class BankingIntegrationManager:
             if integration_name not in self.integrations:
                 self.logger.warning(f"Integration '{integration_name}' not found")
                 continue
-
             try:
                 integration = self.integrations[integration_name]
                 transactions = await integration.get_transactions(
@@ -187,28 +185,25 @@ class BankingIntegrationManager:
             tuple[str, str]: (transaction_id, integration_name)
         """
         integrations_to_try = preferred_integrations or list(self.integrations.keys())
-
         for integration_name in integrations_to_try:
             if integration_name not in self.integrations:
                 continue
-
             try:
                 integration = self.integrations[integration_name]
                 transaction_id = await integration.initiate_payment(payment_request)
                 self.logger.info(
                     f"Payment initiated successfully with '{integration_name}': {transaction_id}"
                 )
-                return transaction_id, integration_name
+                return (transaction_id, integration_name)
             except Exception as e:
                 self.logger.warning(
                     f"Payment failed with '{integration_name}': {str(e)}"
                 )
                 continue
-
         raise BankingIntegrationError("Payment failed with all available integrations")
 
     async def get_payment_status_multi(
-        self, transaction_mappings: Dict[str, str]  # integration_name -> transaction_id
+        self, transaction_mappings: Dict[str, str]
     ) -> Dict[str, TransactionStatus]:
         """
         Get payment status from multiple integrations
@@ -223,7 +218,6 @@ class BankingIntegrationManager:
         for integration_name, transaction_id in transaction_mappings.items():
             if integration_name not in self.integrations:
                 continue
-
             try:
                 integration = self.integrations[integration_name]
                 status = await integration.get_payment_status(transaction_id)
@@ -265,7 +259,7 @@ class BankingIntegrationManager:
             }
         return health_status
 
-    def __del__(self):
+    def __del__(self) -> Any:
         """Cleanup on deletion"""
         import asyncio
 
@@ -276,8 +270,7 @@ class BankingIntegrationManager:
             else:
                 loop.run_until_complete(self.close_all())
         except Exception:
-            pass  # Ignore cleanup errors during shutdown
+            pass
 
 
-# Global instance for easy access
 banking_manager = BankingIntegrationManager()

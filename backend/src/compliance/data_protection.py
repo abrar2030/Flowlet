@@ -4,18 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
 from sqlalchemy.orm import Session
-
 from .regulatory_framework import Jurisdiction
 
-"""
-Data Protection Service
-======================
-
-Comprehensive data protection and privacy compliance service.
-Supports GDPR, CCPA, PDPA, and other privacy regulations across multiple jurisdictions.
-"""
+"\nData Protection Service\n======================\n\nComprehensive data protection and privacy compliance service.\nSupports GDPR, CCPA, PDPA, and other privacy regulations across multiple jurisdictions.\n"
 
 
 class DataCategory(Enum):
@@ -28,7 +20,7 @@ class DataCategory(Enum):
     BEHAVIORAL_DATA = "behavioral_data"
     COMMUNICATION_DATA = "communication_data"
     DEVICE_DATA = "device_data"
-    SPECIAL_CATEGORY = "special_category"  # Sensitive data under GDPR
+    SPECIAL_CATEGORY = "special_category"
 
 
 class ProcessingPurpose(Enum):
@@ -178,36 +170,25 @@ class DataProtectionService:
     - Privacy by design implementation
     """
 
-    def __init__(self, db_session: Session, config: Dict[str, Any] = None):
+    def __init__(self, db_session: Session, config: Dict[str, Any] = None) -> Any:
         self.db = db_session
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
-
-        # Data protection configurations
         self._jurisdiction_requirements = {}
         self._consent_records = {}
         self._processing_records = {}
         self._data_subject_requests = {}
         self._retention_policies = {}
-
-        # Initialize service
         self._initialize_data_protection_service()
 
-    def _initialize_data_protection_service(self):
+    def _initialize_data_protection_service(self) -> Any:
         """Initialize the data protection service."""
-
-        # Set up jurisdiction-specific requirements
         self._setup_jurisdiction_requirements()
-
-        # Initialize retention policies
         self._setup_retention_policies()
-
         self.logger.info("Data protection service initialized successfully")
 
-    def _setup_jurisdiction_requirements(self):
+    def _setup_jurisdiction_requirements(self) -> Any:
         """Set up jurisdiction-specific data protection requirements."""
-
-        # GDPR (EU)
         self._jurisdiction_requirements[Jurisdiction.EU] = {
             "regulation_name": "GDPR",
             "consent_requirements": {
@@ -244,8 +225,6 @@ class DataProtectionService:
             "data_minimization": True,
             "purpose_limitation": True,
         }
-
-        # CCPA (California, US)
         self._jurisdiction_requirements[Jurisdiction.US] = {
             "regulation_name": "CCPA",
             "consent_requirements": {
@@ -276,8 +255,6 @@ class DataProtectionService:
             "data_minimization": False,
             "purpose_limitation": False,
         }
-
-        # PDPA (Singapore)
         self._jurisdiction_requirements[Jurisdiction.SINGAPORE] = {
             "regulation_name": "PDPA",
             "consent_requirements": {
@@ -307,33 +284,28 @@ class DataProtectionService:
             "purpose_limitation": True,
         }
 
-    def _setup_retention_policies(self):
+    def _setup_retention_policies(self) -> Any:
         """Set up data retention policies by category and purpose."""
-
         self._retention_policies = {
             DataCategory.PERSONAL_IDENTIFIERS: {
-                ProcessingPurpose.IDENTITY_VERIFICATION: timedelta(
-                    days=2555
-                ),  # 7 years
-                ProcessingPurpose.COMPLIANCE: timedelta(days=2555),  # 7 years
-                ProcessingPurpose.CUSTOMER_SERVICE: timedelta(days=1095),  # 3 years
-                ProcessingPurpose.MARKETING: timedelta(days=730),  # 2 years
+                ProcessingPurpose.IDENTITY_VERIFICATION: timedelta(days=2555),
+                ProcessingPurpose.COMPLIANCE: timedelta(days=2555),
+                ProcessingPurpose.CUSTOMER_SERVICE: timedelta(days=1095),
+                ProcessingPurpose.MARKETING: timedelta(days=730),
             },
             DataCategory.FINANCIAL_DATA: {
-                ProcessingPurpose.COMPLIANCE: timedelta(days=2555),  # 7 years
-                ProcessingPurpose.FRAUD_PREVENTION: timedelta(days=2555),  # 7 years
-                ProcessingPurpose.CUSTOMER_SERVICE: timedelta(days=1095),  # 3 years
+                ProcessingPurpose.COMPLIANCE: timedelta(days=2555),
+                ProcessingPurpose.FRAUD_PREVENTION: timedelta(days=2555),
+                ProcessingPurpose.CUSTOMER_SERVICE: timedelta(days=1095),
             },
             DataCategory.BIOMETRIC_DATA: {
-                ProcessingPurpose.IDENTITY_VERIFICATION: timedelta(
-                    days=1095
-                ),  # 3 years
-                ProcessingPurpose.FRAUD_PREVENTION: timedelta(days=1095),  # 3 years
+                ProcessingPurpose.IDENTITY_VERIFICATION: timedelta(days=1095),
+                ProcessingPurpose.FRAUD_PREVENTION: timedelta(days=1095),
             },
             DataCategory.BEHAVIORAL_DATA: {
-                ProcessingPurpose.ANALYTICS: timedelta(days=730),  # 2 years
-                ProcessingPurpose.PRODUCT_IMPROVEMENT: timedelta(days=1095),  # 3 years
-                ProcessingPurpose.MARKETING: timedelta(days=365),  # 1 year
+                ProcessingPurpose.ANALYTICS: timedelta(days=730),
+                ProcessingPurpose.PRODUCT_IMPROVEMENT: timedelta(days=1095),
+                ProcessingPurpose.MARKETING: timedelta(days=365),
             },
         }
 
@@ -341,10 +313,8 @@ class DataProtectionService:
         self, entity_data: Dict[str, Any], jurisdiction: Jurisdiction
     ) -> Dict[str, Any]:
         """Assess data protection compliance for an entity."""
-
         try:
             requirements = self._jurisdiction_requirements.get(jurisdiction, {})
-
             if not requirements:
                 return {
                     "status": "unknown",
@@ -353,43 +323,33 @@ class DataProtectionService:
                     "details": {},
                     "remediation_required": False,
                 }
-
             compliance_issues = []
-
-            # Check consent compliance
             consent_issues = await self._check_consent_compliance(
                 entity_data, requirements
             )
             compliance_issues.extend(consent_issues)
-
-            # Check data processing compliance
             processing_issues = await self._check_processing_compliance(
                 entity_data, requirements
             )
             compliance_issues.extend(processing_issues)
-
-            # Check retention compliance
             retention_issues = await self._check_retention_compliance(entity_data)
             compliance_issues.extend(retention_issues)
-
-            # Determine overall compliance status
             if not compliance_issues:
                 status = "compliant"
                 severity = "low"
-                description = f'Data protection compliance verified for {requirements["regulation_name"]}'
-            elif any(issue["severity"] == "critical" for issue in compliance_issues):
+                description = f"Data protection compliance verified for {requirements['regulation_name']}"
+            elif any((issue["severity"] == "critical" for issue in compliance_issues)):
                 status = "non_compliant"
                 severity = "critical"
-                description = f'Critical data protection violations found for {requirements["regulation_name"]}'
-            elif any(issue["severity"] == "high" for issue in compliance_issues):
+                description = f"Critical data protection violations found for {requirements['regulation_name']}"
+            elif any((issue["severity"] == "high" for issue in compliance_issues)):
                 status = "requires_action"
                 severity = "high"
-                description = f'High-priority data protection issues found for {requirements["regulation_name"]}'
+                description = f"High-priority data protection issues found for {requirements['regulation_name']}"
             else:
                 status = "requires_action"
                 severity = "medium"
-                description = f'Data protection issues found for {requirements["regulation_name"]}'
-
+                description = f"Data protection issues found for {requirements['regulation_name']}"
             return {
                 "status": status,
                 "severity": severity,
@@ -402,7 +362,6 @@ class DataProtectionService:
                 },
                 "remediation_required": len(compliance_issues) > 0,
             }
-
         except Exception as e:
             self.logger.error(f"Error assessing data protection compliance: {str(e)}")
             return {
@@ -417,11 +376,8 @@ class DataProtectionService:
         self, entity_data: Dict[str, Any], requirements: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Check consent compliance."""
-
         issues = []
         consent_reqs = requirements.get("consent_requirements", {})
-
-        # Check if explicit consent is required
         if consent_reqs.get("explicit_consent_required", False):
             consent_given = entity_data.get("consent_given", False)
             if not consent_given:
@@ -433,8 +389,6 @@ class DataProtectionService:
                         "remediation": "Obtain explicit consent from data subject",
                     }
                 )
-
-        # Check consent withdrawal capability
         if consent_reqs.get("consent_withdrawal", False):
             withdrawal_mechanism = entity_data.get(
                 "consent_withdrawal_available", False
@@ -448,8 +402,6 @@ class DataProtectionService:
                         "remediation": "Implement consent withdrawal mechanism",
                     }
                 )
-
-        # Check age of consent
         age_of_consent = consent_reqs.get("age_of_consent", 18)
         user_age = entity_data.get("age")
         if user_age and user_age < age_of_consent:
@@ -465,17 +417,13 @@ class DataProtectionService:
                         "remediation": "Obtain parental consent",
                     }
                 )
-
         return issues
 
     async def _check_processing_compliance(
         self, entity_data: Dict[str, Any], requirements: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Check data processing compliance."""
-
         issues = []
-
-        # Check legal basis for processing
         legal_basis = entity_data.get("legal_basis")
         if not legal_basis:
             issues.append(
@@ -486,8 +434,6 @@ class DataProtectionService:
                     "remediation": "Specify legal basis for data processing",
                 }
             )
-
-        # Check purpose limitation
         if requirements.get("purpose_limitation", False):
             processing_purpose = entity_data.get("processing_purpose")
             if not processing_purpose:
@@ -499,21 +445,16 @@ class DataProtectionService:
                         "remediation": "Specify purpose for data processing",
                     }
                 )
-
-        # Check data minimization
         if requirements.get("data_minimization", False):
             data_categories = entity_data.get("data_categories", [])
             processing_purpose = entity_data.get("processing_purpose")
-
             if data_categories and processing_purpose:
-                # Check if data categories are necessary for the purpose
                 necessary_categories = self._get_necessary_data_categories(
                     processing_purpose
                 )
                 unnecessary_categories = [
                     cat for cat in data_categories if cat not in necessary_categories
                 ]
-
                 if unnecessary_categories:
                     issues.append(
                         {
@@ -523,23 +464,18 @@ class DataProtectionService:
                             "remediation": "Remove unnecessary data categories",
                         }
                     )
-
         return issues
 
     async def _check_retention_compliance(
         self, entity_data: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Check data retention compliance."""
-
         issues = []
-
         data_categories = entity_data.get("data_categories", [])
         processing_purpose = entity_data.get("processing_purpose")
         processing_date = entity_data.get("processing_date")
-
         if data_categories and processing_purpose and processing_date:
             processing_datetime = self._parse_datetime(processing_date)
-
             if processing_datetime:
                 for category in data_categories:
                     category_enum = (
@@ -552,14 +488,11 @@ class DataProtectionService:
                         if isinstance(processing_purpose, str)
                         else processing_purpose
                     )
-
                     retention_period = self._retention_policies.get(
                         category_enum, {}
                     ).get(purpose_enum)
-
                     if retention_period:
                         expiry_date = processing_datetime + retention_period
-
                         if datetime.utcnow() > expiry_date:
                             issues.append(
                                 {
@@ -570,18 +503,15 @@ class DataProtectionService:
                                     "expiry_date": expiry_date.isoformat(),
                                 }
                             )
-
         return issues
 
     def _get_necessary_data_categories(self, processing_purpose: str) -> List[str]:
         """Get necessary data categories for a processing purpose."""
-
         purpose_enum = (
             ProcessingPurpose(processing_purpose)
             if isinstance(processing_purpose, str)
             else processing_purpose
         )
-
         necessary_categories = {
             ProcessingPurpose.IDENTITY_VERIFICATION: [
                 DataCategory.PERSONAL_IDENTIFIERS.value,
@@ -610,21 +540,16 @@ class DataProtectionService:
                 DataCategory.DEVICE_DATA.value,
             ],
         }
-
         return necessary_categories.get(purpose_enum, [])
 
     def _parse_datetime(self, date_str: str) -> Optional[datetime]:
         """Parse datetime string."""
-
         if not date_str:
             return None
-
         try:
-            # Try ISO format first
             return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         except ValueError:
             try:
-                # Try common formats
                 for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m/%d/%Y"]:
                     try:
                         return datetime.strptime(date_str, fmt)
@@ -632,7 +557,6 @@ class DataProtectionService:
                         continue
             except Exception:
                 pass
-
         return None
 
     async def record_consent(
@@ -645,9 +569,7 @@ class DataProtectionService:
         consent_version: str = "1.0",
     ) -> ConsentRecord:
         """Record data processing consent."""
-
         consent_id = str(uuid.uuid4())
-
         consent_record = ConsentRecord(
             consent_id=consent_id,
             data_subject_id=data_subject_id,
@@ -658,11 +580,9 @@ class DataProtectionService:
             consent_timestamp=datetime.utcnow(),
             consent_method=consent_method,
             consent_version=consent_version,
-            expiry_date=datetime.utcnow() + timedelta(days=365),  # 1 year default
+            expiry_date=datetime.utcnow() + timedelta(days=365),
         )
-
         self._consent_records[consent_id] = consent_record
-
         self.logger.info(
             f"Recorded consent for data subject {data_subject_id}: {consent_id}"
         )
@@ -670,15 +590,12 @@ class DataProtectionService:
 
     async def withdraw_consent(self, consent_id: str) -> bool:
         """Withdraw previously given consent."""
-
         if consent_id in self._consent_records:
             consent_record = self._consent_records[consent_id]
             consent_record.consent_given = False
             consent_record.withdrawal_timestamp = datetime.utcnow()
-
             self.logger.info(f"Consent withdrawn: {consent_id}")
             return True
-
         return False
 
     async def record_data_processing(
@@ -692,16 +609,12 @@ class DataProtectionService:
         automated_decision_making: bool = False,
     ) -> DataProcessingRecord:
         """Record data processing activity."""
-
         processing_id = str(uuid.uuid4())
-
-        # Determine retention period
-        retention_period = timedelta(days=365)  # Default 1 year
+        retention_period = timedelta(days=365)
         if data_categories and purpose in self._retention_policies.get(
             data_categories[0], {}
         ):
             retention_period = self._retention_policies[data_categories[0]][purpose]
-
         processing_record = DataProcessingRecord(
             processing_id=processing_id,
             data_subject_id=data_subject_id,
@@ -714,9 +627,7 @@ class DataProtectionService:
             third_party_sharing=third_party_sharing,
             automated_decision_making=automated_decision_making,
         )
-
         self._processing_records[processing_id] = processing_record
-
         self.logger.info(
             f"Recorded data processing for data subject {data_subject_id}: {processing_id}"
         )
@@ -729,15 +640,8 @@ class DataProtectionService:
         request_details: Dict[str, Any] = None,
     ) -> DataSubjectRequest:
         """Handle data subject rights request."""
-
         request_id = str(uuid.uuid4())
-
-        # Determine response deadline (default 30 days)
         response_deadline = datetime.utcnow() + timedelta(days=30)
-
-        # Adjust deadline based on jurisdiction requirements
-        # This would be determined based on the data subject's jurisdiction
-
         request = DataSubjectRequest(
             request_id=request_id,
             data_subject_id=data_subject_id,
@@ -747,12 +651,8 @@ class DataProtectionService:
             status="pending",
             response_deadline=response_deadline,
         )
-
         self._data_subject_requests[request_id] = request
-
-        # Process the request based on type
         await self._process_data_subject_request(request)
-
         self.logger.info(
             f"Created data subject request {request_id} for {data_subject_id}: {request_type.value}"
         )
@@ -760,7 +660,6 @@ class DataProtectionService:
 
     async def _process_data_subject_request(self, request: DataSubjectRequest):
         """Process a data subject rights request."""
-
         try:
             if request.request_type == DataSubjectRight.ACCESS:
                 await self._process_access_request(request)
@@ -776,7 +675,6 @@ class DataProtectionService:
                 await self._process_objection_request(request)
             elif request.request_type == DataSubjectRight.WITHDRAW_CONSENT:
                 await self._process_consent_withdrawal_request(request)
-
         except Exception as e:
             self.logger.error(
                 f"Error processing data subject request {request.request_id}: {str(e)}"
@@ -785,10 +683,7 @@ class DataProtectionService:
 
     async def _process_access_request(self, request: DataSubjectRequest):
         """Process data access request."""
-
         data_subject_id = request.data_subject_id
-
-        # Collect all data for the data subject
         personal_data = {
             "consent_records": [
                 record.to_dict()
@@ -806,25 +701,16 @@ class DataProtectionService:
                 if req.data_subject_id == data_subject_id
             ],
         }
-
-        # In practice, this would query all relevant databases and systems
-
         request.request_details["response_data"] = personal_data
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
-
         self.logger.info(f"Completed access request for {data_subject_id}")
 
     async def _process_erasure_request(self, request: DataSubjectRequest):
         """Process data erasure (right to be forgotten) request."""
-
         data_subject_id = request.data_subject_id
-
-        # Check if erasure is legally permissible
         can_erase = await self._check_erasure_permissibility(data_subject_id)
-
         if can_erase:
-            # Perform data erasure
             await self._erase_data_subject_data(data_subject_id)
             request.status = "completed"
             request.completion_timestamp = datetime.utcnow()
@@ -840,27 +726,20 @@ class DataProtectionService:
 
     async def _check_erasure_permissibility(self, data_subject_id: str) -> bool:
         """Check if data erasure is legally permissible."""
-
-        # Check for legal obligations to retain data
         processing_records = [
             record
             for record in self._processing_records.values()
             if record.data_subject_id == data_subject_id
         ]
-
         for record in processing_records:
             if record.legal_basis == LegalBasis.LEGAL_OBLIGATION:
-                # Check if retention period has expired
                 expiry_date = record.processing_timestamp + record.retention_period
                 if datetime.utcnow() < expiry_date:
                     return False
-
         return True
 
     async def _erase_data_subject_data(self, data_subject_id: str):
         """Erase all data for a data subject."""
-
-        # Remove consent records
         consent_ids_to_remove = [
             consent_id
             for consent_id, record in self._consent_records.items()
@@ -868,8 +747,6 @@ class DataProtectionService:
         ]
         for consent_id in consent_ids_to_remove:
             del self._consent_records[consent_id]
-
-        # Remove processing records (where legally permissible)
         processing_ids_to_remove = [
             processing_id
             for processing_id, record in self._processing_records.items()
@@ -879,42 +756,29 @@ class DataProtectionService:
         for processing_id in processing_ids_to_remove:
             del self._processing_records[processing_id]
 
-        # In practice, this would also delete data from all relevant databases and systems
-
     async def _process_rectification_request(self, request: DataSubjectRequest):
         """Process data rectification request."""
-
-        # Implementation would update incorrect data
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
 
     async def _process_restriction_request(self, request: DataSubjectRequest):
         """Process processing restriction request."""
-
-        # Implementation would restrict processing
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
 
     async def _process_portability_request(self, request: DataSubjectRequest):
         """Process data portability request."""
-
-        # Implementation would export data in machine-readable format
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
 
     async def _process_objection_request(self, request: DataSubjectRequest):
         """Process objection to processing request."""
-
-        # Implementation would stop processing based on legitimate interests
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
 
     async def _process_consent_withdrawal_request(self, request: DataSubjectRequest):
         """Process consent withdrawal request."""
-
         data_subject_id = request.data_subject_id
-
-        # Withdraw all consents for the data subject
         for consent_record in self._consent_records.values():
             if (
                 consent_record.data_subject_id == data_subject_id
@@ -922,7 +786,6 @@ class DataProtectionService:
             ):
                 consent_record.consent_given = False
                 consent_record.withdrawal_timestamp = datetime.utcnow()
-
         request.status = "completed"
         request.completion_timestamp = datetime.utcnow()
 
@@ -930,33 +793,23 @@ class DataProtectionService:
         self, processing_description: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Conduct Privacy Impact Assessment (PIA/DPIA)."""
-
         assessment_id = str(uuid.uuid4())
-
-        # Assess privacy risks
         risk_factors = []
         risk_score = 0.0
-
-        # Check for high-risk processing
         if processing_description.get("automated_decision_making", False):
             risk_factors.append("automated_decision_making")
             risk_score += 0.3
-
         if DataCategory.SPECIAL_CATEGORY.value in processing_description.get(
             "data_categories", []
         ):
             risk_factors.append("special_category_data")
             risk_score += 0.4
-
         if processing_description.get("large_scale_processing", False):
             risk_factors.append("large_scale_processing")
             risk_score += 0.2
-
         if processing_description.get("third_party_sharing", False):
             risk_factors.append("third_party_sharing")
             risk_score += 0.2
-
-        # Determine risk level
         if risk_score >= 0.7:
             risk_level = "high"
             dpia_required = True
@@ -966,8 +819,6 @@ class DataProtectionService:
         else:
             risk_level = "low"
             dpia_required = False
-
-        # Generate recommendations
         recommendations = []
         if "automated_decision_making" in risk_factors:
             recommendations.append(
@@ -981,7 +832,6 @@ class DataProtectionService:
             recommendations.append(
                 "Ensure adequate data processing agreements with third parties"
             )
-
         return {
             "assessment_id": assessment_id,
             "risk_level": risk_level,
@@ -996,24 +846,18 @@ class DataProtectionService:
         self, data_subject_id: str, purpose: ProcessingPurpose
     ) -> Dict[str, Any]:
         """Get consent status for a data subject and purpose."""
-
         relevant_consents = [
             record
             for record in self._consent_records.values()
             if record.data_subject_id == data_subject_id and record.purpose == purpose
         ]
-
         if not relevant_consents:
             return {
                 "consent_given": False,
                 "consent_required": True,
                 "message": "No consent record found",
             }
-
-        # Get most recent consent
         latest_consent = max(relevant_consents, key=lambda x: x.consent_timestamp)
-
-        # Check if consent is still valid
         if (
             latest_consent.expiry_date
             and datetime.utcnow() > latest_consent.expiry_date
@@ -1024,7 +868,6 @@ class DataProtectionService:
                 "message": "Consent has expired",
                 "expiry_date": latest_consent.expiry_date.isoformat(),
             }
-
         return {
             "consent_given": latest_consent.consent_given,
             "consent_required": True,
@@ -1039,7 +882,6 @@ class DataProtectionService:
 
     def get_data_protection_statistics(self) -> Dict[str, Any]:
         """Get data protection service statistics."""
-
         return {
             "total_consent_records": len(self._consent_records),
             "active_consents": len(
