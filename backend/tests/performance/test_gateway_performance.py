@@ -8,6 +8,10 @@ import pytest
 from src.gateway.optimized_gateway import CacheManager, CircuitBreaker, RequestBatcher
 from src.main_optimized import create_app
 
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+
 # Performance Optimization Tests for API Gateway
 
 
@@ -50,7 +54,7 @@ class TestGatewayOptimizations:
 
         # Cache hit should be significantly faster
         # Note: In testing, the improvement might be minimal due to in-memory operations
-        print(
+        logger.info(
             f"First request: {first_request_time:.4f}s, Second request: {second_request_time:.4f}s"
         )
 
@@ -84,10 +88,9 @@ class TestGatewayOptimizations:
             else max(response_times)
         )
 
-        print(
+        logger.info(
             f"Concurrent requests - Avg: {avg_response_time:.4f}s, P95: {p95_response_time:.4f}s"
         )
-
         # Performance targets
         assert (
             avg_response_time < 0.5
@@ -302,15 +305,14 @@ class TestPerformanceBenchmarks:
                 }
 
         # Print benchmark results
-        print("\nPerformance Benchmarks:")
-        print("=" * 50)
+        logger.info("\nPerformance Benchmarks:")
+        logger.info("=" * 50)
         for endpoint, metrics in benchmark_results.items():
-            print(f"{endpoint}:")
-            print(f"  Average: {metrics['avg']:.2f}ms")
-            print(f"  Min: {metrics['min']:.2f}ms")
-            print(f"  Max: {metrics['max']:.2f}ms")
-            print(f"  P95: {metrics['p95']:.2f}ms")
-
+            logger.info(f"{endpoint}:")
+            logger.info(f"  Average: {metrics['avg']:.2f}ms")
+            logger.info(f"  Min: {metrics['min']:.2f}ms")
+            logger.info(f"  Max: {metrics['max']:.2f}ms")
+            logger.info(f"  P95: {metrics['p95']:.2f}ms")
         # Assert performance targets
         for endpoint, metrics in benchmark_results.items():
             assert (
@@ -337,11 +339,10 @@ class TestPerformanceBenchmarks:
         actual_duration = time.time() - start_time
         throughput = request_count / actual_duration
 
-        print(f"\nThroughput Benchmark:")
-        print(f"Requests: {request_count}")
-        print(f"Duration: {actual_duration:.2f}s")
-        print(f"Throughput: {throughput:.2f} requests/second")
-
+        logger.info(f"\nThroughput Benchmark:")
+        logger.info(f"Requests: {request_count}")
+        logger.info(f"Duration: {actual_duration:.2f}s")
+        logger.info(f"Throughput: {throughput:.2f} requests/second")
         # Should handle at least 50 requests per second in test environment
         assert throughput > 50, f"Throughput too low: {throughput:.2f} requests/second"
 

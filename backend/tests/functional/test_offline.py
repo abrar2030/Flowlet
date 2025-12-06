@@ -4,6 +4,10 @@ import sys
 from src.main import app
 from src.models.database import db
 
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+
 #!/usr/bin/env python3
 
 
@@ -12,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 def test_app_creation():
     """Test that the Flask app can be created"""
-    print("✓ Flask app created successfully")
+    logger.info("✓ Flask app created successfully")
     return True
 
 
@@ -22,15 +26,13 @@ def test_database_models():
         with app.app_context():
             # Test that all tables can be created
             db.create_all()
-            print("✓ Database models created successfully")
-
+            logger.info("✓ Database models created successfully")
             # Test importing all models
 
-            print("✓ All database models imported successfully")
-
+            logger.info("✓ All database models imported successfully")
             return True
     except Exception as e:
-        print(f"✗ Database model test failed: {e}")
+        logger.info(f"✗ Database model test failed: {e}")
         return False
 
 
@@ -39,10 +41,10 @@ def test_route_imports():
     try:
         pass
 
-        print("✓ All route blueprints imported successfully")
+        logger.info("✓ All route blueprints imported successfully")
         return True
     except Exception as e:
-        print(f"✗ Route import test failed: {e}")
+        logger.info(f"✗ Route import test failed: {e}")
         return False
 
 
@@ -65,8 +67,7 @@ def test_service_functionality():
             )
             db.session.add(user)
             db.session.commit()
-            print(f"✓ User created with ID: {user.id}")
-
+            logger.info(f"✓ User created with ID: {user.id}")
             # Create a test wallet
             wallet = Wallet(
                 user_id=user.id,
@@ -77,17 +78,15 @@ def test_service_functionality():
             )
             db.session.add(wallet)
             db.session.commit()
-            print(f"✓ Wallet created with ID: {wallet.id}")
-
+            logger.info(f"✓ Wallet created with ID: {wallet.id}")
             # Test wallet balance update
             wallet.balance = 100.00
             wallet.available_balance = 100.00
             db.session.commit()
-            print(f"✓ Wallet balance updated to: ${wallet.balance}")
-
+            logger.info(f"✓ Wallet balance updated to: ${wallet.balance}")
             return True
     except Exception as e:
-        print(f"✗ Service functionality test failed: {e}")
+        logger.info(f"✗ Service functionality test failed: {e}")
         return False
 
 
@@ -95,10 +94,10 @@ def test_ai_algorithms():
     """Test AI service algorithms"""
     try:
         # Test basic AI functionality without complex imports
-        print("✓ AI algorithms validated (fraud detection, risk scoring)")
+        logger.info("✓ AI algorithms validated (fraud detection, risk scoring)")
         return True
     except Exception as e:
-        print(f"✗ AI algorithm test failed: {e}")
+        logger.info(f"✗ AI algorithm test failed: {e}")
         return False
 
 
@@ -109,22 +108,19 @@ def test_security_functions():
 
         # Test API key generation
         api_key = generate_api_key()
-        print(f"✓ API key generated: {api_key[:10]}...")
-
+        logger.info(f"✓ API key generated: {api_key[:10]}...")
         # Test API key hashing
         key_hash = hash_api_key(api_key)
-        print(f"✓ API key hashed: {key_hash[:10]}...")
-
+        logger.info(f"✓ API key hashed: {key_hash[:10]}...")
         return True
     except Exception as e:
-        print(f"✗ Security function test failed: {e}")
+        logger.info(f"✗ Security function test failed: {e}")
         return False
 
 
 def main():
     """Run all offline tests"""
-    print("🧪 Running Flowlet Backend Offline Tests\n")
-
+    logger.info("🧪 Running Flowlet Backend Offline Tests\n")
     tests = [
         ("App Creation", test_app_creation),
         ("Database Models", test_database_models),
@@ -138,31 +134,28 @@ def main():
     total = len(tests)
 
     for test_name, test_func in tests:
-        print(f"\n📋 Testing {test_name}:")
+        logger.info(f"\n📋 Testing {test_name}:")
         try:
             if test_func():
                 passed += 1
         except Exception as e:
-            print(f"✗ {test_name} failed with exception: {e}")
-
-    print(f"\n📊 Test Results: {passed}/{total} tests passed")
-
+            logger.info(f"✗ {test_name} failed with exception: {e}")
+    logger.info(f"\n📊 Test Results: {passed}/{total} tests passed")
     if passed == total:
-        print("✅ All offline tests passed! Backend implementation is solid.")
+        logger.info("✅ All offline tests passed! Backend implementation is solid.")
     else:
-        print("❌ Some tests failed. Please review the implementation.")
-
-    print("\n🏗️ Backend Architecture Summary:")
-    print(
+        logger.info("❌ Some tests failed. Please review the implementation.")
+    logger.info("\n🏗️ Backend Architecture Summary:")
+    logger.info(
         "- 8 microservices implemented (Wallet, Payment, Card, KYC/AML, Ledger, AI, Security, API Gateway)"
     )
-    print("- 9 database models with relationships")
-    print("- Double-entry ledger system")
-    print("- AI-powered fraud detection")
-    print("- Comprehensive security with API keys and audit logging")
-    print("- RESTful API design with proper error handling")
-    print("- CORS enabled for web-frontend integration")
-    print("- Production-ready Flask application")
+    logger.info("- 9 database models with relationships")
+    logger.info("- Double-entry ledger system")
+    logger.info("- AI-powered fraud detection")
+    logger.info("- Comprehensive security with API keys and audit logging")
+    logger.info("- RESTful API design with proper error handling")
+    logger.info("- CORS enabled for web-frontend integration")
+    logger.info("- Production-ready Flask application")
 
 
 if __name__ == "__main__":

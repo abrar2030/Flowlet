@@ -5,6 +5,10 @@ from datetime import datetime
 
 import requests
 
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+
 # Configuration
 BASE_URL = "http://localhost:5001"
 API_BASE = f"{BASE_URL}/api/v1"
@@ -20,8 +24,7 @@ class FlowletProductionTester:
 
     def log_test(self, test_name, success, message="", data=None):
         status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}: {message}")
-
+        logger.info(f"{status} {test_name}: {message}")
         self.test_results.append(
             {
                 "test": test_name,
@@ -33,7 +36,7 @@ class FlowletProductionTester:
         )
 
         if not success and data:
-            print(f"   Error details: {data}")
+            logger.info(f"   Error details: {data}")
 
     def make_request(self, method, endpoint, data=None, auth=True):
         headers = {"Content-Type": "application/json"}
@@ -60,8 +63,7 @@ class FlowletProductionTester:
             return None
 
     def test_health_and_info(self):
-        print("\n🏥 Testing Health and API Information...")
-
+        logger.info("\n🏥 Testing Health and API Information...")
         # Health check
         try:
             response = requests.get(f"{BASE_URL}/health", timeout=10)
@@ -92,8 +94,7 @@ class FlowletProductionTester:
         return True
 
     def test_user_registration(self):
-        print("\n👤 Testing User Registration...")
-
+        logger.info("\n👤 Testing User Registration...")
         test_email = f"test_{uuid.uuid4().hex[:8]}@flowlet.com"
         registration_data = {
             "email": test_email,
@@ -133,8 +134,7 @@ class FlowletProductionTester:
             return False
 
     def test_user_login(self):
-        print("\n🔐 Testing User Authentication...")
-
+        logger.info("\n🔐 Testing User Authentication...")
         # For this test, we'll use the registered user
         if not self.test_user_id:
             self.log_test("User Login", False, "No test user available")
@@ -156,8 +156,7 @@ class FlowletProductionTester:
             return False
 
     def test_account_creation(self):
-        print("\n🏦 Testing Account Management...")
-
+        logger.info("\n🏦 Testing Account Management...")
         account_data = {
             "account_name": "Test Checking Account",
             "account_type": "checking",
@@ -192,8 +191,7 @@ class FlowletProductionTester:
             return None
 
     def test_balance_operations(self, account_id):
-        print("\n💰 Testing Balance Operations...")
-
+        logger.info("\n💰 Testing Balance Operations...")
         if not account_id:
             self.log_test("Balance Operations", False, "No account ID provided")
             return False
@@ -288,8 +286,7 @@ class FlowletProductionTester:
         return True
 
     def test_transfers(self):
-        print("\n💸 Testing Fund Transfers...")
-
+        logger.info("\n💸 Testing Fund Transfers...")
         if len(self.test_accounts) < 2:
             # Create a second account for transfer testing
             second_account_data = {
@@ -352,8 +349,7 @@ class FlowletProductionTester:
         return True
 
     def test_transaction_history(self):
-        print("\n📊 Testing Transaction History...")
-
+        logger.info("\n📊 Testing Transaction History...")
         if not self.test_accounts:
             self.log_test("Transaction History", False, "No test accounts available")
             return False
@@ -388,8 +384,7 @@ class FlowletProductionTester:
             return False
 
     def test_error_handling(self):
-        print("\n🛡️ Testing Error Handling...")
-
+        logger.info("\n🛡️ Testing Error Handling...")
         # Test invalid account access
         response = self.make_request("GET", "/accounts/invalid-account-id/balance")
 
@@ -481,8 +476,7 @@ class FlowletProductionTester:
         return True
 
     def test_security_features(self):
-        print("\n🔒 Testing Security Features...")
-
+        logger.info("\n🔒 Testing Security Features...")
         # Test security headers
         response = requests.get(f"{BASE_URL}/health", timeout=10)
 
@@ -518,27 +512,26 @@ class FlowletProductionTester:
         return True
 
     def run_comprehensive_test_suite(self):
-        print("🚀 Starting Flowlet Production Test Suite")
-        print("=" * 70)
-        print("Testing enterprise-grade financial backend implementation")
-        print("=" * 70)
-
+        logger.info("🚀 Starting Flowlet Production Test Suite")
+        logger.info("=" * 70)
+        logger.info("Testing enterprise-grade financial backend implementation")
+        logger.info("=" * 70)
         # Wait for server to be ready
-        print("\n⏳ Waiting for server to be ready...")
+        logger.info("\n⏳ Waiting for server to be ready...")
         time.sleep(3)
 
         # Test basic connectivity
         if not self.test_health_and_info():
-            print("❌ Basic connectivity failed. Cannot continue.")
+            logger.info("❌ Basic connectivity failed. Cannot continue.")
             return False
 
         # Test authentication
         if not self.test_user_registration():
-            print("❌ User registration failed. Cannot continue.")
+            logger.info("❌ User registration failed. Cannot continue.")
             return False
 
         if not self.test_user_login():
-            print("❌ Authentication failed. Cannot continue.")
+            logger.info("❌ Authentication failed. Cannot continue.")
             return False
 
         # Test core functionality
@@ -553,56 +546,54 @@ class FlowletProductionTester:
         self.test_security_features()
 
         # Generate comprehensive report
-        print("\n📊 Production Test Results Summary")
-        print("=" * 70)
-
+        logger.info("\n📊 Production Test Results Summary")
+        logger.info("=" * 70)
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result["success"])
         failed_tests = total_tests - passed_tests
 
-        print(f"Total Tests Executed: {total_tests}")
-        print(f"Passed: {passed_tests} ✅")
-        print(f"Failed: {failed_tests} ❌")
-        print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
-
+        logger.info(f"Total Tests Executed: {total_tests}")
+        logger.info(f"Passed: {passed_tests} ✅")
+        logger.info(f"Failed: {failed_tests} ❌")
+        logger.info(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
         if failed_tests > 0:
-            print("\n❌ Failed Tests:")
+            logger.info("\n❌ Failed Tests:")
             for result in self.test_results:
                 if not result["success"]:
-                    print(f"   - {result['test']}: {result['message']}")
-
-        print(f"\n📈 Test Artifacts Created:")
-        print(f"   - User ID: {self.test_user_id}")
-        print(f"   - Accounts: {len(self.test_accounts)}")
-        print(f"   - Transactions: {len(self.test_transactions)}")
-
-        print(f"\n🏆 Production Readiness Assessment:")
+                    logger.info(f"   - {result['test']}: {result['message']}")
+        logger.info(f"\n📈 Test Artifacts Created:")
+        logger.info(f"   - User ID: {self.test_user_id}")
+        logger.info(f"   - Accounts: {len(self.test_accounts)}")
+        logger.info(f"   - Transactions: {len(self.test_transactions)}")
+        logger.info(f"\n🏆 Production Readiness Assessment:")
         if passed_tests / total_tests >= 0.95:
-            print("   ✅ EXCELLENT - Ready for production deployment")
+            logger.info("   ✅ EXCELLENT - Ready for production deployment")
         elif passed_tests / total_tests >= 0.90:
-            print("   ✅ GOOD - Ready for production with minor fixes")
+            logger.info("   ✅ GOOD - Ready for production with minor fixes")
         elif passed_tests / total_tests >= 0.80:
-            print("   ⚠️ FAIR - Needs improvements before production")
+            logger.info("   ⚠️ FAIR - Needs improvements before production")
         else:
-            print("   ❌ POOR - Significant issues need resolution")
-
+            logger.info("   ❌ POOR - Significant issues need resolution")
         return failed_tests == 0
 
 
 def main():
-    print("Flowlet Production Test Suite")
-    print("Enterprise Financial Backend Validation")
-    print("Testing comprehensive functionality and security")
-
+    logger.info("Flowlet Production Test Suite")
+    logger.info("Enterprise Financial Backend Validation")
+    logger.info("Testing comprehensive functionality and security")
     # Create and run test suite
     tester = FlowletProductionTester()
     success = tester.run_comprehensive_test_suite()
 
     if success:
-        print("\n🎉 All tests passed! Production backend is ready for deployment.")
+        logger.info(
+            "\n🎉 All tests passed! Production backend is ready for deployment."
+        )
         sys.exit(0)
     else:
-        print("\n⚠️ Some tests failed. Please review and fix issues before production.")
+        logger.info(
+            "\n⚠️ Some tests failed. Please review and fix issues before production."
+        )
         sys.exit(1)
 
 

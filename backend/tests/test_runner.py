@@ -1,6 +1,10 @@
 import os
 import sys
 
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+
 # Simple test runner that doesn't require database
 
 # Add the src directory to Python path
@@ -9,16 +13,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 def test_security_modules():
     """Test security modules without database"""
-    print("Testing security modules...")
-
+    logger.info("Testing security modules...")
     # Test password security
     from src.security.password_security import PasswordSecurity
 
     password = "TestPassword123!"
     hashed = PasswordSecurity.hash_password(password)
     assert PasswordSecurity.verify_password(password, hashed)
-    print("✓ Password security tests passed")
-
+    logger.info("✓ Password security tests passed")
     # Test input validation
     from decimal import Decimal
 
@@ -40,8 +42,7 @@ def test_security_modules():
     except ValidationError:
         pass
 
-    print("✓ Input validation tests passed")
-
+    logger.info("✓ Input validation tests passed")
     # Test encryption (basic test without Redis)
     from src.security.encryption_manager import EncryptionManager
 
@@ -52,13 +53,12 @@ def test_security_modules():
 
     assert encrypted_data != original_data
     assert decrypted_data == original_data
-    print("✓ Encryption tests passed")
+    logger.info("✓ Encryption tests passed")
 
 
 def test_financial_calculations():
     """Test financial calculation accuracy"""
-    print("Testing financial calculations...")
-
+    logger.info("Testing financial calculations...")
     from decimal import ROUND_HALF_UP, Decimal
 
     # Test precise decimal calculations
@@ -72,12 +72,12 @@ def test_financial_calculations():
     rounded = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     assert rounded == Decimal("123.46")
 
-    print("✓ Financial calculation tests passed")
+    logger.info("✓ Financial calculation tests passed")
 
 
 def test_compliance_features():
     """Test compliance features"""
-    print("Testing compliance features...")
+    logger.info("Testing compliance features...")
 
     # Test Luhn algorithm for card validation
     def luhn_check(card_num):
@@ -100,29 +100,27 @@ def test_compliance_features():
     invalid_card = "1234567890123456"
     assert not luhn_check(invalid_card)
 
-    print("✓ Compliance feature tests passed")
+    logger.info("✓ Compliance feature tests passed")
 
 
 def run_all_tests():
     """Run all tests"""
-    print("Running Enhanced Flowlet Backend Tests")
-    print("=" * 50)
-
+    logger.info("Running Enhanced Flowlet Backend Tests")
+    logger.info("=" * 50)
     try:
         test_security_modules()
         test_financial_calculations()
         test_compliance_features()
 
-        print("=" * 50)
-        print("✅ All tests passed successfully!")
-        print("✅ Financial industry standards implemented correctly")
-        print("✅ Security features working as expected")
-        print("✅ Compliance features validated")
-
+        logger.info("=" * 50)
+        logger.info("✅ All tests passed successfully!")
+        logger.info("✅ Financial industry standards implemented correctly")
+        logger.info("✅ Security features working as expected")
+        logger.info("✅ Compliance features validated")
         return True
 
     except Exception as e:
-        print(f"❌ Test failed: {str(e)}")
+        logger.info(f"❌ Test failed: {str(e)}")
         return False
 
 

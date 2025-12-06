@@ -2,6 +2,10 @@ import sys
 
 import requests
 
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+
 #!/usr/bin/env python3
 
 
@@ -14,10 +18,10 @@ def test_health():
     """Test health endpoint"""
     try:
         response = requests.get(f"{BASE_URL}/health", timeout=5)
-        print(f"✓ Health check: {response.status_code} - {response.json()}")
+        logger.info(f"✓ Health check: {response.status_code} - {response.json()}")
         return True
     except Exception as e:
-        print(f"✗ Health check failed: {e}")
+        logger.info(f"✗ Health check failed: {e}")
         return False
 
 
@@ -26,15 +30,13 @@ def test_api_gateway():
     try:
         # Test gateway status
         response = requests.get(f"{API_BASE}/gateway/status", timeout=5)
-        print(f"✓ Gateway status: {response.status_code}")
-
+        logger.info(f"✓ Gateway status: {response.status_code}")
         # Test documentation endpoint
         response = requests.get(f"{API_BASE}/gateway/documentation", timeout=5)
-        print(f"✓ API documentation: {response.status_code}")
-
+        logger.info(f"✓ API documentation: {response.status_code}")
         return True
     except Exception as e:
-        print(f"✗ API Gateway test failed: {e}")
+        logger.info(f"✗ API Gateway test failed: {e}")
         return False
 
 
@@ -57,14 +59,16 @@ def test_kyc_service():
 
         if response.status_code == 201:
             user = response.json()
-            print(f"✓ User created: {user['user_id']}")
+            logger.info(f"✓ User created: {user['user_id']}")
             return user["user_id"]
         else:
-            print(f"✗ User creation failed: {response.status_code} - {response.text}")
+            logger.info(
+                f"✗ User creation failed: {response.status_code} - {response.text}"
+            )
             return None
 
     except Exception as e:
-        print(f"✗ KYC service test failed: {e}")
+        logger.info(f"✗ KYC service test failed: {e}")
         return None
 
 
@@ -80,22 +84,22 @@ def test_wallet_service(user_id):
 
         if response.status_code == 201:
             wallet = response.json()
-            print(f"✓ Wallet created: {wallet['wallet_id']}")
-
+            logger.info(f"✓ Wallet created: {wallet['wallet_id']}")
             # Test wallet balance
             response = requests.get(
                 f"{API_BASE}/wallet/{wallet['wallet_id']}/balance", timeout=5
             )
             if response.status_code == 200:
-                print(f"✓ Wallet balance retrieved: {response.json()['balance']}")
-
+                logger.info(f"✓ Wallet balance retrieved: {response.json()['balance']}")
             return wallet["wallet_id"]
         else:
-            print(f"✗ Wallet creation failed: {response.status_code} - {response.text}")
+            logger.info(
+                f"✗ Wallet creation failed: {response.status_code} - {response.text}"
+            )
             return None
 
     except Exception as e:
-        print(f"✗ Wallet service test failed: {e}")
+        logger.info(f"✗ Wallet service test failed: {e}")
         return None
 
 
@@ -116,14 +120,14 @@ def test_payment_service(wallet_id):
 
         if response.status_code == 201:
             transaction = response.json()
-            print(f"✓ Deposit completed: {transaction['transaction_id']}")
+            logger.info(f"✓ Deposit completed: {transaction['transaction_id']}")
             return transaction["transaction_id"]
         else:
-            print(f"✗ Deposit failed: {response.status_code} - {response.text}")
+            logger.info(f"✗ Deposit failed: {response.status_code} - {response.text}")
             return None
 
     except Exception as e:
-        print(f"✗ Payment service test failed: {e}")
+        logger.info(f"✗ Payment service test failed: {e}")
         return None
 
 
@@ -142,14 +146,18 @@ def test_card_service(wallet_id):
 
         if response.status_code == 201:
             card = response.json()
-            print(f"✓ Card issued: {card['card_id']} (****{card['last_four_digits']})")
+            logger.info(
+                f"✓ Card issued: {card['card_id']} (****{card['last_four_digits']})"
+            )
             return card["card_id"]
         else:
-            print(f"✗ Card issuance failed: {response.status_code} - {response.text}")
+            logger.info(
+                f"✗ Card issuance failed: {response.status_code} - {response.text}"
+            )
             return None
 
     except Exception as e:
-        print(f"✗ Card service test failed: {e}")
+        logger.info(f"✗ Card service test failed: {e}")
         return None
 
 
@@ -165,14 +173,18 @@ def test_ai_service():
 
         if response.status_code == 200:
             result = response.json()
-            print(f"✓ AI Chatbot responded with confidence: {result['confidence']}%")
+            logger.info(
+                f"✓ AI Chatbot responded with confidence: {result['confidence']}%"
+            )
             return True
         else:
-            print(f"✗ AI service test failed: {response.status_code} - {response.text}")
+            logger.info(
+                f"✗ AI service test failed: {response.status_code} - {response.text}"
+            )
             return False
 
     except Exception as e:
-        print(f"✗ AI service test failed: {e}")
+        logger.info(f"✗ AI service test failed: {e}")
         return False
 
 
@@ -192,16 +204,16 @@ def test_security_service():
 
         if response.status_code == 201:
             key_info = response.json()
-            print(f"✓ API Key created: {key_info['key_id']}")
+            logger.info(f"✓ API Key created: {key_info['key_id']}")
             return key_info["key_id"]
         else:
-            print(
+            logger.info(
                 f"✗ Security service test failed: {response.status_code} - {response.text}"
             )
             return None
 
     except Exception as e:
-        print(f"✗ Security service test failed: {e}")
+        logger.info(f"✗ Security service test failed: {e}")
         return None
 
 
@@ -215,45 +227,43 @@ def test_ledger_service():
 
         if response.status_code == 200:
             result = response.json()
-            print(
+            logger.info(
                 f"✓ Trial balance generated with {len(result['trial_balance'])} accounts"
             )
             return True
         else:
-            print(
+            logger.info(
                 f"✗ Ledger service test failed: {response.status_code} - {response.text}"
             )
             return False
 
     except Exception as e:
-        print(f"✗ Ledger service test failed: {e}")
+        logger.info(f"✗ Ledger service test failed: {e}")
         return False
 
 
 def main():
     """Run all tests"""
-    print("🚀 Starting Flowlet Backend API Tests\n")
-
+    logger.info("🚀 Starting Flowlet Backend API Tests\n")
     # Test health endpoint first
     if not test_health():
-        print("❌ Server is not responding. Please start the server first.")
+        logger.info("❌ Server is not responding. Please start the server first.")
         sys.exit(1)
 
-    print("\n📋 Testing Core Services:")
-
+    logger.info("\n📋 Testing Core Services:")
     # Test API Gateway
     test_api_gateway()
 
     # Test KYC service and create a user
     user_id = test_kyc_service()
     if not user_id:
-        print("❌ Cannot proceed without a user. Exiting.")
+        logger.info("❌ Cannot proceed without a user. Exiting.")
         sys.exit(1)
 
     # Test wallet service
     wallet_id = test_wallet_service(user_id)
     if not wallet_id:
-        print("❌ Cannot proceed without a wallet. Exiting.")
+        logger.info("❌ Cannot proceed without a wallet. Exiting.")
         sys.exit(1)
 
     # Test payment service
@@ -271,12 +281,12 @@ def main():
     # Test ledger service
     test_ledger_service()
 
-    print("\n✅ All tests completed! Flowlet Backend is functioning properly.")
-    print("\n📊 Summary:")
-    print("- All core services are operational")
-    print("- Database models are working correctly")
-    print("- API endpoints are responding as expected")
-    print("- Cross-service integrations are functional")
+    logger.info("\n✅ All tests completed! Flowlet Backend is functioning properly.")
+    logger.info("\n📊 Summary:")
+    logger.info("- All core services are operational")
+    logger.info("- Database models are working correctly")
+    logger.info("- API endpoints are responding as expected")
+    logger.info("- Cross-service integrations are functional")
 
 
 if __name__ == "__main__":
