@@ -14,6 +14,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# --- Configuration ---
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$PROJECT_ROOT/backend"
+WEB_FRONTEND_DIR="$PROJECT_ROOT/web-frontend"
+
 # Default values
 ENV="development"
 NAMESPACE="flowlet-dev"
@@ -40,9 +45,9 @@ install_python_deps() {
     echo -e "${BLUE}Installing Python dependencies...${NC}"
     
     # Use the updated requirements file if it exists, otherwise fall back
-    REQ_FILE="backend/requirements_updated.txt"
+    REQ_FILE="$BACKEND_DIR/requirements_updated.txt"
     if [ ! -f "$REQ_FILE" ]; then
-        REQ_FILE="backend/requirements.txt"
+        REQ_FILE="$BACKEND_DIR/requirements.txt"
     fi
 
     if [ -f "$REQ_FILE" ]; then
@@ -63,7 +68,8 @@ install_node_deps() {
     echo -e "${BLUE}Installing Node.js dependencies...${NC}"
 
     # Install web-frontend dependencies
-    if [ -d "web-frontend" ]; then
+    if [ -d "$WEB_FRONTEND_DIR" ]; then
+        cd "$WEB_FRONTEND_DIR"
         cd web-frontend
         if command_exists pnpm; then
             pnpm install
@@ -73,7 +79,7 @@ install_node_deps() {
             echo -e "${RED}Neither pnpm nor npm found. Please install Node.js and npm.${NC}"
             exit 1
         fi
-        cd ..
+        cd "$PROJECT_ROOT"
         echo -e "${GREEN}✓ web-frontend dependencies installed${NC}"
     fi
 }
@@ -82,7 +88,7 @@ install_node_deps() {
 setup_dev_database() {
     echo -e "${BLUE}Setting up development database (SQLite)...${NC}"
 
-    cd backend
+    cd "$BACKEND_DIR"
     mkdir -p data
 
     # Initialize database using Python script
@@ -95,7 +101,7 @@ with app.app_context():
     db.create_all()
     print('Database initialized successfully')
 "
-    cd ..
+    cd "$PROJECT_ROOT"
     echo -e "${GREEN}✓ Development database setup completed${NC}"
 }
 
@@ -104,8 +110,8 @@ setup_dev_env_files() {
     echo -e "${BLUE}Setting up development environment files...${NC}"
 
     # Backend environment file
-    if [ ! -f "backend/.env" ]; then
-        cat > backend/.env << EOF
+    if [ ! -f "$BACKEND_DIR/.env" ]; then
+        cat > "$BACKEND_DIR/.env" << EOF
 # Flowlet Backend Environment Configuration
 FLASK_ENV=development
 FLASK_DEBUG=True
@@ -138,8 +144,8 @@ EOF
     fi
 
     # web-frontend environment file
-    if [ ! -f "web-frontend/.env" ]; then
-        cat > web-frontend/.env << EOF
+    if [ ! -f "$WEB_FRONTEND_DIR/.env" ]; then
+        cat > "$WEB_FRONTEND_DIR/.env" << EOF
 # Flowlet web-frontend Environment Configuration
 VITE_API_BASE_URL=http://localhost:5000
 VITE_APP_NAME=Flowlet
@@ -165,7 +171,7 @@ create_dev_scripts() {
     echo -e "${BLUE}Creating development scripts...${NC}"
 
     # Backend development script
-    cat > backend/dev.sh << 'EOF'
+    cat > "$BACKEND_DIR/dev.sh" << 'EOF'
 #!/usr/bin/env bash
 # Backend Development Server
 
@@ -188,10 +194,10 @@ mkdir -p logs
 # Using main.py which should contain the Flask app run logic
 python3 src/main.py
 EOF
-    chmod +x backend/dev.sh
+    chmod +x "$BACKEND_DIR/dev.sh"
 
     # Combined development start script
-    cat > dev-start.sh << 'EOF'
+    cat > "$PROJECT_ROOT/dev-start.sh" << 'EOF'
 #!/usr/bin/env bash
 # Start both backend and web-frontend development servers
 
@@ -236,7 +242,7 @@ echo -e "==========================================${NC}"
 # Wait for background processes
 wait
 EOF
-    chmod +x dev-start.sh
+    chmod +x "$PROJECT_ROOT/dev-start.sh"
 
     echo -e "${GREEN}✓ Development scripts created${NC}"
 }
@@ -360,6 +366,7 @@ else
 fi
 
 # Clean up the old setup-dev.sh if it exists
-if [ -f "Flowlet/setup-dev.sh" ]; then
-    rm "Flowlet/setup-dev.sh"
-fi
+    # Clean up the old setup-dev.sh if it exists
+    if [ -f "$PROJECT_ROOT/setup-dev.sh" ]; then
+        rm "$PROJECT_ROOT/setup-dev.sh"
+    fi

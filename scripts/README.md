@@ -155,8 +155,4 @@ Contributions to the operational scripts are highly encouraged to enhance the re
 4.  **Document Changes:** Provide clear and concise documentation for any new scripts or modifications to existing ones, explaining their purpose, usage, and any dependencies.
 5.  **Submit Pull Requests:** All contributions should be submitted via pull requests, allowing for peer review and automated checks.
 
-## License
-
-The scripts within this directory are part of the Flowlet project and are released under the [MIT License](https://github.com/abrar2030/Flowlet/blob/main/LICENSE). Please refer to the main `LICENSE` file for full details.
-
 ---

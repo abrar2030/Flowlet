@@ -17,8 +17,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-BACKEND_SRC="Flowlet/backend/src"
-FRONTEND_SRC="Flowlet/frontend/web-frontend/src" # Assumed path from original script
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BACKEND_SRC="$PROJECT_ROOT/backend/src"
+FRONTEND_SRC="$PROJECT_ROOT/web-frontend/src" # Corrected path based on repository structure
 
 # --- Helper Functions ---
 
@@ -44,11 +45,17 @@ install_deps() {
     
     # Python dependencies (using sudo for sandbox compatibility)
     sudo pip install --upgrade pip > /dev/null
-    sudo pip install -q flake8 black isort bandit || log_error "Failed to install Python linting tools."
+    # Check if tools are already installed to avoid unnecessary global installs
+    if ! command_exists flake8; then
+        sudo pip install -q flake8 black isort bandit || log_error "Failed to install Python linting tools."
+    fi
     
     # Node.js dependencies (using npm for global install as in original script)
     if command_exists npm; then
-        npm install -g eslint prettier || log_error "Failed to install JavaScript/TypeScript linting tools."
+        # Check if tools are already installed to avoid unnecessary global installs
+        if ! command_exists eslint; then
+            npm install -g eslint prettier || log_error "Failed to install JavaScript/TypeScript linting tools."
+        fi
     else
         echo -e "${YELLOW}⚠ npm not found. Skipping JavaScript/TypeScript linting tool installation.${NC}"
     fi
