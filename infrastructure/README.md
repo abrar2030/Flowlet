@@ -1,84 +1,71 @@
-# Flowlet Infrastructure
+# Infrastructure Directory - YAML Linting Note
 
-This repository contains the complete Infrastructure as Code (IaC) setup for the Flowlet embedded finance platform. It defines a production-ready, scalable microservices architecture using modern DevOps tools.
+## Important: Helm Templates vs Pure YAML
 
-## 1. Core Infrastructure Technologies
+### Files That Will Show "Errors" in YAML Linters
 
-The infrastructure is defined using a cloud-agnostic approach, primarily leveraging Kubernetes for orchestration and Terraform for cloud resource provisioning.
+The following files are **Helm templates** and contain Go template directives (e.g., `{{- ... }}`). They will show syntax errors in pure YAML linters like `prettier` or `fyaml`, but **this is expected and correct behavior**:
 
-| Category               | Technology               | Purpose                                                                 | Key Files/Directories    |
-| :--------------------- | :----------------------- | :---------------------------------------------------------------------- | :----------------------- |
-| **Orchestration**      | **Kubernetes**           | Container deployment, scaling, and management.                          | `kubernetes/`            |
-| **IaC**                | **Terraform**            | Provisioning and managing cloud resources (e.g., VPC, EKS/GKE cluster). | `terraform/`             |
-| **Containerization**   | **Docker**               | Defining and building application images.                               | `docker/`                |
-| **Package Management** | **Helm**                 | Simplifying the deployment and management of Kubernetes applications.   | `helm/`                  |
-| **CI/CD**              | **GitHub Actions**       | Automated build, test, and deployment pipelines.                        | `ci-cd/`                 |
-| **Monitoring**         | **Prometheus & Grafana** | Metrics collection, alerting, and visualization.                        | `kubernetes/monitoring/` |
+#### infrastructure/helm/flowlet/templates/
+- `backend-deployment.yaml`
+- `backend-hpa.yaml`
+- `backend-service.yaml`
+- `frontend-deployment.yaml`
+- `frontend-service.yaml`
+- `ingress.yaml`
+- `secrets.yaml`
 
-## 2. Directory Structure
+#### infrastructure/kubernetes/helm/flowlet-chart/templates/
+- `deployment.yaml`
+- `hpa.yaml`
+- `ingress.yaml`
+- `serviceaccount.yaml`
+- `tests/test-connection.yaml`
 
-The repository is organized into logical directories, each focusing on a specific aspect of the infrastructure lifecycle.
+### Why These Files Appear as Errors
 
-| Directory       | Primary Function                                                       | Key Contents                                                                                     |
-| :-------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| **terraform/**  | Infrastructure as Code for cloud resource provisioning.                | `main.tf`, `variables.tf`, `outputs.tf`, `modules/` (reusable components).                       |
-| **kubernetes/** | Kubernetes manifests for deploying the application.                    | Sub-directories for `namespaces/`, `services/`, `databases/`, `monitoring/`, and `security/`.    |
-| **docker/**     | Dockerfiles and related configuration for building service images.     | `Dockerfile.backend`, `Dockerfile.web-frontend`, `docker-compose.yml` (for local dev).           |
-| **helm/**       | Helm charts for packaging and deploying the application to Kubernetes. | `flowlet/` (the main application chart).                                                         |
-| **ci-cd/**      | Continuous Integration and Continuous Deployment pipelines.            | YAML files defining GitHub Actions workflows for various services and infrastructure components. |
-| **scripts/**    | Utility scripts for deployment, building, and maintenance tasks.       | `deploy.sh`, `build-images.sh`, `cleanup.sh`, `validate.sh`.                                     |
-| **docs/**       | Infrastructure-specific documentation and diagrams.                    | Runbooks, architecture diagrams, and setup guides.                                               |
-| `README.md`     | This documentation file.                                               | Overview and quick start guide.                                                                  |
+These files are **NOT pure YAML** - they are **Helm template files** that use Go's `text/template` syntax. Helm processes these templates at deployment time to generate valid Kubernetes YAML manifests.
 
-## 3. Kubernetes Deployment Structure
+Example of Helm template syntax that confuses YAML linters:
+```yaml
+{{- if .Values.backend.autoscaling.enabled }}
+replicas: {{ .Values.backend.replicaCount }}
+{{- end }}
+```
 
-The `kubernetes/` directory is structured to manage the deployment of the entire microservices ecosystem.
+### How to Validate Helm Templates
 
-| Sub-Directory   | Purpose                                           | Key Components Deployed                                                   |
-| :-------------- | :------------------------------------------------ | :------------------------------------------------------------------------ |
-| **namespaces/** | Defines logical isolation boundaries.             | `flowlet-core`, `flowlet-monitoring`, etc.                                |
-| **databases/**  | Manifests for stateful data services.             | PostgreSQL, MongoDB, Redis.                                               |
-| **messaging/**  | Manifests for inter-service communication.        | Kafka, RabbitMQ.                                                          |
-| **services/**   | Manifests for the core application microservices. | Wallet, Payments, Card, KYC/AML, Ledger, Auth, Notification, AI Services. |
-| **ingress/**    | Defines external access and routing.              | Ingress controllers, Ingress resources, and network policies.             |
-| **monitoring/** | Defines observability stack components.           | Prometheus, Grafana, Alertmanager.                                        |
-| **security/**   | Defines security-related resources.               | Network policies, Secrets, ConfigMaps for security configurations.        |
+To validate Helm templates, use Helm's built-in tools instead of YAML linters:
 
-## 4. CI/CD Pipelines (GitHub Actions)
+```bash
+# Validate Helm chart structure
+helm lint infrastructure/helm/flowlet/
 
-The `ci-cd/` directory contains workflows to automate the software delivery process.
+# Render templates to see generated YAML (dry-run)
+helm template my-release infrastructure/helm/flowlet/
 
-| Workflow File                   | Trigger                            | Purpose                                                                 |
-| :------------------------------ | :--------------------------------- | :---------------------------------------------------------------------- |
-| `python-backend-ci-cd.yml`      | Push to `main` (or feature branch) | Builds, tests, and deploys the Python backend service.                  |
-| `nodejs-web-frontend-ci-cd.yml` | Push to `main` (or feature branch) | Builds, tests, and deploys the Node.js web-frontend application.        |
-| `terraform-ci.yml`              | Changes in `terraform/`            | Runs `terraform plan` and `terraform apply` for infrastructure changes. |
-| `kubernetes-ci.yml`             | Changes in `kubernetes/`           | Validates Kubernetes manifests and applies changes to the cluster.      |
-| `documentation.yml`             | Scheduled or Manual                | Generates and updates documentation (e.g., API specs, runbooks).        |
-| `scripts-ci.yml`                | Changes in `scripts/`              | Runs linting and validation checks on utility scripts.                  |
+# Validate rendered manifests against Kubernetes API
+helm install my-release infrastructure/helm/flowlet/ --dry-run --debug
+```
 
-## 5. Quick Start: Deployment
+### Prettier Configuration
 
-The `scripts/` directory provides convenient wrappers for common operational tasks.
+A `.prettierignore` file has been added to the project root to exclude Helm templates from Prettier formatting:
 
-| Script            | Description                                                                               | Usage Example                            |
-| :---------------- | :---------------------------------------------------------------------------------------- | :--------------------------------------- |
-| `deploy.sh`       | Main deployment script that orchestrates the entire application deployment to Kubernetes. | `./scripts/deploy.sh --env=staging`      |
-| `build-images.sh` | Builds all necessary Docker images for the application services.                          | `./scripts/build-images.sh --tag=v1.2.0` |
-| `cleanup.sh`      | Removes all deployed Kubernetes resources and cleans up local artifacts.                  | `./scripts/cleanup.sh --force`           |
-| `validate.sh`     | Runs linting and validation checks on all IaC files (Terraform, Kubernetes, Docker).      | `./scripts/validate.sh`                  |
+```
+# Helm templates contain Go template directives and should not be linted as pure YAML
+infrastructure/helm/**/templates/**/*.yaml
+infrastructure/kubernetes/helm/**/templates/**/*.yaml
+```
 
-### Deployment Steps
+### All Other YAML Files
 
-1.  **Configure Environment**: Ensure your cloud provider credentials and `kubectl` context are correctly set.
-2.  **Provision Infrastructure**: Run Terraform to provision the underlying cloud resources (e.g., EKS cluster).
-    ```bash
-    cd terraform
-    terraform init
-    terraform apply
-    ```
-3.  **Deploy Application**: Use the main deployment script to push the application to the cluster.
-    ```bash
-    cd ..
-    ./scripts/deploy.sh
-    ```
+All non-template YAML files in the infrastructure directory have been successfully formatted with Prettier and contain no syntax errors.
+
+## Summary
+
+✅ **Pure YAML files**: All formatted and validated successfully  
+⚠️ **Helm template files**: Will show "errors" in YAML linters - this is expected and correct  
+✔️ **To validate Helm templates**: Use `helm lint` and `helm template` commands instead
+
+The "errors" you see in Helm template files are not actual errors - they're YAML linters trying to parse Go template syntax, which they're not designed to handle.

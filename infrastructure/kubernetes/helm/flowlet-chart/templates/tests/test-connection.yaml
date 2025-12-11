@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -10,6 +11,6 @@ spec:
   containers:
     - name: wget
       image: busybox
-      command: ['wget']
-      args: ['{{ include "flowlet-chart.fullname" . }}:{{ .Values.service.port }}']
+      command: ["wget"]
+      args: ["{{ include "flowlet-chart.fullname" . }}:{{ .Values.service.port }}"]
   restartPolicy: Never
