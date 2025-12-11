@@ -18,72 +18,72 @@ jobs:
   terraform-validate-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.x # Use a more flexible version
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.x # Use a more flexible version
 
-    - name: Terraform Init
-      id: init
-      run: terraform init
-      working-directory: infrastructure/terraform
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: infrastructure/terraform
 
-    - name: Terraform Format
-      id: fmt
-      run: terraform fmt -check
-      working-directory: infrastructure/terraform
-      continue-on-error: true
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        working-directory: infrastructure/terraform
+        continue-on-error: true
 
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate
-      working-directory: infrastructure/terraform
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: infrastructure/terraform
 
-    - name: Run IaC linting (tflint - Placeholder)
-      run: echo "tflint placeholder: Install tflint and run tflint infrastructure/terraform"
-      working-directory: infrastructure/terraform
+      - name: Run IaC linting (tflint - Placeholder)
+        run: echo "tflint placeholder - Install tflint and run tflint infrastructure/terraform"
+        working-directory: infrastructure/terraform
 
-    - name: Run IaC security scan (Checkov - Placeholder)
-      run: echo "Checkov placeholder: pip install checkov && checkov -d ."
-      working-directory: infrastructure/terraform
+      - name: Run IaC security scan (Checkov - Placeholder)
+        run: echo "Checkov placeholder - pip install checkov && checkov -d ."
+        working-directory: infrastructure/terraform
 
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan -no-color
-      working-directory: infrastructure/terraform
-      continue-on-error: true
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        working-directory: infrastructure/terraform
+        continue-on-error: true
 
-    - name: Check Terraform plan results
-      if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
-      run: |
-        echo "Terraform validation failed. Please check the infrastructure code."
-        exit 1
+      - name: Check Terraform plan results
+        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.plan.outcome == 'failure'
+        run: |
+          echo "Terraform validation failed. Please check the infrastructure code."
+          exit 1
 
-    - name: Update Pull Request
-      uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
-      with:
-        script: |
-          const output = `#### Terraform Format and Validate ⚙️
-          ${{ steps.fmt.outcome == 'success' ? '✅' : '❌' }} Format
-          ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }} Validate
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `#### Terraform Format and Validate ⚙️
+            ${{ steps.fmt.outcome == 'success' ? '✅' : '❌' }} Format
+            ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }} Validate
 
-          #### Terraform Plan 📖
-          <details><summary>Show Plan</summary>
+            #### Terraform Plan 📖
+            <details><summary>Show Plan</summary>
 
-          ```terraform
-          ${{ steps.plan.outputs.stdout }}
-          ```
+            ```terraform
+            ${{ steps.plan.outputs.stdout }}
+            ```
 
-          </details>
+            </details>
 
-          *Pushed by: @${{ github.actor }}, Action:
-          `
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
+            *Pushed by: @${{ github.actor }}, Action:
+            `
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

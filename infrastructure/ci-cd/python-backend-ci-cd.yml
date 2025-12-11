@@ -6,13 +6,13 @@ on:
       - main
       - develop
     paths:
-      - 'backend/**'
+      - "backend/**"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'backend/**'
+      - "backend/**"
 
 jobs:
   build-test-scan:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
@@ -69,10 +69,10 @@ jobs:
         run: trivy image --exit-code 1 --severity HIGH,CRITICAL flowlet-backend:$(git rev-parse --short HEAD)
 
       - name: Run Secrets Scanning (TruffleHog - Placeholder)
-        run: echo "TruffleHog scan placeholder: trufflehog filesystem . --json > trufflehog_report.json || true"
+        run: echo "TruffleHog scan placeholder - trufflehog filesystem . --json > trufflehog_report.json or true"
 
       - name: Run OWASP Dependency-Check (Placeholder)
-        run: echo "OWASP Dependency-Check placeholder: Download and run dependency-check.sh"
+        run: echo "OWASP Dependency-Check placeholder - Download and run dependency-check.sh"
 
   # Placeholder for deployment job, will be in a separate workflow or triggered by this one
   # deploy:

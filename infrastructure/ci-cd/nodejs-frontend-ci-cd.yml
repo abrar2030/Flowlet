@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies (web-web-frontend)
         run: npm install
@@ -43,11 +43,11 @@ jobs:
         working-directory: web-frontend/web-web-frontend
 
       - name: Run web-frontend security linting (ESLint with security plugins - Placeholder)
-        run: echo "ESLint security linting placeholder: npm run lint:security"
+        run: echo "ESLint security linting placeholder - npm run lint security"
         working-directory: web-frontend/web-web-frontend
 
       - name: Run web-frontend SCA (Snyk - Placeholder)
-        run: echo "Snyk scan placeholder: snyk test --file=package.json"
+        run: echo "Snyk scan placeholder - snyk test --file=package.json"
         working-directory: web-frontend/web-web-frontend
 
       - name: Build web-frontend assets
