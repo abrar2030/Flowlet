@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,8 +15,6 @@ spec:
       app.kubernetes.io/component: backend
   template:
     metadata:
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         {{- include "flowlet.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: backend
