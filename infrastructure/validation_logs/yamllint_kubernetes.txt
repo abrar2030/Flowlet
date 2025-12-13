@@ -1,0 +1,53 @@
+kubernetes/jobs/pre-post-hooks.yaml
+  22:11     warning  comment not indented like content  (comments-indentation)
+  45:11     warning  comment not indented like content  (comments-indentation)
+
+kubernetes/manifests/ingress.yaml
+  14:121    warning  line too long (185 > 120 characters)  (line-length)
+
+kubernetes/monitoring/prometheus.yaml
+  24:121    warning  line too long (124 > 120 characters)  (line-length)
+  113:121   warning  line too long (140 > 120 characters)  (line-length)
+  131:121   warning  line too long (121 > 120 characters)  (line-length)
+
+kubernetes/secrets/flowlet-secrets.yaml
+  3:2       error    trailing spaces  (trailing-spaces)
+
+kubernetes/secrets/secret.example.yaml
+  2:2       error    trailing spaces  (trailing-spaces)
+  5:2       error    trailing spaces  (trailing-spaces)
+  8:2       error    trailing spaces  (trailing-spaces)
+  23:1      error    trailing spaces  (trailing-spaces)
+  27:1      error    trailing spaces  (trailing-spaces)
+  32:1      error    trailing spaces  (trailing-spaces)
+
+kubernetes/security/image-pull-secrets.yaml
+  7:121     warning  line too long (161 > 120 characters)  (line-length)
+
+kubernetes/security/secure-ingress.yaml
+  14:121    warning  line too long (185 > 120 characters)  (line-length)
+
+kubernetes/security/security-policies.yaml
+  277:11    error    wrong indentation: expected 8 but found 10  (indentation)
+
+kubernetes/services/ai-fraud-detection.yaml
+  24:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/card-service.yaml
+  19:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/kyc-aml-service.yaml
+  24:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/ledger-service.yaml
+  19:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/notification-service.yaml
+  19:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/payments-service.yaml
+  19:121    warning  line too long (179 > 120 characters)  (line-length)
+
+kubernetes/services/wallet-service.yaml
+  19:121    warning  line too long (179 > 120 characters)  (line-length)
+

@@ -4,6 +4,11 @@
 
 set -e
 
+# Create validation logs directory
+mkdir -p ../validation_logs
+LOG_DIR="../validation_logs"
+VALIDATION_LOG="${LOG_DIR}/validation_$(date +%Y%m%d_%H%M%S).log"
+
 echo "🔍 Validating Flowlet Infrastructure"
 
 # Colors for output
@@ -233,6 +238,8 @@ echo "  ✅ Comprehensive documentation"
 
 echo ""
 echo "🎉 Infrastructure validation complete!"
+echo ""
+print_status "INFO" "Validation log saved to: ${VALIDATION_LOG}"
 echo ""
 print_status "INFO" "To deploy the infrastructure:"
 print_status "INFO" "  1. Ensure you have a Kubernetes cluster ready"

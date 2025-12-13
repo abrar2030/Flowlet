@@ -1,0 +1,35 @@
+---
+- name: Docker configuration and setup
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      tags: [docker]
+
+    - name: Configure Docker daemon
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "10m",
+              "max-file": "3"
+            },
+            "storage-driver": "overlay2"
+          }
+        mode: "0644"
+      notify: Restart Docker
+      tags: [docker]
+
+  handlers:
+    - name: Restart Docker
+      ansible.builtin.service:
+        name: docker
+        state: restarted

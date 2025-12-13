@@ -1,0 +1,165 @@
+WARNING  Project directory /.ansible cannot be used for caching as it is not writable.
+WARNING  Using unique temporary directory /tmp/.ansible-0aaa for caching.
+ERROR    Failed to load playbooks/k8s-setup.yml playbook due to failing syntax check.
+WARNING  Listing 50 violation(s) that are fatal
+Read documentation for instructions on how to ignore specific rule violations.
+
+# Rule Violation Summary
+
+  1 syntax-check profile:min tags:core,unskippable
+  3 name profile:min tags:idiom
+ 15 yaml profile:min tags:formatting,yaml
+ 16 yaml profile:min tags:formatting,yaml
+ 15 fqcn profile:min tags:formatting
+
+Failed: 50 failure(s), 0 warning(s) in 3 files processed of 3 encountered.
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/docker-setup.yml:4
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/docker-setup.yml:5
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/docker-setup.yml:6
+
+fqcn[action-core]: Use FQCN for builtin module actions (user).
+playbooks/docker-setup.yml:9:7 Use `ansible.builtin.user` or `ansible.legacy.user` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/docker-setup.yml:12
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/docker-setup.yml:14
+
+fqcn[action-core]: Use FQCN for builtin module actions (copy).
+playbooks/docker-setup.yml:16:7 Use `ansible.builtin.copy` or `ansible.legacy.copy` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/docker-setup.yml:30
+
+fqcn[action-core]: Use FQCN for builtin module actions (service).
+playbooks/docker-setup.yml:33:7 Use `ansible.builtin.service` or `ansible.legacy.service` instead.
+
+syntax-check[unknown-module]: couldn't resolve module/action 'modprobe'. This often indicates a misspelling, missing collection, or incorrect module path.
+playbooks/k8s-setup.yml:19:7
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/monitoring-setup.yml:4
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/monitoring-setup.yml:5
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/monitoring-setup.yml:6
+
+fqcn[action-core]: Use FQCN for builtin module actions (file).
+playbooks/monitoring-setup.yml:9:7 Use `ansible.builtin.file` or `ansible.legacy.file` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/monitoring-setup.yml:14
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+playbooks/monitoring-setup.yml:16:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/monitoring-setup.yml:21
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/monitoring-setup.yml:24
+
+fqcn[action-core]: Use FQCN for builtin module actions (service).
+playbooks/monitoring-setup.yml:26:7 Use `ansible.builtin.service` or `ansible.legacy.service` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/monitoring-setup.yml:29
+
+yaml[trailing-spaces]: Trailing spaces
+playbooks/monitoring-setup.yml:31
+
+fqcn[action-core]: Use FQCN for builtin module actions (service).
+playbooks/monitoring-setup.yml:33:7 Use `ansible.builtin.service` or `ansible.legacy.service` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+playbooks/monitoring-setup.yml:36
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:5
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:6
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:7
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+site.yml:10:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:11
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:15
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+site.yml:17:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:28
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+site.yml:30:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:32
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:39
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:40
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:41
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+site.yml:44:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:54
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt_key).
+site.yml:56:7 Use `ansible.builtin.apt_key` or `ansible.legacy.apt_key` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:61
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt_repository).
+site.yml:63:7 Use `ansible.builtin.apt_repository` or `ansible.legacy.apt_repository` instead.
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:68
+
+fqcn[action-core]: Use FQCN for builtin module actions (apt).
+site.yml:70:7 Use `ansible.builtin.apt` or `ansible.legacy.apt` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:76
+
+yaml[trailing-spaces]: Trailing spaces
+site.yml:79
+
+fqcn[action-core]: Use FQCN for builtin module actions (service).
+site.yml:81:7 Use `ansible.builtin.service` or `ansible.legacy.service` instead.
+
+yaml[truthy]: Truthy value should be one of [false, true]
+site.yml:84
+
+name[play]: All plays should be named.
+site.yml:88:3
+
+name[play]: All plays should be named.
+site.yml:91:3
+
+name[play]: All plays should be named.
+site.yml:94:3
+

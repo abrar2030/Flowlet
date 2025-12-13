@@ -1,0 +1,74 @@
+---
+- name: Kubernetes cluster setup
+  hosts: k8s
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Disable swap
+      ansible.builtin.shell: swapoff -a
+      tags: [kubernetes]
+
+    - name: Remove swap from fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: ".*swap.*"
+        state: absent
+      tags: [kubernetes]
+
+    - name: Load kernel modules
+      ansible.builtin.modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+      tags: [kubernetes]
+
+    - name: Configure sysctl for Kubernetes
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: true
+      loop:
+        - { name: "net.bridge.bridge-nf-call-iptables", value: "1" }
+        - { name: "net.bridge.bridge-nf-call-ip6tables", value: "1" }
+        - { name: "net.ipv4.ip_forward", value: "1" }
+      tags: [kubernetes]
+
+    - name: Add Kubernetes apt key
+      ansible.builtin.apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+      when: ansible_os_family == "Debian"
+      tags: [kubernetes]
+
+    - name: Add Kubernetes repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+      when: ansible_os_family == "Debian"
+      tags: [kubernetes]
+
+    - name: Install Kubernetes packages
+      ansible.builtin.apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+      tags: [kubernetes]
+
+    - name: Hold Kubernetes packages
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+      when: ansible_os_family == "Debian"
+      tags: [kubernetes]

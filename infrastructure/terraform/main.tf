@@ -19,13 +19,9 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = var.terraform_state_bucket
-    key            = "flowlet/terraform.tfstate"
-    region         = var.aws_region
-    encrypt        = true
-    dynamodb_table = var.terraform_lock_table
-  }
+  # Backend configuration moved to backend.tf
+  # By default, uses local backend for development
+  # See backend.tf for remote backend (S3) configuration
 }
 
 provider "aws" {
@@ -40,17 +36,37 @@ provider "aws" {
   }
 }
 
+# Kubernetes provider configuration
+# Uncomment when using EKS module or configure for existing cluster
+/*
 provider "kubernetes" {
   host                   = module.kubernetes.cluster_endpoint
   cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
   token                  = module.kubernetes.cluster_token
 }
+*/
 
+# Alternative: Configure for existing cluster using kubeconfig
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+
+# Helm provider configuration
+# Uncomment when using EKS module or configure for existing cluster
+/*
 provider "helm" {
   kubernetes {
     host                   = module.kubernetes.cluster_endpoint
     cluster_ca_certificate = base64decode(module.kubernetes.cluster_ca_certificate)
     token                  = module.kubernetes.cluster_token
+  }
+}
+*/
+
+# Alternative: Configure for existing cluster using kubeconfig
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
   }
 }
 
@@ -131,6 +147,11 @@ module "database" {
 }
 
 # Kubernetes Module
+# NOTE: kubernetes module not yet implemented
+# For EKS deployment, uncomment the module below after creating the module
+# or use eksctl/kubectl to deploy to an existing cluster
+
+/*
 module "kubernetes" {
   source = "./modules/kubernetes"
 
@@ -144,12 +165,13 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  enable_irsa                    = var.enable_irsa
-  enable_cluster_autoscaler      = var.enable_cluster_autoscaler
+  enable_irsa                         = var.enable_irsa
+  enable_cluster_autoscaler           = var.enable_cluster_autoscaler
   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
 
   tags = local.common_tags
 }
+*/
 
 # Random password for database
 resource "random_password" "db_password" {

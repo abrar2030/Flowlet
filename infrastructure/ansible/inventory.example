@@ -1,0 +1,36 @@
+# Ansible Inventory Example
+# Copy this file to 'inventory' and update with your actual hosts
+# cp inventory.example inventory
+
+[all:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_python_interpreter=/usr/bin/python3
+
+[k8s_master]
+# Kubernetes master nodes
+# master-1 ansible_host=192.168.1.10
+# master-2 ansible_host=192.168.1.11
+
+[k8s_worker]
+# Kubernetes worker nodes
+# worker-1 ansible_host=192.168.1.20
+# worker-2 ansible_host=192.168.1.21
+# worker-3 ansible_host=192.168.1.22
+
+[database]
+# Database servers
+# db-1 ansible_host=192.168.1.30
+
+[monitoring]
+# Monitoring servers
+# monitoring-1 ansible_host=192.168.1.40
+
+[k8s:children]
+k8s_master
+k8s_worker
+
+[k8s:vars]
+k8s_version=1.28.0
+container_runtime=containerd
+pod_network_cidr=10.244.0.0/16

@@ -21,13 +21,15 @@ variable "aws_region" {
 }
 
 variable "terraform_state_bucket" {
-  description = "S3 bucket for Terraform state"
+  description = "S3 bucket for Terraform state (only required for remote backend)"
   type        = string
+  default     = ""
 }
 
 variable "terraform_lock_table" {
-  description = "DynamoDB table for Terraform state locking"
+  description = "DynamoDB table for Terraform state locking (only required for remote backend)"
   type        = string
+  default     = ""
 }
 
 # Networking Configuration

@@ -1,0 +1,23 @@
+---
+# Variables for all hosts
+ansible_user: ubuntu
+ansible_become: yes
+ansible_become_method: sudo
+
+# Common packages
+common_packages:
+  - curl
+  - wget
+  - git
+  - vim
+  - htop
+  - net-tools
+  - jq
+  - unzip
+
+# NTP configuration
+ntp_enabled: true
+ntp_timezone: UTC
+
+# Firewall
+firewall_enabled: false # Managed by cloud provider security groups
