@@ -791,150 +791,148 @@ export function AuditTrail({
                 }),
                 _jsx("div", {
                   className: "grid gap-2",
-                  children: filteredEvents
-                    .slice(0, 100)
-                    .map((event) =>
-                      _jsx(
-                        Card,
-                        {
-                          className: "hover:shadow-md transition-shadow",
-                          children: _jsx(CardContent, {
-                            className: "p-4",
-                            children: _jsxs("div", {
-                              className: "flex items-start justify-between",
-                              children: [
-                                _jsxs("div", {
-                                  className: "flex items-start space-x-3",
-                                  children: [
-                                    getEventTypeIcon(event.eventType),
-                                    _jsxs("div", {
-                                      className: "flex-1 min-w-0",
-                                      children: [
-                                        _jsxs("div", {
-                                          className:
-                                            "flex items-center space-x-2 mb-1",
-                                          children: [
-                                            _jsx("h4", {
-                                              className: "font-medium truncate",
-                                              children: event.action,
-                                            }),
+                  children: filteredEvents.slice(0, 100).map((event) =>
+                    _jsx(
+                      Card,
+                      {
+                        className: "hover:shadow-md transition-shadow",
+                        children: _jsx(CardContent, {
+                          className: "p-4",
+                          children: _jsxs("div", {
+                            className: "flex items-start justify-between",
+                            children: [
+                              _jsxs("div", {
+                                className: "flex items-start space-x-3",
+                                children: [
+                                  getEventTypeIcon(event.eventType),
+                                  _jsxs("div", {
+                                    className: "flex-1 min-w-0",
+                                    children: [
+                                      _jsxs("div", {
+                                        className:
+                                          "flex items-center space-x-2 mb-1",
+                                        children: [
+                                          _jsx("h4", {
+                                            className: "font-medium truncate",
+                                            children: event.action,
+                                          }),
+                                          _jsx(Badge, {
+                                            className: getOutcomeColor(
+                                              event.outcome,
+                                            ),
+                                            children: event.outcome,
+                                          }),
+                                          _jsx(Badge, {
+                                            className: getRiskLevelColor(
+                                              event.riskLevel,
+                                            ),
+                                            children: event.riskLevel,
+                                          }),
+                                          event.complianceRelevant &&
                                             _jsx(Badge, {
-                                              className: getOutcomeColor(
-                                                event.outcome,
-                                              ),
-                                              children: event.outcome,
+                                              className:
+                                                "bg-purple-100 text-purple-600",
+                                              children: "Compliance",
                                             }),
-                                            _jsx(Badge, {
-                                              className: getRiskLevelColor(
-                                                event.riskLevel,
-                                              ),
-                                              children: event.riskLevel,
-                                            }),
-                                            event.complianceRelevant &&
-                                              _jsx(Badge, {
-                                                className:
-                                                  "bg-purple-100 text-purple-600",
-                                                children: "Compliance",
+                                        ],
+                                      }),
+                                      _jsxs("div", {
+                                        className:
+                                          "flex items-center space-x-4 text-sm text-gray-600 mb-1",
+                                        children: [
+                                          _jsxs("span", {
+                                            className: "flex items-center",
+                                            children: [
+                                              _jsx(User, {
+                                                className: "w-3 h-3 mr-1",
                                               }),
-                                          ],
-                                        }),
-                                        _jsxs("div", {
-                                          className:
-                                            "flex items-center space-x-4 text-sm text-gray-600 mb-1",
-                                          children: [
+                                              event.userName,
+                                            ],
+                                          }),
+                                          _jsxs("span", {
+                                            className: "flex items-center",
+                                            children: [
+                                              _jsx(Database, {
+                                                className: "w-3 h-3 mr-1",
+                                              }),
+                                              event.resource,
+                                            ],
+                                          }),
+                                          _jsxs("span", {
+                                            className: "flex items-center",
+                                            children: [
+                                              _jsx(Globe, {
+                                                className: "w-3 h-3 mr-1",
+                                              }),
+                                              event.sourceIp,
+                                            ],
+                                          }),
+                                          event.deviceInfo &&
                                             _jsxs("span", {
                                               className: "flex items-center",
                                               children: [
-                                                _jsx(User, {
-                                                  className: "w-3 h-3 mr-1",
-                                                }),
-                                                event.userName,
-                                              ],
-                                            }),
-                                            _jsxs("span", {
-                                              className: "flex items-center",
-                                              children: [
-                                                _jsx(Database, {
-                                                  className: "w-3 h-3 mr-1",
-                                                }),
-                                                event.resource,
-                                              ],
-                                            }),
-                                            _jsxs("span", {
-                                              className: "flex items-center",
-                                              children: [
-                                                _jsx(Globe, {
-                                                  className: "w-3 h-3 mr-1",
-                                                }),
-                                                event.sourceIp,
-                                              ],
-                                            }),
-                                            event.deviceInfo &&
-                                              _jsxs("span", {
-                                                className: "flex items-center",
-                                                children: [
-                                                  getDeviceIcon(
+                                                getDeviceIcon(
+                                                  event.deviceInfo.type,
+                                                ),
+                                                _jsx("span", {
+                                                  className: "ml-1",
+                                                  children:
                                                     event.deviceInfo.type,
-                                                  ),
-                                                  _jsx("span", {
-                                                    className: "ml-1",
-                                                    children:
-                                                      event.deviceInfo.type,
-                                                  }),
-                                                ],
-                                              }),
-                                          ],
-                                        }),
-                                        _jsxs("div", {
-                                          className:
-                                            "flex items-center space-x-2 text-xs text-gray-500",
-                                          children: [
-                                            _jsx(Clock, {
-                                              className: "w-3 h-3",
+                                                }),
+                                              ],
                                             }),
-                                            _jsx("span", {
-                                              children: new Date(
-                                                event.timestamp,
-                                              ).toLocaleString(),
+                                        ],
+                                      }),
+                                      _jsxs("div", {
+                                        className:
+                                          "flex items-center space-x-2 text-xs text-gray-500",
+                                        children: [
+                                          _jsx(Clock, {
+                                            className: "w-3 h-3",
+                                          }),
+                                          _jsx("span", {
+                                            children: new Date(
+                                              event.timestamp,
+                                            ).toLocaleString(),
+                                          }),
+                                          event.location &&
+                                            _jsxs(_Fragment, {
+                                              children: [
+                                                _jsx("span", {
+                                                  children: "\u2022",
+                                                }),
+                                                _jsxs("span", {
+                                                  children: [
+                                                    event.location.city,
+                                                    ",",
+                                                    " ",
+                                                    event.location.country,
+                                                  ],
+                                                }),
+                                              ],
                                             }),
-                                            event.location &&
-                                              _jsxs(_Fragment, {
-                                                children: [
-                                                  _jsx("span", {
-                                                    children: "\u2022",
-                                                  }),
-                                                  _jsxs("span", {
-                                                    children: [
-                                                      event.location.city,
-                                                      ",",
-                                                      " ",
-                                                      event.location.country,
-                                                    ],
-                                                  }),
-                                                ],
-                                              }),
-                                          ],
-                                        }),
-                                      ],
-                                    }),
-                                  ],
-                                }),
-                                _jsxs(Button, {
-                                  onClick: () => handleEventDetails(event.id),
-                                  size: "sm",
-                                  variant: "outline",
-                                  children: [
-                                    _jsx(Eye, { className: "w-3 h-3 mr-1" }),
-                                    "Details",
-                                  ],
-                                }),
-                              ],
-                            }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                              _jsxs(Button, {
+                                onClick: () => handleEventDetails(event.id),
+                                size: "sm",
+                                variant: "outline",
+                                children: [
+                                  _jsx(Eye, { className: "w-3 h-3 mr-1" }),
+                                  "Details",
+                                ],
+                              }),
+                            ],
                           }),
-                        },
-                        event.id,
-                      ),
+                        }),
+                      },
+                      event.id,
                     ),
+                  ),
                 }),
                 filteredEvents.length === 0 &&
                   _jsx(Card, {

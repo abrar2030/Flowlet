@@ -1575,113 +1575,110 @@ export function PerformanceMonitor({
                     _jsx(CardContent, {
                       children: _jsx("div", {
                         className: "space-y-3",
-                        children: userExperience
-                          .slice(0, 10)
-                          .map((ux) =>
-                            _jsxs(
-                              "div",
-                              {
-                                className:
-                                  "flex items-center justify-between p-3 bg-gray-50 rounded",
-                                children: [
-                                  _jsxs("div", {
-                                    className: "flex items-center space-x-3",
-                                    children: [
-                                      getDeviceIcon(ux.device.type),
-                                      _jsxs("div", {
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium text-sm",
-                                            children: ux.page,
-                                          }),
-                                          _jsxs("p", {
-                                            className: "text-xs text-gray-600",
-                                            children: [
-                                              ux.device.browser,
-                                              " on ",
-                                              ux.device.os,
-                                              " \u2022",
-                                              " ",
-                                              ux.location.city,
-                                              ", ",
-                                              ux.location.country,
-                                            ],
-                                          }),
-                                        ],
-                                      }),
-                                    ],
-                                  }),
-                                  _jsxs("div", {
-                                    className:
-                                      "flex items-center space-x-4 text-xs",
-                                    children: [
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "Load Time",
-                                          }),
-                                          _jsx("p", {
-                                            className: "text-gray-600",
-                                            children: formatDuration(
-                                              ux.metrics.loadTime,
+                        children: userExperience.slice(0, 10).map((ux) =>
+                          _jsxs(
+                            "div",
+                            {
+                              className:
+                                "flex items-center justify-between p-3 bg-gray-50 rounded",
+                              children: [
+                                _jsxs("div", {
+                                  className: "flex items-center space-x-3",
+                                  children: [
+                                    getDeviceIcon(ux.device.type),
+                                    _jsxs("div", {
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium text-sm",
+                                          children: ux.page,
+                                        }),
+                                        _jsxs("p", {
+                                          className: "text-xs text-gray-600",
+                                          children: [
+                                            ux.device.browser,
+                                            " on ",
+                                            ux.device.os,
+                                            " \u2022",
+                                            " ",
+                                            ux.location.city,
+                                            ", ",
+                                            ux.location.country,
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                                _jsxs("div", {
+                                  className:
+                                    "flex items-center space-x-4 text-xs",
+                                  children: [
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "Load Time",
+                                        }),
+                                        _jsx("p", {
+                                          className: "text-gray-600",
+                                          children: formatDuration(
+                                            ux.metrics.loadTime,
+                                          ),
+                                        }),
+                                      ],
+                                    }),
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "FCP",
+                                        }),
+                                        _jsx("p", {
+                                          className: "text-gray-600",
+                                          children: formatDuration(
+                                            ux.metrics.firstContentfulPaint,
+                                          ),
+                                        }),
+                                      ],
+                                    }),
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "CLS",
+                                        }),
+                                        _jsx("p", {
+                                          className: "text-gray-600",
+                                          children:
+                                            ux.metrics.cumulativeLayoutShift.toFixed(
+                                              3,
                                             ),
-                                          }),
-                                        ],
-                                      }),
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "FCP",
-                                          }),
-                                          _jsx("p", {
-                                            className: "text-gray-600",
-                                            children: formatDuration(
-                                              ux.metrics.firstContentfulPaint,
-                                            ),
-                                          }),
-                                        ],
-                                      }),
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "CLS",
-                                          }),
-                                          _jsx("p", {
-                                            className: "text-gray-600",
-                                            children:
-                                              ux.metrics.cumulativeLayoutShift.toFixed(
-                                                3,
-                                              ),
-                                          }),
-                                        ],
-                                      }),
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "Network",
-                                          }),
-                                          _jsx("p", {
-                                            className:
-                                              "text-gray-600 uppercase",
-                                            children: ux.network.type,
-                                          }),
-                                        ],
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              },
-                              ux.id,
-                            ),
+                                        }),
+                                      ],
+                                    }),
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "Network",
+                                        }),
+                                        _jsx("p", {
+                                          className: "text-gray-600 uppercase",
+                                          children: ux.network.type,
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            },
+                            ux.id,
                           ),
+                        ),
                       }),
                     }),
                   ],
@@ -1835,109 +1832,106 @@ export function PerformanceMonitor({
                     _jsx(CardContent, {
                       children: _jsx("div", {
                         className: "space-y-3",
-                        children: apiPerformance
-                          .slice(0, 10)
-                          .map((api) =>
-                            _jsxs(
-                              "div",
-                              {
-                                className:
-                                  "flex items-center justify-between p-3 bg-gray-50 rounded",
-                                children: [
-                                  _jsxs("div", {
-                                    className: "flex items-center space-x-3",
-                                    children: [
-                                      _jsx(Badge, {
-                                        className:
-                                          api.statusCode >= 400
-                                            ? "bg-red-100 text-red-600"
-                                            : "bg-green-100 text-green-600",
-                                        children: api.method,
-                                      }),
-                                      _jsxs("div", {
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium text-sm",
-                                            children: api.endpoint,
-                                          }),
-                                          _jsxs("p", {
-                                            className: "text-xs text-gray-600",
-                                            children: [
-                                              api.ipAddress,
-                                              " \u2022 ",
-                                              api.region,
-                                              " \u2022",
-                                              " ",
-                                              new Date(
-                                                api.timestamp,
-                                              ).toLocaleTimeString(),
-                                            ],
-                                          }),
-                                        ],
-                                      }),
-                                    ],
-                                  }),
-                                  _jsxs("div", {
-                                    className:
-                                      "flex items-center space-x-4 text-xs",
-                                    children: [
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "Status",
-                                          }),
-                                          _jsx(Badge, {
-                                            className:
-                                              api.statusCode >= 400
-                                                ? "bg-red-100 text-red-600"
-                                                : "bg-green-100 text-green-600",
-                                            children: api.statusCode,
-                                          }),
-                                        ],
-                                      }),
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "Response Time",
-                                          }),
-                                          _jsxs("p", {
-                                            className: "text-gray-600",
-                                            children: [api.responseTime, "ms"],
-                                          }),
-                                        ],
-                                      }),
-                                      _jsxs("div", {
-                                        className: "text-center",
-                                        children: [
-                                          _jsx("p", {
-                                            className: "font-medium",
-                                            children: "Size",
-                                          }),
-                                          _jsx("p", {
-                                            className: "text-gray-600",
-                                            children: formatBytes(
-                                              api.responseSize,
-                                            ),
-                                          }),
-                                        ],
-                                      }),
-                                      api.cached &&
+                        children: apiPerformance.slice(0, 10).map((api) =>
+                          _jsxs(
+                            "div",
+                            {
+                              className:
+                                "flex items-center justify-between p-3 bg-gray-50 rounded",
+                              children: [
+                                _jsxs("div", {
+                                  className: "flex items-center space-x-3",
+                                  children: [
+                                    _jsx(Badge, {
+                                      className:
+                                        api.statusCode >= 400
+                                          ? "bg-red-100 text-red-600"
+                                          : "bg-green-100 text-green-600",
+                                      children: api.method,
+                                    }),
+                                    _jsxs("div", {
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium text-sm",
+                                          children: api.endpoint,
+                                        }),
+                                        _jsxs("p", {
+                                          className: "text-xs text-gray-600",
+                                          children: [
+                                            api.ipAddress,
+                                            " \u2022 ",
+                                            api.region,
+                                            " \u2022",
+                                            " ",
+                                            new Date(
+                                              api.timestamp,
+                                            ).toLocaleTimeString(),
+                                          ],
+                                        }),
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                                _jsxs("div", {
+                                  className:
+                                    "flex items-center space-x-4 text-xs",
+                                  children: [
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "Status",
+                                        }),
                                         _jsx(Badge, {
                                           className:
-                                            "bg-blue-100 text-blue-600",
-                                          children: "Cached",
+                                            api.statusCode >= 400
+                                              ? "bg-red-100 text-red-600"
+                                              : "bg-green-100 text-green-600",
+                                          children: api.statusCode,
                                         }),
-                                    ],
-                                  }),
-                                ],
-                              },
-                              api.id,
-                            ),
+                                      ],
+                                    }),
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "Response Time",
+                                        }),
+                                        _jsxs("p", {
+                                          className: "text-gray-600",
+                                          children: [api.responseTime, "ms"],
+                                        }),
+                                      ],
+                                    }),
+                                    _jsxs("div", {
+                                      className: "text-center",
+                                      children: [
+                                        _jsx("p", {
+                                          className: "font-medium",
+                                          children: "Size",
+                                        }),
+                                        _jsx("p", {
+                                          className: "text-gray-600",
+                                          children: formatBytes(
+                                            api.responseSize,
+                                          ),
+                                        }),
+                                      ],
+                                    }),
+                                    api.cached &&
+                                      _jsx(Badge, {
+                                        className: "bg-blue-100 text-blue-600",
+                                        children: "Cached",
+                                      }),
+                                  ],
+                                }),
+                              ],
+                            },
+                            api.id,
                           ),
+                        ),
                       }),
                     }),
                   ],

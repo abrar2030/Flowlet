@@ -511,19 +511,17 @@ const WorkflowTemplates = ({ onUseTemplate }) => {
                           _jsxs("div", {
                             className: "flex flex-wrap gap-1",
                             children: [
-                              template.tags
-                                .slice(0, 3)
-                                .map((tag) =>
-                                  _jsx(
-                                    Badge,
-                                    {
-                                      variant: "secondary",
-                                      className: "text-xs",
-                                      children: tag,
-                                    },
-                                    tag,
-                                  ),
+                              template.tags.slice(0, 3).map((tag) =>
+                                _jsx(
+                                  Badge,
+                                  {
+                                    variant: "secondary",
+                                    className: "text-xs",
+                                    children: tag,
+                                  },
+                                  tag,
                                 ),
+                              ),
                               template.tags.length > 3 &&
                                 _jsxs(Badge, {
                                   variant: "secondary",
