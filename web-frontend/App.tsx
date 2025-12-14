@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,34 +19,37 @@ import LoginScreen from "@/components/auth/LoginScreen";
 import RegisterScreen from "@/components/auth/RegisterScreen";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
-// Page Components - Organized by feature
+// Page Components - Dashboard & Wallet
 import Dashboard from "@/components/wallet/Dashboard";
 import WalletScreen from "@/components/pages/wallet/WalletScreen";
 import TransactionHistory from "@/components/pages/transactions/TransactionHistory";
 import SendMoney from "@/components/pages/transactions/SendMoney";
 import ReceiveMoney from "@/components/pages/transactions/ReceiveMoney";
-import CardsScreen from "@/components/pages/cards/CardsScreen";
 
-// Placeholder imports for components not yet refactored - Removed to fix compilation error.
-// The components below are stubbed out to allow compilation.
-const CardDetails = () => <div>Card Details (Stub)</div>;
-const IssueCard = () => <div>Issue Card (Stub)</div>;
-const AnalyticsScreen = () => <div>Analytics Screen (Stub)</div>;
-const ChatbotScreen = () => <div>Chatbot Screen (Stub)</div>;
-const FraudAlerts = () => <div>Fraud Alerts (Stub)</div>;
-const AIFraudDetectionScreen = () => (
-  <div>AI Fraud Detection Screen (Stub)</div>
-);
-const SecurityScreen = () => <div>Security Screen (Stub)</div>;
-const SettingsScreen = () => <div>Settings Screen (Stub)</div>;
-const EnhancedSecurityScreen = () => <div>Enhanced Security Screen (Stub)</div>;
-const AdvancedBudgetingScreen = () => (
-  <div>Advanced Budgeting Screen (Stub)</div>
-);
-const HomePage = () => <div>Home Page (Stub)</div>;
-const PaymentsPage = () => <div>Payments Page (Stub)</div>;
-const CompliancePage = () => <div>Compliance Page (Stub)</div>;
-const DeveloperPortalPage = () => <div>Developer Portal Page (Stub)</div>;
+// Card Components
+import CardsScreen from "@/components/pages/cards/CardsScreen";
+import CardDetails from "@/components/pages/cards/CardDetails";
+import IssueCard from "@/components/pages/cards/IssueCard";
+
+// Analytics & AI
+import AnalyticsScreen from "@/components/pages/analytics/AnalyticsScreen";
+import ChatbotScreen from "@/components/pages/ai/ChatbotScreen";
+import FraudAlerts from "@/components/pages/ai/FraudAlerts";
+import AIFraudDetectionScreen from "@/components/pages/ai/AIFraudDetectionScreen";
+
+// Security & Settings
+import SecurityScreen from "@/components/pages/security/SecurityScreen";
+import EnhancedSecurityScreen from "@/components/pages/security/EnhancedSecurityScreen";
+import SettingsScreen from "@/components/pages/settings/SettingsScreen";
+
+// Budgeting
+import AdvancedBudgetingScreen from "@/components/pages/budgeting/AdvancedBudgetingScreen";
+
+// Public Pages
+import HomePage from "@/components/pages/HomePage";
+import PaymentsPage from "@/components/pages/PaymentsPage";
+import CompliancePage from "@/components/pages/CompliancePage";
+import DeveloperPortalPage from "@/components/pages/DeveloperPortalPage";
 
 // Route Guards
 import ProtectedRoute from "@/components/auth/ProtectedRoute";

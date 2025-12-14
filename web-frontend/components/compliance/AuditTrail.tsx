@@ -36,6 +36,8 @@ import {
   Trash2,
   Plus,
   RefreshCw,
+  Settings,
+  XCircle,
 } from "lucide-react";
 
 interface AuditEvent {

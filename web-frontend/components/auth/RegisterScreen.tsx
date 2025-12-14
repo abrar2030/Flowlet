@@ -61,7 +61,15 @@ const RegisterScreen: React.FC = () => {
     setIsLoading(true);
     try {
       // Remove confirmPassword and acceptTerms from the data sent to the API
-      const { confirmPassword, acceptTerms, ...registerData } = data;
+      const { confirmPassword, acceptTerms, firstName, lastName, ...rest } =
+        data;
+
+      // Transform to API format (snake_case)
+      const registerData = {
+        ...rest,
+        first_name: firstName,
+        last_name: lastName,
+      };
 
       await dispatch(registerUser(registerData)).unwrap();
       toast.success("Account created successfully!");

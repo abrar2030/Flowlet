@@ -38,6 +38,7 @@ import {
   Trash2,
   Plus,
   Settings,
+  Unlock,
 } from "lucide-react";
 
 interface DataClassificationLevel {
