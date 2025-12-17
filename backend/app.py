@@ -2,8 +2,9 @@ import logging
 import os
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 from flask import Flask, jsonify, send_from_directory
-from flask.json import JSONEncoder
+
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -18,8 +19,10 @@ def create_app() -> Any:
     """Create and configure the Flask application."""
     app = Flask(__name__, static_folder="../web-frontend/dist", static_url_path="")
 
-    class CustomJSONEncoder(JSONEncoder):
+    # Configure JSON encoder for Decimal and datetime
+    from flask.json.provider import DefaultJSONProvider
 
+    class CustomJSONProvider(DefaultJSONProvider):
         def default(self, obj):
             if isinstance(obj, Decimal):
                 return str(obj)
@@ -27,7 +30,7 @@ def create_app() -> Any:
                 return obj.isoformat()
             return super().default(obj)
 
-    app.json_encoder = CustomJSONEncoder
+    app.json = CustomJSONProvider(app)
     config_name = os.environ.get("FLASK_CONFIG", "default")
     app.config.from_object(config[config_name])
     if hasattr(config[config_name], "validate_config"):

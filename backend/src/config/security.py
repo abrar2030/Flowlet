@@ -1,4 +1,5 @@
 import os
+from typing import Any
 from datetime import timedelta
 
 
@@ -52,4 +53,4 @@ class SecurityConfig:
         return True
 
 
-SecurityConfig.validate_config()
+# Validation will be called from settings.py after all config is loaded
