@@ -7,7 +7,6 @@ from ..models.account import Account
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 from ..utils.auth import token_required
-from ..utils.audit import audit_logger
 from ..services.wallet_service import (
     WalletServiceError,
     process_deposit,
@@ -17,11 +16,12 @@ from ..services.wallet_service import (
     get_account_details_with_transactions,
 )
 from ..schemas import DepositFundsRequest, WithdrawFundsRequest, TransferFundsRequest
-from ..error_handlers import (
+from ..utils.error_handlers import (
     handle_validation_error,
     handle_wallet_service_error,
     handle_generic_exception,
 )
+from ..security.audit_logger import audit_logger
 
 wallet_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")
 logger = logging.getLogger(__name__)

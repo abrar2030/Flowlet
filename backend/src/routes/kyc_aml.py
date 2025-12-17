@@ -17,6 +17,7 @@ from sqlalchemy import select
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
 from ..models.user import User
+from ..security.audit_logger import audit_logger
 
 kyc_aml_bp = Blueprint("kyc_aml", __name__, url_prefix="/api/v1/kyc")
 logger = logging.getLogger(__name__)

@@ -11,6 +11,7 @@ from ..models.fraud_alert import FraudAlert, FraudAlertStatus
 from ..models.transaction import Transaction
 from ..models.user import User
 from ..utils.auth import token_required, admin_required
+from ..security.audit_logger import audit_logger
 
 ai_service_bp = Blueprint("ai_service", __name__, url_prefix="/api/v1/ai")
 logger = logging.getLogger(__name__)

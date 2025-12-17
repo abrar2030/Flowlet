@@ -10,10 +10,12 @@ from .transaction import (
 )
 from .audit_log import AuditLog, AuditEventType, AuditSeverity
 from .security import SecurityEvent, SecurityEventType
+from .ledger import LedgerEntry, LedgerAccountType
 
 # Define a list of all models for easy import and use in database operations
 ALL_MODELS = [
     User,
+    LedgerEntry,
     Account,
     Card,
     Transaction,
@@ -44,6 +46,8 @@ __all__ = [
     "AuditSeverity",
     "SecurityEvent",
     "SecurityEventType",
+    "LedgerEntry",
+    "LedgerAccountType",
     "AuditSeverity",
     "ALL_MODELS",
 ]

@@ -13,6 +13,7 @@ from ..models.transaction import Transaction, TransactionStatus
 from ..models.user import User
 from ..security.audit_logger import audit_logger
 from ..utils.validators import InputValidator
+from ..utils.auth import admin_required
 
 user_bp = Blueprint("user", __name__, url_prefix="/api/v1/users")
 logger = logging.getLogger(__name__)

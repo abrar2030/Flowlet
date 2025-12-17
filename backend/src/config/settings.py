@@ -103,10 +103,6 @@ class Config:
         errors = []
         if not Config.SECRET_KEY:
             errors.append("SECRET_KEY must be set.")
-        try:
-            Security  # Config.validate_config() # Moved to app initialization
-        except ValueError as e:
-            errors.append(str(e))
         if errors:
             raise ValueError(f"Configuration errors: {', '.join(errors)}")
         return True

@@ -5,6 +5,7 @@ Provides centralized error handling for common HTTP errors and exceptions
 
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
+from pydantic import ValidationError
 
 
 def register_error_handlers(app):
@@ -52,3 +53,40 @@ def register_error_handlers(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(error):
         return jsonify({"status": "error", "message": error.description}), error.code
+
+
+def handle_validation_error(error: ValidationError):
+    """Handle Pydantic validation errors"""
+    errors = error.errors()
+    formatted_errors = []
+    for err in errors:
+        field = ".".join(str(x) for x in err["loc"])
+        formatted_errors.append({"field": field, "message": err["msg"]})
+
+    return (
+        jsonify(
+            {
+                "status": "error",
+                "message": "Validation error",
+                "errors": formatted_errors,
+            }
+        ),
+        400,
+    )
+
+
+def handle_wallet_service_error(error):
+    """Handle wallet service errors"""
+    return jsonify(
+        {"status": "error", "message": error.message, "code": error.error_code}
+    ), getattr(error, "status_code", 400)
+
+
+def handle_generic_exception(error: Exception):
+    """Handle generic exceptions"""
+    return (
+        jsonify(
+            {"status": "error", "message": "An error occurred", "error": str(error)}
+        ),
+        500,
+    )

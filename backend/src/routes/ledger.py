@@ -4,25 +4,30 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from flask import Blueprint, g, jsonify, request
-from ..models.account import AccountType
+from ..models.ledger import LedgerEntry, LedgerAccountType
 from sqlalchemy import func, select
 from ..models.audit_log import AuditEventType, AuditSeverity
 from ..models.database import db
+from ..utils.auth import admin_required
+from ..security.audit_logger import audit_logger
 
 ledger_bp = Blueprint("ledger", __name__, url_prefix="/api/v1/ledger")
 logger = logging.getLogger(__name__)
 CHART_OF_ACCOUNTS = {
     "cash_and_equivalents": {
-        "type": AccountType.ASSET,
+        "type": LedgerAccountType.ASSET,
         "name": "Cash and Cash Equivalents",
     },
-    "customer_deposits": {"type": AccountType.LIABILITY, "name": "Customer Deposits"},
+    "customer_deposits": {
+        "type": LedgerAccountType.LIABILITY,
+        "name": "Customer Deposits",
+    },
     "transaction_fees": {
-        "type": AccountType.REVENUE,
+        "type": LedgerAccountType.REVENUE,
         "name": "Transaction Fee Revenue",
     },
     "processing_costs": {
-        "type": AccountType.EXPENSE,
+        "type": LedgerAccountType.EXPENSE,
         "name": "Payment Processing Costs",
     },
 }
@@ -155,8 +160,8 @@ def get_account_balance(account_name: Any) -> Any:
             )
         account_info = CHART_OF_ACCOUNTS[account_name]
         is_debit_normal = account_info["type"] in [
-            AccountType.ASSET,
-            AccountType.EXPENSE,
+            LedgerAccountType.ASSET,
+            LedgerAccountType.EXPENSE,
         ]
         balance_query = select(
             func.sum(LedgerEntry.debit_amount).label("total_debit"),
