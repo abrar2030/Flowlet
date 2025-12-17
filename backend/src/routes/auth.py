@@ -1,3 +1,4 @@
+from typing import Any
 import base64
 import io
 import logging
@@ -7,6 +8,7 @@ import jwt
 import pyotp
 import qrcode
 from flask import Blueprint, current_app, g, jsonify, request
+from ..utils.auth import token_required
 from sqlalchemy.exc import IntegrityError
 from ..models.account import Account, AccountStatus, AccountType
 from ..models.audit_log import AuditEventType, AuditSeverity

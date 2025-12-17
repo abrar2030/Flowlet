@@ -1,3 +1,4 @@
+from typing import Any
 import logging
 from flask import Blueprint, g, jsonify, request
 from pydantic import ValidationError
@@ -14,11 +15,11 @@ from ..error_handlers import (
     handle_generic_exception,
 )
 
-payments_bp = Blueprint("payments", __name__, url_prefix="/api/v1/payments")
+payment_bp = Blueprint("payments", __name__, url_prefix="/api/v1/payments")
 logger = logging.getLogger(__name__)
 
 
-@payments_bp.route("/process", methods=["POST"])
+@payment_bp.route("/process", methods=["POST"])
 @token_required
 def process_payment() -> Any:
     """
@@ -52,7 +53,7 @@ def process_payment() -> Any:
         return handle_generic_exception(e)
 
 
-@payments_bp.route("/webhook/<processor_name>", methods=["POST"])
+@payment_bp.route("/webhook/<processor_name>", methods=["POST"])
 def payment_webhook(processor_name: Any) -> Any:
     """
     Webhook endpoint for payment processors to notify of transaction status updates.
@@ -80,7 +81,7 @@ def payment_webhook(processor_name: Any) -> Any:
         return handle_generic_exception(e)
 
 
-@payments_bp.route("/transaction/<transaction_id>", methods=["GET"])
+@payment_bp.route("/transaction/<transaction_id>", methods=["GET"])
 @token_required
 def get_transaction_details_route(transaction_id: Any) -> Any:
     """Get details for a specific transaction"""

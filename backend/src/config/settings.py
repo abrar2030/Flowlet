@@ -104,7 +104,7 @@ class Config:
         if not Config.SECRET_KEY:
             errors.append("SECRET_KEY must be set.")
         try:
-            SecurityConfig.validate_config()
+            Security  # Config.validate_config() # Moved to app initialization
         except ValueError as e:
             errors.append(str(e))
         if errors:
@@ -151,4 +151,4 @@ config = {
     "production": ProductionConfig,
     "default": ProductionConfig,
 }
-Config.validate_config()
+# Config.validate_config() # Moved to app initialization

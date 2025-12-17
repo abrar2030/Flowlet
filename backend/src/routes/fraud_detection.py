@@ -1,3 +1,4 @@
+from typing import Any
 import asyncio
 import logging
 from datetime import datetime
@@ -9,10 +10,10 @@ from ..ml.fraud_detection.service import get_fraud_service
 
 "\nFlask Routes for Fraud Detection\nProvides REST API endpoints for fraud detection functionality\n"
 logger = logging.getLogger(__name__)
-fraud_bp = Blueprint("fraud", __name__, url_prefix="/api/v1/fraud")
+fraud_detection_bp = Blueprint("fraud", __name__, url_prefix="/api/v1/fraud")
 
 
-@fraud_bp.route("/detect", methods=["POST"])
+@fraud_detection_bp.route("/detect", methods=["POST"])
 @cross_origin()
 def detect_fraud() -> Any:
     """Detect fraud for a single transaction"""
@@ -63,7 +64,7 @@ def detect_fraud() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/detect/batch", methods=["POST"])
+@fraud_detection_bp.route("/detect/batch", methods=["POST"])
 @cross_origin()
 def detect_fraud_batch() -> Any:
     """Detect fraud for multiple transactions"""
@@ -123,7 +124,7 @@ def detect_fraud_batch() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/model/train", methods=["POST"])
+@fraud_detection_bp.route("/model/train", methods=["POST"])
 @cross_origin()
 def train_model() -> Any:
     """Train the fraud detection model"""
@@ -160,7 +161,7 @@ def train_model() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/model/status", methods=["GET"])
+@fraud_detection_bp.route("/model/status", methods=["GET"])
 @cross_origin()
 def get_model_status() -> Any:
     """Get fraud detection model status"""
@@ -179,7 +180,7 @@ def get_model_status() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/alerts", methods=["GET"])
+@fraud_detection_bp.route("/alerts", methods=["GET"])
 @cross_origin()
 def get_recent_alerts() -> Any:
     """Get recent fraud alerts"""
@@ -231,7 +232,7 @@ def get_recent_alerts() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/statistics", methods=["GET"])
+@fraud_detection_bp.route("/statistics", methods=["GET"])
 @cross_origin()
 def get_fraud_statistics() -> Any:
     """Get fraud detection statistics"""
@@ -250,7 +251,7 @@ def get_fraud_statistics() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/feedback", methods=["POST"])
+@fraud_detection_bp.route("/feedback", methods=["POST"])
 @cross_origin()
 def submit_feedback() -> Any:
     """Submit feedback on fraud detection results"""
@@ -284,7 +285,7 @@ def submit_feedback() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/model/retrain/check", methods=["GET"])
+@fraud_detection_bp.route("/model/retrain/check", methods=["GET"])
 @cross_origin()
 def check_retrain_needed() -> Any:
     """Check if model retraining is needed"""
@@ -309,7 +310,7 @@ def check_retrain_needed() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.route("/health", methods=["GET"])
+@fraud_detection_bp.route("/health", methods=["GET"])
 @cross_origin()
 def health_check() -> Any:
     """Health check endpoint for fraud detection service"""
@@ -337,7 +338,7 @@ def health_check() -> Any:
         return (jsonify({"success": False, "error": str(e)}), 500)
 
 
-@fraud_bp.errorhandler(FraudDetectionError)
+@fraud_detection_bp.errorhandler(FraudDetectionError)
 def handle_fraud_detection_error(e: Any) -> Any:
     return (
         jsonify(

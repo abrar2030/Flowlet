@@ -1,3 +1,4 @@
+from typing import Any
 import logging
 from flask import Blueprint, g, jsonify, request
 from pydantic import ValidationError
@@ -22,7 +23,7 @@ from ..error_handlers import (
     handle_generic_exception,
 )
 
-account_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")
+wallet_bp = Blueprint("account", __name__, url_prefix="/api/v1/accounts")
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +55,7 @@ def account_access_required(f: Any) -> Any:
     return decorated
 
 
-@account_bp.route("/", methods=["GET"])
+@wallet_bp.route("/", methods=["GET"])
 @token_required
 def get_user_accounts() -> Any:
     """Get all accounts (wallets) for the current user"""
@@ -69,7 +70,7 @@ def get_user_accounts() -> Any:
         return handle_generic_exception(e)
 
 
-@account_bp.route("/<account_id>", methods=["GET"])
+@wallet_bp.route("/<account_id>", methods=["GET"])
 @account_access_required
 def get_account_details(account_id: Any) -> Any:
     """Get details for a specific account (wallet)"""
@@ -90,7 +91,7 @@ def get_account_details(account_id: Any) -> Any:
         return handle_generic_exception(e)
 
 
-@account_bp.route("/<account_id>/deposit", methods=["POST"])
+@wallet_bp.route("/<account_id>/deposit", methods=["POST"])
 @account_access_required
 def deposit_funds(account_id: Any) -> Any:
     """Deposit funds into an account"""
@@ -127,7 +128,7 @@ def deposit_funds(account_id: Any) -> Any:
         return handle_generic_exception(e)
 
 
-@account_bp.route("/<account_id>/withdraw", methods=["POST"])
+@wallet_bp.route("/<account_id>/withdraw", methods=["POST"])
 @account_access_required
 def withdraw_funds(account_id: Any) -> Any:
     """Withdraw funds from an account"""
@@ -164,7 +165,7 @@ def withdraw_funds(account_id: Any) -> Any:
         return handle_generic_exception(e)
 
 
-@account_bp.route("/<account_id>/transfer", methods=["POST"])
+@wallet_bp.route("/<account_id>/transfer", methods=["POST"])
 @account_access_required
 def transfer_funds(account_id: Any) -> Any:
     """Transfer funds from one account to another (internal transfer)"""

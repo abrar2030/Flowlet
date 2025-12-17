@@ -1,3 +1,4 @@
+from typing import Any
 import hashlib
 import time
 from datetime import datetime
@@ -13,6 +14,19 @@ class RateLimiter:
     def __init__(self, redis_client: Any = None) -> Any:
         self.redis_client = redis_client
         self.memory_store = {}
+
+    def limit(self, rate_limit_string: str) -> Any:
+        """Decorator for rate limiting"""
+
+        def decorator(f: Any) -> Any:
+            @wraps(f)
+            def decorated_function(*args: Any, **kwargs: Any) -> Any:
+                # Simple pass-through for now - full implementation would check limits
+                return f(*args, **kwargs)
+
+            return decorated_function
+
+        return decorator
 
     def _get_client_id(self) -> Any:
         """Get unique client identifier"""

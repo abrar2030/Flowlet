@@ -3,7 +3,7 @@ import os
 import uuid
 from abc import ABC, abstractmethod
 from decimal import Decimal
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import requests
 
 logger = logging.getLogger(__name__)

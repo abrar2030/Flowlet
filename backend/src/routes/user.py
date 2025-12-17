@@ -1,7 +1,9 @@
+from typing import Any
 import logging
 from datetime import datetime, timezone
 from decimal import Decimal
 from flask import Blueprint, g, jsonify, request
+from ..utils.auth import token_required
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from ..models.account import Account

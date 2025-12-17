@@ -1,13 +1,14 @@
+from typing import Any
 import logging
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify
 
 "\nBanking Integrations Routes (Placeholder for External Banking APIs)\n"
-banking_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")
+banking_integrations_bp = Blueprint("banking", __name__, url_prefix="/api/v1/banking")
 logger = logging.getLogger(__name__)
 
 
-@banking_bp.route("/health", methods=["GET"])
+@banking_integrations_bp.route("/health", methods=["GET"])
 def health_check() -> Any:
     """Health check endpoint for banking integrations"""
     try:

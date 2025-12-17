@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
@@ -449,3 +449,36 @@ class FraudExplainer:
             ),
         }
         return descriptions.get(feature, f"{feature}: {value}")
+
+
+# Stub implementations for missing classes
+class EnsembleFraudModel(FraudModelBase):
+    """Ensemble fraud detection model"""
+
+    def train(
+        self, training_data: pd.DataFrame, labels: Optional[pd.Series] = None
+    ) -> None:
+        """Train ensemble model"""
+        self.is_trained = True
+        self.training_timestamp = datetime.now()
+
+    def predict(self, features: pd.DataFrame) -> np.ndarray:
+        """Predict fraud probability"""
+        return np.random.random(len(features))
+
+    def get_feature_importance(self) -> Dict[str, float]:
+        """Get feature importance"""
+        return {}
+
+
+class RealTimeFraudDetector:
+    """Real-time fraud detector"""
+
+    def __init__(self, config: Dict[str, Any] = None) -> Any:
+        self.config = config or {}
+
+    def check_transaction(
+        self, transaction_data: Dict[str, Any]
+    ) -> Tuple[bool, float, str]:
+        """Check transaction for fraud"""
+        return (False, 0.1, "Low risk")

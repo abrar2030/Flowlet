@@ -1,3 +1,4 @@
+from typing import Any
 import logging
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
@@ -9,8 +10,9 @@ from ..models.database import db
 from ..models.fraud_alert import FraudAlert, FraudAlertStatus
 from ..models.transaction import Transaction
 from ..models.user import User
+from ..utils.auth import token_required, admin_required
 
-ai_bp = Blueprint("ai_service", __name__, url_prefix="/api/v1/ai")
+ai_service_bp = Blueprint("ai_service", __name__, url_prefix="/api/v1/ai")
 logger = logging.getLogger(__name__)
 try:
     openai_client = OpenAI()
@@ -32,7 +34,7 @@ def _get_risk_level(risk_score: int) -> str:
         return "very_low"
 
 
-@ai_bp.route("/fraud-detection/analyze", methods=["POST"])
+@ai_service_bp.route("/fraud-detection/analyze", methods=["POST"])
 @token_required
 def analyze_transaction_fraud() -> Any:
     """Analyze a transaction for potential fraud using AI algorithms (simulated)"""
@@ -172,7 +174,7 @@ def analyze_transaction_fraud() -> Any:
         )
 
 
-@ai_bp.route("/fraud-detection/alerts", methods=["GET"])
+@ai_service_bp.route("/fraud-detection/alerts", methods=["GET"])
 @admin_required
 def get_fraud_alerts() -> Any:
     """Get fraud alerts with filtering (Admin only)"""
@@ -249,7 +251,7 @@ def get_fraud_alerts() -> Any:
         )
 
 
-@ai_bp.route("/fraud-detection/alerts/<alert_id>/resolve", methods=["POST"])
+@ai_service_bp.route("/fraud-detection/alerts/<alert_id>/resolve", methods=["POST"])
 @admin_required
 def resolve_fraud_alert(alert_id: Any) -> Any:
     """Resolve a fraud alert (Admin only)"""
@@ -304,7 +306,7 @@ def resolve_fraud_alert(alert_id: Any) -> Any:
         )
 
 
-@ai_bp.route("/chatbot/query", methods=["POST"])
+@ai_service_bp.route("/chatbot/query", methods=["POST"])
 @token_required
 def chatbot_query() -> Any:
     """AI Support Chatbot for user assistance"""
