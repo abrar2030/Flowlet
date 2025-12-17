@@ -211,27 +211,87 @@ class PlaidIntegration(BankingIntegrationBase):
     async def initiate_payment(self, payment_request: PaymentRequest) -> str:
         """
         Initiate payment using Plaid Transfer (requires additional setup)
-        Note: This is a simplified implementation
+        Note: This is a mock implementation. Real Plaid Transfer requires:
+        - Plaid Transfer API access
+        - Bank partnership agreements
+        - Additional KYC/compliance setup
         """
-        raise NotImplementedError(
-            "Plaid Transfer integration requires additional setup"
-        )
+        if not self._authenticated:
+            await self.authenticate()
+
+        # Mock implementation for testing
+        self.logger.warning("Using mock Plaid Transfer implementation")
+
+        # Generate a mock transfer ID
+        transfer_id = f"plaid_transfer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+        # In a real implementation, this would call Plaid Transfer API:
+        # data = {
+        #     "access_token": payment_request.source_account_token,
+        #     "account_id": payment_request.account_id,
+        #     "type": "debit",  # or "credit"
+        #     "network": "ach",  # or "same-day-ach"
+        #     "amount": str(payment_request.amount),
+        #     "description": payment_request.description,
+        #     "ach_class": "ppd",  # or "ccd", "web"
+        #     "user": {"legal_name": payment_request.user_name},
+        # }
+        # async with self.session.post(f"{self.base_url}/transfer/create", json=data) as response:
+        #     ...
+
+        self.logger.info(f"Mock payment initiated: {transfer_id}")
+        return transfer_id
 
     async def get_payment_status(self, transaction_id: str) -> TransactionStatus:
         """
-        Get payment status (placeholder for Plaid Transfer)
+        Get payment status for Plaid Transfer
+        Note: This is a mock implementation
         """
-        raise NotImplementedError(
-            "Plaid Transfer integration requires additional setup"
-        )
+        if not self._authenticated:
+            await self.authenticate()
+
+        # Mock implementation
+        self.logger.warning("Using mock Plaid Transfer status check")
+
+        # In real implementation:
+        # data = {
+        #     "client_id": self.client_id,
+        #     "secret": self.secret,
+        #     "transfer_id": transaction_id
+        # }
+        # async with self.session.post(f"{self.base_url}/transfer/get", json=data) as response:
+        #     result = await response.json()
+        #     return self._map_plaid_status(result["status"])
+
+        # Return mock completed status
+        from src.models.transaction import TransactionStatus
+
+        return TransactionStatus.COMPLETED
 
     async def cancel_payment(self, transaction_id: str) -> bool:
         """
-        Cancel payment (placeholder for Plaid Transfer)
+        Cancel a Plaid Transfer payment
+        Note: This is a mock implementation
         """
-        raise NotImplementedError(
-            "Plaid Transfer integration requires additional setup"
-        )
+        if not self._authenticated:
+            await self.authenticate()
+
+        # Mock implementation
+        self.logger.warning("Using mock Plaid Transfer cancellation")
+
+        # In real implementation:
+        # data = {
+        #     "client_id": self.client_id,
+        #     "secret": self.secret,
+        #     "transfer_id": transaction_id
+        # }
+        # async with self.session.post(f"{self.base_url}/transfer/cancel", json=data) as response:
+        #     if response.status == 200:
+        #         return True
+        #     return False
+
+        self.logger.info(f"Mock payment cancelled: {transaction_id}")
+        return True
 
     async def get_identity(self, access_token: str) -> Dict[str, Any]:
         """

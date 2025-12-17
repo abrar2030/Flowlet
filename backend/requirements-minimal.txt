@@ -1,0 +1,43 @@
+# Minimal requirements for basic backend functionality
+# Use this for quick testing and development
+
+# Core Flask dependencies
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-CORS==6.0.0
+Flask-JWT-Extended==4.6.0
+Flask-Migrate==4.0.5
+Flask-Limiter==3.5.0
+
+# Database
+SQLAlchemy==2.0.23
+psycopg2-binary==2.9.9
+redis==5.0.1
+
+# Security
+Werkzeug==3.0.6
+cryptography>=41.0.0
+bcrypt==4.1.2
+PyJWT==2.8.0
+
+# Validation
+marshmallow==3.20.2
+pydantic==2.5.2
+
+# Environment management
+python-dotenv==1.0.0
+
+# Utilities
+requests==2.32.4
+click==8.1.7
+
+# Payment integrations
+stripe==7.9.0
+
+# Additional utilities
+phonenumbers==8.13.26
+email-validator==2.1.0.post1
+pyotp==2.9.0
+qrcode==7.4.2
+openai==1.10.0
+aiohttp==3.9.1
