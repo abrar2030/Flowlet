@@ -22,7 +22,7 @@ class ProcessPaymentRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
 
@@ -38,7 +38,7 @@ class InternalTransferRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
 
@@ -57,7 +57,7 @@ class SendPaymentRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
 
@@ -72,5 +72,5 @@ class PaymentRequestCreate(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()

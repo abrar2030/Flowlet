@@ -30,7 +30,7 @@ class MetricsService:
     Service for collecting and reporting metrics
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize metrics service"""
         self.config = config or {}
         self.enabled = self.config.get("METRICS_ENABLED", True)
@@ -232,11 +232,11 @@ class TimerContext:
         self.tags = tags
         self.start_time = None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         self.start_time = time.time()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         if self.start_time:
             duration_ms = (time.time() - self.start_time) * 1000
             self.metrics_service.timing(self.metric_name, duration_ms, self.tags)

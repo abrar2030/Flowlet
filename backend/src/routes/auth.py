@@ -30,7 +30,7 @@ def token_required(f: Any) -> Any:
     """Enhanced JWT token validation decorator"""
 
     @wraps(f)
-    def decorated(*args, **kwargs):
+    def decorated(*args: Any, **kwargs: Any) -> Any:
         token = None
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
@@ -116,7 +116,7 @@ def admin_required(f: Any) -> Any:
 
     @wraps(f)
     @token_required
-    def decorated(*args, **kwargs):
+    def decorated(*args: Any, **kwargs: Any) -> Any:
         if not g.current_user.is_admin:
             audit_logger.log_event(
                 event_type=AuditEventType.SECURITY_ALERT,

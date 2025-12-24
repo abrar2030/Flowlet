@@ -19,7 +19,7 @@ class DepositFundsRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
 
@@ -35,7 +35,7 @@ class WithdrawFundsRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
 
@@ -51,12 +51,12 @@ class TransferFundsRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
     @field_validator("to_account_id")
     @classmethod
-    def validate_different_accounts(cls, v, info):
+    def validate_different_accounts(cls, v: str, info: any) -> str:
         if "from_account_id" in info.data and v == info.data["from_account_id"]:
             raise ValueError("Cannot transfer to the same account")
         return v
@@ -73,12 +73,12 @@ class CreateWalletRequest(BaseModel):
 
     @field_validator("currency")
     @classmethod
-    def validate_currency(cls, v):
+    def validate_currency(cls, v: str) -> str:
         return v.upper()
 
     @field_validator("account_type")
     @classmethod
-    def validate_account_type(cls, v):
+    def validate_account_type(cls, v: str) -> str:
         valid_types = ["checking", "savings", "credit", "investment", "business"]
         if v.lower() not in valid_types:
             raise ValueError(f'Account type must be one of: {", ".join(valid_types)}')

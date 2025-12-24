@@ -32,7 +32,7 @@ def account_access_required(f: Any) -> Any:
 
     @wraps(f)
     @token_required
-    def decorated(account_id, *args, **kwargs):
+    def decorated(account_id: str, *args: Any, **kwargs: Any) -> Any:
         account = db.session.get(Account, account_id)
         if not account:
             return (

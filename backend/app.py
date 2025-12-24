@@ -54,12 +54,12 @@ def create_app() -> Any:
     app.register_blueprint(api_bp)
 
     @app.route("/")
-    def serve_web_frontend():
+    def serve_web_frontend() -> Any:
         """Serve the React web-frontend index page."""
         return send_from_directory(app.static_folder, "index.html")
 
     @app.route("/<path:path>")
-    def serve_static_files(path):
+    def serve_static_files(path) -> Any:
         """Serve static files or fallback to index.html for SPA routing."""
         try:
             return send_from_directory(app.static_folder, path)
@@ -69,7 +69,7 @@ def create_app() -> Any:
     register_error_handlers(app)
 
     @app.errorhandler(Exception)
-    def handle_exception(e):
+    def handle_exception(e: Exception) -> Any:
         app.logger.error("Unhandled Exception", exc_info=True)
         response = {
             "status": "error",
@@ -77,7 +77,7 @@ def create_app() -> Any:
         }
         return (jsonify(response), 500)
 
-    def _initialize_sqlite_if_missing():
+    def _initialize_sqlite_if_missing() -> Any:
         """Create SQLite DB file and tables if using file-based SQLite and file is missing."""
         db_uri_local = app.config.get("SQLALCHEMY_DATABASE_URI", "")
         if db_uri_local and db_uri_local.startswith("sqlite:///"):

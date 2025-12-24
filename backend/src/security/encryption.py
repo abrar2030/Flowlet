@@ -22,7 +22,9 @@ class EncryptionService:
     Uses Fernet (symmetric encryption) from cryptography library
     """
 
-    def __init__(self, key: Optional[bytes] = None, password: Optional[str] = None):
+    def __init__(
+        self, key: Optional[bytes] = None, password: Optional[str] = None
+    ) -> None:
         """
         Initialize encryption service
 

@@ -468,13 +468,13 @@ def create_optimized_gateway(app: Any) -> Any:
     gateway = PerformanceOptimizedGateway(app)
 
     @app.before_request
-    def setup_request_context():
+    def setup_request_context() -> Any:
         g.cache_manager = CacheManager(gateway.redis_client, gateway.cache_config)
         g.performance_monitor = PerformanceMonitor(gateway.monitoring_config)
         g.request_start_time = time.time()
 
     @app.route("/api/v1/gateway/metrics", methods=["GET"])
-    def gateway_metrics():
+    def gateway_metrics() -> Any:
         """Get gateway performance metrics"""
         if hasattr(g, "performance_monitor"):
             metrics = g.performance_monitor.get_metrics_summary()
@@ -482,7 +482,7 @@ def create_optimized_gateway(app: Any) -> Any:
         return (jsonify({"error": "Metrics not available"}), 500)
 
     @app.route("/api/v1/gateway/cache/clear", methods=["POST"])
-    def clear_cache():
+    def clear_cache() -> Any:
         """Clear cache for specific pattern"""
         pattern = request.json.get("pattern", "*")
         if hasattr(g, "cache_manager"):

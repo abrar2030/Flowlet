@@ -124,7 +124,7 @@ class RateLimiter:
 
         Usage:
             @rate_limit(minute=10, hour=100)
-            def my_endpoint():
+            def my_endpoint() -> Any:
                 pass
         """
 
