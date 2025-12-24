@@ -87,11 +87,11 @@ Flowlet's strength lies in its comprehensive suite of embedded finance capabilit
 | :------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Backend Implementation** | `backend/src/gateway/optimized_gateway.py`, `docs/03_API_Reference` | Implements gateway functionality (authentication, rate limiting, intelligent routing) and supports the developer experience with comprehensive documentation. |
 
-### 🧠 AI-Enhanced Capabilities
+### 🧠 AI-Capabilities
 
-| Component                  | Key Files/Modules                                                                                                                                                                                       | Purpose                                                                                                                                                               |
-| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Implementation Details** | `backend/src/ai/enhanced_fraud_detection.py`, `backend/src/ai/risk_assessment.py`, `backend/src/ml/fraud_detection/`, `backend/src/ai/support_chatbot.py`, `backend/src/ai/transaction_intelligence.py` | Implements AI-driven fraud analysis, risk assessment, and machine learning models; provides AI-powered support and derives deeper insights from transaction patterns. |
+| Component                  | Key Files/Modules                                                                                                                                                                              | Purpose                                                                                                                                                               |
+| :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Implementation Details** | `backend/src/ai/fraud_detection.py`, `backend/src/ai/risk_assessment.py`, `backend/src/ml/fraud_detection/`, `backend/src/ai/support_chatbot.py`, `backend/src/ai/transaction_intelligence.py` | Implements AI-driven fraud analysis, risk assessment, and machine learning models; provides AI-powered support and derives deeper insights from transaction patterns. |
 
 ### 🔒 Security Infrastructure
 

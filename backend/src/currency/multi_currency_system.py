@@ -12,7 +12,6 @@ from sqlalchemy import Boolean, Column, DateTime, Numeric, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-"\nEnhanced Multi-Currency and Exchange Rate Management System\nImplements real-time exchange rates, accurate conversion, and FX accounting\n"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 Base = declarative_base()

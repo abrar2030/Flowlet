@@ -1,4 +1,5 @@
 import pytest
+from typing import Any
 
 
 class TestAuthenticationAPI:
@@ -104,8 +105,8 @@ class TestMultiCurrencyAPI:
         assert data["wallet"]["balance"] == "0.00"
 
 
-class TestEnhancedCardsAPI:
-    """Test enhanced card management"""
+class TestCardsAPI:
+    """Test Card management"""
 
     def test_create_virtual_card(self, client: Any, auth_headers: Any) -> Any:
         """Test creating a virtual card"""
@@ -130,7 +131,7 @@ class TestEnhancedCardsAPI:
             },
         }
         response = client.post(
-            "/api/v1/cards/enhanced/cards", json=card_data, headers=auth_headers
+            "/api/v1/cards/cards", json=card_data, headers=auth_headers
         )
         assert response.status_code == 201
         data = response.get_json()
@@ -147,7 +148,7 @@ class TestEnhancedCardsAPI:
         )
         wallet_id = wallet_response.get_json()["wallet"]["wallet_id"]
         card_response = client.post(
-            "/api/v1/cards/enhanced/cards",
+            "/api/v1/cards/cards",
             json={"wallet_id": wallet_id},
             headers=auth_headers,
         )
@@ -158,7 +159,7 @@ class TestEnhancedCardsAPI:
             "blocked_categories": ["gambling", "adult_entertainment"],
         }
         response = client.put(
-            f"/api/v1/cards/enhanced/cards/{card_id}/controls",
+            f"/api/v1/cards/cards/{card_id}/controls",
             json=update_data,
             headers=auth_headers,
         )
@@ -173,20 +174,20 @@ class TestEnhancedCardsAPI:
         )
         wallet_id = wallet_response.get_json()["wallet"]["wallet_id"]
         card_response = client.post(
-            "/api/v1/cards/enhanced/cards",
+            "/api/v1/cards/cards",
             json={"wallet_id": wallet_id},
             headers=auth_headers,
         )
         card_id = card_response.get_json()["card"]["card_id"]
         freeze_response = client.post(
-            f"/api/v1/cards/enhanced/cards/{card_id}/freeze",
+            f"/api/v1/cards/cards/{card_id}/freeze",
             json={"reason": "Lost card"},
             headers=auth_headers,
         )
         assert freeze_response.status_code == 200
         assert freeze_response.get_json()["status"] == "blocked"
         unfreeze_response = client.post(
-            f"/api/v1/cards/enhanced/cards/{card_id}/unfreeze", headers=auth_headers
+            f"/api/v1/cards/cards/{card_id}/unfreeze", headers=auth_headers
         )
         assert unfreeze_response.status_code == 200
         assert unfreeze_response.get_json()["status"] == "active"

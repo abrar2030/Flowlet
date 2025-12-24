@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional
 import redis
 from cryptography.fernet import Fernet
 
-"\nEnhanced Regulatory Compliance Module for Financial Industry Standards\nImplements comprehensive workflows for GDPR, PSD2, FinCEN, and other regulatory frameworks\n"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

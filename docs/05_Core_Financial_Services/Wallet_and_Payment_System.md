@@ -226,23 +226,6 @@ backend/
 4. **Status Tracking**: Comprehensive status tracking for accounts and transactions
 5. **Audit Trail**: Complete transaction history with timestamps and references
 
-## Future Enhancements
-
-The MVP provides a solid foundation for additional features:
-
-- User authentication and authorization
-- Card management and tokenization
-- Fraud detection and prevention
-- Multi-factor authentication
-- Real-time notifications
-- Advanced reporting and analytics
-- Integration with external payment processors
-- Mobile app support
-
-## Support
-
-For questions or issues with the MVP implementation, refer to the test script (`test_mvp.py`) for usage examples and the API documentation above for endpoint details.
-
 ## License
 
 This MVP implementation is part of the Flowlet project. See the main project LICENSE file for details.

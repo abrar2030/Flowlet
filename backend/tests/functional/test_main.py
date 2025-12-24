@@ -1,7 +1,6 @@
 import json
 from src.main import create_app
-
-"\nTest the enhanced main application\n"
+from typing import Any
 
 
 def test_app_creation() -> Any:

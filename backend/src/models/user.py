@@ -40,7 +40,7 @@ class KYCStatus(PyEnum):
 
 
 class User(Base):
-    """Enhanced User model with merged security and compliance features"""
+    """User model with merged security and compliance features"""
 
     __tablename__ = "users"
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

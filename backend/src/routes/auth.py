@@ -27,7 +27,7 @@ rate_limiter = RateLimiter()
 
 
 def token_required(f: Any) -> Any:
-    """Enhanced JWT token validation decorator"""
+    """JWT token validation decorator"""
 
     @wraps(f)
     def decorated(*args: Any, **kwargs: Any) -> Any:
@@ -143,7 +143,7 @@ def admin_required(f: Any) -> Any:
 @rate_limiter.limit("5 per minute")
 def register() -> Any:
     """
-    Enhanced user registration with comprehensive validation
+    User registration with comprehensive validation
     """
     try:
         data = request.get_json()

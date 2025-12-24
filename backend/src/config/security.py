@@ -4,7 +4,7 @@ from datetime import timedelta
 
 
 class SecurityConfig:
-    """Enhanced security configuration for financial industry standards"""
+    """Security configuration for financial industry standards"""
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
