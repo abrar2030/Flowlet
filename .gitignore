@@ -80,13 +80,16 @@ yarn-error.log
 # package-lock.json
 # yarn.lock
 
-# web-frontend build artifacts
-/code/web-frontend/build/
-/code/web-frontend/dist/
+# Frontend build artifacts
+/web-frontend/build/
+/web-frontend/dist/
+/mobile-frontend/build/
+/mobile-frontend/dist/
 .cache/
 
 # Jest cache
-/code/web-frontend/.jest-cache
+/web-frontend/.jest-cache
+/mobile-frontend/.jest-cache
 
 # Webpack cache
 .webpack/
