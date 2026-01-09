@@ -4,7 +4,7 @@
 ![Test Coverage](https://img.shields.io/badge/coverage-91%25-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-![Flowlet Dashboard](docs/assets/images/dashboard.bmp)
+![Flowlet Dashboard](docs/images/dashboard.bmp)
 
 > **Note**: This project is under active development. Features and functionalities are continuously being enhanced to improve embedded finance capabilities and user experience. The repository has been significantly updated from its original state, migrating to a more robust, containerized, and microservices-oriented architecture.
 
